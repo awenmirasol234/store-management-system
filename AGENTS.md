@@ -59,7 +59,7 @@ tests/
 
 ## 3. Domain & Module Guidelines
 
-Reference specification: `product-inventory-and-selling-options.md`.
+Reference specification: `docs/product-inventory-and-selling-options.md`.
 
 1. **Single Unified Selling Model**: Keep product inventory in one `base_unit` on `Product`, and represent packs, bundles, promos, weight/volume presets, and flexible prices via `ProductSellingOption` (`quantity` in `base_unit` + `price`). Do not create separate pricing models per selling method.
 2. **Numeric Precision**:
