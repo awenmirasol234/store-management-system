@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import {
   decimalQuantitySchema,
-  idSchema,
+  identifierSchema,
   nonNegativeMoneySchema,
   optionalTextSchema,
   timestampSchema,
-} from './primitives';
+} from '../../../shared/domain';
 
 export const InventoryTransactionTypeSchema = z.enum([
   'STOCK_IN',
@@ -27,34 +27,34 @@ const DEDUCTION_TYPES: ReadonlySet<InventoryTransactionType> = new Set([
 
 export const InventoryTransactionSchema = z
   .object({
-    transaction_id: idSchema,
-    product_id: idSchema,
-    supplier_id: idSchema.nullable().optional(),
-    option_id: idSchema.nullable().optional(),
+    transaction_id: identifierSchema,
+    product_id: identifierSchema,
+    supplier_id: identifierSchema.nullable().optional(),
+    option_id: identifierSchema.nullable().optional(),
     transaction_type: InventoryTransactionTypeSchema,
-    quantity: decimalQuantitySchema.refine((val) => val !== 0, {
+    quantity: decimalQuantitySchema.refine((value) => value !== 0, {
       message: 'Inventory transaction quantity cannot be zero',
     }),
     unit_cost: nonNegativeMoneySchema,
     reference_number: optionalTextSchema,
     remarks: optionalTextSchema,
-    created_by: idSchema,
+    created_by: identifierSchema,
     created_at: timestampSchema,
   })
-  .superRefine((data, ctx) => {
-    if (ADDITION_TYPES.has(data.transaction_type) && data.quantity <= 0) {
-      ctx.addIssue({
+  .superRefine((transaction, context) => {
+    if (ADDITION_TYPES.has(transaction.transaction_type) && transaction.quantity <= 0) {
+      context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['quantity'],
-        message: `${data.transaction_type} transactions must have a positive quantity`,
+        message: `${transaction.transaction_type} transactions must have a positive quantity`,
       });
     }
 
-    if (DEDUCTION_TYPES.has(data.transaction_type) && data.quantity >= 0) {
-      ctx.addIssue({
+    if (DEDUCTION_TYPES.has(transaction.transaction_type) && transaction.quantity >= 0) {
+      context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['quantity'],
-        message: `${data.transaction_type} transactions must have a negative quantity`,
+        message: `${transaction.transaction_type} transactions must have a negative quantity`,
       });
     }
   });

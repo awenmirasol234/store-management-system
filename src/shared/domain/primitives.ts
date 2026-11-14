@@ -11,7 +11,7 @@ function hasMaxScale(value: number, precision: number, scale: number): boolean {
   return Number(value.toFixed(scale)) === value;
 }
 
-export const idSchema = z.string().trim().min(1, 'ID must not be empty');
+export const identifierSchema = z.string().trim().min(1, 'Identifier must not be empty');
 
 export const nonEmptyTextSchema = z.string().trim().min(1, 'Value must not be empty');
 
@@ -29,11 +29,11 @@ export const barcodeSchema = z
  */
 export const decimalMoneySchema = z
   .number()
-  .refine((val) => hasMaxScale(val, 12, 2), {
+  .refine((value) => hasMaxScale(value, 12, 2), {
     message: 'Monetary value must be a finite DECIMAL(12, 2) with at most 2 decimal places',
   });
 
-export const nonNegativeMoneySchema = decimalMoneySchema.refine((val) => val >= 0, {
+export const nonNegativeMoneySchema = decimalMoneySchema.refine((value) => value >= 0, {
   message: 'Monetary value cannot be negative',
 });
 
@@ -42,15 +42,15 @@ export const nonNegativeMoneySchema = decimalMoneySchema.refine((val) => val >= 
  */
 export const decimalQuantitySchema = z
   .number()
-  .refine((val) => hasMaxScale(val, 12, 4), {
+  .refine((value) => hasMaxScale(value, 12, 4), {
     message: 'Quantity must be a finite DECIMAL(12, 4) with at most 4 decimal places',
   });
 
-export const nonNegativeQuantitySchema = decimalQuantitySchema.refine((val) => val >= 0, {
+export const nonNegativeQuantitySchema = decimalQuantitySchema.refine((value) => value >= 0, {
   message: 'Quantity cannot be negative',
 });
 
-export const positiveQuantitySchema = decimalQuantitySchema.refine((val) => val > 0, {
+export const positiveQuantitySchema = decimalQuantitySchema.refine((value) => value > 0, {
   message: 'Quantity must be greater than zero',
 });
 

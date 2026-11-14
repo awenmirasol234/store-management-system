@@ -9,11 +9,11 @@ import {
   SalesTransactionSchema,
   SalesTransactionWithItemsSchema,
   SupplierSchema,
-} from '../../src/inventory/models';
+} from '../../../src/inventory/domain';
 
-const NOW = '2026-11-14T12:00:00.000Z';
+const CURRENT_TIMESTAMP = '2026-11-14T12:00:00.000Z';
 
-function makeProduct(overrides: Partial<Record<string, unknown>> = {}) {
+function buildProduct(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     product_id: 'prod-1',
     category_id: 'cat-1',
@@ -27,13 +27,13 @@ function makeProduct(overrides: Partial<Record<string, unknown>> = {}) {
     reorder_level: 20,
     allow_custom_amount: false,
     is_active: true,
-    created_at: NOW,
-    updated_at: NOW,
+    created_at: CURRENT_TIMESTAMP,
+    updated_at: CURRENT_TIMESTAMP,
     ...overrides,
   };
 }
 
-function makeOption(overrides: Partial<Record<string, unknown>> = {}) {
+function buildSellingOption(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     option_id: 'opt-1',
     product_id: 'prod-1',
@@ -42,8 +42,8 @@ function makeOption(overrides: Partial<Record<string, unknown>> = {}) {
     quantity: 1,
     price: 15,
     is_active: true,
-    created_at: NOW,
-    updated_at: NOW,
+    created_at: CURRENT_TIMESTAMP,
+    updated_at: CURRENT_TIMESTAMP,
     ...overrides,
   };
 }
@@ -71,51 +71,53 @@ describe('Inventory & Selling Models - Validation & Precision Rules', () => {
 
   it('enforces DECIMAL(12, 2) precision on monetary fields', () => {
     expect(() =>
-      ProductSchema.parse(makeProduct({ selling_price: 15.999 })),
+      ProductSchema.parse(buildProduct({ selling_price: 15.999 })),
     ).toThrow(/DECIMAL\(12, 2\)/);
 
     expect(() =>
-      ProductSchema.parse(makeProduct({ cost_price: -1 })),
+      ProductSchema.parse(buildProduct({ cost_price: -1 })),
     ).toThrow(/cannot be negative/);
 
-    const valid = ProductSchema.parse(makeProduct({ cost_price: 10.25, selling_price: 15.5 }));
-    expect(valid.cost_price).toBe(10.25);
-    expect(valid.selling_price).toBe(15.5);
+    const validProduct = ProductSchema.parse(
+      buildProduct({ cost_price: 10.25, selling_price: 15.5 }),
+    );
+    expect(validProduct.cost_price).toBe(10.25);
+    expect(validProduct.selling_price).toBe(15.5);
   });
 
   it('enforces DECIMAL(12, 4) precision and non-negative stock on quantities', () => {
     expect(() =>
-      ProductSchema.parse(makeProduct({ current_stock: -0.5 })),
+      ProductSchema.parse(buildProduct({ current_stock: -0.5 })),
     ).toThrow(/cannot be negative/);
 
     expect(() =>
-      ProductSchema.parse(makeProduct({ current_stock: 1.12345 })),
+      ProductSchema.parse(buildProduct({ current_stock: 1.12345 })),
     ).toThrow(/DECIMAL\(12, 4\)/);
 
-    const fractional = ProductSchema.parse(
-      makeProduct({ base_unit: 'kg', current_stock: 12.3456, reorder_level: 2.5 }),
+    const fractionalProduct = ProductSchema.parse(
+      buildProduct({ base_unit: 'kg', current_stock: 12.3456, reorder_level: 2.5 }),
     );
-    expect(fractional.current_stock).toBe(12.3456);
+    expect(fractionalProduct.current_stock).toBe(12.3456);
   });
 
   it('requires selling option quantity to be strictly positive', () => {
     expect(() =>
-      ProductSellingOptionSchema.parse(makeOption({ quantity: 0 })),
+      ProductSellingOptionSchema.parse(buildSellingOption({ quantity: 0 })),
     ).toThrow(/greater than zero/);
 
     expect(() =>
-      ProductSellingOptionSchema.parse(makeOption({ quantity: -1 })),
+      ProductSellingOptionSchema.parse(buildSellingOption({ quantity: -1 })),
     ).toThrow(/greater than zero/);
   });
 
   it('rejects blank barcodes when provided, while allowing null or undefined', () => {
-    expect(ProductSchema.parse(makeProduct({ barcode: null })).barcode).toBeNull();
-    expect(ProductSchema.parse(makeProduct({ barcode: undefined })).barcode).toBeUndefined();
-    expect(() => ProductSchema.parse(makeProduct({ barcode: '   ' }))).toThrow();
+    expect(ProductSchema.parse(buildProduct({ barcode: null })).barcode).toBeNull();
+    expect(ProductSchema.parse(buildProduct({ barcode: undefined })).barcode).toBeUndefined();
+    expect(() => ProductSchema.parse(buildProduct({ barcode: '   ' }))).toThrow();
   });
 
   it('enforces InventoryTransaction sign rules per transaction type', () => {
-    const baseTx = {
+    const baseTransaction = {
       transaction_id: 'tx-1',
       product_id: 'prod-1',
       supplier_id: 'sup-1',
@@ -124,12 +126,12 @@ describe('Inventory & Selling Models - Validation & Precision Rules', () => {
       reference_number: 'PO-001',
       remarks: 'Restock',
       created_by: 'user-1',
-      created_at: NOW,
+      created_at: CURRENT_TIMESTAMP,
     };
 
     expect(
       InventoryTransactionSchema.parse({
-        ...baseTx,
+        ...baseTransaction,
         transaction_type: 'STOCK_IN',
         quantity: 50,
       }).quantity,
@@ -137,7 +139,7 @@ describe('Inventory & Selling Models - Validation & Precision Rules', () => {
 
     expect(() =>
       InventoryTransactionSchema.parse({
-        ...baseTx,
+        ...baseTransaction,
         transaction_type: 'STOCK_IN',
         quantity: -5,
       }),
@@ -145,7 +147,7 @@ describe('Inventory & Selling Models - Validation & Precision Rules', () => {
 
     expect(() =>
       InventoryTransactionSchema.parse({
-        ...baseTx,
+        ...baseTransaction,
         transaction_type: 'SALE',
         quantity: 2,
       }),
@@ -153,7 +155,7 @@ describe('Inventory & Selling Models - Validation & Precision Rules', () => {
 
     expect(
       InventoryTransactionSchema.parse({
-        ...baseTx,
+        ...baseTransaction,
         transaction_type: 'SALE',
         quantity: -0.25,
       }).quantity,
@@ -161,7 +163,7 @@ describe('Inventory & Selling Models - Validation & Precision Rules', () => {
 
     expect(
       InventoryTransactionSchema.parse({
-        ...baseTx,
+        ...baseTransaction,
         transaction_type: 'ADJUSTMENT',
         quantity: -1.5,
       }).quantity,
@@ -169,7 +171,7 @@ describe('Inventory & Selling Models - Validation & Precision Rules', () => {
 
     expect(() =>
       InventoryTransactionSchema.parse({
-        ...baseTx,
+        ...baseTransaction,
         transaction_type: 'ADJUSTMENT',
         quantity: 0,
       }),
@@ -179,8 +181,8 @@ describe('Inventory & Selling Models - Validation & Precision Rules', () => {
   it('enforces relationship integrity on ProductWithOptions and SalesTransactionWithItems', () => {
     expect(() =>
       ProductWithOptionsSchema.parse({
-        ...makeProduct({ product_id: 'prod-1' }),
-        selling_options: [makeOption({ product_id: 'prod-999' })],
+        ...buildProduct({ product_id: 'prod-1' }),
+        selling_options: [buildSellingOption({ product_id: 'prod-999' })],
       }),
     ).toThrow(/must match parent product_id/);
 
@@ -192,7 +194,7 @@ describe('Inventory & Selling Models - Validation & Precision Rules', () => {
         amount_paid: 90,
         change_amount: 0,
         created_by: 'cashier-1',
-        created_at: NOW,
+        created_at: CURRENT_TIMESTAMP,
       }),
     ).toThrow(/cannot be less than total_amount/);
 
@@ -204,7 +206,7 @@ describe('Inventory & Selling Models - Validation & Precision Rules', () => {
         amount_paid: 20,
         change_amount: 5,
         created_by: 'cashier-1',
-        created_at: NOW,
+        created_at: CURRENT_TIMESTAMP,
         items: [
           {
             sale_item_id: 'item-1',
@@ -227,7 +229,7 @@ describe('Inventory & Selling Models - Validation & Precision Rules', () => {
 describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
   it('Scenario 1: Regular product without custom selling options (nullable option_id)', () => {
     const product = ProductWithOptionsSchema.parse({
-      ...makeProduct({
+      ...buildProduct({
         product_id: 'prod-water',
         product_name: 'Bottled Water',
         base_unit: 'piece',
@@ -244,7 +246,7 @@ describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
       amount_paid: 20,
       change_amount: 5,
       created_by: 'cashier-1',
-      created_at: NOW,
+      created_at: CURRENT_TIMESTAMP,
       items: [
         {
           sale_item_id: 'si-1',
@@ -267,7 +269,7 @@ describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
 
   it('Scenario 2: Quantity-based / bundle pricing (Candy: 1 pc, 3 for ₱5, 10 for ₱15)', () => {
     const candy = ProductWithOptionsSchema.parse({
-      ...makeProduct({
+      ...buildProduct({
         product_id: 'prod-candy',
         product_name: 'Candy',
         base_unit: 'piece',
@@ -276,9 +278,9 @@ describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
         selling_price: 2,
       }),
       selling_options: [
-        makeOption({ option_id: 'c-1', product_id: 'prod-candy', option_name: '1 Piece', quantity: 1, price: 2 }),
-        makeOption({ option_id: 'c-3', product_id: 'prod-candy', option_name: '3 for ₱5', quantity: 3, price: 5 }),
-        makeOption({ option_id: 'c-10', product_id: 'prod-candy', option_name: '10 for ₱15', quantity: 10, price: 15 }),
+        buildSellingOption({ option_id: 'c-1', product_id: 'prod-candy', option_name: '1 Piece', quantity: 1, price: 2 }),
+        buildSellingOption({ option_id: 'c-3', product_id: 'prod-candy', option_name: '3 for ₱5', quantity: 3, price: 5 }),
+        buildSellingOption({ option_id: 'c-10', product_id: 'prod-candy', option_name: '10 for ₱15', quantity: 10, price: 15 }),
       ],
     });
 
@@ -300,8 +302,8 @@ describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
   });
 
   it('Scenario 3: Amount-based ("tingi") selling with presets and custom amount support (Cooking Oil in ml)', () => {
-    const oil = ProductWithOptionsSchema.parse({
-      ...makeProduct({
+    const cookingOil = ProductWithOptionsSchema.parse({
+      ...buildProduct({
         product_id: 'prod-oil',
         product_name: 'Cooking Oil',
         base_unit: 'ml',
@@ -311,19 +313,19 @@ describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
         allow_custom_amount: true,
       }),
       selling_options: [
-        makeOption({ option_id: 'oil-5', product_id: 'prod-oil', option_name: '₱5 Worth', quantity: 25, price: 5 }),
-        makeOption({ option_id: 'oil-10', product_id: 'prod-oil', option_name: '₱10 Worth', quantity: 50, price: 10 }),
-        makeOption({ option_id: 'oil-20', product_id: 'prod-oil', option_name: '₱20 Worth', quantity: 100, price: 20 }),
+        buildSellingOption({ option_id: 'oil-5', product_id: 'prod-oil', option_name: '₱5 Worth', quantity: 25, price: 5 }),
+        buildSellingOption({ option_id: 'oil-10', product_id: 'prod-oil', option_name: '₱10 Worth', quantity: 50, price: 10 }),
+        buildSellingOption({ option_id: 'oil-20', product_id: 'prod-oil', option_name: '₱20 Worth', quantity: 100, price: 20 }),
       ],
     });
 
-    expect(oil.allow_custom_amount).toBe(true);
-    expect(oil.selling_options.map((o) => o.quantity)).toEqual([25, 50, 100]);
+    expect(cookingOil.allow_custom_amount).toBe(true);
+    expect(cookingOil.selling_options.map((option) => option.quantity)).toEqual([25, 50, 100]);
   });
 
   it('Scenario 4: Flexible pricing for the same base quantity (Tomato)', () => {
     const tomato = ProductWithOptionsSchema.parse({
-      ...makeProduct({
+      ...buildProduct({
         product_id: 'prod-tomato',
         product_name: 'Tomato',
         base_unit: 'piece',
@@ -332,18 +334,18 @@ describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
         selling_price: 5,
       }),
       selling_options: [
-        makeOption({ option_id: 'tom-1', product_id: 'prod-tomato', option_name: 'Price Option 1', quantity: 1, price: 5 }),
-        makeOption({ option_id: 'tom-2', product_id: 'prod-tomato', option_name: 'Price Option 2', quantity: 1, price: 8 }),
-        makeOption({ option_id: 'tom-3', product_id: 'prod-tomato', option_name: 'Price Option 3', quantity: 1, price: 12 }),
+        buildSellingOption({ option_id: 'tom-1', product_id: 'prod-tomato', option_name: 'Price Option 1', quantity: 1, price: 5 }),
+        buildSellingOption({ option_id: 'tom-2', product_id: 'prod-tomato', option_name: 'Price Option 2', quantity: 1, price: 8 }),
+        buildSellingOption({ option_id: 'tom-3', product_id: 'prod-tomato', option_name: 'Price Option 3', quantity: 1, price: 12 }),
       ],
     });
 
-    expect(tomato.selling_options.map((o) => o.price)).toEqual([5, 8, 12]);
+    expect(tomato.selling_options.map((option) => option.price)).toEqual([5, 8, 12]);
   });
 
   it('Scenario 5 & 8: Weight-based & fractional quantity selling (Rice & Onion in kg)', () => {
     const rice = ProductWithOptionsSchema.parse({
-      ...makeProduct({
+      ...buildProduct({
         product_id: 'prod-rice',
         product_name: 'Rice',
         base_unit: 'kg',
@@ -352,14 +354,14 @@ describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
         selling_price: 60,
       }),
       selling_options: [
-        makeOption({ option_id: 'r-250', product_id: 'prod-rice', option_name: '250 grams', quantity: 0.25, price: 15 }),
-        makeOption({ option_id: 'r-500', product_id: 'prod-rice', option_name: '500 grams', quantity: 0.5, price: 30 }),
-        makeOption({ option_id: 'r-1k', product_id: 'prod-rice', option_name: '1 kilogram', quantity: 1, price: 60 }),
+        buildSellingOption({ option_id: 'r-250', product_id: 'prod-rice', option_name: '250 grams', quantity: 0.25, price: 15 }),
+        buildSellingOption({ option_id: 'r-500', product_id: 'prod-rice', option_name: '500 grams', quantity: 0.5, price: 30 }),
+        buildSellingOption({ option_id: 'r-1k', product_id: 'prod-rice', option_name: '1 kilogram', quantity: 1, price: 60 }),
       ],
     });
 
     const onion = ProductWithOptionsSchema.parse({
-      ...makeProduct({
+      ...buildProduct({
         product_id: 'prod-onion',
         product_name: 'Onion',
         base_unit: 'kg',
@@ -368,9 +370,9 @@ describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
         selling_price: 120,
       }),
       selling_options: [
-        makeOption({ option_id: 'on-100', product_id: 'prod-onion', option_name: '100 grams', quantity: 0.1, price: 12 }),
-        makeOption({ option_id: 'on-250', product_id: 'prod-onion', option_name: '250 grams', quantity: 0.25, price: 30 }),
-        makeOption({ option_id: 'on-500', product_id: 'prod-onion', option_name: '500 grams', quantity: 0.5, price: 60 }),
+        buildSellingOption({ option_id: 'on-100', product_id: 'prod-onion', option_name: '100 grams', quantity: 0.1, price: 12 }),
+        buildSellingOption({ option_id: 'on-250', product_id: 'prod-onion', option_name: '250 grams', quantity: 0.25, price: 30 }),
+        buildSellingOption({ option_id: 'on-500', product_id: 'prod-onion', option_name: '500 grams', quantity: 0.5, price: 60 }),
       ],
     });
 
@@ -380,7 +382,7 @@ describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
 
   it('Scenario 6: Multiple selling units with option-level barcodes and bulk STOCK_IN reference', () => {
     const noodles = ProductWithOptionsSchema.parse({
-      ...makeProduct({
+      ...buildProduct({
         product_id: 'prod-noodles',
         product_name: 'Instant Noodles',
         barcode: '4800011111111',
@@ -390,9 +392,9 @@ describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
         selling_price: 15,
       }),
       selling_options: [
-        makeOption({ option_id: 'n-pc', product_id: 'prod-noodles', option_name: '1 Piece', barcode: '4800011111111', quantity: 1, price: 15 }),
-        makeOption({ option_id: 'n-pk', product_id: 'prod-noodles', option_name: '1 Pack', barcode: '4800011111128', quantity: 5, price: 70 }),
-        makeOption({ option_id: 'n-bx', product_id: 'prod-noodles', option_name: '1 Box', barcode: '4800011111135', quantity: 40, price: 500 }),
+        buildSellingOption({ option_id: 'n-pc', product_id: 'prod-noodles', option_name: '1 Piece', barcode: '4800011111111', quantity: 1, price: 15 }),
+        buildSellingOption({ option_id: 'n-pk', product_id: 'prod-noodles', option_name: '1 Pack', barcode: '4800011111128', quantity: 5, price: 70 }),
+        buildSellingOption({ option_id: 'n-bx', product_id: 'prod-noodles', option_name: '1 Box', barcode: '4800011111135', quantity: 40, price: 500 }),
       ],
     });
 
@@ -407,7 +409,7 @@ describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
       reference_number: 'INV-2026-01',
       remarks: '2 Boxes stocked in',
       created_by: 'owner-1',
-      created_at: NOW,
+      created_at: CURRENT_TIMESTAMP,
     });
 
     expect(noodles.selling_options[2].barcode).toBe('4800011111135');
@@ -417,7 +419,7 @@ describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
 
   it('Scenario 7: Volume-based selling (Liquid Detergent in ml)', () => {
     const detergent = ProductWithOptionsSchema.parse({
-      ...makeProduct({
+      ...buildProduct({
         product_id: 'prod-detergent',
         product_name: 'Liquid Detergent',
         base_unit: 'ml',
@@ -426,13 +428,13 @@ describe('Inventory & Selling Models - Spec Scenarios (Section 4)', () => {
         selling_price: 0.1,
       }),
       selling_options: [
-        makeOption({ option_id: 'det-100', product_id: 'prod-detergent', option_name: '100 ml', quantity: 100, price: 10 }),
-        makeOption({ option_id: 'det-250', product_id: 'prod-detergent', option_name: '250 ml', quantity: 250, price: 25 }),
-        makeOption({ option_id: 'det-500', product_id: 'prod-detergent', option_name: '500 ml', quantity: 500, price: 50 }),
+        buildSellingOption({ option_id: 'det-100', product_id: 'prod-detergent', option_name: '100 ml', quantity: 100, price: 10 }),
+        buildSellingOption({ option_id: 'det-250', product_id: 'prod-detergent', option_name: '250 ml', quantity: 250, price: 25 }),
+        buildSellingOption({ option_id: 'det-500', product_id: 'prod-detergent', option_name: '500 ml', quantity: 500, price: 50 }),
       ],
     });
 
     expect(detergent.base_unit).toBe('ml');
-    expect(detergent.selling_options.map((o) => o.quantity)).toEqual([100, 250, 500]);
+    expect(detergent.selling_options.map((option) => option.quantity)).toEqual([100, 250, 500]);
   });
 });

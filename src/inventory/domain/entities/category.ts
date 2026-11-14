@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { idSchema, nonEmptyTextSchema, optionalTextSchema } from './primitives';
+import { identifierSchema, nonEmptyTextSchema, optionalTextSchema } from '../../../shared/domain';
 
 export const ProductCategorySchema = z.object({
-  category_id: idSchema,
+  category_id: identifierSchema,
   category_name: nonEmptyTextSchema,
   description: optionalTextSchema,
   is_active: z.boolean().default(true),

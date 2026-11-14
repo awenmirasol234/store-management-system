@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { idSchema, nonEmptyTextSchema, optionalTextSchema } from './primitives';
+import { identifierSchema, nonEmptyTextSchema, optionalTextSchema } from '../../../shared/domain';
 
 export const SupplierSchema = z.object({
-  supplier_id: idSchema,
+  supplier_id: identifierSchema,
   supplier_name: nonEmptyTextSchema,
   contact_person: optionalTextSchema,
   phone: optionalTextSchema,

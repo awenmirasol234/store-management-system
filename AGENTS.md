@@ -53,7 +53,7 @@ tests/
     └── presentation/            # Controller / UI tests
 ```
 
-> **Note on current layout:** Initial inventory data models currently reside in `src/inventory/models/` with tests in `tests/inventory/models.test.ts`. As use cases and adapters are added, place or migrate domain models under `src/inventory/domain/entities/` and follow the layered structure above.
+> **Current status:** Shared primitives reside in `src/shared/domain/` and inventory domain entities reside in `src/inventory/domain/entities/` with domain unit tests in `tests/inventory/domain/models.test.ts`.
 
 ---
 

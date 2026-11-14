@@ -1,18 +1,18 @@
 import { z } from 'zod';
 import {
   barcodeSchema,
-  idSchema,
+  identifierSchema,
   nonEmptyTextSchema,
   nonNegativeMoneySchema,
   nonNegativeQuantitySchema,
   optionalTextSchema,
   positiveQuantitySchema,
   timestampSchema,
-} from './primitives';
+} from '../../../shared/domain';
 
 export const ProductSchema = z.object({
-  product_id: idSchema,
-  category_id: idSchema,
+  product_id: identifierSchema,
+  category_id: identifierSchema,
   product_name: nonEmptyTextSchema,
   barcode: barcodeSchema,
   description: optionalTextSchema,
@@ -30,8 +30,8 @@ export const ProductSchema = z.object({
 export type Product = z.infer<typeof ProductSchema>;
 
 export const ProductSellingOptionSchema = z.object({
-  option_id: idSchema,
-  product_id: idSchema,
+  option_id: identifierSchema,
+  product_id: identifierSchema,
   option_name: nonEmptyTextSchema,
   barcode: barcodeSchema,
   quantity: positiveQuantitySchema,
@@ -49,13 +49,13 @@ export type ProductSellingOption = z.infer<typeof ProductSellingOptionSchema>;
  */
 export const ProductWithOptionsSchema = ProductSchema.extend({
   selling_options: z.array(ProductSellingOptionSchema).default([]),
-}).superRefine((data, ctx) => {
-  data.selling_options.forEach((option, index) => {
-    if (option.product_id !== data.product_id) {
-      ctx.addIssue({
+}).superRefine((productData, context) => {
+  productData.selling_options.forEach((option, index) => {
+    if (option.product_id !== productData.product_id) {
+      context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['selling_options', index, 'product_id'],
-        message: `Selling option product_id (${option.product_id}) must match parent product_id (${data.product_id})`,
+        message: `Selling option product_id (${option.product_id}) must match parent product_id (${productData.product_id})`,
       });
     }
   });
