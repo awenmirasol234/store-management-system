@@ -11,9 +11,15 @@ describe("Typography & Theme Centralization", function () {
     expect(cssContent).toContain('--font-sans: "Inter", system-ui');
     expect(cssContent).toContain('--font-mono: "Inter", ui-monospace');
 
-    // Centralized sub-12px typography scale tokens
-    expect(cssContent).toContain("--text-2xs: 0.625rem");
-    expect(cssContent).toContain("--text-tiny: 0.6875rem");
+    // Centralized sub-12px and calibrated typography scale tokens
+    expect(cssContent).toContain("--text-2xs: 0.6875rem");
+    expect(cssContent).toContain("--text-tiny: 0.75rem");
+    expect(cssContent).toContain("--text-xs: 0.8125rem");
+    expect(cssContent).toContain("--text-sm: 0.875rem");
+    expect(cssContent).toContain("--text-base: 1rem");
+    expect(cssContent).toContain("--text-lg: 1.25rem");
+    expect(cssContent).toContain("--text-xl: 1.375rem");
+    expect(cssContent).toContain("--text-2xl: 1.625rem");
 
     // Base typography styling
     expect(cssContent).toContain("font-variant-numeric: tabular-nums");
