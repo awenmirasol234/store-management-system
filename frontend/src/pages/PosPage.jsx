@@ -2,12 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import {
   Banknote,
   Bell,
-  CreditCard,
   Minus,
   Plus,
   ScanBarcode,
   Search,
-  Split,
   Tag,
   Trash2,
   XCircle
@@ -96,6 +94,7 @@ export function PosPage() {
   const [completedReceipt, setCompletedReceipt] = useState(null);
 
   async function loadCatalog() {
+    setErrorBanner("");
     try {
       const results = await Promise.all([
         api.listProducts(),
@@ -384,7 +383,7 @@ export function PosPage() {
   let errorElement = null;
   if (errorBanner) {
     errorElement = (
-      <div className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700">
+      <div className="relative z-[60] mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700">
         {errorBanner}
       </div>
     );
@@ -670,10 +669,10 @@ export function PosPage() {
   let cashTenderedSection = null;
   if (paymentMethod !== "CREDIT") {
     const quickBills = [
-      { label: "Exact", amount: totals.total },
-      { label: formatPeso(50), amount: 50 },
-      { label: formatPeso(100), amount: 100 },
-      { label: formatPeso(500), amount: 500 }
+      { key: "exact", label: "Exact", amount: totals.total },
+      { key: "50", label: formatPeso(50), amount: 50 },
+      { key: "100", label: formatPeso(100), amount: 100 },
+      { key: "500", label: formatPeso(500), amount: 500 }
     ];
     cashTenderedSection = (
       <div className="space-y-2">
@@ -692,7 +691,7 @@ export function PosPage() {
           {quickBills.map(function renderQuickBill(bill) {
             return (
               <Button
-                key={bill.label}
+                key={bill.key}
                 variant="secondary"
                 size="sm"
                 onClick={function fillBill() {
@@ -874,12 +873,8 @@ export function PosPage() {
           </Button>
 
           {/* Payment Method Strip */}
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { key: "CASH", label: "Cash", icon: Banknote },
-              { key: "CREDIT", label: "Credit", icon: CreditCard },
-              { key: "SPLIT", label: "Split", icon: Split }
-            ].map(function renderMethod(method) {
+          <div className="grid grid-cols-1 gap-2">
+            {[{ key: "CASH", label: "Cash", icon: Banknote }].map(function renderMethod(method) {
               const IconComponent = method.icon;
               const isSelected = paymentMethod === method.key;
               let btnClass =

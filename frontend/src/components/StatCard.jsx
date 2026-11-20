@@ -8,9 +8,6 @@ function getValueToneClass(tone) {
   if (tone === "amber") {
     return "text-amber-600";
   }
-  if (tone === "red") {
-    return "text-rose-600";
-  }
   return "text-slate-900";
 }
 

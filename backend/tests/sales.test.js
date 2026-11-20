@@ -240,6 +240,33 @@ describe("sales domain and use cases", function () {
     ).rejects.toThrow(ValidationError);
   });
 
+  it("fails closed when credit repositories are missing", async function () {
+    const deps = createInMemorySalesDeps();
+    const createProduct = createProductUseCase(deps);
+    const processSale = createProcessSaleUseCase(deps);
+
+    const water = await createProduct({
+      product_name: "Water",
+      base_unit: "piece",
+      current_stock: 5,
+      cost_price: 10,
+      selling_price: 15
+    });
+
+    deps.customerRepository = null;
+    deps.creditTransactionRepository = null;
+
+    await expect(
+      processSale({
+        items: [{ product_id: water.product_id, quantity: 1 }],
+        payment_method: PAYMENT_METHODS.CREDIT,
+        customer_id: "cust-1",
+        created_by: "cashier-1"
+      })
+    ).rejects.toThrow("Credit sales are not configured");
+    expect(deps.sales.size).toBe(0);
+  });
+
   it("enforces credit limit on SPLIT sale and refunds credit first before cash on ProcessReturn", async function () {
     const deps = createInMemorySalesDeps();
     const createProduct = createProductUseCase(deps);

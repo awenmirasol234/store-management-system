@@ -54,18 +54,18 @@ backend/
 │   ├── db/                          # sqlite.js (connection, schema DDL, UnitOfWork)
 │   ├── inventory/                   # domain.js, use-cases.js, sqlite-repo.js, routes.js
 │   ├── sales/                       # domain.js, use-cases.js, sqlite-repo.js, routes.js
-│   ├── credit/                      # domain.js, use-cases.js, sqlite-repo.js, routes.js
-│   ├── shifts/                      # domain.js, use-cases.js, sqlite-repo.js, routes.js
-│   ├── reports/                     # sqlite-repo.js, routes.js (read-only queries)
+│   ├── credit/                      # Planned: domain.js, use-cases.js, sqlite-repo.js, routes.js
+│   ├── shifts/                      # Planned: domain.js, use-cases.js, sqlite-repo.js, routes.js
+│   ├── reports/                     # domain.js, use-cases.js, sqlite-repo.js, routes.js
 │   ├── app.js                       # Express app composition (middleware, module routers, error handler)
 │   └── server.js                    # HTTP server entry point
-└── tests/                           # Flat test files (inventory.test.js, sales.test.js, sqlite.test.js, routes.test.js)
+└── tests/                           # Flat test files (inventory.test.js, sales.test.js, reports.test.js, shared.test.js, sqlite.test.js, routes.test.js)
 
 frontend/
 └── src/
     ├── api.js                       # Single REST API client for Express endpoints
-    ├── components/                  # Shared UI components (Button.jsx, Modal.jsx, Table.jsx)
-    ├── pages/                       # Flat screens (PosPage.jsx, InventoryPage.jsx, CreditPage.jsx, ShiftsPage.jsx, ReportsPage.jsx)
+    ├── components/                  # Shared UI components (Badge.jsx, Button.jsx, Input.jsx, Modal.jsx, ProductThumb.jsx, ReceiptView.jsx, Sidebar.jsx, StatCard.jsx)
+    ├── pages/                       # Flat screens (DashboardPage.jsx, PosPage.jsx, InventoryPage.jsx, OrdersPage.jsx, ReportsPage.jsx)
     ├── App.jsx
     └── main.jsx                     # React + Vite entry point
 ```
@@ -85,8 +85,8 @@ flowchart TB
 ## 4. Planned Modules & Capabilities
 
 ### 4.1 Inventory & Restocking (`inventory/`)
-- **Status**: Planned (Phase 1).
-- **Planned Use Cases**:
+- **Status**: Implemented (inventory, sales, reports). Credit and shifts remain planned.
+- **Use Cases**:
   - `CreateProduct`, `UpdateProduct`, `DeleteProduct`, `ManageSellingOptions` (enforces barcode uniqueness across active non-deleted `Product.barcode` and `ProductSellingOption.barcode`; soft-deletes products via `deleted_at` and disables via `is_active = false`).
   - **Product Images**: Optional `image_url` on `Product`. Store uploaded images locally under `backend/uploads/products/` served statically at `/uploads/products/<filename>`, validating image MIME type (`jpeg`/`png`/`webp`) and max file size (2 MB) at the Express boundary.
   - `StockIn` (supports bulk pack/box multiplier: `entered_qty × option.quantity` added to `current_stock` with `supplier_id` and `unit_cost`; updates `Product.cost_price` to the latest `unit_cost`).
@@ -101,12 +101,13 @@ flowchart TB
 - **Receipt Numbering & Discounts**:
   - Sequential receipt numbers per day in `Asia/Manila` (`YYYYMMDD-0001`).
   - Optional line-item and order-level `discount_amount` (cannot exceed subtotal).
-- **Planned Use Cases**:
+- **Use Cases**:
   - `CalculateCartTotals` (preview line subtotals, discounts, and `base_quantity` deductions before checkout)
-  - `ProcessSale` (executes inside `UnitOfWork`: validates stock, shift, and credit limit; creates `SalesTransaction` + `SalesItem` snapshots; records negative `SALE` `InventoryTransaction`; deducts `Product.current_stock`; and creates a `CHARGE` `CreditTransaction` when `credit_amount > 0`)
+  - `ProcessSale` (executes inside `UnitOfWork`: validates stock; creates `SalesTransaction` + `SalesItem` snapshots; records negative `SALE` `InventoryTransaction`; deducts `Product.current_stock`. Credit paths fail closed until `credit/` is wired.)
   - `ProcessReturn` (links to original `sale_id` / `sale_item_id`, prevents returning more than remaining sold quantity, records positive `RETURN` `InventoryTransaction` to restore stock, and refunds credit balance first before cash on `CREDIT`/`SPLIT` sales)
 
 ### 4.3 Customer Credit / "Utang" Ledger (`credit/`)
+- **Status**: Not implemented. POS credit and split are hidden; sale use cases fail closed until repositories are wired.
 - **Entities**:
   - `Customer`: `customer_id`, `full_name`, `phone`, `address`, `credit_limit`, `current_balance`, `is_active`
   - `CreditTransaction`: `credit_tx_id`, `customer_id`, `sale_id` (nullable), `shift_id` (nullable), `type` (`CHARGE` | `PAYMENT` | `RETURN_ADJUSTMENT`), `amount`, `remarks`, `created_by`, `created_at`
@@ -161,7 +162,7 @@ flowchart TB
 - Build Product & Inventory management screen (create/edit product with optional image upload, configure selling options, bulk stock-in by pack/box, stock adjustments).
 
 ### Phase 4: Utang Ledger, Roles, Shifts, Reports & Local Backup
-- Implement `credit/`, `shifts/` (including `CashMovement`), and `reports/` modules end-to-end.
+- Implement `credit/` and `shifts/` (including `CashMovement`) end-to-end; `reports/` is already implemented.
 - Add first-time Owner setup and PIN login for Owner and Cashier roles.
 - Build Shift Open/Close reconciliation, Sales/Profit dashboard (`Asia/Manila` daily cutoffs), and one-click local SQLite backup download.
 

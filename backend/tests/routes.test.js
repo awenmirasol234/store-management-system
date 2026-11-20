@@ -30,6 +30,9 @@ async function startTestServer() {
       },
       todayManilaCompact() {
         return "20261120";
+      },
+      todayManilaIsoDate() {
+        return "2026-11-20";
       }
     }
   });
@@ -141,6 +144,14 @@ describe("Express REST API routes", function () {
     });
     expect(returnRes.status).toBe(201);
     expect(returnRes.body.data.return_record.cash_refund_amount).toBe(70);
+
+    const reportsRes = await requestJson(
+      baseUrl,
+      "GET",
+      "/api/reports/summary?from=2026-11-20&to=2026-11-20"
+    );
+    expect(reportsRes.status).toBe(200);
+    expect(reportsRes.body.data.sale_count).toBe(1);
 
     // Soft-delete product
     const deleteRes = await requestJson(baseUrl, "DELETE", "/api/products/" + productId);

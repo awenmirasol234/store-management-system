@@ -171,7 +171,7 @@ export function ReportsPage() {
               selectPreset("7D", 6);
             }}
           >
-            7 Days
+            <span className="font-mono">7</span> Days
           </Button>
           <Button
             variant={monthVariant}
@@ -180,7 +180,7 @@ export function ReportsPage() {
               selectPreset("30D", 29);
             }}
           >
-            30 Days
+            <span className="font-mono">30</span> Days
           </Button>
 
           <input

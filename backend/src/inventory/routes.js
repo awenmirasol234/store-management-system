@@ -2,8 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import express from "express";
 import multer from "multer";
-import { NotFoundError, ValidationError } from "../shared/errors.js";
-import { createCategoryEntity, createSupplierEntity } from "./domain.js";
+import { ValidationError } from "../shared/errors.js";
 
 const ALLOWED_IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
@@ -51,7 +50,7 @@ export function createInventoryRouter(dependencies) {
   const upload = createProductImageUpload(dependencies.uploadsDir);
 
   router.get("/products", async function listProducts(request, response) {
-    const products = await dependencies.productRepository.listAll();
+    const products = await dependencies.useCases.listProducts();
     response.json({ data: products });
   });
 
@@ -61,54 +60,15 @@ export function createInventoryRouter(dependencies) {
   });
 
   router.get("/products/barcode/:barcode", async function lookupBarcode(request, response) {
-    const barcode = request.params.barcode;
-    const product = await dependencies.productRepository.findByBarcode(barcode);
-    if (product) {
-      const options = await dependencies.sellingOptionRepository.listByProductId(
-        product.product_id
-      );
-      response.json({
-        data: {
-          match_type: "PRODUCT",
-          product: product,
-          option: null,
-          options: options
-        }
-      });
-      return;
-    }
-
-    const option = await dependencies.sellingOptionRepository.findByBarcode(barcode);
-    if (option && option.is_active) {
-      const parentProduct = await dependencies.productRepository.findById(option.product_id);
-      if (parentProduct && parentProduct.deleted_at === null) {
-        const options = await dependencies.sellingOptionRepository.listByProductId(
-          parentProduct.product_id
-        );
-        response.json({
-          data: {
-            match_type: "OPTION",
-            product: parentProduct,
-            option: option,
-            options: options
-          }
-        });
-        return;
-      }
-    }
-
-    throw new NotFoundError("No product or selling option matches barcode: " + barcode);
+    const match = await dependencies.useCases.lookupBarcode({ barcode: request.params.barcode });
+    response.json({ data: match });
   });
 
   router.get("/products/:productId", async function getProduct(request, response) {
-    const product = await dependencies.productRepository.findById(request.params.productId);
-    if (!product || product.deleted_at !== null) {
-      throw new NotFoundError("Product not found: " + request.params.productId);
-    }
-    const options = await dependencies.sellingOptionRepository.listByProductId(product.product_id);
-    response.json({
-      data: Object.assign({}, product, { selling_options: options })
+    const product = await dependencies.useCases.getProduct({
+      product_id: request.params.productId
     });
+    response.json({ data: product });
   });
 
   router.post("/products", async function createProduct(request, response) {
@@ -148,9 +108,9 @@ export function createInventoryRouter(dependencies) {
   );
 
   router.get("/products/:productId/options", async function listOptions(request, response) {
-    const options = await dependencies.sellingOptionRepository.listByProductId(
-      request.params.productId
-    );
+    const options = await dependencies.useCases.listSellingOptions({
+      product_id: request.params.productId
+    });
     response.json({ data: options });
   });
 
@@ -175,9 +135,9 @@ export function createInventoryRouter(dependencies) {
   );
 
   router.get("/products/:productId/transactions", async function listTx(request, response) {
-    const transactions = await dependencies.inventoryTransactionRepository.listByProductId(
-      request.params.productId
-    );
+    const transactions = await dependencies.useCases.listInventoryTransactions({
+      product_id: request.params.productId
+    });
     response.json({ data: transactions });
   });
 
@@ -192,32 +152,22 @@ export function createInventoryRouter(dependencies) {
   });
 
   router.get("/categories", async function listCategories(request, response) {
-    const categories = await dependencies.categoryRepository.listAll();
+    const categories = await dependencies.useCases.listCategories();
     response.json({ data: categories });
   });
 
   router.post("/categories", async function createCategory(request, response) {
-    const category = createCategoryEntity(
-      Object.assign({}, request.body, {
-        category_id: dependencies.idGenerator.nextId()
-      })
-    );
-    await dependencies.categoryRepository.save(category);
+    const category = await dependencies.useCases.createCategory(request.body);
     response.status(201).json({ data: category });
   });
 
   router.get("/suppliers", async function listSuppliers(request, response) {
-    const suppliers = await dependencies.supplierRepository.listAll();
+    const suppliers = await dependencies.useCases.listSuppliers();
     response.json({ data: suppliers });
   });
 
   router.post("/suppliers", async function createSupplier(request, response) {
-    const supplier = createSupplierEntity(
-      Object.assign({}, request.body, {
-        supplier_id: dependencies.idGenerator.nextId()
-      })
-    );
-    await dependencies.supplierRepository.save(supplier);
+    const supplier = await dependencies.useCases.createSupplier(request.body);
     response.status(201).json({ data: supplier });
   });
 

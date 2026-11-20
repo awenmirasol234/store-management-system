@@ -31,29 +31,29 @@ The project separates the standalone **Express backend** (`backend/`) from the *
 ```text
 backend/
 ├── src/
-│   ├── shared/                  # decimal.js, errors.js, ports.js (UnitOfWork, Clock, IdGenerator)
+│   ├── shared/                  # decimal.js, errors.js, ports.js, validation.js
 │   ├── db/                      # sqlite.js (connection, schema DDL, UnitOfWork)
-│   ├── <module>/                # Flat module folder (inventory, sales, credit, shifts, reports)
+│   ├── <module>/                # Flat module folder (inventory, sales, reports)
 │   │   ├── domain.js            # Entities, validation rules, errors, repository contracts
 │   │   ├── use-cases.js         # Single-responsibility use cases
 │   │   ├── sqlite-repo.js       # SQLite adapter (add postgres-repo.js / mysql-repo.js to swap DB)
 │   │   └── routes.js            # Express REST router
 │   ├── app.js                   # Express app setup (middleware, routes, error handler)
 │   └── server.js                # HTTP server entry point
-└── tests/                       # Flat test files (inventory.test.js, sales.test.js, sqlite.test.js, routes.test.js)
+└── tests/                       # Flat test files (inventory.test.js, sales.test.js, reports.test.js, shared.test.js, sqlite.test.js, routes.test.js)
 
 frontend/
 └── src/
     ├── api.js                   # Single REST API client for Express
-    ├── components/              # Shared UI components (Button.jsx, Modal.jsx, Table.jsx)
-    ├── pages/                   # Flat screens (PosPage.jsx, InventoryPage.jsx, CreditPage.jsx, ShiftsPage.jsx, ReportsPage.jsx)
+    ├── components/              # Shared UI components (Badge.jsx, Button.jsx, Input.jsx, Modal.jsx, ProductThumb.jsx, ReceiptView.jsx, Sidebar.jsx, StatCard.jsx)
+    ├── pages/                   # Flat screens (DashboardPage.jsx, PosPage.jsx, InventoryPage.jsx, OrdersPage.jsx, ReportsPage.jsx)
     ├── App.jsx
     └── main.jsx                 # React + Vite entry point
 ```
 
 > If a single module file grows too large, split it into flat sibling files inside the same module folder (e.g., `stock-use-cases.js`) rather than adding nested subfolders.
 
-> **Current status:** Planning complete; ready for Phase 1 implementation (`backend/` and `frontend/` have not been scaffolded yet).
+> **Current status:** Inventory, sales, and reports run on SQLite with Express and React. Credit, roles, and shifts are still planned; POS payment is cash-only until credit is wired.
 
 ---
 

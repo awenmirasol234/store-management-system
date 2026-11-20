@@ -85,6 +85,7 @@ export function InventoryPage() {
   const [adjustRemarks, setAdjustRemarks] = useState("");
 
   async function loadAll() {
+    setErrorBanner("");
     try {
       const results = await Promise.all([
         api.listProducts(),
@@ -359,7 +360,7 @@ export function InventoryPage() {
   let errorElement = null;
   if (errorBanner) {
     errorElement = (
-      <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700">
+      <div className="relative z-[60] mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700">
         {errorBanner}
       </div>
     );
@@ -858,7 +859,7 @@ export function InventoryPage() {
               {stockInOptions.map(function renderOpt(option) {
                 return (
                   <option key={option.option_id} value={option.option_id}>
-                    {option.option_name} ({formatQuantity(option.quantity)} {stockInUnitLabel})
+                    {option.option_name} (<span className="font-mono">{formatQuantity(option.quantity)}</span> {stockInUnitLabel})
                   </option>
                 );
               })}

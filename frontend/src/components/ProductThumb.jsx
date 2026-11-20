@@ -12,8 +12,6 @@ export function ProductThumb(props) {
   let sizeClass = "h-28 w-full";
   if (props.size === "sm") {
     sizeClass = "h-11 w-11 shrink-0";
-  } else if (props.size === "md") {
-    sizeClass = "h-14 w-14 shrink-0";
   }
 
   if (imageSrc) {

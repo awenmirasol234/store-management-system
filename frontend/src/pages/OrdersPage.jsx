@@ -28,6 +28,7 @@ export function OrdersPage() {
   const [submittingReturn, setSubmittingReturn] = useState(false);
 
   async function loadSales() {
+    setErrorBanner("");
     try {
       const list = await api.listSales(50);
       setSales(list);
@@ -116,7 +117,7 @@ export function OrdersPage() {
   let errorElement = null;
   if (errorBanner) {
     errorElement = (
-      <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700">
+      <div className="relative z-[60] mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700">
         {errorBanner}
       </div>
     );

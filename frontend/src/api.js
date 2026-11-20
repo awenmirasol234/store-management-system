@@ -5,9 +5,12 @@ async function request(method, path, body) {
     method: method,
     headers: {}
   };
-  if (body !== undefined) {
+  if (body !== undefined && !(body instanceof FormData)) {
     options.headers["Content-Type"] = "application/json";
     options.body = JSON.stringify(body);
+  }
+  if (body instanceof FormData) {
+    options.body = body;
   }
 
   const response = await fetch(API_BASE + path, options);
@@ -55,25 +58,14 @@ export const api = {
   deleteProduct(productId) {
     return request("DELETE", "/api/products/" + encodeURIComponent(productId));
   },
-  async uploadProductImage(productId, file) {
+  uploadProductImage(productId, file) {
     const formData = new FormData();
     formData.append("image", file);
-    const response = await fetch(
-      API_BASE + "/api/products/" + encodeURIComponent(productId) + "/image",
-      {
-        method: "POST",
-        body: formData
-      }
+    return request(
+      "POST",
+      "/api/products/" + encodeURIComponent(productId) + "/image",
+      formData
     );
-    const payload = await response.json();
-    if (!response.ok) {
-      let message = "Image upload failed";
-      if (payload && payload.error && payload.error.message) {
-        message = payload.error.message;
-      }
-      throw new Error(message);
-    }
-    return payload.data;
   },
   listSellingOptions(productId) {
     return request("GET", "/api/products/" + encodeURIComponent(productId) + "/options");
@@ -113,11 +105,11 @@ export const api = {
     return request("POST", "/api/sales", data);
   },
   listSales(limit) {
-    let query = "";
+    const params = new URLSearchParams();
     if (limit) {
-      query = "?limit=" + String(limit);
+      params.set("limit", String(limit));
     }
-    return request("GET", "/api/sales" + query);
+    return request("GET", "/api/sales" + buildQuery(params));
   },
   getSale(saleId) {
     return request("GET", "/api/sales/" + encodeURIComponent(saleId));
@@ -140,11 +132,7 @@ export const api = {
     if (limit) {
       params.set("limit", String(limit));
     }
-    const text = params.toString();
-    if (text.length > 0) {
-      return request("GET", "/api/reports/top-products?" + text);
-    }
-    return request("GET", "/api/reports/top-products");
+    return request("GET", "/api/reports/top-products" + buildQuery(params));
   },
   getDailyReport(fromDate, toDate) {
     const query = buildDateRangeQuery(fromDate, toDate);
@@ -160,6 +148,10 @@ function buildDateRangeQuery(fromDate, toDate) {
   if (toDate) {
     params.set("to", toDate);
   }
+  return buildQuery(params);
+}
+
+function buildQuery(params) {
   const text = params.toString();
   if (text.length > 0) {
     return "?" + text;

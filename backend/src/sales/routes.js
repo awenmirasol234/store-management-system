@@ -1,5 +1,4 @@
 import express from "express";
-import { NotFoundError } from "../shared/errors.js";
 
 export function createSalesRouter(dependencies) {
   const router = express.Router();
@@ -15,22 +14,12 @@ export function createSalesRouter(dependencies) {
   });
 
   router.get("/sales", async function listSales(request, response) {
-    let limit = 50;
-    if (request.query.limit !== undefined) {
-      const parsed = Number(request.query.limit);
-      if (Number.isInteger(parsed) && parsed > 0) {
-        limit = parsed;
-      }
-    }
-    const sales = await dependencies.salesRepository.listRecentSales(limit);
+    const sales = await dependencies.useCases.listSales({ limit: request.query.limit });
     response.json({ data: sales });
   });
 
   router.get("/sales/:saleId", async function getSale(request, response) {
-    const record = await dependencies.salesRepository.findSaleById(request.params.saleId);
-    if (!record) {
-      throw new NotFoundError("Sale not found: " + request.params.saleId);
-    }
+    const record = await dependencies.useCases.getSale({ sale_id: request.params.saleId });
     response.json({ data: record });
   });
 

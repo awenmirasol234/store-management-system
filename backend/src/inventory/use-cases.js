@@ -3,9 +3,11 @@ import { ConflictError, NotFoundError, ValidationError } from "../shared/errors.
 import {
   INVENTORY_TRANSACTION_TYPES,
   calculateStockInBaseQuantity,
+  createCategoryEntity,
   createInventoryTransactionEntity,
   createProductEntity,
   createSellingOptionEntity,
+  createSupplierEntity,
   isProductLowStock,
   normalizeOptionalText
 } from "./domain.js";
@@ -298,5 +300,100 @@ export function createGetLowStockProductsUseCase(dependencies) {
       }
     }
     return lowStockProducts;
+  };
+}
+
+export function createListProductsUseCase(dependencies) {
+  return async function execute() {
+    return dependencies.productRepository.listAll();
+  };
+}
+
+export function createLookupBarcodeUseCase(dependencies) {
+  return async function execute(input) {
+    const barcode = input.barcode;
+    const product = await dependencies.productRepository.findByBarcode(barcode);
+    if (product && product.deleted_at === null && product.is_active) {
+      const options = await dependencies.sellingOptionRepository.listByProductId(product.product_id);
+      return {
+        match_type: "PRODUCT",
+        product: product,
+        option: null,
+        options: options
+      };
+    }
+
+    const option = await dependencies.sellingOptionRepository.findByBarcode(barcode);
+    if (option && option.is_active) {
+      const parentProduct = await dependencies.productRepository.findById(option.product_id);
+      if (parentProduct && parentProduct.deleted_at === null && parentProduct.is_active) {
+        const options = await dependencies.sellingOptionRepository.listByProductId(
+          parentProduct.product_id
+        );
+        return {
+          match_type: "OPTION",
+          product: parentProduct,
+          option: option,
+          options: options
+        };
+      }
+    }
+
+    throw new NotFoundError("No product or selling option matches barcode: " + barcode);
+  };
+}
+
+export function createGetProductUseCase(dependencies) {
+  return async function execute(input) {
+    const product = await dependencies.productRepository.findById(input.product_id);
+    if (!product || product.deleted_at !== null) {
+      throw new NotFoundError("Product not found: " + input.product_id);
+    }
+    const options = await dependencies.sellingOptionRepository.listByProductId(product.product_id);
+    return Object.assign({}, product, { selling_options: options });
+  };
+}
+
+export function createListSellingOptionsUseCase(dependencies) {
+  return async function execute(input) {
+    return dependencies.sellingOptionRepository.listByProductId(input.product_id);
+  };
+}
+
+export function createListInventoryTransactionsUseCase(dependencies) {
+  return async function execute(input) {
+    return dependencies.inventoryTransactionRepository.listByProductId(input.product_id);
+  };
+}
+
+export function createListCategoriesUseCase(dependencies) {
+  return async function execute() {
+    return dependencies.categoryRepository.listAll();
+  };
+}
+
+export function createCreateCategoryUseCase(dependencies) {
+  return async function execute(input) {
+    const category = createCategoryEntity(
+      Object.assign({}, input, { category_id: dependencies.idGenerator.nextId() })
+    );
+    await dependencies.categoryRepository.save(category);
+    return category;
+  };
+}
+
+export function createListSuppliersUseCase(dependencies) {
+  return async function execute() {
+    return dependencies.supplierRepository.listAll();
+  };
+}
+
+export function createCreateSupplierUseCase(dependencies) {
+  return async function execute(input) {
+    const supplier = createSupplierEntity(
+      Object.assign({}, input, { supplier_id: dependencies.idGenerator.nextId() })
+    );
+    await dependencies.supplierRepository.save(supplier);
+    return supplier;
   };
 }

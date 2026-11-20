@@ -14,8 +14,17 @@ import {
 } from "./inventory/sqlite-repo.js";
 import {
   createAdjustStockUseCase,
+  createCreateCategoryUseCase,
+  createCreateSupplierUseCase,
   createDeleteProductUseCase,
   createGetLowStockProductsUseCase,
+  createGetProductUseCase,
+  createListCategoriesUseCase,
+  createListInventoryTransactionsUseCase,
+  createListProductsUseCase,
+  createListSellingOptionsUseCase,
+  createListSuppliersUseCase,
+  createLookupBarcodeUseCase,
   createProductUseCase,
   createSaveSellingOptionUseCase,
   createStockInUseCase,
@@ -25,11 +34,18 @@ import { createInventoryRouter } from "./inventory/routes.js";
 import { createSqliteSalesRepository } from "./sales/sqlite-repo.js";
 import {
   createCalculateCartTotalsUseCase,
+  createGetSaleUseCase,
+  createListSalesUseCase,
   createProcessReturnUseCase,
   createProcessSaleUseCase
 } from "./sales/use-cases.js";
 import { createSalesRouter } from "./sales/routes.js";
 import { createSqliteReportsRepository } from "./reports/sqlite-repo.js";
+import {
+  createGetDailyBreakdownUseCase,
+  createGetReportsSummaryUseCase,
+  createGetTopProductsUseCase
+} from "./reports/use-cases.js";
 import { createReportsRouter } from "./reports/routes.js";
 
 function createErrorHandler() {
@@ -91,6 +107,8 @@ export function createApp(options) {
     productRepository: productRepository,
     sellingOptionRepository: sellingOptionRepository,
     inventoryTransactionRepository: inventoryTransactionRepository,
+    categoryRepository: categoryRepository,
+    supplierRepository: supplierRepository,
     salesRepository: salesRepository
   };
 
@@ -101,13 +119,33 @@ export function createApp(options) {
     saveSellingOption: createSaveSellingOptionUseCase(sharedDeps),
     stockIn: createStockInUseCase(sharedDeps),
     adjustStock: createAdjustStockUseCase(sharedDeps),
-    getLowStockProducts: createGetLowStockProductsUseCase(sharedDeps)
+    getLowStockProducts: createGetLowStockProductsUseCase(sharedDeps),
+    listProducts: createListProductsUseCase(sharedDeps),
+    lookupBarcode: createLookupBarcodeUseCase(sharedDeps),
+    getProduct: createGetProductUseCase(sharedDeps),
+    listSellingOptions: createListSellingOptionsUseCase(sharedDeps),
+    listInventoryTransactions: createListInventoryTransactionsUseCase(sharedDeps),
+    listCategories: createListCategoriesUseCase(sharedDeps),
+    createCategory: createCreateCategoryUseCase(sharedDeps),
+    listSuppliers: createListSuppliersUseCase(sharedDeps),
+    createSupplier: createCreateSupplierUseCase(sharedDeps)
   };
 
   const salesUseCases = {
     calculateCartTotals: createCalculateCartTotalsUseCase(sharedDeps),
     processSale: createProcessSaleUseCase(sharedDeps),
-    processReturn: createProcessReturnUseCase(sharedDeps)
+    processReturn: createProcessReturnUseCase(sharedDeps),
+    listSales: createListSalesUseCase(sharedDeps),
+    getSale: createGetSaleUseCase(sharedDeps)
+  };
+
+  const reportsUseCases = {
+    getSummary: createGetReportsSummaryUseCase({ reportsRepository: reportsRepository, clock: clock }),
+    getTopProducts: createGetTopProductsUseCase({ reportsRepository: reportsRepository, clock: clock }),
+    getDailyBreakdown: createGetDailyBreakdownUseCase({
+      reportsRepository: reportsRepository,
+      clock: clock
+    })
   };
 
   const app = express();
@@ -123,12 +161,6 @@ export function createApp(options) {
     "/api",
     createInventoryRouter({
       uploadsDir: uploadsDir,
-      idGenerator: idGenerator,
-      productRepository: productRepository,
-      sellingOptionRepository: sellingOptionRepository,
-      inventoryTransactionRepository: inventoryTransactionRepository,
-      categoryRepository: categoryRepository,
-      supplierRepository: supplierRepository,
       useCases: inventoryUseCases
     })
   );
@@ -136,7 +168,6 @@ export function createApp(options) {
   app.use(
     "/api",
     createSalesRouter({
-      salesRepository: salesRepository,
       useCases: salesUseCases
     })
   );
@@ -144,8 +175,7 @@ export function createApp(options) {
   app.use(
     "/api",
     createReportsRouter({
-      clock: clock,
-      reportsRepository: reportsRepository
+      useCases: reportsUseCases
     })
   );
 

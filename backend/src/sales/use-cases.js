@@ -6,6 +6,7 @@ import {
   toQuantityInt
 } from "../shared/decimal.js";
 import { NotFoundError, ValidationError } from "../shared/errors.js";
+import { parsePositiveLimit } from "../shared/validation.js";
 import {
   INVENTORY_TRANSACTION_TYPES,
   createInventoryTransactionEntity,
@@ -135,7 +136,7 @@ async function validateCustomerCredit(dependencies, payment) {
     return null;
   }
   if (!dependencies.customerRepository || !dependencies.creditTransactionRepository) {
-    return null;
+    throw new ValidationError("Credit sales are not configured");
   }
 
   const customer = await dependencies.customerRepository.findById(payment.customer_id);
@@ -478,5 +479,22 @@ export function createProcessReturnUseCase(dependencies) {
         credit_transaction: creditAdjustment
       };
     });
+  };
+}
+
+export function createListSalesUseCase(dependencies) {
+  return async function execute(input) {
+    const limit = parsePositiveLimit(input.limit, 50, "limit");
+    return dependencies.salesRepository.listRecentSales(limit);
+  };
+}
+
+export function createGetSaleUseCase(dependencies) {
+  return async function execute(input) {
+    const record = await dependencies.salesRepository.findSaleById(input.sale_id);
+    if (!record) {
+      throw new NotFoundError("Sale not found: " + input.sale_id);
+    }
+    return record;
   };
 }

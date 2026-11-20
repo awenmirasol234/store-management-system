@@ -11,6 +11,9 @@ function getVariantClasses(variant) {
   if (variant === "ghost") {
     return "bg-transparent text-slate-600 hover:bg-slate-100 border-transparent";
   }
+  if (variant === "secondary") {
+    return "bg-white text-slate-800 hover:bg-slate-50 border-slate-200";
+  }
   return "bg-white text-slate-800 hover:bg-slate-50 border-slate-200";
 }
 

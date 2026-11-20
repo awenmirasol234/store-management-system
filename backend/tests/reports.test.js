@@ -11,6 +11,11 @@ import { createSqliteSalesRepository } from "../src/sales/sqlite-repo.js";
 import { PAYMENT_METHODS } from "../src/sales/domain.js";
 import { createProcessSaleUseCase } from "../src/sales/use-cases.js";
 import { createSqliteReportsRepository } from "../src/reports/sqlite-repo.js";
+import {
+  createGetDailyBreakdownUseCase,
+  createGetReportsSummaryUseCase,
+  createGetTopProductsUseCase
+} from "../src/reports/use-cases.js";
 
 let activeDatabase = null;
 
@@ -49,6 +54,13 @@ describe("reports SQLite repository", function () {
     const createProduct = createProductUseCase(deps);
     const processSale = createProcessSaleUseCase(deps);
     const reportsRepo = createSqliteReportsRepository(database);
+    const reportDeps = {
+      reportsRepository: reportsRepo,
+      clock: deps.clock
+    };
+    const getSummary = createGetReportsSummaryUseCase(reportDeps);
+    const getTopProducts = createGetTopProductsUseCase(reportDeps);
+    const getDailyBreakdown = createGetDailyBreakdownUseCase(reportDeps);
 
     const water = await createProduct({
       product_name: "Bottled Water",
@@ -66,7 +78,7 @@ describe("reports SQLite repository", function () {
       created_by: "owner"
     });
 
-    const summary = await reportsRepo.getSummary("2026-11-20", "2026-11-20");
+    const summary = await getSummary({ from: "2026-11-20", to: "2026-11-20" });
     expect(summary.sale_count).toBe(1);
     expect(summary.gross_sales).toBe(60);
     expect(summary.cogs).toBe(40);
@@ -74,13 +86,13 @@ describe("reports SQLite repository", function () {
     expect(summary.low_stock_count).toBe(1);
     expect(summary.inventory_valuation).toBe(60);
 
-    const topProducts = await reportsRepo.getTopProducts("2026-11-20", "2026-11-20", 5);
+    const topProducts = await getTopProducts({ from: "2026-11-20", to: "2026-11-20", limit: 5 });
     expect(topProducts.length).toBe(1);
     expect(topProducts[0].quantity_sold).toBe(4);
     expect(topProducts[0].revenue).toBe(60);
     expect(topProducts[0].profit).toBe(20);
 
-    const daily = await reportsRepo.getDailyBreakdown("2026-11-20", "2026-11-20");
+    const daily = await getDailyBreakdown({ from: "2026-11-20", to: "2026-11-20" });
     expect(daily.length).toBe(1);
     expect(daily[0].date).toBe("2026-11-20");
     expect(daily[0].profit).toBe(20);
