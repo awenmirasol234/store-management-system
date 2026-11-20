@@ -19,7 +19,7 @@ function getPaymentTone(method) {
   return "blue";
 }
 
-export function OrdersPage() {
+export function TransactionsPage() {
   const [sales, setSales] = useState([]);
   const [errorBanner, setErrorBanner] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -241,7 +241,7 @@ export function OrdersPage() {
   return (
     <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-lg font-bold text-slate-900">Orders</h1>
+        <h1 className="text-lg font-bold text-slate-900">Transactions</h1>
         <Button variant="secondary" size="sm" onClick={loadSales}>
           Refresh
         </Button>

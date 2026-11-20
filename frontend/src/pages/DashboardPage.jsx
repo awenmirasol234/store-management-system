@@ -186,8 +186,8 @@ export function DashboardPage(props) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={function goOrders() {
-                props.onNavigate("orders");
+              onClick={function goTransactions() {
+                props.onNavigate("transactions");
               }}
             >
               View All

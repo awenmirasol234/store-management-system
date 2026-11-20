@@ -10,8 +10,8 @@ import {
 const NAV_ITEMS = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "pos", label: "POS", icon: ShoppingBag },
-  { key: "orders", label: "Orders", icon: Receipt },
   { key: "inventory", label: "Inventory", icon: Package },
+  { key: "transactions", label: "Transactions", icon: Receipt },
   { key: "reports", label: "Reports", icon: BarChart3 }
 ];
 
