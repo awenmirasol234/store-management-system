@@ -154,6 +154,41 @@ CREATE TABLE IF NOT EXISTS sales_return_items (
   FOREIGN KEY (sale_item_id) REFERENCES sales_items(sale_item_id),
   FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
+
+CREATE TABLE IF NOT EXISTS customers (
+  customer_id TEXT PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  phone TEXT,
+  address TEXT,
+  credit_limit_int INTEGER,
+  current_balance_int INTEGER NOT NULL DEFAULT 0,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_customers_full_name
+  ON customers(full_name);
+
+CREATE TABLE IF NOT EXISTS credit_transactions (
+  credit_tx_id TEXT PRIMARY KEY,
+  customer_id TEXT NOT NULL,
+  sale_id TEXT,
+  shift_id TEXT,
+  type TEXT NOT NULL,
+  amount_int INTEGER NOT NULL,
+  remarks TEXT,
+  created_by TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+  FOREIGN KEY (sale_id) REFERENCES sales_transactions(sale_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_credit_tx_customer_id
+  ON credit_transactions(customer_id);
+
+CREATE INDEX IF NOT EXISTS idx_credit_tx_created_at
+  ON credit_transactions(created_at);
 `;
 
 export function openSqliteDatabase(databasePath) {

@@ -47,6 +47,19 @@ import {
   createGetTopProductsUseCase
 } from "./reports/use-cases.js";
 import { createReportsRouter } from "./reports/routes.js";
+import {
+  createSqliteCreditTransactionRepository,
+  createSqliteCustomerRepository
+} from "./credit/sqlite-repo.js";
+import {
+  createCreateCustomerUseCase,
+  createGetCustomerUseCase,
+  createListCreditTransactionsUseCase,
+  createListCustomersUseCase,
+  createRecordPaymentUseCase,
+  createUpdateCustomerUseCase
+} from "./credit/use-cases.js";
+import { createCreditRouter } from "./credit/routes.js";
 
 function createErrorHandler() {
   return function handleError(error, request, response, next) {
@@ -96,6 +109,8 @@ export function createApp(options) {
   const inventoryTransactionRepository = createSqliteInventoryTransactionRepository(database);
   const categoryRepository = createSqliteCategoryRepository(database);
   const supplierRepository = createSqliteSupplierRepository(database);
+  const customerRepository = createSqliteCustomerRepository(database);
+  const creditTransactionRepository = createSqliteCreditTransactionRepository(database);
   const salesRepository = createSqliteSalesRepository(database);
   const reportsRepository = createSqliteReportsRepository(database);
 
@@ -108,6 +123,8 @@ export function createApp(options) {
     inventoryTransactionRepository: inventoryTransactionRepository,
     categoryRepository: categoryRepository,
     supplierRepository: supplierRepository,
+    customerRepository: customerRepository,
+    creditTransactionRepository: creditTransactionRepository,
     salesRepository: salesRepository,
     reportsRepository: reportsRepository
   };
@@ -145,6 +162,15 @@ export function createApp(options) {
     getDailyBreakdown: createGetDailyBreakdownUseCase(sharedDeps)
   };
 
+  const creditUseCases = {
+    createCustomer: createCreateCustomerUseCase(sharedDeps),
+    updateCustomer: createUpdateCustomerUseCase(sharedDeps),
+    getCustomer: createGetCustomerUseCase(sharedDeps),
+    listCustomers: createListCustomersUseCase(sharedDeps),
+    recordPayment: createRecordPaymentUseCase(sharedDeps),
+    listCreditTransactions: createListCreditTransactionsUseCase(sharedDeps)
+  };
+
   const app = express();
   app.use(cors());
   app.use(express.json());
@@ -173,6 +199,13 @@ export function createApp(options) {
     "/api",
     createReportsRouter({
       useCases: reportsUseCases
+    })
+  );
+
+  app.use(
+    "/api",
+    createCreditRouter({
+      useCases: creditUseCases
     })
   );
 

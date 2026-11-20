@@ -161,6 +161,30 @@ describe("Express REST API routes", function () {
     // Soft-deleted product is excluded from list
     const listRes = await requestJson(baseUrl, "GET", "/api/products");
     expect(listRes.body.data.length).toBe(0);
+
+    // Customer creation and credit management
+    const createCustomerRes = await requestJson(baseUrl, "POST", "/api/customers", {
+      full_name: "Aling Marites",
+      phone: "09170001122",
+      credit_limit: 1000
+    });
+    expect(createCustomerRes.status).toBe(201);
+    const customerId = createCustomerRes.body.data.customer_id;
+    expect(createCustomerRes.body.data.current_balance).toBe(0);
+
+    const getCustomerRes = await requestJson(baseUrl, "GET", "/api/customers/" + customerId);
+    expect(getCustomerRes.status).toBe(200);
+    expect(getCustomerRes.body.data.full_name).toBe("Aling Marites");
+
+    const searchCustomerRes = await requestJson(baseUrl, "GET", "/api/customers?q=marites");
+    expect(searchCustomerRes.status).toBe(200);
+    expect(searchCustomerRes.body.data.length).toBe(1);
+
+    const updateCustomerRes = await requestJson(baseUrl, "PATCH", "/api/customers/" + customerId, {
+      credit_limit: 2000
+    });
+    expect(updateCustomerRes.status).toBe(200);
+    expect(updateCustomerRes.body.data.credit_limit).toBe(2000);
   });
 
   it("returns consistent JSON error envelope for validation and not-found errors", async function () {
