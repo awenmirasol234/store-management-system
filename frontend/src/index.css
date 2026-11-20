@@ -9,8 +9,8 @@
 }
 
 @theme {
-  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Inter";
+  --font-mono: "Inter";
 }
 
 @layer base {
@@ -42,7 +42,7 @@
     padding: 4mm;
     background: #ffffff;
     color: #000000;
-    font-family: ui-monospace, Consolas, monospace;
+    font-family: "Inter";
     font-size: 11px;
     line-height: 1.35;
   }
