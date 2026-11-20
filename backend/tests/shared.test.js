@@ -9,6 +9,12 @@ import {
   toQuantityInt
 } from "../src/shared/decimal.js";
 import { formatManilaDateParts } from "../src/shared/ports.js";
+import {
+  normalizeBoolean,
+  normalizeOptionalText,
+  parsePositiveLimit,
+  requireNonEmptyText
+} from "../src/shared/validation.js";
 import { ValidationError } from "../src/shared/errors.js";
 
 describe("shared decimal and clock helpers", function () {
@@ -60,5 +66,54 @@ describe("shared decimal and clock helpers", function () {
     const parts = formatManilaDateParts(new Date("2026-11-20T16:30:00.000Z"));
     expect(parts.compact).toBe("20261121");
     expect(parts.isoDate).toBe("2026-11-21");
+  });
+
+  it("parses positive integer limits and rejects invalid or negative inputs", function () {
+    expect(parsePositiveLimit("15", 50, "limit")).toBe(15);
+    expect(parsePositiveLimit(undefined, 50, "limit")).toBe(50);
+    expect(parsePositiveLimit(null, 50, "limit")).toBe(50);
+    expect(parsePositiveLimit("   ", 50, "limit")).toBe(50);
+
+    expect(function () {
+      parsePositiveLimit("0", 50, "limit");
+    }).toThrow(ValidationError);
+
+    expect(function () {
+      parsePositiveLimit("-5", 50, "limit");
+    }).toThrow(ValidationError);
+
+    expect(function () {
+      parsePositiveLimit("abc", 50, "limit");
+    }).toThrow(ValidationError);
+
+    expect(function () {
+      parsePositiveLimit("1.5", 50, "limit");
+    }).toThrow(ValidationError);
+  });
+
+  it("validates and normalizes text and boolean primitives", function () {
+    expect(requireNonEmptyText("  hello world  ", "name")).toBe("hello world");
+    expect(function () {
+      requireNonEmptyText("   ", "name");
+    }).toThrow(ValidationError);
+    expect(function () {
+      requireNonEmptyText(123, "name");
+    }).toThrow(ValidationError);
+
+    expect(normalizeOptionalText("  trimmed  ", "desc")).toBe("trimmed");
+    expect(normalizeOptionalText("   ", "desc")).toBeNull();
+    expect(normalizeOptionalText(undefined, "desc")).toBeNull();
+    expect(normalizeOptionalText(null, "desc")).toBeNull();
+    expect(function () {
+      normalizeOptionalText(123, "desc");
+    }).toThrow(ValidationError);
+
+    expect(normalizeBoolean(true, false, "active")).toBe(true);
+    expect(normalizeBoolean(false, true, "active")).toBe(false);
+    expect(normalizeBoolean(undefined, true, "active")).toBe(true);
+    expect(normalizeBoolean(null, true, "active")).toBe(true);
+    expect(function () {
+      normalizeBoolean("true", true, "active");
+    }).toThrow(ValidationError);
   });
 });

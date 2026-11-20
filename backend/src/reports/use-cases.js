@@ -11,16 +11,18 @@ import {
 } from "./domain.js";
 
 function resolveReportRange(dependencies, input) {
+  const safeInput = input || {};
   const today = dependencies.clock.todayManilaIsoDate();
   return {
-    fromDate: resolveReportDate(input.from, today, "from"),
-    toDate: resolveReportDate(input.to, today, "to")
+    fromDate: resolveReportDate(safeInput.from, today, "from"),
+    toDate: resolveReportDate(safeInput.to, today, "to")
   };
 }
 
 export function createGetReportsSummaryUseCase(dependencies) {
   return async function execute(input) {
-    const range = resolveReportRange(dependencies, input);
+    const safeInput = input || {};
+    const range = resolveReportRange(dependencies, safeInput);
     const rows = await dependencies.reportsRepository.getSummaryRows(range.fromDate, range.toDate);
     const totalCogsInt = calculateTotalCogsInt(rows.items);
 
@@ -46,8 +48,9 @@ export function createGetReportsSummaryUseCase(dependencies) {
 
 export function createGetTopProductsUseCase(dependencies) {
   return async function execute(input) {
-    const range = resolveReportRange(dependencies, input);
-    const limit = parsePositiveLimit(input.limit, 10, "limit");
+    const safeInput = input || {};
+    const range = resolveReportRange(dependencies, safeInput);
+    const limit = parsePositiveLimit(safeInput.limit, 10, "limit");
     const itemRows = await dependencies.reportsRepository.getSalesItems(range.fromDate, range.toDate);
     return buildTopProducts(itemRows, limit);
   };
@@ -55,7 +58,8 @@ export function createGetTopProductsUseCase(dependencies) {
 
 export function createGetDailyBreakdownUseCase(dependencies) {
   return async function execute(input) {
-    const range = resolveReportRange(dependencies, input);
+    const safeInput = input || {};
+    const range = resolveReportRange(dependencies, safeInput);
     const dailyRows = await dependencies.reportsRepository.getDailySalesRows(
       range.fromDate,
       range.toDate

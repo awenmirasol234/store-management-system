@@ -8,7 +8,7 @@ import {
   toQuantityInt
 } from "../shared/decimal.js";
 import { ValidationError } from "../shared/errors.js";
-import { normalizeOptionalText, requireNonEmptyText } from "../inventory/domain.js";
+import { normalizeOptionalText, requireNonEmptyText } from "../shared/validation.js";
 
 export const PAYMENT_METHODS = {
   CASH: "CASH",

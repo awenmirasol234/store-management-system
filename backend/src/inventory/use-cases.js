@@ -311,7 +311,8 @@ export function createListProductsUseCase(dependencies) {
 
 export function createLookupBarcodeUseCase(dependencies) {
   return async function execute(input) {
-    const barcode = input.barcode;
+    const safeInput = input || {};
+    const barcode = safeInput.barcode;
     const product = await dependencies.productRepository.findByBarcode(barcode);
     if (product && product.deleted_at === null && product.is_active) {
       const options = await dependencies.sellingOptionRepository.listByProductId(product.product_id);
@@ -345,9 +346,10 @@ export function createLookupBarcodeUseCase(dependencies) {
 
 export function createGetProductUseCase(dependencies) {
   return async function execute(input) {
-    const product = await dependencies.productRepository.findById(input.product_id);
+    const safeInput = input || {};
+    const product = await dependencies.productRepository.findById(safeInput.product_id);
     if (!product || product.deleted_at !== null) {
-      throw new NotFoundError("Product not found: " + input.product_id);
+      throw new NotFoundError("Product not found: " + safeInput.product_id);
     }
     const options = await dependencies.sellingOptionRepository.listByProductId(product.product_id);
     return Object.assign({}, product, { selling_options: options });
@@ -356,13 +358,15 @@ export function createGetProductUseCase(dependencies) {
 
 export function createListSellingOptionsUseCase(dependencies) {
   return async function execute(input) {
-    return dependencies.sellingOptionRepository.listByProductId(input.product_id);
+    const safeInput = input || {};
+    return dependencies.sellingOptionRepository.listByProductId(safeInput.product_id);
   };
 }
 
 export function createListInventoryTransactionsUseCase(dependencies) {
   return async function execute(input) {
-    return dependencies.inventoryTransactionRepository.listByProductId(input.product_id);
+    const safeInput = input || {};
+    return dependencies.inventoryTransactionRepository.listByProductId(safeInput.product_id);
   };
 }
 
@@ -374,8 +378,9 @@ export function createListCategoriesUseCase(dependencies) {
 
 export function createCreateCategoryUseCase(dependencies) {
   return async function execute(input) {
+    const safeInput = input || {};
     const category = createCategoryEntity(
-      Object.assign({}, input, { category_id: dependencies.idGenerator.nextId() })
+      Object.assign({}, safeInput, { category_id: dependencies.idGenerator.nextId() })
     );
     await dependencies.categoryRepository.save(category);
     return category;
@@ -390,8 +395,9 @@ export function createListSuppliersUseCase(dependencies) {
 
 export function createCreateSupplierUseCase(dependencies) {
   return async function execute(input) {
+    const safeInput = input || {};
     const supplier = createSupplierEntity(
-      Object.assign({}, input, { supplier_id: dependencies.idGenerator.nextId() })
+      Object.assign({}, safeInput, { supplier_id: dependencies.idGenerator.nextId() })
     );
     await dependencies.supplierRepository.save(supplier);
     return supplier;

@@ -16,6 +16,8 @@ import { Button } from "../components/Button.jsx";
 import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
+import { InventoryStockInModal } from "../components/InventoryStockInModal.jsx";
+import { InventoryAdjustModal } from "../components/InventoryAdjustModal.jsx";
 
 function createEmptyProductForm() {
   return {
@@ -513,21 +515,9 @@ export function InventoryPage() {
     );
   }
 
-  let stockInTitle = "Stock In";
-  let stockInUnitLabel = "unit";
-  if (stockInProduct) {
-    stockInTitle = "Stock In — " + stockInProduct.product_name;
-    stockInUnitLabel = stockInProduct.base_unit;
-  }
-
   let imageUploadLabel = "Upload JPEG, PNG, or WebP (max 2MB)";
   if (imageFile) {
     imageUploadLabel = imageFile.name;
-  }
-
-  let adjustTitle = "Adjust Stock";
-  if (adjustProduct) {
-    adjustTitle = "Adjust Stock — " + adjustProduct.product_name;
   }
 
   return (
@@ -837,167 +827,40 @@ export function InventoryPage() {
       </Modal>
 
       {/* Stock In Modal */}
-      <Modal
-        open={stockInProduct !== null}
-        onClose={function close() {
+      <InventoryStockInModal
+        product={stockInProduct}
+        options={stockInOptions}
+        suppliers={suppliers}
+        optionId={stockInOptionId}
+        onOptionIdChange={setStockInOptionId}
+        qty={stockInQty}
+        onQtyChange={setStockInQty}
+        unitCost={stockInUnitCost}
+        onUnitCostChange={setStockInUnitCost}
+        supplierId={stockInSupplierId}
+        onSupplierIdChange={setStockInSupplierId}
+        reference={stockInRef}
+        onReferenceChange={setStockInRef}
+        onClose={function closeStockIn() {
           setStockInProduct(null);
         }}
-        title={stockInTitle}
-        size="sm"
-      >
-        <form onSubmit={handleStockIn} className="space-y-3.5">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700">Stock-In Unit</label>
-            <select
-              value={stockInOptionId}
-              onChange={function onChange(event) {
-                setStockInOptionId(event.target.value);
-              }}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
-            >
-              <option value="">Base Unit (1 {stockInUnitLabel})</option>
-              {stockInOptions.map(function renderOpt(option) {
-                return (
-                  <option key={option.option_id} value={option.option_id}>
-                    {option.option_name} (<span className="font-mono">{formatQuantity(option.quantity)}</span> {stockInUnitLabel})
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              label="Quantity"
-              type="number"
-              step="0.0001"
-              min="0.0001"
-              value={stockInQty}
-              onChange={function onChange(event) {
-                setStockInQty(event.target.value);
-              }}
-              required={true}
-            />
-            <Input
-              label={"Cost / " + stockInUnitLabel + " (₱)"}
-              type="number"
-              step="0.01"
-              min="0"
-              value={stockInUnitCost}
-              onChange={function onChange(event) {
-                setStockInUnitCost(event.target.value);
-              }}
-              required={true}
-            />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700">Supplier</label>
-            <select
-              value={stockInSupplierId}
-              onChange={function onChange(event) {
-                setStockInSupplierId(event.target.value);
-              }}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
-            >
-              <option value="">None</option>
-              {suppliers.map(function renderSup(supplier) {
-                return (
-                  <option key={supplier.supplier_id} value={supplier.supplier_id}>
-                    {supplier.supplier_name}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-
-          <Input
-            label="Reference / DR #"
-            mono={true}
-            value={stockInRef}
-            onChange={function onChange(event) {
-              setStockInRef(event.target.value);
-            }}
-            placeholder="Optional"
-          />
-
-          <div className="flex justify-end gap-2 pt-1">
-            <Button
-              variant="secondary"
-              onClick={function cancel() {
-                setStockInProduct(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary">
-              Add Stock
-            </Button>
-          </div>
-        </form>
-      </Modal>
+        onSubmit={handleStockIn}
+      />
 
       {/* Adjust Stock Modal */}
-      <Modal
-        open={adjustProduct !== null}
-        onClose={function close() {
+      <InventoryAdjustModal
+        product={adjustProduct}
+        adjustType={adjustType}
+        onAdjustTypeChange={setAdjustType}
+        qty={adjustQty}
+        onQtyChange={setAdjustQty}
+        remarks={adjustRemarks}
+        onRemarksChange={setAdjustRemarks}
+        onClose={function closeAdjust() {
           setAdjustProduct(null);
         }}
-        title={adjustTitle}
-        size="sm"
-      >
-        <form onSubmit={handleAdjustStock} className="space-y-3.5">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700">Type</label>
-            <select
-              value={adjustType}
-              onChange={function onChange(event) {
-                setAdjustType(event.target.value);
-              }}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
-            >
-              <option value="DAMAGED">DAMAGED (Deduct)</option>
-              <option value="EXPIRED">EXPIRED (Deduct)</option>
-              <option value="ADJUSTMENT">ADJUSTMENT (+/-)</option>
-            </select>
-          </div>
-
-          <Input
-            label="Quantity"
-            type="number"
-            step="0.0001"
-            value={adjustQty}
-            onChange={function onChange(event) {
-              setAdjustQty(event.target.value);
-            }}
-            required={true}
-          />
-
-          <Input
-            label="Remarks"
-            value={adjustRemarks}
-            onChange={function onChange(event) {
-              setAdjustRemarks(event.target.value);
-            }}
-            placeholder="Required reason"
-            required={true}
-          />
-
-          <div className="flex justify-end gap-2 pt-1">
-            <Button
-              variant="secondary"
-              onClick={function cancel() {
-                setAdjustProduct(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" variant="danger">
-              Save Adjustment
-            </Button>
-          </div>
-        </form>
-      </Modal>
+        onSubmit={handleAdjustStock}
+      />
     </div>
   );
 }

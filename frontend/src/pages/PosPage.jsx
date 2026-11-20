@@ -18,6 +18,7 @@ import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
 import { ReceiptView } from "../components/ReceiptView.jsx";
+import { PosCheckoutModal } from "../components/PosCheckoutModal.jsx";
 
 function getStockTextClass(product) {
   if (product.current_stock <= 0) {
@@ -634,86 +635,6 @@ export function PosPage() {
     );
   }
 
-  let customerField = null;
-  if (paymentMethod !== "CASH") {
-    customerField = (
-      <Input
-        label="Customer ID"
-        value={customerIdInput}
-        onChange={function onChange(event) {
-          setCustomerIdInput(event.target.value);
-        }}
-        placeholder="Enter customer ID"
-        required={true}
-      />
-    );
-  }
-
-  let splitCashField = null;
-  if (paymentMethod === "SPLIT") {
-    splitCashField = (
-      <Input
-        label="Cash Portion (₱)"
-        type="number"
-        step="0.01"
-        min="0.01"
-        value={cashPartInput}
-        onChange={function onChange(event) {
-          setCashPartInput(event.target.value);
-        }}
-        required={true}
-      />
-    );
-  }
-
-  let cashTenderedSection = null;
-  if (paymentMethod !== "CREDIT") {
-    const quickBills = [
-      { key: "exact", label: "Exact", amount: totals.total },
-      { key: "50", label: formatPeso(50), amount: 50 },
-      { key: "100", label: formatPeso(100), amount: 100 },
-      { key: "500", label: formatPeso(500), amount: 500 }
-    ];
-    cashTenderedSection = (
-      <div className="space-y-2">
-        <Input
-          label="Cash Tendered (₱)"
-          type="number"
-          step="0.01"
-          min="0"
-          value={amountPaidInput}
-          onChange={function onChange(event) {
-            setAmountPaidInput(event.target.value);
-          }}
-          required={true}
-        />
-        <div className="grid grid-cols-4 gap-1.5">
-          {quickBills.map(function renderQuickBill(bill) {
-            return (
-              <Button
-                key={bill.key}
-                variant="secondary"
-                size="sm"
-                onClick={function fillBill() {
-                  setAmountPaidInput(String(bill.amount));
-                }}
-                className="font-mono"
-              >
-                {bill.label}
-              </Button>
-            );
-          })}
-        </div>
-        <div className="flex items-center justify-between rounded-lg border border-slate-200 px-3.5 py-2">
-          <span className="text-xs font-medium text-slate-500">Change</span>
-          <span className="font-mono text-base font-bold text-emerald-700">
-            {formatPeso(changePreview)}
-          </span>
-        </div>
-      </div>
-    );
-  }
-
   let receiptBody = null;
   if (completedReceipt) {
     receiptBody = (
@@ -975,39 +896,23 @@ export function PosPage() {
       </Modal>
 
       {/* Checkout Payment Modal */}
-      <Modal
+      <PosCheckoutModal
         open={checkoutModalOpen}
         onClose={function closeCheckout() {
           setCheckoutModalOpen(false);
         }}
-        title={"Checkout — " + paymentMethod}
-        size="sm"
-      >
-        <form onSubmit={handleCompleteSale} className="space-y-4">
-          <div className="rounded-lg bg-slate-50 p-3.5 flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-600">Total Due</span>
-            <span className="font-mono text-xl font-bold text-slate-900">
-              {formatPeso(totals.total)}
-            </span>
-          </div>
-          {customerField}
-          {splitCashField}
-          {cashTenderedSection}
-          <div className="flex justify-end gap-2 pt-1">
-            <Button
-              variant="secondary"
-              onClick={function cancelCheckout() {
-                setCheckoutModalOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary" disabled={submittingSale}>
-              Confirm Sale
-            </Button>
-          </div>
-        </form>
-      </Modal>
+        paymentMethod={paymentMethod}
+        total={totals.total}
+        amountPaid={amountPaidInput}
+        onAmountPaidChange={setAmountPaidInput}
+        customerId={customerIdInput}
+        onCustomerIdChange={setCustomerIdInput}
+        cashPart={cashPartInput}
+        onCashPartChange={setCashPartInput}
+        changePreview={changePreview}
+        submitting={submittingSale}
+        onSubmit={handleCompleteSale}
+      />
 
       {/* Receipt Preview Modal */}
       <Modal

@@ -16,6 +16,8 @@ import {
   createGetReportsSummaryUseCase,
   createGetTopProductsUseCase
 } from "../src/reports/use-cases.js";
+import { calculateNetProfitInt, resolveReportDate } from "../src/reports/domain.js";
+import { ValidationError } from "../src/shared/errors.js";
 
 let activeDatabase = null;
 
@@ -96,5 +98,21 @@ describe("reports SQLite repository", function () {
     expect(daily.length).toBe(1);
     expect(daily[0].date).toBe("2026-11-20");
     expect(daily[0].profit).toBe(20);
+  });
+
+  it("validates report date format, calendar dates, and net profit calculations", function () {
+    expect(resolveReportDate("2026-11-20", "2026-11-01", "from")).toBe("2026-11-20");
+    expect(resolveReportDate("", "2026-11-01", "from")).toBe("2026-11-01");
+    expect(resolveReportDate(null, "2026-11-01", "from")).toBe("2026-11-01");
+
+    expect(function () {
+      resolveReportDate("2026/11/20", "2026-11-01", "from");
+    }).toThrow(ValidationError);
+
+    expect(function () {
+      resolveReportDate("2026-02-30", "2026-11-01", "from");
+    }).toThrow(ValidationError);
+
+    expect(calculateNetProfitInt(10000, 6000, 1000)).toBe(3000);
   });
 });

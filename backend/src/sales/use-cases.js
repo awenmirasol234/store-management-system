@@ -6,13 +6,15 @@ import {
   toQuantityInt
 } from "../shared/decimal.js";
 import { NotFoundError, ValidationError } from "../shared/errors.js";
-import { parsePositiveLimit } from "../shared/validation.js";
+import {
+  normalizeOptionalText,
+  parsePositiveLimit,
+  requireNonEmptyText
+} from "../shared/validation.js";
 import {
   INVENTORY_TRANSACTION_TYPES,
   createInventoryTransactionEntity,
-  createProductEntity,
-  normalizeOptionalText,
-  requireNonEmptyText
+  createProductEntity
 } from "../inventory/domain.js";
 import {
   SALE_STATUSES,
@@ -484,16 +486,18 @@ export function createProcessReturnUseCase(dependencies) {
 
 export function createListSalesUseCase(dependencies) {
   return async function execute(input) {
-    const limit = parsePositiveLimit(input.limit, 50, "limit");
+    const safeInput = input || {};
+    const limit = parsePositiveLimit(safeInput.limit, 50, "limit");
     return dependencies.salesRepository.listRecentSales(limit);
   };
 }
 
 export function createGetSaleUseCase(dependencies) {
   return async function execute(input) {
-    const record = await dependencies.salesRepository.findSaleById(input.sale_id);
+    const safeInput = input || {};
+    const record = await dependencies.salesRepository.findSaleById(safeInput.sale_id);
     if (!record) {
-      throw new NotFoundError("Sale not found: " + input.sale_id);
+      throw new NotFoundError("Sale not found: " + safeInput.sale_id);
     }
     return record;
   };

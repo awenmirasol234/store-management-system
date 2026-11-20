@@ -6,6 +6,13 @@ import {
   toQuantityInt
 } from "../shared/decimal.js";
 import { ValidationError } from "../shared/errors.js";
+import {
+  normalizeBoolean,
+  normalizeOptionalText,
+  requireNonEmptyText
+} from "../shared/validation.js";
+
+export { normalizeBoolean, normalizeOptionalText, requireNonEmptyText };
 
 export const INVENTORY_TRANSACTION_TYPES = {
   STOCK_IN: "STOCK_IN",
@@ -17,37 +24,6 @@ export const INVENTORY_TRANSACTION_TYPES = {
 };
 
 const VALID_TRANSACTION_TYPES = new Set(Object.values(INVENTORY_TRANSACTION_TYPES));
-
-export function requireNonEmptyText(value, fieldName) {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new ValidationError(fieldName + " is required");
-  }
-  return value.trim();
-}
-
-export function normalizeOptionalText(value, fieldName) {
-  if (value === undefined || value === null) {
-    return null;
-  }
-  if (typeof value !== "string") {
-    throw new ValidationError(fieldName + " must be a string");
-  }
-  const trimmed = value.trim();
-  if (trimmed.length === 0) {
-    return null;
-  }
-  return trimmed;
-}
-
-export function normalizeBoolean(value, defaultValue, fieldName) {
-  if (value === undefined || value === null) {
-    return defaultValue;
-  }
-  if (typeof value !== "boolean") {
-    throw new ValidationError(fieldName + " must be a boolean");
-  }
-  return value;
-}
 
 export function createCategoryEntity(input) {
   const categoryId = requireNonEmptyText(input.category_id, "category_id");
