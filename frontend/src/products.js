@@ -5,25 +5,42 @@ export const STOCK_LEVELS = {
 };
 
 export function getStockLevel(product) {
-  if (product.current_stock <= 0) {
+  if (!product) {
     return STOCK_LEVELS.OUT;
   }
-  if (product.current_stock <= product.reorder_level) {
+  const currentStock = Number(product.current_stock);
+  const reorderLevel = Number(product.reorder_level);
+  if (!Number.isFinite(currentStock) || currentStock <= 0) {
+    return STOCK_LEVELS.OUT;
+  }
+  if (Number.isFinite(reorderLevel) && currentStock <= reorderLevel) {
     return STOCK_LEVELS.LOW;
   }
   return STOCK_LEVELS.HEALTHY;
 }
 
 export function filterProducts(products, query) {
-  const lowerQuery = query.trim().toLowerCase();
+  if (!products || !Array.isArray(products)) {
+    return [];
+  }
+  let lowerQuery = "";
+  if (typeof query === "string") {
+    lowerQuery = query.trim().toLowerCase();
+  }
   const results = [];
   for (let index = 0; index < products.length; index++) {
     const product = products[index];
+    if (!product) {
+      continue;
+    }
     if (lowerQuery.length > 0) {
-      const nameMatches = product.product_name.toLowerCase().includes(lowerQuery);
+      let nameMatches = false;
+      if (typeof product.product_name === "string") {
+        nameMatches = product.product_name.toLowerCase().includes(lowerQuery);
+      }
       let barcodeMatches = false;
       if (product.barcode !== null && product.barcode !== undefined) {
-        barcodeMatches = product.barcode.toLowerCase().includes(lowerQuery);
+        barcodeMatches = String(product.barcode).toLowerCase().includes(lowerQuery);
       }
       if (!nameMatches && !barcodeMatches) {
         continue;

@@ -53,7 +53,7 @@ frontend/
     ├── App.jsx
     └── main.jsx                 # React + Vite entry point
 
-frontend/tests/                  # Flat Vitest tests (format.test.js, cart.test.js)
+frontend/tests/                  # Flat Vitest tests (format.test.js, cart.test.js, products.test.js)
 ```
 
 > If a single module file grows too large, split it into flat sibling files inside the same module folder (e.g., `stock-use-cases.js`) rather than adding nested subfolders.
