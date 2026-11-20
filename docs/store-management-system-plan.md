@@ -2,56 +2,82 @@
 
 ## 1. System Overview
 
-A full-stack **Store Management & POS System** tailored for Sari-Sari stores and small retail businesses. It builds directly on [product-inventory-and-selling-options.md](file:///c:/Users/awen/Projects/store-management-system/docs/product-inventory-and-selling-options.md) and adheres to the **Module-First Clean Architecture** and coding standards defined in [AGENTS.md](file:///c:/Users/awen/Projects/store-management-system/AGENTS.md).
+A full-stack **Store Management & POS System** tailored for Sari-Sari stores and small retail businesses. It builds directly on [product-inventory-and-selling-options.md](./product-inventory-and-selling-options.md) and adheres to the **Module-First Clean Architecture** and coding standards defined in [AGENTS.md](../AGENTS.md).
 
 ### Core Design Goals
 - **Fast, Frictionless POS**: Support 1-tap selling options, barcode scanning, and ad-hoc "tingi" peso amounts.
+- **Owner-First, Clutter-Free UI**: No overloaded text, filler descriptions, or extra labels—every screen shows only what the business owner or cashier needs for that exact use case.
 - **Accurate Inventory & Profit**: Maintain stock in a single `base_unit` (`DECIMAL(12, 4)`), support bulk pack/box stock-ins, and snapshot `unit_price` and `unit_cost` (`DECIMAL(12, 2)`) on every sale.
-- **Local-First Reliability**: Run smoothly offline on a local SQLite database with optional cloud backup and sync.
-- **Modular & Testable**: Keep all business rules in `domain/` and `application/` layers, testable without a database or UI.
+- **Local-First Reliability**: Run smoothly offline on a local SQLite database with manual backup download and optional cloud sync later.
+- **Philippine Retail Defaults**: Currency is `PHP (₱)` and business day cutoffs use `Asia/Manila` (`UTC+8`).
+- **Modular & Testable**: Keep all business rules in `domain.js` and `use-cases.js`, testable without a database or UI.
 
 ---
 
-## 2. Tech Stack & Hybrid Storage
+## 2. Tech Stack & Storage
 
 | Layer | Technology | Purpose |
 |---|---|---|
-| **Frontend & API** | Next.js (App Router), React, TypeScript (`strict: true`), Tailwind CSS | POS terminal, inventory admin, reports, and Route Handlers / Server Actions |
-| **Validation & Domain** | Zod, TypeScript | Schema/boundary validation and pure domain entities |
-| **Local Database** | SQLite (WAL mode) via Drizzle ORM (or Prisma) | Fast, zero-config local persistence that works offline |
-| **Cloud Backup / Sync** | Pluggable Sync Adapter (e.g., Turso/libSQL, S3/R2, or Postgres sync) | Optional encrypted snapshots or incremental sync when internet is available |
-| **Testing** | Vitest | Domain/application unit tests (in-memory fakes) and repository integration tests |
+| **Backend API (`backend/`)** | Node.js, Express, JavaScript (ESM, no TypeScript) | Standalone REST API server, middleware, and Clean Architecture modules |
+| **Frontend UI (`frontend/`)** | React, Vite, JavaScript / JSX (no TypeScript), Tailwind CSS | Lightweight POS terminal, inventory admin, and reports SPA calling the Express API |
+| **Frontend State** | Built-in React state (`useState`, `useReducer`, `useContext`) | Local feature state (e.g., POS cart) and lightweight session/shift context (no external state library) |
+| **Validation & Domain** | Plain JavaScript (ESM) | Plain JS boundary validators and pure domain entities (no TypeScript, no Zod) |
+| **Local Database** | SQLite (WAL mode) via `better-sqlite3` (plain SQL) | Fast, zero-config, synchronous local persistence with exact scaled-integer storage (`×100` money, `×10,000` quantities) |
+| **Backup / Sync** | Local SQLite backup download (MVP); pluggable `BackupSyncPort` (optional later) | Safe local backups first, without coupling business logic to a cloud provider |
+| **Testing** | Vitest | Domain/application unit tests (in-memory fakes), SQLite repository integration tests, and Express route tests |
 
-### Hybrid SQLite + Cloud Strategy
-1. **Primary Store Operations**: All reads and writes hit the local SQLite database so checkout never stalls if Wi-Fi drops.
-2. **Backup & Sync Port**: Defined as an interface in `shared/application/` (`BackupSyncPort`), allowing either scheduled SQLite snapshot uploads or incremental change-log sync without coupling business logic to a cloud provider.
+### Local-First & Portable Relational Database Strategy
+1. **Primary Store Operations**: All reads and writes hit the local SQLite database (`WAL` mode + `PRAGMA foreign_keys = ON`) inside `backend/` so checkout never stalls if Wi-Fi drops.
+2. **Relational Database Portability (SQLite → PostgreSQL / MySQL)**:
+   - **Async Repository & `UnitOfWork` Ports**: All repository and `UnitOfWork` methods return Promises (`async`), even when backed by synchronous `better-sqlite3`, so swapping to async drivers (`pg`, `mysql2`) requires zero changes in `domain.js`, `use-cases.js`, or `routes.js`.
+   - **Dialect-Isolated Adapters**: Place SQL implementations in `sqlite-repo.js` (future: `postgres-repo.js`, `mysql-repo.js`) and `db/sqlite.js`, selected in one composition root (`app.js`). Isolate dialect-specific DDL, `PRAGMA`s, and parameter placeholders (`?` vs `$1`) inside each dialect file.
+   - **Portable Keys & Precision**: Generate IDs in the application (`IdGenerator`) instead of relying on DB-specific auto-increment behavior. Store exact numeric values in SQLite as scaled integers (`× 100` centavos, `× 10,000` quantities) converted in mappers—other relational adapters can use either `BIGINT` scaled integers or native `DECIMAL(12, 2)` / `DECIMAL(12, 4)` transparently.
+   - **Contract Tests**: Run the same repository integration test suite against any relational adapter to guarantee identical behavior.
+3. **Backup Port**: Support one-click local SQLite backup download via an Express endpoint in MVP; keep `BackupSyncPort` in `shared/` for optional cloud snapshot uploads later.
+
+### REST API Contract (`frontend/` ↔ `backend/`)
+- **Resource-Based Endpoints**: Expose clean REST routes under `/api/<resource>` (e.g., `/api/products`, `/api/sales`, `/api/customers`, `/api/shifts`, `/api/reports`).
+- **Standard HTTP Methods & Status Codes**: Use `GET`, `POST`, `PUT`/`PATCH`, and `DELETE` with standard codes (`200`, `201`, `400`, `404`, `409`, `500`).
+- **Consistent JSON Envelope**: Every endpoint returns `{ "data": ... }` on success and `{ "error": { "code": "...", "message": "..." } }` on failure via one shared Express error handler.
+- **Single Frontend Client**: All frontend requests go through one shared `fetch` wrapper in `frontend/src/api.js`.
 
 ---
 
 ## 3. Clean Architecture Module Map
 
+The repository separates the standalone **Express backend** (`backend/`) from the **React + Vite frontend** (`frontend/`) using a flat, beginner-friendly layout (max 1 folder under `src/`, separated by file role):
+
 ```text
-src/
-├── shared/
-│   ├── domain/                  # Decimal helpers, identifiers, base errors (implemented)
-│   └── application/             # UnitOfWork, Clock, IdGenerator, BackupSyncPort
-├── inventory/                   # Products, selling options, categories, suppliers, stock movements
-├── sales/                       # POS checkout, cart calculation, receipts, returns/voids
-├── credit/                      # Customer "Utang" ledger, credit limits, partial payments
-├── shifts/                      # Users, Owner/Cashier roles, shift open/close & cash reconciliation
-├── reports/                     # Read-only queries: daily/monthly revenue, COGS profit, low stock
-└── hardware/                    # Ports & adapters for barcode scanner & thermal receipt printer
+backend/
+├── src/
+│   ├── shared/                      # decimal.js, errors.js, ports.js (UnitOfWork, Clock, IdGenerator, BackupSyncPort)
+│   ├── db/                          # sqlite.js (connection, schema DDL, UnitOfWork)
+│   ├── inventory/                   # domain.js, use-cases.js, sqlite-repo.js, routes.js
+│   ├── sales/                       # domain.js, use-cases.js, sqlite-repo.js, routes.js
+│   ├── credit/                      # domain.js, use-cases.js, sqlite-repo.js, routes.js
+│   ├── shifts/                      # domain.js, use-cases.js, sqlite-repo.js, routes.js
+│   ├── reports/                     # sqlite-repo.js, routes.js (read-only queries)
+│   ├── app.js                       # Express app composition (middleware, module routers, error handler)
+│   └── server.js                    # HTTP server entry point
+└── tests/                           # Flat test files (inventory.test.js, sales.test.js, sqlite.test.js, routes.test.js)
+
+frontend/
+└── src/
+    ├── api.js                       # Single REST API client for Express endpoints
+    ├── components/                  # Shared UI components (Button.jsx, Modal.jsx, Table.jsx)
+    ├── pages/                       # Flat screens (PosPage.jsx, InventoryPage.jsx, CreditPage.jsx, ShiftsPage.jsx, ReportsPage.jsx)
+    ├── App.jsx
+    └── main.jsx                     # React + Vite entry point
 ```
 
 ### Dependency Flow
 
 ```mermaid
 flowchart TB
-    UI["Next.js App Router (POS / Admin / Reports UI)"] --> API["Presentation (Server Actions / API Routes)"]
-    API --> App["Application (Use Cases & DTOs)"]
-    App --> Domain["Domain (Entities, Value Objects, Port Interfaces)"]
-    Infra["Infrastructure (SQLite Repositories, UnitOfWork, Cloud Sync, Printer)"] --> App
-    Infra --> Domain
+    UI["Frontend: React + Vite + Tailwind (pages/ & components/)"] -->|REST API / JSON| API["Backend Presentation (routes.js)"]
+    API --> App["Backend Application (use-cases.js)"]
+    App --> Domain["Backend Domain (domain.js)"]
+    Infra["Backend Infrastructure (sqlite-repo.js & db/sqlite.js)"] --> Domain
 ```
 
 ---
@@ -59,87 +85,92 @@ flowchart TB
 ## 4. Planned Modules & Capabilities
 
 ### 4.1 Inventory & Restocking (`inventory/`)
-- **Status**: Domain entities implemented in [src/inventory/domain/entities/](file:///c:/Users/awen/Projects/store-management-system/src/inventory/domain/entities/index.ts).
+- **Status**: Planned (Phase 1).
 - **Planned Use Cases**:
-  - `CreateProduct`, `UpdateProduct`, `ManageSellingOptions`
-  - `StockIn` (supports bulk pack/box multiplier: `entered_qty × option.quantity` added to `current_stock` with `supplier_id` and `unit_cost`)
-  - `AdjustStock` (`ADJUSTMENT`, `DAMAGED`, `EXPIRED` with required remarks and sign rules)
-  - `GetLowStockProducts` (`current_stock <= reorder_level`)
+  - `CreateProduct`, `UpdateProduct`, `DeleteProduct`, `ManageSellingOptions` (enforces barcode uniqueness across active non-deleted `Product.barcode` and `ProductSellingOption.barcode`; soft-deletes products via `deleted_at` and disables via `is_active = false`).
+  - **Product Images**: Optional `image_url` on `Product`. Store uploaded images locally under `backend/uploads/products/` served statically at `/uploads/products/<filename>`, validating image MIME type (`jpeg`/`png`/`webp`) and max file size (2 MB) at the Express boundary.
+  - `StockIn` (supports bulk pack/box multiplier: `entered_qty × option.quantity` added to `current_stock` with `supplier_id` and `unit_cost`; updates `Product.cost_price` to the latest `unit_cost`).
+  - `AdjustStock` (`ADJUSTMENT`, `DAMAGED`, `EXPIRED` with required remarks and sign rules).
+  - `GetLowStockProducts` (`current_stock <= reorder_level` for active products).
 
 ### 4.2 POS Checkout & Cart (`sales/`)
 - **Selling Modes**:
   - Default base unit (`option_id = null`)
   - Preset `ProductSellingOption` (packs, bundles, promos, weight/volume presets)
-  - Ad-hoc custom peso amount ("tingi") when `Product.allow_custom_amount = true` (`base_quantity = custom_amount / product.selling_price`)
+  - Ad-hoc custom peso amount ("tingi") when `Product.allow_custom_amount = true` (`base_quantity = round_half_up(custom_amount / product.selling_price, 4)`, `quantity = 1`, `unit_price = custom_amount`)
+- **Receipt Numbering & Discounts**:
+  - Sequential receipt numbers per day in `Asia/Manila` (`YYYYMMDD-0001`).
+  - Optional line-item and order-level `discount_amount` (cannot exceed subtotal).
 - **Planned Use Cases**:
-  - `CalculateCartTotals` (preview line subtotals and `base_quantity` deductions before checkout)
-  - `ProcessSale` (executes inside `UnitOfWork`: validates stock, creates `SalesTransaction` + `SalesItem` snapshots, records negative `SALE` `InventoryTransaction`, deducts `Product.current_stock`, and optionally creates a `CreditTransaction` if paid via Utang)
-  - `ProcessReturn` (records positive `RETURN` `InventoryTransaction` and restores stock)
+  - `CalculateCartTotals` (preview line subtotals, discounts, and `base_quantity` deductions before checkout)
+  - `ProcessSale` (executes inside `UnitOfWork`: validates stock, shift, and credit limit; creates `SalesTransaction` + `SalesItem` snapshots; records negative `SALE` `InventoryTransaction`; deducts `Product.current_stock`; and creates a `CHARGE` `CreditTransaction` when `credit_amount > 0`)
+  - `ProcessReturn` (links to original `sale_id` / `sale_item_id`, prevents returning more than remaining sold quantity, records positive `RETURN` `InventoryTransaction` to restore stock, and refunds credit balance first before cash on `CREDIT`/`SPLIT` sales)
 
 ### 4.3 Customer Credit / "Utang" Ledger (`credit/`)
 - **Entities**:
   - `Customer`: `customer_id`, `full_name`, `phone`, `address`, `credit_limit`, `current_balance`, `is_active`
-  - `CreditTransaction`: `credit_tx_id`, `customer_id`, `sale_id` (nullable), `type` (`CHARGE` | `PAYMENT`), `amount`, `remarks`, `created_by`, `created_at`
+  - `CreditTransaction`: `credit_tx_id`, `customer_id`, `sale_id` (nullable), `shift_id` (nullable), `type` (`CHARGE` | `PAYMENT` | `RETURN_ADJUSTMENT`), `amount`, `remarks`, `created_by`, `created_at`
 - **Rules**:
   - `SalesTransaction` supports payment breakdown (`CASH`, `CREDIT`, or `SPLIT` cash + credit).
   - Enforces optional `credit_limit` before approving a `CHARGE`.
-  - Supports partial payments (`PAYMENT`) that reduce `current_balance`.
+  - Supports partial payments (`PAYMENT`) that reduce `current_balance` and record `shift_id` when paid in cash.
 
 ### 4.4 User Roles & Shift Management (`shifts/`)
-- **Roles**:
-  - `OWNER`: Full access (products, cost prices, stock adjustments, profit reports, user management, cloud backup).
+- **Roles & First-Time Setup**:
+  - `OWNER`: Full access (products, cost prices, stock adjustments, profit reports, user management, backups).
   - `CASHIER`: POS checkout, customer utang payments (within limits), own shift open/close.
+  - On first launch with an empty `users` table, prompt to create the initial `OWNER` account and PIN.
 - **Shift Cash Drawer**:
   - `CashierShift`: `shift_id`, `user_id`, `opened_at`, `closed_at`, `opening_cash`, `expected_cash`, `actual_cash`, `variance`, `status` (`OPEN` | `CLOSED`).
-  - `expected_cash = opening_cash + cash_sales + cash_utang_payments - cash_refunds`.
+  - `CashMovement`: `movement_id`, `shift_id`, `type` (`CASH_IN` | `CASH_OUT`), `amount`, `remarks`, `created_by`, `created_at` (for petty cash / supplier payouts).
+  - `expected_cash = opening_cash + cash_sales + cash_utang_payments + cash_in - cash_out - cash_refunds`.
 
 ### 4.5 Sales & Profit Reports (`reports/`)
 - **Daily & Monthly Summaries**: Gross sales, cash vs. credit collected, and net profit (`SUM(subtotal - base_quantity × unit_cost)`).
 - **Product Performance**: Top-selling items by quantity and profit margin.
 - **Inventory & Utang Health**: Low-stock alerts, stock valuation (`SUM(current_stock × cost_price)`), and aging unpaid customer balances.
 
-### 4.6 Hardware Integration (`hardware/`)
+### 4.6 Hardware Integration
 - **USB Barcode Scanner**:
   - Keyboard-wedge input listener in the POS UI matching against `Product.barcode` **and** `ProductSellingOption.barcode` (scanning a box barcode automatically adds the Box option).
 - **Thermal Receipt Printer (58mm / 80mm)**:
-  - `ReceiptPrinterPort` in `hardware/domain/` with adapters for browser print CSS (`@media print` receipt layout) and optional local ESC/POS bridge (WebUSB / serial / local print agent).
+  - Browser print CSS (`@media print` receipt layout) in MVP; optional local ESC/POS bridge (WebUSB / serial / local print agent) deferred to Phase 5.
 
 ---
 
 ## 5. Phased Implementation Roadmap
 
-### Phase 1: Core Domain & Application Use Cases (In-Memory)
-- Add `src/shared/application/` (`UnitOfWork`, `IdGenerator`, `Clock`).
-- Add `inventory/` repository interfaces and `StockIn` / `AdjustStock` / `GetLowStockProducts` use cases.
-- Add `sales/` `ProcessSale` and `ProcessReturn` use cases.
+### Phase 1: Backend Core Domain & Application Use Cases (In-Memory)
+- Initialize `backend/` (plain ESM JavaScript + Vitest) with `backend/src/shared/` (`decimal.js`, `errors.js`, `ports.js`).
+- Add `inventory/` domain entities, repository port contracts, and `StockIn` / `AdjustStock` / `GetLowStockProducts` use cases.
+- Add `sales/` `CalculateCartTotals`, `ProcessSale`, and `ProcessReturn` use cases.
 - Verify all business rules, stock deductions, and profit calculations using Vitest + in-memory repository fakes (no DB required).
 
-### Phase 2: Local SQLite Persistence & Migrations
-- Define SQLite schema (matching `DECIMAL(12, 2)` and `DECIMAL(12, 4)` precision rules) and Drizzle ORM repositories in `infrastructure/persistence/`.
-- Implement SQLite `UnitOfWork` transaction manager.
-- Add repository integration tests.
+### Phase 2: Local SQLite Persistence & Express REST API
+- Define SQLite schema and `UnitOfWork` in `backend/src/db/sqlite.js` (scaled integers for `DECIMAL(12, 2)` and `DECIMAL(12, 4)` with `PRAGMA foreign_keys = ON`) and plain SQL `better-sqlite3` adapters in `backend/src/<module>/sqlite-repo.js`.
+- Add repository and transaction rollback integration tests in `backend/tests/`.
+- Wire Express routers, CORS, and centralized error handling in `backend/src/<module>/routes.js`, `backend/src/app.js`, and `backend/src/server.js`.
 
-### Phase 3: Next.js POS & Inventory Admin UI
-- Scaffold Next.js App Router + Tailwind CSS in `src/app/` (presentation layer).
-- Build POS Checkout screen (search/barcode scan, selling option buttons, custom "tingi" modal, cart, payment & change calculator).
-- Build Product & Inventory management screens (create product, configure selling options, bulk stock-in by pack/box).
+### Phase 3: React + Vite POS & Inventory Admin UI
+- Scaffold `frontend/` with React, Vite, plain JavaScript / JSX, and Tailwind CSS, plus an HTTP API client targeting the Express backend.
+- Build POS Checkout screen (search/barcode scan, selling option buttons, custom "tingi" modal, cart, discounts, payment & change calculator, browser `@media print` 58mm/80mm receipt).
+- Build Product & Inventory management screens (create/edit product with optional image upload, configure selling options, bulk stock-in by pack/box).
 
-### Phase 4: Utang Ledger, Roles, Shifts & Reports
-- Implement `credit/`, `shifts/`, and `reports/` modules end-to-end.
-- Add authentication/PIN login for Owner and Cashier roles.
-- Build Shift Open/Close reconciliation and Sales/Profit dashboard.
+### Phase 4: Utang Ledger, Roles, Shifts, Reports & Local Backup
+- Implement `credit/`, `shifts/` (including `CashMovement`), and `reports/` modules end-to-end.
+- Add first-time Owner setup and PIN login for Owner and Cashier roles.
+- Build Shift Open/Close reconciliation, Sales/Profit dashboard (`Asia/Manila` daily cutoffs), and one-click local SQLite backup download.
 
-### Phase 5: Hardware & Hybrid Cloud Sync
-- Wire 58mm/80mm thermal receipt printing and keyboard-wedge barcode shortcuts.
-- Implement `BackupSyncPort` for automated/manual local SQLite backup and optional cloud sync.
+### Phase 5 (Optional / Deferred): Direct Hardware Bridge & Cloud Sync
+- Add optional direct ESC/POS thermal printer adapter (WebUSB / serial / local print agent).
+- Implement `BackupSyncPort` for automated cloud snapshot upload or incremental sync.
 
 ---
 
 ## 6. Verification Strategy
-- **Unit Tests**: Every `domain/` and `application/` use case tested in isolation with in-memory fakes covering normal, boundary, and failure cases.
+- **Unit Tests**: Every `domain.js` rule and `use-cases.js` workflow tested in isolation with in-memory fakes covering normal, boundary, and failure cases.
 - **Integration Tests**: SQLite repository and `UnitOfWork` rollback tests to guarantee atomic sales + stock deductions.
 - **Checks Before Every Commit**:
   ```bash
-  npm run typecheck
-  npm test
+  cd backend && npm test
   ```

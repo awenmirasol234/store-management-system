@@ -33,6 +33,7 @@ Fields:
 - product_name
 - barcode (nullable, unique)
 - description
+- image_url (nullable, relative path/URL to optional product image)
 - base_unit
 - current_stock
 - cost_price
@@ -40,6 +41,7 @@ Fields:
 - reorder_level
 - allow_custom_amount (boolean, default false – for ad-hoc peso/weight "tingi" sales)
 - is_active
+- deleted_at (nullable, timestamp for soft delete)
 - created_at
 - updated_at
 
@@ -140,12 +142,26 @@ Stores completed sales and payment information.
 
 Fields:
 - sale_id
-- receipt_number
-- total_amount
-- amount_paid
-- change_amount
+- receipt_number (sequential, unique)
+- shift_id (nullable, links sale to an open cashier shift when shift tracking is enabled)
+- customer_id (nullable, required when `payment_method` is `CREDIT` or `SPLIT`)
+- payment_method (`CASH` | `CREDIT` | `SPLIT`)
+- subtotal_amount (sum of item subtotals before order discount)
+- discount_amount (default `0.00`)
+- total_amount (`subtotal_amount - discount_amount`)
+- cash_amount (cash portion applied to the sale)
+- credit_amount (credit / "Utang" portion charged to `customer_id`)
+- amount_paid (total cash tendered by customer)
+- change_amount (`max(0, amount_paid - cash_amount)`)
+- status (`COMPLETED` | `VOIDED`)
 - created_by
 - created_at
+
+Rules:
+- `cash_amount + credit_amount` must equal `total_amount`.
+- For `CASH` sales: `credit_amount = 0` and `amount_paid >= total_amount`.
+- For `CREDIT` sales: `cash_amount = 0`, `credit_amount = total_amount`, and `customer_id` is required.
+- For `SPLIT` sales: both `cash_amount > 0` and `credit_amount > 0`, `amount_paid >= cash_amount`, and `customer_id` is required.
 
 ### 2.7 SalesItem
 
@@ -156,17 +172,18 @@ Fields:
 - sale_id
 - product_id
 - option_id (nullable)
-- option_name_snapshot (stores the option name or base unit name at the time of sale)
+- option_name_snapshot (stores the option name, base unit name, or `"Custom Amount"` at the time of sale)
 - quantity
 - base_quantity
 - unit_price
 - unit_cost
+- discount_amount (default `0.00`)
 - subtotal
 
 Rules:
-- `option_id` is nullable when selling directly using the product's default base unit and price, or when making an ad-hoc custom weight/amount sale.
-- `quantity` represents the number of selling options (or base units) purchased.
-- `base_quantity` stores the actual total inventory quantity deducted in `base_unit`.
+- `option_id` is nullable when selling directly using the product's default base unit and price, or when making an ad-hoc custom peso amount ("tingi") sale.
+- `quantity` represents the number of selling options (or base units) purchased. For ad-hoc custom peso amount sales, set `quantity = 1`, `unit_price = custom_peso_amount`, `option_name_snapshot = "Custom Amount (₱<amount>)"`, and `base_quantity = round_half_up(custom_peso_amount / product.selling_price, 4)`.
+- `base_quantity` stores the actual total inventory quantity deducted in `base_unit`. Must be `> 0`.
 - `unit_price` stores the actual selling price per unit/option at the time of sale.
 - `unit_cost` snapshots `Product.cost_price` (cost per `base_unit`) at the time of sale so historical profit calculations (`subtotal - (base_quantity × unit_cost)`) remain accurate even when supplier costs change.
 - Preserve historical prices, costs, and quantities even when product configurations change.
@@ -343,8 +360,9 @@ Use one consistent calculation for all selling methods.
 
 ### 5.2 Ad-Hoc Custom Peso Amount ("Tingi") Sale
 - When a customer buys a custom peso amount (e.g., ₱7 worth of cooking oil) and `allow_custom_amount = true`:
-  - `base_quantity = custom_peso_amount / product.selling_price`
-  - `subtotal = custom_peso_amount`
+  - Require `product.selling_price > 0` and `custom_peso_amount > 0`.
+  - `base_quantity = round_half_up(custom_peso_amount / product.selling_price, 4)` (must be `> 0`).
+  - `quantity = 1`, `unit_price = custom_peso_amount`, `subtotal = custom_peso_amount`.
 
 ### 5.3 Stock Deduction & Profit
 - Remaining inventory:
@@ -352,10 +370,11 @@ Use one consistent calculation for all selling methods.
 - Item profit (using snapshotted `unit_cost` per base unit):
   - `item_profit = subtotal - (base_quantity × unit_cost)`
 
-### 5.4 Bulk Stock-In Conversion
+### 5.4 Bulk Stock-In Conversion & Cost Price Policy
 - When stocking in using a pack/box option:
   - `stock_added_in_base_unit = entered_pack_quantity × option.quantity`
   - `new_stock = current_stock + stock_added_in_base_unit`
+- **Cost Price Update Policy**: When `STOCK_IN` provides a `unit_cost` per `base_unit`, update `Product.cost_price` to that latest `unit_cost` (historical `InventoryTransaction.unit_cost` and `SalesItem.unit_cost` snapshots remain immutable).
 
 ---
 
@@ -376,6 +395,8 @@ Use one consistent calculation for all selling methods.
 13. Use `DECIMAL(12, 2)` for monetary values and `DECIMAL(12, 4)` for fractional inventory quantities.
 14. Prevent negative inventory unless explicitly allowed by business rules.
 15. Preserve historical sales and profit records when product prices, costs, or selling options change.
+16. Enforce barcode uniqueness across **both** `Product.barcode` and `ProductSellingOption.barcode` so every scanned barcode resolves unambiguously.
+17. Soft-delete products using `deleted_at` (never hard-delete products referenced by historical sales or inventory transactions); exclude rows where `deleted_at IS NOT NULL` from normal queries, POS, and low-stock alerts. Use `is_active = false` to temporarily disable products, selling options, categories, and suppliers.
 
 ---
 
