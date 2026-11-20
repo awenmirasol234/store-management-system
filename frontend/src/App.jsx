@@ -1,17 +1,23 @@
 import { useState } from "react";
 import { Sidebar } from "./components/Sidebar.jsx";
+import { DashboardPage } from "./pages/DashboardPage.jsx";
 import { PosPage } from "./pages/PosPage.jsx";
 import { OrdersPage } from "./pages/OrdersPage.jsx";
 import { InventoryPage } from "./pages/InventoryPage.jsx";
+import { ReportsPage } from "./pages/ReportsPage.jsx";
 
 export function App() {
-  const [activePage, setActivePage] = useState("sales");
+  const [activePage, setActivePage] = useState("dashboard");
 
-  let pageElement = <PosPage />;
-  if (activePage === "orders") {
+  let pageElement = <DashboardPage onNavigate={setActivePage} />;
+  if (activePage === "pos") {
+    pageElement = <PosPage />;
+  } else if (activePage === "orders") {
     pageElement = <OrdersPage />;
-  } else if (activePage === "products") {
+  } else if (activePage === "inventory") {
     pageElement = <InventoryPage />;
+  } else if (activePage === "reports") {
+    pageElement = <ReportsPage />;
   }
 
   return (

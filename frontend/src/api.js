@@ -124,5 +124,45 @@ export const api = {
   },
   processReturn(saleId, data) {
     return request("POST", "/api/sales/" + encodeURIComponent(saleId) + "/returns", data);
+  },
+  getReportsSummary(fromDate, toDate) {
+    const query = buildDateRangeQuery(fromDate, toDate);
+    return request("GET", "/api/reports/summary" + query);
+  },
+  getTopProducts(fromDate, toDate, limit) {
+    const params = new URLSearchParams();
+    if (fromDate) {
+      params.set("from", fromDate);
+    }
+    if (toDate) {
+      params.set("to", toDate);
+    }
+    if (limit) {
+      params.set("limit", String(limit));
+    }
+    const text = params.toString();
+    if (text.length > 0) {
+      return request("GET", "/api/reports/top-products?" + text);
+    }
+    return request("GET", "/api/reports/top-products");
+  },
+  getDailyReport(fromDate, toDate) {
+    const query = buildDateRangeQuery(fromDate, toDate);
+    return request("GET", "/api/reports/daily" + query);
   }
 };
+
+function buildDateRangeQuery(fromDate, toDate) {
+  const params = new URLSearchParams();
+  if (fromDate) {
+    params.set("from", fromDate);
+  }
+  if (toDate) {
+    params.set("to", toDate);
+  }
+  const text = params.toString();
+  if (text.length > 0) {
+    return "?" + text;
+  }
+  return "";
+}

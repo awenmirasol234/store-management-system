@@ -1,9 +1,18 @@
-import { ShoppingBag, Receipt, Package, Store } from "lucide-react";
+import {
+  BarChart3,
+  LayoutDashboard,
+  Package,
+  Receipt,
+  ShoppingBag,
+  Store
+} from "lucide-react";
 
 const NAV_ITEMS = [
-  { key: "sales", label: "Sales", icon: ShoppingBag },
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "pos", label: "POS", icon: ShoppingBag },
   { key: "orders", label: "Orders", icon: Receipt },
-  { key: "products", label: "Products", icon: Package }
+  { key: "inventory", label: "Inventory", icon: Package },
+  { key: "reports", label: "Reports", icon: BarChart3 }
 ];
 
 export function Sidebar(props) {

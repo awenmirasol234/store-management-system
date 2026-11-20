@@ -1,4 +1,26 @@
+# Dependencies
 node_modules/
+
+# Build outputs
 dist/
-backend/data/
-backend/uploads/
+
+# Local SQLite databases & uploads
+data/
+uploads/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs & OS files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db

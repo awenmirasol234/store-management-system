@@ -29,6 +29,8 @@ import {
   createProcessSaleUseCase
 } from "./sales/use-cases.js";
 import { createSalesRouter } from "./sales/routes.js";
+import { createSqliteReportsRepository } from "./reports/sqlite-repo.js";
+import { createReportsRouter } from "./reports/routes.js";
 
 function createErrorHandler() {
   return function handleError(error, request, response, next) {
@@ -68,7 +70,8 @@ export function createApp(options) {
   }
 
   const database = config.database || openSqliteDatabase(config.databasePath);
-  const uploadsDir = config.uploadsDir || path.resolve(process.cwd(), "uploads");
+  const backendRoot = path.resolve(import.meta.dirname, "..");
+  const uploadsDir = config.uploadsDir || path.join(backendRoot, "uploads");
   const idGenerator = config.idGenerator || createDefaultIdGenerator();
   const clock = config.clock || createSystemClock();
   const unitOfWork = createSqliteUnitOfWork(database);
@@ -79,6 +82,7 @@ export function createApp(options) {
   const categoryRepository = createSqliteCategoryRepository(database);
   const supplierRepository = createSqliteSupplierRepository(database);
   const salesRepository = createSqliteSalesRepository(database);
+  const reportsRepository = createSqliteReportsRepository(database);
 
   const sharedDeps = {
     idGenerator: idGenerator,
@@ -134,6 +138,14 @@ export function createApp(options) {
     createSalesRouter({
       salesRepository: salesRepository,
       useCases: salesUseCases
+    })
+  );
+
+  app.use(
+    "/api",
+    createReportsRouter({
+      clock: clock,
+      reportsRepository: reportsRepository
     })
   );
 
