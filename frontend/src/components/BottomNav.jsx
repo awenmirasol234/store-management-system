@@ -23,7 +23,7 @@ export function BottomNav(props) {
           const isActive = props.activePage === item.key;
 
           let buttonClass =
-            "flex flex-col items-center justify-center gap-1 py-1 text-[11px] font-medium transition-colors cursor-pointer ";
+            "flex flex-col items-center justify-center gap-1 py-1 text-tiny font-medium transition-colors cursor-pointer ";
           if (isActive) {
             buttonClass = buttonClass + "text-white font-semibold";
           } else {

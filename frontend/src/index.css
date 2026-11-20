@@ -9,8 +9,12 @@
 }
 
 @theme {
-  --font-sans: "Inter";
-  --font-mono: "Inter";
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Inter", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 0.875rem;
+  --text-tiny: 0.6875rem;
+  --text-tiny--line-height: 1rem;
 }
 
 @layer base {
@@ -19,9 +23,15 @@
   button,
   input,
   select,
-  textarea {
+  textarea,
+  table,
+  th,
+  td,
+  code {
     font-family: var(--font-sans);
     font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 

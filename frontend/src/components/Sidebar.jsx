@@ -110,7 +110,7 @@ export function Sidebar(props) {
           </div>
           <div className="min-w-0">
             <div className="truncate text-xs font-semibold text-white">Store Owner</div>
-            <div className="text-[11px] text-slate-400">Cashier</div>
+            <div className="text-tiny text-slate-400">Cashier</div>
           </div>
         </div>
       </div>

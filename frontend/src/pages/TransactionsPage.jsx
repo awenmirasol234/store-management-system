@@ -253,7 +253,7 @@ export function TransactionsPage() {
 
           <div className="flex items-center justify-between border-t border-slate-100 pt-2.5">
             <div>
-              <div className="text-[11px] text-slate-400">Total Amount</div>
+              <div className="text-tiny text-slate-400">Total Amount</div>
               <div className="font-mono text-base font-bold text-slate-900">
                 {formatPeso(sale.total_amount)}
               </div>
@@ -313,7 +313,7 @@ export function TransactionsPage() {
                     <div className="truncate text-xs font-semibold text-slate-900">
                       {item.option_name_snapshot}
                     </div>
-                    <div className="mt-0.5 font-mono text-[11px] text-slate-500">
+                    <div className="mt-0.5 font-mono text-tiny text-slate-500">
                       Sold: {formatQuantity(item.quantity)} · {formatPeso(item.subtotal)}
                     </div>
                   </div>

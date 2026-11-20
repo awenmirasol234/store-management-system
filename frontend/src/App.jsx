@@ -48,10 +48,10 @@ export function App() {
           </div>
           <div>
             <div className="text-xs font-bold leading-tight">StoreFlow</div>
-            <div className="text-[10px] text-slate-400">{getPageTitle(activePage)}</div>
+            <div className="text-2xs text-slate-400">{getPageTitle(activePage)}</div>
           </div>
         </div>
-        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600/20 text-[10px] font-semibold text-blue-300">
+        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600/20 text-2xs font-semibold text-blue-300">
           OW
         </div>
       </header>

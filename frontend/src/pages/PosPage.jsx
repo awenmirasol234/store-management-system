@@ -364,7 +364,7 @@ export function PosPage() {
   let lowStockBadge = null;
   if (lowStockProducts.length > 0) {
     lowStockBadge = (
-      <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 font-mono text-[10px] font-bold text-white">
+      <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 font-mono text-2xs font-bold text-white">
         {lowStockProducts.length}
       </span>
     );
@@ -773,7 +773,7 @@ export function PosPage() {
               placeholder="Search by product or scan barcode..."
               className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-20 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
             />
-            <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-[11px] text-slate-400">
+            <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-tiny text-slate-400">
               Ctrl K
             </span>
           </div>

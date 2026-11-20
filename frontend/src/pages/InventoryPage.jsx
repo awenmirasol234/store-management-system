@@ -503,7 +503,7 @@ export function InventoryPage() {
               <div className="font-mono font-bold text-slate-900">
                 {formatPeso(product.selling_price)}
               </div>
-              <div className="font-mono text-[11px] text-slate-500 mt-0.5">
+              <div className="font-mono text-tiny text-slate-500 mt-0.5">
                 Cost: {formatPeso(product.cost_price)}
               </div>
             </div>
