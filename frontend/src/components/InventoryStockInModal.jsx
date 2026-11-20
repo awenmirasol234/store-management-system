@@ -19,15 +19,15 @@ export function InventoryStockInModal(props) {
       title={title}
       size="sm"
     >
-      <form onSubmit={props.onSubmit} className="space-y-3.5">
+      <form onSubmit={props.onSubmit} className="space-y-5">
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700">Stock-In Unit</label>
+          <label className="mb-1.5 block text-xs font-medium text-slate-700">Stock-In Unit</label>
           <select
             value={props.optionId}
             onChange={function onOptChange(event) {
               props.onOptionIdChange(event.target.value);
             }}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
           >
             <option value="">Base Unit (1 {unitLabel})</option>
             {props.options.map(function renderOpt(option) {
@@ -40,7 +40,7 @@ export function InventoryStockInModal(props) {
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           <Input
             label="Quantity"
             type="number"
@@ -66,13 +66,13 @@ export function InventoryStockInModal(props) {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700">Supplier</label>
+          <label className="mb-1.5 block text-xs font-medium text-slate-700">Supplier</label>
           <select
             value={props.supplierId}
             onChange={function onSupChange(event) {
               props.onSupplierIdChange(event.target.value);
             }}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
           >
             <option value="">None</option>
             {props.suppliers.map(function renderSup(supplier) {
@@ -95,7 +95,7 @@ export function InventoryStockInModal(props) {
           placeholder="Optional"
         />
 
-        <div className="flex justify-end gap-2 pt-1">
+        <div className="flex justify-end gap-3 pt-2">
           <Button variant="secondary" onClick={props.onClose}>
             Cancel
           </Button>

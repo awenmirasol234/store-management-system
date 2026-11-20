@@ -19,12 +19,12 @@ function getVariantClasses(variant) {
 
 function getSizeClasses(size) {
   if (size === "sm") {
-    return "px-2.5 py-1.5 text-xs";
+    return "px-3 py-2 text-xs";
   }
   if (size === "lg") {
-    return "px-4 py-3 text-sm";
+    return "px-5 py-3.5 text-sm";
   }
-  return "px-3.5 py-2 text-sm";
+  return "px-4 py-2.5 text-sm";
 }
 
 export function Button(props) {
@@ -39,7 +39,7 @@ export function Button(props) {
   }
 
   const classes =
-    "inline-flex items-center justify-center gap-1.5 rounded-lg border font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed " +
+    "inline-flex items-center justify-center gap-2 rounded-lg border font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed " +
     getVariantClasses(props.variant) +
     " " +
     getSizeClasses(props.size) +

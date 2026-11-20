@@ -17,8 +17,8 @@ const NAV_ITEMS = [
 
 export function Sidebar(props) {
   return (
-    <aside className="flex w-52 shrink-0 flex-col bg-[#181B2C] text-slate-300 select-none">
-      <div className="flex items-center gap-2.5 px-5 py-5">
+    <aside className="flex w-60 shrink-0 flex-col bg-[#181B2C] text-slate-300 select-none">
+      <div className="flex items-center gap-3 px-6 py-6">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white">
           <Store className="h-5 w-5" />
         </div>
@@ -28,12 +28,12 @@ export function Sidebar(props) {
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-2">
+      <nav className="flex-1 space-y-1.5 px-4 py-3">
         {NAV_ITEMS.map(function renderNavItem(item) {
           const IconComponent = item.icon;
           const isActive = props.activePage === item.key;
           let itemClass =
-            "flex w-full items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-colors cursor-pointer ";
+            "flex w-full items-center gap-3.5 rounded-lg px-4 py-3 text-sm font-medium transition-colors cursor-pointer ";
           if (isActive) {
             itemClass = itemClass + "bg-blue-600 text-white";
           } else {
@@ -56,8 +56,8 @@ export function Sidebar(props) {
         })}
       </nav>
 
-      <div className="border-t border-white/10 p-4">
-        <div className="flex items-center gap-2.5">
+      <div className="border-t border-white/10 px-5 py-5">
+        <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600/20 text-xs font-semibold text-blue-300">
             OW
           </div>

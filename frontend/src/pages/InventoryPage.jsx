@@ -354,7 +354,7 @@ export function InventoryPage() {
   }
   const filteredProducts = filterProducts(stockFilteredProducts, searchQuery);
 
-  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-4" />;
+  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-6" />;
 
   let lowStockToggleVariant = "secondary";
   if (lowStockOnly) {
@@ -363,7 +363,7 @@ export function InventoryPage() {
 
   let productTableBody = (
     <tr>
-      <td colSpan="6" className="px-4 py-10 text-center text-sm text-slate-500">
+      <td colSpan="6" className="px-5 py-14 text-center text-sm text-slate-500">
         No products yet. Click Add Product to start.
       </td>
     </tr>
@@ -376,29 +376,29 @@ export function InventoryPage() {
       }
       return (
         <tr key={product.product_id} className="hover:bg-slate-50">
-          <td className="px-4 py-3">
-            <div className="flex items-center gap-3">
+          <td className="px-5 py-4">
+            <div className="flex items-center gap-3.5">
               <ProductThumb imageUrl={product.image_url} name={product.product_name} size="sm" />
               <div>
                 <div className="text-sm font-semibold text-slate-900">{product.product_name}</div>
-                <div className="font-mono text-xs text-slate-500">{barcodeText}</div>
+                <div className="mt-0.5 font-mono text-xs text-slate-500">{barcodeText}</div>
               </div>
             </div>
           </td>
-          <td className="px-4 py-3 text-xs text-slate-600">{product.base_unit}</td>
-          <td className="px-4 py-3 font-mono text-sm text-slate-600 text-right">
+          <td className="px-5 py-4 text-xs text-slate-600">{product.base_unit}</td>
+          <td className="px-5 py-4 font-mono text-sm text-slate-600 text-right">
             {formatPeso(product.cost_price)}
           </td>
-          <td className="px-4 py-3 font-mono text-sm font-semibold text-slate-900 text-right">
+          <td className="px-5 py-4 font-mono text-sm font-semibold text-slate-900 text-right">
             {formatPeso(product.selling_price)}
           </td>
-          <td className="px-4 py-3 text-right">
+          <td className="px-5 py-4 text-right">
             <Badge tone={getStockBadgeTone(product)} className="font-mono">
               {formatQuantity(product.current_stock)} {product.base_unit}
             </Badge>
           </td>
-          <td className="px-4 py-3">
-            <div className="flex items-center justify-end gap-1.5">
+          <td className="px-5 py-4">
+            <div className="flex items-center justify-end gap-2">
               <Button
                 variant="soft"
                 size="sm"
@@ -477,7 +477,7 @@ export function InventoryPage() {
   }
 
   let optionsListContent = (
-    <div className="py-4 text-center text-xs text-slate-500">
+    <div className="py-6 text-center text-xs text-slate-500">
       No extra selling options yet.
     </div>
   );
@@ -486,10 +486,10 @@ export function InventoryPage() {
       <div className="divide-y divide-slate-100 rounded-lg border border-slate-200">
         {productOptions.map(function renderOpt(option) {
           return (
-            <div key={option.option_id} className="flex items-center justify-between px-3 py-2">
+            <div key={option.option_id} className="flex items-center justify-between px-4 py-3">
               <div>
                 <div className="text-sm font-medium text-slate-900">{option.option_name}</div>
-                <div className="font-mono text-xs text-slate-500">
+                <div className="mt-0.5 font-mono text-xs text-slate-500">
                   {formatQuantity(option.quantity)} {optionsModalProduct.base_unit}
                 </div>
               </div>
@@ -509,11 +509,11 @@ export function InventoryPage() {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-6">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3 flex-1 min-w-64">
+    <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-8">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5 flex-1 min-w-64">
           <div className="relative flex-1 max-w-sm">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={searchQuery}
@@ -521,7 +521,7 @@ export function InventoryPage() {
                 setSearchQuery(event.target.value);
               }}
               placeholder="Search products or barcode..."
-              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
             />
           </div>
           <Button
@@ -535,7 +535,7 @@ export function InventoryPage() {
           </Button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button
             variant="secondary"
             onClick={function openCat() {
@@ -558,12 +558,12 @@ export function InventoryPage() {
         <table className="w-full border-collapse text-left">
           <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
             <tr>
-              <th className="px-4 py-3">Product</th>
-              <th className="px-4 py-3">Unit</th>
-              <th className="px-4 py-3 text-right">Cost</th>
-              <th className="px-4 py-3 text-right">Price</th>
-              <th className="px-4 py-3 text-right">Stock</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-5 py-3.5">Product</th>
+              <th className="px-5 py-3.5">Unit</th>
+              <th className="px-5 py-3.5 text-right">Cost</th>
+              <th className="px-5 py-3.5 text-right">Price</th>
+              <th className="px-5 py-3.5 text-right">Stock</th>
+              <th className="px-5 py-3.5 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">{productTableBody}</tbody>
@@ -578,7 +578,7 @@ export function InventoryPage() {
         }}
         title={productModalTitle}
       >
-        <form onSubmit={handleSaveProduct} className="space-y-3.5">
+        <form onSubmit={handleSaveProduct} className="space-y-5">
           <Input
             label="Product Name"
             value={productForm.product_name}
@@ -588,7 +588,7 @@ export function InventoryPage() {
             required={true}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <Input
               label="Barcode"
               mono={true}
@@ -599,13 +599,13 @@ export function InventoryPage() {
               placeholder="Optional"
             />
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700">Category</label>
+              <label className="mb-1.5 block text-xs font-medium text-slate-700">Category</label>
               <select
                 value={productForm.category_id}
                 onChange={function onChange(event) {
                   updateProductField("category_id", event.target.value);
                 }}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
               >
                 <option value="">Uncategorized</option>
                 {categories.map(function renderCatOption(category) {
@@ -619,7 +619,7 @@ export function InventoryPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-4">
             <Input
               label="Base Unit"
               value={productForm.base_unit}
@@ -653,7 +653,7 @@ export function InventoryPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {initialStockField}
             <Input
               label="Reorder Level"
@@ -668,8 +668,8 @@ export function InventoryPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700">Product Image</label>
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-600 hover:border-blue-400">
+            <label className="mb-1.5 block text-xs font-medium text-slate-700">Product Image</label>
+            <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-xs text-slate-600 hover:border-blue-400">
               <Upload className="h-4 w-4 text-slate-400" />
               <span>{imageUploadLabel}</span>
               <input
@@ -685,7 +685,7 @@ export function InventoryPage() {
             </label>
           </div>
 
-          <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
+          <label className="flex items-center gap-2.5 py-1 text-xs font-medium text-slate-700 cursor-pointer">
             <input
               type="checkbox"
               checked={productForm.allow_custom_amount}
@@ -697,7 +697,7 @@ export function InventoryPage() {
             <span>Allow custom peso amount ("Tingi")</span>
           </label>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-3 pt-2">
             <Button
               variant="secondary"
               onClick={function cancel() {
@@ -722,7 +722,7 @@ export function InventoryPage() {
         title="Add Category"
         size="sm"
       >
-        <form onSubmit={handleCreateCategory} className="space-y-4">
+        <form onSubmit={handleCreateCategory} className="space-y-5">
           <Input
             label="Category Name"
             value={categoryNameInput}
@@ -732,7 +732,7 @@ export function InventoryPage() {
             placeholder="e.g. Beverages"
             required={true}
           />
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-3 pt-1">
             <Button
               variant="secondary"
               onClick={function cancel() {
@@ -756,12 +756,12 @@ export function InventoryPage() {
         }}
         title={optionsTitle}
       >
-        <div className="space-y-4">
+        <div className="space-y-5">
           {optionsListContent}
 
-          <form onSubmit={handleAddOption} className="space-y-3 border-t border-slate-200 pt-3">
+          <form onSubmit={handleAddOption} className="space-y-4 border-t border-slate-200 pt-4">
             <div className="text-xs font-semibold text-slate-700">Add Selling Option</div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <Input
                 label="Option Name"
                 value={optionName}
@@ -781,7 +781,7 @@ export function InventoryPage() {
                 placeholder="Optional"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <Input
                 label="Base Quantity"
                 type="number"

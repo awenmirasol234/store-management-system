@@ -46,7 +46,7 @@ export function PosCheckoutModal(props) {
     ];
 
     cashTenderedSection = (
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Input
           label="Cash Tendered (₱)"
           type="number"
@@ -58,7 +58,7 @@ export function PosCheckoutModal(props) {
           }}
           required={true}
         />
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-4 gap-2">
           {quickBills.map(function renderQuickBill(bill) {
             return (
               <Button
@@ -75,7 +75,7 @@ export function PosCheckoutModal(props) {
             );
           })}
         </div>
-        <div className="flex items-center justify-between rounded-lg border border-slate-200 px-3.5 py-2">
+        <div className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3">
           <span className="text-xs font-medium text-slate-500">Change</span>
           <span className="font-mono text-base font-bold text-emerald-700">
             {formatPeso(props.changePreview)}
@@ -92,8 +92,8 @@ export function PosCheckoutModal(props) {
       title={"Checkout — " + props.paymentMethod}
       size="sm"
     >
-      <form onSubmit={props.onSubmit} className="space-y-4">
-        <div className="flex items-center justify-between rounded-lg bg-slate-50 p-3.5">
+      <form onSubmit={props.onSubmit} className="space-y-5">
+        <div className="flex items-center justify-between rounded-lg bg-slate-50 p-4">
           <span className="text-sm font-medium text-slate-600">Total Due</span>
           <span className="font-mono text-xl font-bold text-slate-900">
             {formatPeso(props.total)}
@@ -102,7 +102,7 @@ export function PosCheckoutModal(props) {
         {customerField}
         {splitCashField}
         {cashTenderedSection}
-        <div className="flex justify-end gap-2 pt-1">
+        <div className="flex justify-end gap-3 pt-2">
           <Button variant="secondary" onClick={props.onClose}>
             Cancel
           </Button>

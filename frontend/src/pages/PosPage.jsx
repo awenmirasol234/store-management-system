@@ -352,7 +352,7 @@ export function PosPage() {
     changePreview = Math.round((tenderedValue - cashDueForChange) * 100) / 100;
   }
 
-  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-3" />;
+  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-4" />;
 
   let lowStockBadge = null;
   if (lowStockProducts.length > 0) {
@@ -376,7 +376,7 @@ export function PosPage() {
   }
 
   let allCategoryClass =
-    "shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-medium cursor-pointer ";
+    "shrink-0 rounded-lg px-4 py-2 text-xs font-medium cursor-pointer ";
   if (selectedCategoryId === "ALL") {
     allCategoryClass = allCategoryClass + "bg-blue-600 font-semibold text-white";
   } else {
@@ -393,7 +393,7 @@ export function PosPage() {
     );
   } else {
     productGridContent = (
-      <div className="grid grid-cols-2 gap-3.5 md:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-4">
         {filteredProducts.map(function renderCard(product) {
           return (
             <button
@@ -402,16 +402,16 @@ export function PosPage() {
               onClick={function onCardClick() {
                 handleProductCardClick(product);
               }}
-              className="flex flex-col rounded-xl border border-slate-200 bg-white p-3 text-left transition-all hover:border-blue-300 hover:shadow-sm cursor-pointer"
+              className="flex flex-col rounded-xl border border-slate-200 bg-white p-4 text-left transition-all hover:border-blue-300 hover:shadow-sm cursor-pointer"
             >
               <ProductThumb imageUrl={product.image_url} name={product.product_name} />
-              <div className="mt-2.5 truncate text-sm font-semibold text-slate-900">
+              <div className="mt-3 truncate text-sm font-semibold text-slate-900">
                 {product.product_name}
               </div>
-              <div className="mt-0.5 font-mono text-sm font-bold text-slate-900">
+              <div className="mt-1 font-mono text-sm font-bold text-slate-900">
                 {formatPeso(product.selling_price)}
               </div>
-              <div className={"mt-1 font-mono text-xs font-medium " + getStockTextClass(product)}>
+              <div className={"mt-1.5 font-mono text-xs font-medium " + getStockTextClass(product)}>
                 Stock: {formatQuantity(product.current_stock)} {product.base_unit}
               </div>
             </button>
@@ -424,7 +424,7 @@ export function PosPage() {
   let cartListContent = null;
   if (cartItems.length === 0) {
     cartListContent = (
-      <div className="py-12 text-center text-sm text-slate-400">
+      <div className="py-16 text-center text-sm text-slate-400">
         Tap a product or scan a barcode
       </div>
     );
@@ -440,11 +440,11 @@ export function PosPage() {
               onClick={function dec() {
                 changeCartItemQty(item.key, -1);
               }}
-              className="p-1 text-slate-600 hover:text-slate-900 cursor-pointer"
+              className="p-1.5 text-slate-600 hover:text-slate-900 cursor-pointer"
             >
               <Minus className="h-3 w-3" />
             </button>
-            <span className="min-w-7 text-center font-mono text-xs font-semibold text-slate-900">
+            <span className="min-w-8 text-center font-mono text-xs font-semibold text-slate-900">
               {formatQuantity(item.quantity)}
             </span>
             <button
@@ -452,7 +452,7 @@ export function PosPage() {
               onClick={function inc() {
                 changeCartItemQty(item.key, 1);
               }}
-              className="p-1 text-slate-600 hover:text-slate-900 cursor-pointer"
+              className="p-1.5 text-slate-600 hover:text-slate-900 cursor-pointer"
             >
               <Plus className="h-3 w-3" />
             </button>
@@ -461,16 +461,16 @@ export function PosPage() {
       }
 
       return (
-        <div key={item.key} className="flex items-center gap-3 py-3.5">
+        <div key={item.key} className="flex items-center gap-3.5 py-4">
           <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-semibold text-slate-900">
               {item.product_name}
             </div>
-            <div className="truncate text-xs text-slate-500">{item.option_label}</div>
-            <div className="mt-1.5 flex items-center gap-2">{qtyControl}</div>
+            <div className="mt-0.5 truncate text-xs text-slate-500">{item.option_label}</div>
+            <div className="mt-2.5 flex items-center gap-2">{qtyControl}</div>
           </div>
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-col items-end gap-3">
             <button
               type="button"
               onClick={function remove() {
@@ -506,7 +506,7 @@ export function PosPage() {
             addItemToCart(pickerState.product, null, parsed);
             setPickerState(null);
           }}
-          className="border-t border-slate-200 pt-3 space-y-2.5"
+          className="border-t border-slate-200 pt-4 space-y-4"
         >
           <Input
             label="Custom Peso Amount (Tingi)"
@@ -527,15 +527,15 @@ export function PosPage() {
     }
 
     pickerBody = (
-      <div className="space-y-4">
-        <div className="space-y-2">
+      <div className="space-y-5">
+        <div className="space-y-2.5">
           <button
             type="button"
             onClick={function pickBase() {
               addItemToCart(pickerState.product, null, null);
               setPickerState(null);
             }}
-            className="flex w-full items-center justify-between rounded-lg border border-slate-200 px-3.5 py-2.5 text-left hover:border-blue-400 hover:bg-blue-50 cursor-pointer"
+            className="flex w-full items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-blue-400 hover:bg-blue-50 cursor-pointer"
           >
             <span className="text-sm font-medium text-slate-900">
               1 {pickerState.product.base_unit} (Default)
@@ -554,11 +554,11 @@ export function PosPage() {
                   addItemToCart(pickerState.product, option, null);
                   setPickerState(null);
                 }}
-                className="flex w-full items-center justify-between rounded-lg border border-slate-200 px-3.5 py-2.5 text-left hover:border-blue-400 hover:bg-blue-50 cursor-pointer"
+                className="flex w-full items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-blue-400 hover:bg-blue-50 cursor-pointer"
               >
                 <div>
                   <div className="text-sm font-medium text-slate-900">{option.option_name}</div>
-                  <div className="font-mono text-xs text-slate-500">
+                  <div className="mt-0.5 font-mono text-xs text-slate-500">
                     {formatQuantity(option.quantity)} {pickerState.product.base_unit}
                   </div>
                 </div>
@@ -575,17 +575,17 @@ export function PosPage() {
   }
 
   let lowStockBody = (
-    <div className="py-6 text-center text-sm text-slate-500">All products are stocked.</div>
+    <div className="py-10 text-center text-sm text-slate-500">All products are stocked.</div>
   );
   if (lowStockProducts.length > 0) {
     lowStockBody = (
       <div className="divide-y divide-slate-100">
         {lowStockProducts.map(function renderLowStock(product) {
           return (
-            <div key={product.product_id} className="flex items-center justify-between py-2.5">
+            <div key={product.product_id} className="flex items-center justify-between py-3.5">
               <div>
                 <div className="text-sm font-semibold text-slate-900">{product.product_name}</div>
-                <div className="font-mono text-xs text-slate-500">
+                <div className="mt-0.5 font-mono text-xs text-slate-500">
                   Reorder at {formatQuantity(product.reorder_level)} {product.base_unit}
                 </div>
               </div>
@@ -609,11 +609,11 @@ export function PosPage() {
   return (
     <div className="flex h-full flex-1 overflow-hidden bg-slate-50">
       {/* Center Catalog Workspace */}
-      <div className="flex flex-1 flex-col overflow-hidden p-5">
+      <div className="flex flex-1 flex-col overflow-hidden p-7">
         {/* Top Search & Low Stock Bar */}
-        <div className="mb-4 flex items-center gap-3">
+        <div className="mb-5 flex items-center gap-3.5">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               ref={searchInputRef}
               type="text"
@@ -623,9 +623,9 @@ export function PosPage() {
               }}
               onKeyDown={handleSearchKeyDown}
               placeholder="Search by product or scan barcode..."
-              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-16 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-20 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
             />
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[11px] text-slate-400">
+            <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-[11px] text-slate-400">
               Ctrl K
             </span>
           </div>
@@ -635,7 +635,7 @@ export function PosPage() {
             onClick={function openLowStock() {
               setLowStockModalOpen(true);
             }}
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 cursor-pointer"
+            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 cursor-pointer"
             title="Low Stock Alerts"
           >
             <Bell className="h-4 w-4" />
@@ -646,7 +646,7 @@ export function PosPage() {
         {errorElement}
 
         {/* Category Filter Pills */}
-        <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-1">
+        <div className="mb-6 flex items-center gap-2.5 overflow-x-auto pb-1.5">
           <button
             type="button"
             onClick={function selectAll() {
@@ -659,7 +659,7 @@ export function PosPage() {
           {categories.map(function renderCategory(category) {
             const isSelected = selectedCategoryId === category.category_id;
             let pillClass =
-              "shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-medium cursor-pointer ";
+              "shrink-0 rounded-lg px-4 py-2 text-xs font-medium cursor-pointer ";
             if (isSelected) {
               pillClass = pillClass + "bg-blue-600 font-semibold text-white";
             } else {
@@ -685,7 +685,7 @@ export function PosPage() {
         <div className="flex-1 overflow-y-auto pr-1">{productGridContent}</div>
 
         {/* Bottom Quick Action Bar */}
-        <div className="mt-4 grid grid-cols-3 gap-3 pt-2">
+        <div className="mt-6 grid grid-cols-3 gap-4 pt-2">
           <Button
             variant="soft"
             size="lg"
@@ -717,20 +717,20 @@ export function PosPage() {
       </div>
 
       {/* Right Current Sale Cart Panel */}
-      <aside className="flex w-88 shrink-0 flex-col border-l border-slate-200 bg-white">
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+      <aside className="flex w-96 shrink-0 flex-col border-l border-slate-200 bg-white">
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
           <h2 className="text-base font-bold text-slate-900">
             Current Sale (<span className="font-mono">{cartItems.length}</span>)
           </h2>
         </div>
 
-        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 px-5">
+        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 px-6">
           {cartListContent}
         </div>
 
         {/* Totals & Checkout */}
-        <div className="border-t border-slate-200 p-5 space-y-4">
-          <div className="space-y-1.5">
+        <div className="border-t border-slate-200 p-6 space-y-5">
+          <div className="space-y-2.5">
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-500">Subtotal</span>
               <span className="font-mono font-medium text-slate-900">
@@ -738,7 +738,7 @@ export function PosPage() {
               </span>
             </div>
             {discountSummaryRow}
-            <div className="flex items-center justify-between pt-1.5">
+            <div className="flex items-center justify-between pt-2.5">
               <span className="text-base font-bold text-slate-900">Total</span>
               <span className="font-mono text-xl font-bold text-slate-900">
                 {formatPeso(totals.total)}
@@ -751,19 +751,19 @@ export function PosPage() {
             size="lg"
             disabled={cartItems.length === 0}
             onClick={openCheckoutModal}
-            className="w-full justify-between px-5 py-3 text-base"
+            className="w-full justify-between px-5 py-3.5 text-base"
           >
             <span>Checkout</span>
             <span className="font-mono font-bold">{formatPeso(totals.total)}</span>
           </Button>
 
           {/* Payment Method Strip */}
-          <div className="grid grid-cols-1 gap-2">
+          <div className="grid grid-cols-1 gap-2.5">
             {[{ key: "CASH", label: "Cash", icon: Banknote }].map(function renderMethod(method) {
               const IconComponent = method.icon;
               const isSelected = paymentMethod === method.key;
               let btnClass =
-                "flex flex-col items-center gap-1 rounded-lg border py-2 text-xs font-medium cursor-pointer ";
+                "flex flex-col items-center gap-1.5 rounded-lg border py-2.5 text-xs font-medium cursor-pointer ";
               if (isSelected) {
                 btnClass = btnClass + "border-blue-600 bg-blue-50 text-blue-700";
               } else {
@@ -819,7 +819,7 @@ export function PosPage() {
             }
             setDiscountModalOpen(false);
           }}
-          className="space-y-4"
+          className="space-y-5"
         >
           <Input
             label="Discount Amount (₱)"
@@ -832,7 +832,7 @@ export function PosPage() {
             }}
             placeholder="0.00"
           />
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-3 pt-1">
             <Button
               variant="secondary"
               onClick={function cancel() {

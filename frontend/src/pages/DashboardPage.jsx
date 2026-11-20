@@ -33,7 +33,7 @@ export function DashboardPage(props) {
     loadDashboard();
   }, []);
 
-  let errorElement = <ErrorBanner message={errorBanner} className="mb-4" />;
+  let errorElement = <ErrorBanner message={errorBanner} className="mb-6" />;
 
   let todaySales = "₱0.00";
   let todayOrdersMeta = "0 orders";
@@ -56,19 +56,19 @@ export function DashboardPage(props) {
   }
 
   let lowStockList = (
-    <div className="py-8 text-center text-sm text-slate-500">All stock levels are healthy.</div>
+    <div className="py-12 text-center text-sm text-slate-500">All stock levels are healthy.</div>
   );
   if (lowStock.length > 0) {
     lowStockList = (
       <div className="divide-y divide-slate-100">
         {lowStock.slice(0, 8).map(function renderLowItem(product) {
           return (
-            <div key={product.product_id} className="flex items-center justify-between py-2.5">
-              <div className="min-w-0 pr-3">
+            <div key={product.product_id} className="flex items-center justify-between py-3.5">
+              <div className="min-w-0 pr-4">
                 <div className="truncate text-sm font-medium text-slate-900">
                   {product.product_name}
                 </div>
-                <div className="font-mono text-xs text-slate-500">
+                <div className="mt-0.5 font-mono text-xs text-slate-500">
                   Reorder: {formatQuantity(product.reorder_level)} {product.base_unit}
                 </div>
               </div>
@@ -83,23 +83,23 @@ export function DashboardPage(props) {
   }
 
   let recentSalesList = (
-    <div className="py-8 text-center text-sm text-slate-500">No sales recorded yet.</div>
+    <div className="py-12 text-center text-sm text-slate-500">No sales recorded yet.</div>
   );
   if (recentSales.length > 0) {
     recentSalesList = (
       <div className="divide-y divide-slate-100">
         {recentSales.map(function renderSale(sale) {
           return (
-            <div key={sale.sale_id} className="flex items-center justify-between py-2.5">
+            <div key={sale.sale_id} className="flex items-center justify-between py-3.5">
               <div>
                 <div className="font-mono text-sm font-semibold text-slate-900">
                   #{sale.receipt_number}
                 </div>
-                <div className="font-mono text-xs text-slate-500">
+                <div className="mt-0.5 font-mono text-xs text-slate-500">
                   {formatManilaDateTime(sale.created_at)}
                 </div>
               </div>
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-3">
                 <Badge tone="blue">{sale.payment_method}</Badge>
                 <span className="font-mono text-sm font-bold text-slate-900">
                   {formatPeso(sale.total_amount)}
@@ -113,10 +113,10 @@ export function DashboardPage(props) {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-y-auto bg-slate-50 p-6">
-      <div className="mb-5 flex items-center justify-between">
+    <div className="flex h-full flex-1 flex-col overflow-y-auto bg-slate-50 p-8">
+      <div className="mb-7 flex items-center justify-between">
         <h1 className="text-lg font-bold text-slate-900">Dashboard</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button variant="secondary" size="sm" onClick={loadDashboard}>
             Refresh
           </Button>
@@ -135,7 +135,7 @@ export function DashboardPage(props) {
 
       {errorElement}
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Today's Sales"
           value={todaySales}
@@ -163,9 +163,9 @@ export function DashboardPage(props) {
         />
       </div>
 
-      <div className="grid flex-1 grid-cols-1 gap-5 lg:grid-cols-2">
-        <section className="flex flex-col rounded-xl border border-slate-200 bg-white p-5">
-          <div className="mb-3 flex items-center justify-between">
+      <div className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-2">
+        <section className="flex flex-col rounded-xl border border-slate-200 bg-white p-6">
+          <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-900">Low Stock</h2>
             <Button
               variant="ghost"
@@ -180,8 +180,8 @@ export function DashboardPage(props) {
           {lowStockList}
         </section>
 
-        <section className="flex flex-col rounded-xl border border-slate-200 bg-white p-5">
-          <div className="mb-3 flex items-center justify-between">
+        <section className="flex flex-col rounded-xl border border-slate-200 bg-white p-6">
+          <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-900">Recent Sales</h2>
             <Button
               variant="ghost"

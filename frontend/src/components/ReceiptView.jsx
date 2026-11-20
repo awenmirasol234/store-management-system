@@ -30,18 +30,18 @@ export function ReceiptView(props) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div
         id="thermal-receipt"
-        className="mx-auto w-full max-w-[300px] rounded-lg border border-slate-200 bg-white p-4 font-mono text-xs text-slate-900"
+        className="mx-auto w-full max-w-[300px] rounded-lg border border-slate-200 bg-white p-5 font-mono text-xs text-slate-900"
       >
-        <div className="text-center border-b border-dashed border-slate-300 pb-2 mb-2">
+        <div className="text-center border-b border-dashed border-slate-300 pb-3 mb-3 space-y-0.5">
           <div className="text-sm font-bold">STOREFLOW POS</div>
           <div>OR #{sale.receipt_number}</div>
           <div className="text-[11px] text-slate-600">{formatManilaDateTime(sale.created_at)}</div>
         </div>
 
-        <div className="space-y-1.5 border-b border-dashed border-slate-300 pb-2 mb-2">
+        <div className="space-y-2 border-b border-dashed border-slate-300 pb-3 mb-3">
           {items.map(function renderItem(item) {
             return (
               <div key={item.sale_item_id}>
@@ -57,13 +57,13 @@ export function ReceiptView(props) {
           })}
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <div className="flex justify-between">
             <span>Subtotal</span>
             <span>{formatPeso(sale.subtotal_amount)}</span>
           </div>
           {discountRow}
-          <div className="flex justify-between text-sm font-bold border-t border-dashed border-slate-300 pt-1">
+          <div className="flex justify-between text-sm font-bold border-t border-dashed border-slate-300 pt-2">
             <span>TOTAL</span>
             <span>{formatPeso(sale.total_amount)}</span>
           </div>

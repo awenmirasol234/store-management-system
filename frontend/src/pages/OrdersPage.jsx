@@ -115,11 +115,11 @@ export function OrdersPage() {
     }
   }
 
-  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-4" />;
+  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-6" />;
 
   let tableBody = (
     <tr>
-      <td colSpan="6" className="px-4 py-10 text-center text-sm text-slate-500">
+      <td colSpan="6" className="px-5 py-14 text-center text-sm text-slate-500">
         No completed sales yet.
       </td>
     </tr>
@@ -128,22 +128,22 @@ export function OrdersPage() {
     tableBody = sales.map(function renderSaleRow(sale) {
       return (
         <tr key={sale.sale_id} className="hover:bg-slate-50">
-          <td className="px-4 py-3 font-mono text-sm font-semibold text-slate-900">
+          <td className="px-5 py-4 font-mono text-sm font-semibold text-slate-900">
             #{sale.receipt_number}
           </td>
-          <td className="px-4 py-3 font-mono text-xs text-slate-600">
+          <td className="px-5 py-4 font-mono text-xs text-slate-600">
             {formatManilaDateTime(sale.created_at)}
           </td>
-          <td className="px-4 py-3">
+          <td className="px-5 py-4">
             <Badge tone={getPaymentTone(sale.payment_method)}>{sale.payment_method}</Badge>
           </td>
-          <td className="px-4 py-3 font-mono text-sm font-bold text-slate-900 text-right">
+          <td className="px-5 py-4 font-mono text-sm font-bold text-slate-900 text-right">
             {formatPeso(sale.total_amount)}
           </td>
-          <td className="px-4 py-3 font-mono text-xs text-slate-600 text-right">
+          <td className="px-5 py-4 font-mono text-xs text-slate-600 text-right">
             {formatPeso(sale.change_amount)}
           </td>
-          <td className="px-4 py-3 text-right">
+          <td className="px-5 py-4 text-right">
             <Button
               variant="secondary"
               size="sm"
@@ -167,24 +167,24 @@ export function OrdersPage() {
     let returnStatusBanner = null;
     if (returnMessage) {
       returnStatusBanner = (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-medium text-blue-800">
+        <div className="rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-2.5 text-xs font-medium text-blue-800">
           {returnMessage}
         </div>
       );
     }
 
     modalBody = (
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <ReceiptView sale={selectedOrder.sale} items={selectedOrder.items} />
 
-        <form onSubmit={handleProcessReturn} className="space-y-3 border-t pt-4 md:border-l md:border-t-0 md:pl-5 md:pt-0 border-slate-200">
-          <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+        <form onSubmit={handleProcessReturn} className="space-y-4 border-t pt-5 md:border-l md:border-t-0 md:pl-7 md:pt-0 border-slate-200">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
             <RotateCcw className="h-4 w-4 text-blue-600" />
             <span>Return Items</span>
           </div>
           {returnStatusBanner}
 
-          <div className="space-y-2.5">
+          <div className="space-y-3">
             {selectedOrder.items.map(function renderItemReturn(item) {
               let value = returnQuantities[item.sale_item_id];
               if (value === undefined) {
@@ -193,13 +193,13 @@ export function OrdersPage() {
               return (
                 <div
                   key={item.sale_item_id}
-                  className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 p-2.5"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3.5"
                 >
                   <div className="min-w-0">
                     <div className="truncate text-xs font-semibold text-slate-900">
                       {item.option_name_snapshot}
                     </div>
-                    <div className="font-mono text-[11px] text-slate-500">
+                    <div className="mt-0.5 font-mono text-[11px] text-slate-500">
                       Sold: {formatQuantity(item.quantity)} · {formatPeso(item.subtotal)}
                     </div>
                   </div>
@@ -213,7 +213,7 @@ export function OrdersPage() {
                       updateReturnQty(item.sale_item_id, event.target.value);
                     }}
                     placeholder="0"
-                    className="w-20 rounded-md border border-slate-200 px-2 py-1 text-right font-mono text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
+                    className="w-20 rounded-md border border-slate-200 px-2.5 py-1.5 text-right font-mono text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               );
@@ -239,8 +239,8 @@ export function OrdersPage() {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-6">
-      <div className="mb-4 flex items-center justify-between">
+    <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-8">
+      <div className="mb-6 flex items-center justify-between">
         <h1 className="text-lg font-bold text-slate-900">Orders</h1>
         <Button variant="secondary" size="sm" onClick={loadSales}>
           Refresh
@@ -253,12 +253,12 @@ export function OrdersPage() {
         <table className="w-full border-collapse text-left">
           <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
             <tr>
-              <th className="px-4 py-3">Receipt</th>
-              <th className="px-4 py-3">Date (Manila)</th>
-              <th className="px-4 py-3">Payment</th>
-              <th className="px-4 py-3 text-right">Total</th>
-              <th className="px-4 py-3 text-right">Change</th>
-              <th className="px-4 py-3 text-right">Action</th>
+              <th className="px-5 py-3.5">Receipt</th>
+              <th className="px-5 py-3.5">Date (Manila)</th>
+              <th className="px-5 py-3.5">Payment</th>
+              <th className="px-5 py-3.5 text-right">Total</th>
+              <th className="px-5 py-3.5 text-right">Change</th>
+              <th className="px-5 py-3.5 text-right">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">{tableBody}</tbody>

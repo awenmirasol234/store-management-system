@@ -51,7 +51,7 @@ export function ReportsPage() {
     setToDate(end);
   }
 
-  let errorElement = <ErrorBanner message={errorBanner} className="mb-4" />;
+  let errorElement = <ErrorBanner message={errorBanner} className="mb-6" />;
 
   let grossSales = "₱0.00";
   let netProfit = "₱0.00";
@@ -70,7 +70,7 @@ export function ReportsPage() {
 
   let dailyTableBody = (
     <tr>
-      <td colSpan="4" className="px-4 py-8 text-center text-sm text-slate-500">
+      <td colSpan="4" className="px-5 py-12 text-center text-sm text-slate-500">
         No sales in this date range.
       </td>
     </tr>
@@ -79,14 +79,14 @@ export function ReportsPage() {
     dailyTableBody = dailyRows.map(function renderDay(row) {
       return (
         <tr key={row.date} className="hover:bg-slate-50">
-          <td className="px-4 py-2.5 font-mono text-sm font-medium text-slate-900">{row.date}</td>
-          <td className="px-4 py-2.5 font-mono text-sm text-slate-600 text-right">
+          <td className="px-5 py-3.5 font-mono text-sm font-medium text-slate-900">{row.date}</td>
+          <td className="px-5 py-3.5 font-mono text-sm text-slate-600 text-right">
             {row.sale_count}
           </td>
-          <td className="px-4 py-2.5 font-mono text-sm font-semibold text-slate-900 text-right">
+          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-slate-900 text-right">
             {formatPeso(row.gross_sales)}
           </td>
-          <td className="px-4 py-2.5 font-mono text-sm font-semibold text-emerald-700 text-right">
+          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-emerald-700 text-right">
             {formatPeso(row.profit)}
           </td>
         </tr>
@@ -96,7 +96,7 @@ export function ReportsPage() {
 
   let topTableBody = (
     <tr>
-      <td colSpan="4" className="px-4 py-8 text-center text-sm text-slate-500">
+      <td colSpan="4" className="px-5 py-12 text-center text-sm text-slate-500">
         No product sales in this date range.
       </td>
     </tr>
@@ -105,14 +105,14 @@ export function ReportsPage() {
     topTableBody = topProducts.map(function renderProduct(item) {
       return (
         <tr key={item.product_id} className="hover:bg-slate-50">
-          <td className="px-4 py-2.5 text-sm font-medium text-slate-900">{item.product_name}</td>
-          <td className="px-4 py-2.5 font-mono text-sm text-slate-600 text-right">
+          <td className="px-5 py-3.5 text-sm font-medium text-slate-900">{item.product_name}</td>
+          <td className="px-5 py-3.5 font-mono text-sm text-slate-600 text-right">
             {formatQuantity(item.quantity_sold)} {item.base_unit}
           </td>
-          <td className="px-4 py-2.5 font-mono text-sm font-semibold text-slate-900 text-right">
+          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-slate-900 text-right">
             {formatPeso(item.revenue)}
           </td>
-          <td className="px-4 py-2.5 font-mono text-sm font-semibold text-emerald-700 text-right">
+          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-emerald-700 text-right">
             {formatPeso(item.profit)}
           </td>
         </tr>
@@ -134,11 +134,11 @@ export function ReportsPage() {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-y-auto bg-slate-50 p-6">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <div className="flex h-full flex-1 flex-col overflow-y-auto bg-slate-50 p-8">
+      <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-lg font-bold text-slate-900">Reports</h1>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           <Button
             variant={todayVariant}
             size="sm"
@@ -174,7 +174,7 @@ export function ReportsPage() {
               setActivePreset("CUSTOM");
               setFromDate(event.target.value);
             }}
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 font-mono text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
           />
           <span className="text-xs text-slate-400">to</span>
           <input
@@ -184,14 +184,14 @@ export function ReportsPage() {
               setActivePreset("CUSTOM");
               setToDate(event.target.value);
             }}
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 font-mono text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
           />
         </div>
       </div>
 
       {errorElement}
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Gross Sales"
           value={grossSales}
@@ -210,18 +210,18 @@ export function ReportsPage() {
         <StatCard label="Credit (Utang)" value={creditSales} tone="amber" icon={CreditCard} />
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <div className="border-b border-slate-200 px-4 py-3 text-sm font-bold text-slate-900">
+          <div className="border-b border-slate-200 px-5 py-4 text-sm font-bold text-slate-900">
             Daily Sales
           </div>
           <table className="w-full border-collapse text-left">
             <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
               <tr>
-                <th className="px-4 py-2.5">Date</th>
-                <th className="px-4 py-2.5 text-right">Orders</th>
-                <th className="px-4 py-2.5 text-right">Sales</th>
-                <th className="px-4 py-2.5 text-right">Profit</th>
+                <th className="px-5 py-3.5">Date</th>
+                <th className="px-5 py-3.5 text-right">Orders</th>
+                <th className="px-5 py-3.5 text-right">Sales</th>
+                <th className="px-5 py-3.5 text-right">Profit</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">{dailyTableBody}</tbody>
@@ -229,16 +229,16 @@ export function ReportsPage() {
         </section>
 
         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <div className="border-b border-slate-200 px-4 py-3 text-sm font-bold text-slate-900">
+          <div className="border-b border-slate-200 px-5 py-4 text-sm font-bold text-slate-900">
             Top Products
           </div>
           <table className="w-full border-collapse text-left">
             <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
               <tr>
-                <th className="px-4 py-2.5">Product</th>
-                <th className="px-4 py-2.5 text-right">Qty</th>
-                <th className="px-4 py-2.5 text-right">Revenue</th>
-                <th className="px-4 py-2.5 text-right">Profit</th>
+                <th className="px-5 py-3.5">Product</th>
+                <th className="px-5 py-3.5 text-right">Qty</th>
+                <th className="px-5 py-3.5 text-right">Revenue</th>
+                <th className="px-5 py-3.5 text-right">Profit</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">{topTableBody}</tbody>
