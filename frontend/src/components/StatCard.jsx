@@ -31,7 +31,9 @@ export function StatCard(props) {
     <div className="rounded-xl border border-slate-200 bg-white p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <div className="text-xs font-medium text-slate-500">{props.label}</div>
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            {props.label}
+          </div>
           <div
             className={"mt-1.5 font-mono text-2xl font-bold " + getValueToneClass(props.tone)}
           >
