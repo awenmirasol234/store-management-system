@@ -11,7 +11,7 @@ import { toMoneyInt, toQuantityInt } from "../shared/decimal.js";
 import { createDefaultIdGenerator, createSystemClock } from "../shared/ports.js";
 import { formatReceiptNumber } from "../sales/domain.js";
 
-export function seedDatabase(targetDbPath, clean = false) {
+export function seedDatabase(targetDbPath, shouldClean) {
   let resolvedPath = targetDbPath;
   if (!resolvedPath) {
     resolvedPath = path.resolve(import.meta.dirname, "../../data/store.db");
@@ -22,129 +22,169 @@ export function seedDatabase(targetDbPath, clean = false) {
   const clock = createSystemClock();
   const nowIso = clock.nowIso();
 
-  if (clean) {
-    database.exec("DELETE FROM sales_return_items");
-    database.exec("DELETE FROM sales_returns");
-    database.exec("DELETE FROM sales_items");
-    database.exec("DELETE FROM sales_transactions");
-    database.exec("DELETE FROM receipt_sequences");
-    database.exec("DELETE FROM inventory_transactions");
-    database.exec("DELETE FROM product_selling_options");
-    database.exec("DELETE FROM products");
-    database.exec("DELETE FROM suppliers");
-    database.exec("DELETE FROM product_categories");
-  }
+  try {
+    if (shouldClean) {
+      database.exec("DELETE FROM sales_return_items");
+      database.exec("DELETE FROM sales_returns");
+      database.exec("DELETE FROM sales_items");
+      database.exec("DELETE FROM sales_transactions");
+      database.exec("DELETE FROM receipt_sequences");
+      database.exec("DELETE FROM inventory_transactions");
+      database.exec("DELETE FROM product_selling_options");
+      database.exec("DELETE FROM products");
+      database.exec("DELETE FROM suppliers");
+      database.exec("DELETE FROM product_categories");
+    }
 
-  // 1. Seed Categories
-  const insertCatStmt = database.prepare(`
-    INSERT OR IGNORE INTO product_categories (category_id, category_name, description, is_active)
-    VALUES (?, ?, ?, 1)
-  `);
-  for (let categoryIndex = 0; categoryIndex < CATEGORIES.length; categoryIndex = categoryIndex + 1) {
-    const categoryItem = CATEGORIES[categoryIndex];
-    insertCatStmt.run(categoryItem.category_id, categoryItem.category_name, categoryItem.description);
-  }
+    // 1. Seed Categories
+    const insertCatStmt = database.prepare(`
+      INSERT OR IGNORE INTO product_categories (category_id, category_name, description, is_active)
+      VALUES (?, ?, ?, 1)
+    `);
+    for (let categoryIndex = 0; categoryIndex < CATEGORIES.length; categoryIndex = categoryIndex + 1) {
+      const categoryItem = CATEGORIES[categoryIndex];
+      insertCatStmt.run(categoryItem.category_id, categoryItem.category_name, categoryItem.description);
+    }
 
-  // 2. Seed Suppliers
-  const insertSupStmt = database.prepare(`
-    INSERT OR IGNORE INTO suppliers (supplier_id, supplier_name, contact_person, phone, address, is_active)
-    VALUES (?, ?, ?, ?, ?, 1)
-  `);
-  for (let supplierIndex = 0; supplierIndex < SUPPLIERS.length; supplierIndex = supplierIndex + 1) {
-    const supplierItem = SUPPLIERS[supplierIndex];
-    insertSupStmt.run(
-      supplierItem.supplier_id,
-      supplierItem.supplier_name,
-      supplierItem.contact_person,
-      supplierItem.phone,
-      supplierItem.address
-    );
-  }
-
-  // 3. Seed Products and Selling Options
-  const insertProdStmt = database.prepare(`
-    INSERT OR REPLACE INTO products (
-      product_id, category_id, product_name, barcode, description,
-      image_url, base_unit, current_stock_int, cost_price_int,
-      selling_price_int, reorder_level_int, allow_custom_amount,
-      is_active, deleted_at, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, NULL, ?, ?)
-  `);
-
-  const insertOptionStmt = database.prepare(`
-    INSERT OR REPLACE INTO product_selling_options (
-      option_id, product_id, option_name, barcode, quantity_int,
-      price_int, is_active, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)
-  `);
-
-  const insertTxStmt = database.prepare(`
-    INSERT INTO inventory_transactions (
-      transaction_id, product_id, supplier_id, option_id,
-      transaction_type, quantity_int, unit_cost_int, reference_number,
-      remarks, created_by, created_at
-    ) VALUES (?, ?, ?, NULL, 'STOCK_IN', ?, ?, ?, 'Initial inventory stock', 'system', ?)
-  `);
-
-  for (let productIndex = 0; productIndex < PRODUCTS.length; productIndex = productIndex + 1) {
-    const item = PRODUCTS[productIndex];
-    const stockInt = toQuantityInt(item.stock, "stock");
-    const costInt = toMoneyInt(item.cost, "cost");
-    const priceInt = toMoneyInt(item.price, "price");
-    const reorderInt = toQuantityInt(item.reorder, "reorder");
-    const mockImageUrl = getMockProductImageUrl(item);
-
-    insertProdStmt.run(
-      item.id,
-      item.category_id,
-      item.name,
-      item.barcode,
-      null,
-      item.image_url || mockImageUrl,
-      item.unit,
-      stockInt,
-      costInt,
-      priceInt,
-      reorderInt,
-      nowIso,
-      nowIso
-    );
-
-    // Initial stock-in movement
-    if (stockInt > 0) {
-      const txId = idGen.nextId();
-      insertTxStmt.run(
-        txId,
-        item.id,
-        item.supplier_id,
-        stockInt,
-        costInt,
-        "INIT-STOCK",
-        nowIso
+    // 2. Seed Suppliers
+    const insertSupStmt = database.prepare(`
+      INSERT OR IGNORE INTO suppliers (supplier_id, supplier_name, contact_person, phone, address, is_active)
+      VALUES (?, ?, ?, ?, ?, 1)
+    `);
+    for (let supplierIndex = 0; supplierIndex < SUPPLIERS.length; supplierIndex = supplierIndex + 1) {
+      const supplierItem = SUPPLIERS[supplierIndex];
+      insertSupStmt.run(
+        supplierItem.supplier_id,
+        supplierItem.supplier_name,
+        supplierItem.contact_person,
+        supplierItem.phone,
+        supplierItem.address
       );
     }
 
-    // Selling options
-    if (item.options && item.options.length > 0) {
-      for (let optionIndex = 0; optionIndex < item.options.length; optionIndex = optionIndex + 1) {
-        const optionItem = item.options[optionIndex];
-        const optionId = idGen.nextId();
-        const optionQtyInt = toQuantityInt(optionItem.quantity, "option.quantity");
-        const optionPriceInt = toMoneyInt(optionItem.price, "option.price");
+    // 3. Seed Products and Selling Options
+    const insertProdStmt = database.prepare(`
+      INSERT INTO products (
+        product_id, category_id, product_name, barcode, description,
+        image_url, base_unit, current_stock_int, cost_price_int,
+        selling_price_int, reorder_level_int, allow_custom_amount,
+        is_active, deleted_at, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, NULL, ?, ?)
+      ON CONFLICT(product_id) DO UPDATE SET
+        category_id = excluded.category_id,
+        product_name = excluded.product_name,
+        barcode = excluded.barcode,
+        image_url = excluded.image_url,
+        base_unit = excluded.base_unit,
+        cost_price_int = excluded.cost_price_int,
+        selling_price_int = excluded.selling_price_int,
+        reorder_level_int = excluded.reorder_level_int,
+        updated_at = excluded.updated_at
+    `);
 
-        insertOptionStmt.run(
-          optionId,
-          item.id,
-          optionItem.name,
-          optionItem.barcode,
-          optionQtyInt,
-          optionPriceInt,
-          nowIso,
-          nowIso
-        );
+    const findOptionByBarcodeStmt = database.prepare(
+      "SELECT option_id FROM product_selling_options WHERE barcode = ?"
+    );
+
+    const insertOptionStmt = database.prepare(`
+      INSERT INTO product_selling_options (
+        option_id, product_id, option_name, barcode, quantity_int,
+        price_int, is_active, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)
+    `);
+
+    const updateOptionStmt = database.prepare(`
+      UPDATE product_selling_options
+      SET product_id = ?, option_name = ?, quantity_int = ?, price_int = ?, updated_at = ?
+      WHERE option_id = ?
+    `);
+
+    const findInitTxStmt = database.prepare(
+      "SELECT transaction_id FROM inventory_transactions WHERE product_id = ? AND reference_number = 'INIT-STOCK'"
+    );
+
+    const insertTxStmt = database.prepare(`
+      INSERT INTO inventory_transactions (
+        transaction_id, product_id, supplier_id, option_id,
+        transaction_type, quantity_int, unit_cost_int, reference_number,
+        remarks, created_by, created_at
+      ) VALUES (?, ?, ?, NULL, 'STOCK_IN', ?, ?, ?, 'Initial inventory stock', 'system', ?)
+    `);
+
+    for (let productIndex = 0; productIndex < PRODUCTS.length; productIndex = productIndex + 1) {
+      const item = PRODUCTS[productIndex];
+      const stockInt = toQuantityInt(item.stock, "stock");
+      const costInt = toMoneyInt(item.cost, "cost");
+      const priceInt = toMoneyInt(item.price, "price");
+      const reorderInt = toQuantityInt(item.reorder, "reorder");
+      const mockImageUrl = getMockProductImageUrl(item);
+
+      insertProdStmt.run(
+        item.id,
+        item.category_id,
+        item.name,
+        item.barcode,
+        null,
+        item.image_url || mockImageUrl,
+        item.unit,
+        stockInt,
+        costInt,
+        priceInt,
+        reorderInt,
+        nowIso,
+        nowIso
+      );
+
+      // Initial stock-in movement (only if not already recorded)
+      if (stockInt > 0) {
+        const existingTx = findInitTxStmt.get(item.id);
+        if (!existingTx) {
+          const txId = idGen.nextId();
+          insertTxStmt.run(
+            txId,
+            item.id,
+            item.supplier_id,
+            stockInt,
+            costInt,
+            "INIT-STOCK",
+            nowIso
+          );
+        }
+      }
+
+      // Selling options (upsert to preserve existing option_id and foreign key integrity)
+      if (item.options && item.options.length > 0) {
+        for (let optionIndex = 0; optionIndex < item.options.length; optionIndex = optionIndex + 1) {
+          const optionItem = item.options[optionIndex];
+          const optionQtyInt = toQuantityInt(optionItem.quantity, "option.quantity");
+          const optionPriceInt = toMoneyInt(optionItem.price, "option.price");
+          const existingOption = findOptionByBarcodeStmt.get(optionItem.barcode);
+
+          if (existingOption) {
+            updateOptionStmt.run(
+              item.id,
+              optionItem.name,
+              optionQtyInt,
+              optionPriceInt,
+              nowIso,
+              existingOption.option_id
+            );
+          } else {
+            const optionId = idGen.nextId();
+            insertOptionStmt.run(
+              optionId,
+              item.id,
+              optionItem.name,
+              optionItem.barcode,
+              optionQtyInt,
+              optionPriceInt,
+              nowIso,
+              nowIso
+            );
+          }
+        }
       }
     }
-  }
 
   // 4. Seed Sample Completed Sales Transactions (12 sales across today and yesterday)
   const insertSaleStmt = database.prepare(`
@@ -236,15 +276,17 @@ export function seedDatabase(targetDbPath, clean = false) {
   const salesCountRow = database.prepare("SELECT count(*) as count FROM sales_transactions").get();
 
   const stats = {
-    categories: catCountRow.count,
-    suppliers: supCountRow.count,
-    products: prodCountRow.count,
-    selling_options: optCountRow.count,
-    inventory_transactions: txCountRow.count,
-    sales_transactions: salesCountRow.count
-  };
-  database.close();
-  return stats;
+      categories: catCountRow.count,
+      suppliers: supCountRow.count,
+      products: prodCountRow.count,
+      selling_options: optCountRow.count,
+      inventory_transactions: txCountRow.count,
+      sales_transactions: salesCountRow.count
+    };
+    return stats;
+  } finally {
+    database.close();
+  }
 }
 
 // Direct CLI invocation
