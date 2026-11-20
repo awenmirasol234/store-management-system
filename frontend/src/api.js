@@ -137,6 +137,35 @@ export const api = {
   getDailyReport(fromDate, toDate) {
     const query = buildDateRangeQuery(fromDate, toDate);
     return request("GET", "/api/reports/daily" + query);
+  },
+  listCustomers(query) {
+    const params = new URLSearchParams();
+    if (query) {
+      params.set("q", query);
+    }
+    return request("GET", "/api/customers" + buildQuery(params));
+  },
+  createCustomer(data) {
+    return request("POST", "/api/customers", data);
+  },
+  getCustomer(customerId) {
+    return request("GET", "/api/customers/" + encodeURIComponent(customerId));
+  },
+  updateCustomer(customerId, data) {
+    return request("PATCH", "/api/customers/" + encodeURIComponent(customerId), data);
+  },
+  recordPayment(customerId, data) {
+    return request("POST", "/api/customers/" + encodeURIComponent(customerId) + "/payments", data);
+  },
+  listCreditTransactions(customerId, limit) {
+    const params = new URLSearchParams();
+    if (limit) {
+      params.set("limit", String(limit));
+    }
+    return request(
+      "GET",
+      "/api/customers/" + encodeURIComponent(customerId) + "/transactions" + buildQuery(params)
+    );
   }
 };
 

@@ -15,4 +15,10 @@ describe("PosPage SSR test", function () {
     expect(ShoppingBag).toBeDefined();
     expect(typeof ShoppingBag).toBe("object");
   });
+
+  it("renders Cash and Utang payment options", function () {
+    const html = renderToString(React.createElement(PosPage));
+    expect(html).toContain("Cash");
+    expect(html).toContain("Utang");
+  });
 });

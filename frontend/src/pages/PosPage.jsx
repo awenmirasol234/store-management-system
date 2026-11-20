@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Banknote,
   Bell,
+  CreditCard,
   Minus,
   Plus,
   ScanBarcode,
@@ -9,6 +10,7 @@ import {
   ShoppingBag,
   Tag,
   Trash2,
+  Wallet,
   XCircle
 } from "lucide-react";
 import { api } from "../api.js";
@@ -55,6 +57,7 @@ export function PosPage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [errorBanner, setErrorBanner] = useState("");
@@ -83,6 +86,13 @@ export function PosPage() {
   async function loadCatalog() {
     setErrorBanner("");
     try {
+      let customerList = [];
+      try {
+        customerList = await api.listCustomers();
+      } catch (customerError) {
+        customerList = [];
+      }
+
       const results = await Promise.all([
         api.listProducts(),
         api.listCategories(),
@@ -97,6 +107,7 @@ export function PosPage() {
       setProducts(activeProducts);
       setCategories(results[1]);
       setLowStockProducts(results[2]);
+      setCustomers(customerList);
     } catch (error) {
       setErrorBanner(error.message);
     }
@@ -267,20 +278,52 @@ export function PosPage() {
     setErrorBanner("");
   }
 
+  function handlePaymentMethodChange(newMethod) {
+    setPaymentMethod(newMethod);
+    if (newMethod === "CASH") {
+      setAmountPaidInput(String(totals.total));
+      setCashPartInput("");
+    } else if (newMethod === "CREDIT") {
+      setAmountPaidInput("0");
+      setCashPartInput("");
+    } else if (newMethod === "SPLIT") {
+      const half = Math.round((totals.total / 2) * 100) / 100;
+      setCashPartInput(String(half));
+      setAmountPaidInput(String(half));
+    }
+  }
+
   function openCheckoutModal() {
     if (cartItems.length === 0) {
       return;
     }
     setErrorBanner("");
-    setAmountPaidInput(String(totals.total));
-    setCashPartInput("");
+    if (paymentMethod === "CASH") {
+      setAmountPaidInput(String(totals.total));
+      setCashPartInput("");
+    } else if (paymentMethod === "CREDIT") {
+      setAmountPaidInput("0");
+      setCashPartInput("");
+    } else {
+      if (!cashPartInput || Number(cashPartInput) <= 0) {
+        const half = Math.round((totals.total / 2) * 100) / 100;
+        setCashPartInput(String(half));
+        setAmountPaidInput(String(half));
+      }
+    }
     setCheckoutModalOpen(true);
   }
 
   async function handleCompleteSale(event) {
     event.preventDefault();
-    setSubmittingSale(true);
     setErrorBanner("");
+
+    if (paymentMethod !== "CASH" && customerIdInput.trim().length === 0) {
+      setErrorBanner("Please select a customer for credit / utang sale");
+      return;
+    }
+
+    setSubmittingSale(true);
 
     try {
       const payloadItems = [];
@@ -311,6 +354,7 @@ export function PosPage() {
         payload.amount_paid = Number(amountPaidInput);
       } else if (paymentMethod === "CREDIT") {
         payload.customer_id = customerIdInput.trim();
+        payload.amount_paid = 0;
       } else {
         const cashPart = Number(cashPartInput);
         const creditPart = Math.round((totals.total - cashPart) * 100) / 100;
@@ -323,6 +367,9 @@ export function PosPage() {
       const result = await api.processSale(payload);
       setCheckoutModalOpen(false);
       clearCart();
+      setCustomerIdInput("");
+      setCashPartInput("");
+      setAmountPaidInput("");
       setCompletedReceipt(result);
       await loadCatalog();
     } catch (error) {
@@ -686,14 +733,17 @@ export function PosPage() {
         <span className="font-mono font-bold">{formatPeso(totals.total)}</span>
       </Button>
 
-      <div className="grid grid-cols-1 gap-2">
-        {[{ key: "CASH", label: "Cash", icon: Banknote }].map(function renderMethod(method) {
+      <div className="grid grid-cols-2 gap-2">
+        {[
+          { key: "CASH", label: "Cash", icon: Banknote },
+          { key: "CREDIT", label: "Utang", icon: CreditCard }
+        ].map(function renderMethod(method) {
           const IconComponent = method.icon;
           const isSelected = paymentMethod === method.key;
           let btnClass =
             "flex flex-col items-center gap-1.5 rounded-lg border py-2 text-xs font-medium cursor-pointer ";
           if (isSelected) {
-            btnClass = btnClass + "border-blue-600 bg-blue-50 text-blue-700";
+            btnClass = btnClass + "border-blue-600 bg-blue-50 text-blue-700 font-semibold";
           } else {
             btnClass = btnClass + "border-slate-200 bg-white text-slate-600 hover:bg-slate-50";
           }
@@ -702,7 +752,7 @@ export function PosPage() {
               key={method.key}
               type="button"
               onClick={function selectMethod() {
-                setPaymentMethod(method.key);
+                handlePaymentMethodChange(method.key);
               }}
               className={btnClass}
             >
@@ -979,6 +1029,7 @@ export function PosPage() {
           setCheckoutModalOpen(false);
         }}
         paymentMethod={paymentMethod}
+        onPaymentMethodChange={handlePaymentMethodChange}
         total={totals.total}
         amountPaid={amountPaidInput}
         onAmountPaidChange={setAmountPaidInput}
@@ -989,6 +1040,17 @@ export function PosPage() {
         changePreview={changePreview}
         submitting={submittingSale}
         onSubmit={handleCompleteSale}
+        customers={customers}
+        onCustomerCreated={function handleCustomerCreated(newCustomer) {
+          setCustomers(function updateCustomers(previous) {
+            const nextList = [newCustomer];
+            for (let index = 0; index < previous.length; index++) {
+              nextList.push(previous[index]);
+            }
+            return nextList;
+          });
+          setCustomerIdInput(newCustomer.customer_id);
+        }}
       />
 
       {/* Receipt Preview Modal */}

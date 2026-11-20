@@ -202,4 +202,109 @@ describe("Express REST API routes", function () {
     expect(invalid.status).toBe(400);
     expect(invalid.body.error.code).toBe("VALIDATION_ERROR");
   });
+
+  it("processes POS CREDIT and SPLIT sales through REST API, updates customer balances, and rejects limit violations", async function () {
+    const baseUrl = await startTestServer();
+
+    // 1. Create a product
+    const productRes = await requestJson(baseUrl, "POST", "/api/products", {
+      product_name: "Cooking Oil 1L",
+      base_unit: "bottle",
+      current_stock: 50,
+      cost_price: 60,
+      selling_price: 100,
+      reorder_level: 5
+    });
+    expect(productRes.status).toBe(201);
+    const productId = productRes.body.data.product_id;
+
+    // 2. Register a customer with 300.00 credit limit
+    const customerRes = await requestJson(baseUrl, "POST", "/api/customers", {
+      full_name: "Mang Kepweng",
+      phone: "09171239876",
+      credit_limit: 300
+    });
+    expect(customerRes.status).toBe(201);
+    const customerId = customerRes.body.data.customer_id;
+    expect(customerRes.body.data.current_balance).toBe(0);
+
+    // 3. POS Credit Sale: 2 bottles = 200.00
+    const creditSaleRes = await requestJson(baseUrl, "POST", "/api/sales", {
+      items: [{ product_id: productId, quantity: 2 }],
+      payment_method: "CREDIT",
+      customer_id: customerId,
+      created_by: "cashier"
+    });
+    expect(creditSaleRes.status).toBe(201);
+    expect(creditSaleRes.body.data.sale.payment_method).toBe("CREDIT");
+    expect(creditSaleRes.body.data.sale.credit_amount).toBe(200);
+    expect(creditSaleRes.body.data.sale.cash_amount).toBe(0);
+    expect(creditSaleRes.body.data.sale.amount_paid).toBe(0);
+
+    // Customer balance updated to 200.00
+    const customerAfterCredit = await requestJson(baseUrl, "GET", "/api/customers/" + customerId);
+    expect(customerAfterCredit.status).toBe(200);
+    expect(customerAfterCredit.body.data.current_balance).toBe(200);
+
+    // Customer credit ledger contains CHARGE transaction
+    const txRes = await requestJson(baseUrl, "GET", "/api/customers/" + customerId + "/transactions");
+    expect(txRes.status).toBe(200);
+    expect(txRes.body.data.length).toBe(1);
+    expect(txRes.body.data[0].type).toBe("CHARGE");
+    expect(txRes.body.data[0].amount).toBe(200);
+
+    // 4. POS Split Sale: 1 bottle = 100.00 (cash: 50, credit: 50, amount_paid: 100, change: 50)
+    const splitSaleRes = await requestJson(baseUrl, "POST", "/api/sales", {
+      items: [{ product_id: productId, quantity: 1 }],
+      payment_method: "SPLIT",
+      customer_id: customerId,
+      cash_amount: 50,
+      credit_amount: 50,
+      amount_paid: 100,
+      created_by: "cashier"
+    });
+    expect(splitSaleRes.status).toBe(201);
+    expect(splitSaleRes.body.data.sale.payment_method).toBe("SPLIT");
+    expect(splitSaleRes.body.data.sale.cash_amount).toBe(50);
+    expect(splitSaleRes.body.data.sale.credit_amount).toBe(50);
+    expect(splitSaleRes.body.data.sale.amount_paid).toBe(100);
+    expect(splitSaleRes.body.data.sale.change_amount).toBe(50);
+
+    // Customer balance is now 250.00 (200 + 50)
+    const customerAfterSplit = await requestJson(baseUrl, "GET", "/api/customers/" + customerId);
+    expect(customerAfterSplit.body.data.current_balance).toBe(250);
+
+    // 5. Attempt Credit Sale exceeding limit: 1 bottle (100.00) -> 250 + 100 = 350 > 300 limit
+    const overLimitRes = await requestJson(baseUrl, "POST", "/api/sales", {
+      items: [{ product_id: productId, quantity: 1 }],
+      payment_method: "CREDIT",
+      customer_id: customerId,
+      created_by: "cashier"
+    });
+    expect(overLimitRes.status).toBe(400);
+    expect(overLimitRes.body.error.code).toBe("VALIDATION_ERROR");
+    expect(overLimitRes.body.error.message).toContain("credit_limit");
+
+    // 6. Record Payment of 150.00
+    const paymentRes = await requestJson(baseUrl, "POST", "/api/customers/" + customerId + "/payments", {
+      amount: 150,
+      payment_method: "CASH",
+      created_by: "cashier"
+    });
+    expect(paymentRes.status).toBe(201);
+    expect(paymentRes.body.data.customer.current_balance).toBe(100);
+
+    // 7. Retry Credit Sale of 100.00 -> now succeeds because 100 + 100 = 200 <= 300 limit
+    const retryCreditRes = await requestJson(baseUrl, "POST", "/api/sales", {
+      items: [{ product_id: productId, quantity: 1 }],
+      payment_method: "CREDIT",
+      customer_id: customerId,
+      created_by: "cashier"
+    });
+    expect(retryCreditRes.status).toBe(201);
+    expect(retryCreditRes.body.data.sale.credit_amount).toBe(100);
+
+    const finalCustomer = await requestJson(baseUrl, "GET", "/api/customers/" + customerId);
+    expect(finalCustomer.body.data.current_balance).toBe(200);
+  });
 });
