@@ -211,9 +211,8 @@ export function createSqliteSalesRepository(database) {
 
       for (let index = 0; index < returnRecord.items.length; index++) {
         const item = returnRecord.items[index];
-        const returnItemId = returnRecord.return_id + "-" + String(index + 1);
         insertReturnItemStmt.run({
-          return_item_id: returnItemId,
+          return_item_id: item.return_item_id,
           return_id: returnRecord.return_id,
           sale_item_id: item.sale_item_id,
           product_id: item.product_id,

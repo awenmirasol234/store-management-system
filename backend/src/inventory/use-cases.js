@@ -1,5 +1,6 @@
 import { fromMoneyInt, fromQuantityInt, toMoneyInt, toQuantityInt } from "../shared/decimal.js";
 import { ConflictError, NotFoundError, ValidationError } from "../shared/errors.js";
+import { normalizeOptionalText } from "../shared/validation.js";
 import {
   INVENTORY_TRANSACTION_TYPES,
   calculateStockInBaseQuantity,
@@ -8,8 +9,7 @@ import {
   createProductEntity,
   createSellingOptionEntity,
   createSupplierEntity,
-  isProductLowStock,
-  normalizeOptionalText
+  isProductLowStock
 } from "./domain.js";
 
 async function assertBarcodeAvailable(dependencies, barcode, ignoreProductId, ignoreOptionId) {

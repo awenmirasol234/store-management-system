@@ -12,8 +12,6 @@ import {
   requireNonEmptyText
 } from "../shared/validation.js";
 
-export { normalizeBoolean, normalizeOptionalText, requireNonEmptyText };
-
 export const INVENTORY_TRANSACTION_TYPES = {
   STOCK_IN: "STOCK_IN",
   SALE: "SALE",

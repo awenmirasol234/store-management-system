@@ -409,6 +409,7 @@ export function createProcessReturnUseCase(dependencies) {
         await dependencies.inventoryTransactionRepository.save(inventoryTx);
 
         returnItems.push({
+          return_item_id: dependencies.idGenerator.nextId(),
           sale_item_id: saleItem.sale_item_id,
           product_id: saleItem.product_id,
           quantity: fromQuantityInt(returnQtyInt),
