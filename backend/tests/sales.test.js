@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ValidationError } from "../src/shared/errors.js";
-import { createProductUseCase, createSaveSellingOptionUseCase } from "../src/inventory/use-cases.js";
+import { createCreateProductUseCase, createSaveSellingOptionUseCase } from "../src/inventory/use-cases.js";
 import { calculateItemProfit, PAYMENT_METHODS } from "../src/sales/domain.js";
 import {
   createCalculateCartTotalsUseCase,
@@ -150,7 +150,7 @@ function createInMemorySalesDeps() {
 describe("sales domain and use cases", function () {
   it("processes base-unit, option, and ad-hoc tingi sales with exact stock deduction and profit snapshots", async function () {
     const deps = createInMemorySalesDeps();
-    const createProduct = createProductUseCase(deps);
+    const createProduct = createCreateProductUseCase(deps);
     const saveOption = createSaveSellingOptionUseCase(deps);
     const calculateCart = createCalculateCartTotalsUseCase(deps);
     const processSale = createProcessSaleUseCase(deps);
@@ -216,7 +216,7 @@ describe("sales domain and use cases", function () {
 
   it("blocks overselling when multiple lines share the same product", async function () {
     const deps = createInMemorySalesDeps();
-    const createProduct = createProductUseCase(deps);
+    const createProduct = createCreateProductUseCase(deps);
     const processSale = createProcessSaleUseCase(deps);
 
     const water = await createProduct({
@@ -242,7 +242,7 @@ describe("sales domain and use cases", function () {
 
   it("fails closed when credit repositories are missing", async function () {
     const deps = createInMemorySalesDeps();
-    const createProduct = createProductUseCase(deps);
+    const createProduct = createCreateProductUseCase(deps);
     const processSale = createProcessSaleUseCase(deps);
 
     const water = await createProduct({
@@ -269,7 +269,7 @@ describe("sales domain and use cases", function () {
 
   it("enforces credit limit on SPLIT sale and refunds credit first before cash on ProcessReturn", async function () {
     const deps = createInMemorySalesDeps();
-    const createProduct = createProductUseCase(deps);
+    const createProduct = createCreateProductUseCase(deps);
     const processSale = createProcessSaleUseCase(deps);
     const processReturn = createProcessReturnUseCase(deps);
 

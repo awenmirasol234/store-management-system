@@ -11,9 +11,12 @@ import {
   XCircle
 } from "lucide-react";
 import { api } from "../api.js";
+import { computeLocalCartTotals } from "../cart.js";
 import { formatPeso, formatQuantity } from "../format.js";
+import { getStockLevel, filterProducts, STOCK_LEVELS } from "../products.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
+import { ErrorBanner } from "../components/ErrorBanner.jsx";
 import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
@@ -21,10 +24,11 @@ import { ReceiptView } from "../components/ReceiptView.jsx";
 import { PosCheckoutModal } from "../components/PosCheckoutModal.jsx";
 
 function getStockTextClass(product) {
-  if (product.current_stock <= 0) {
+  const stockLevel = getStockLevel(product);
+  if (stockLevel === STOCK_LEVELS.OUT) {
     return "text-rose-600";
   }
-  if (product.current_stock <= product.reorder_level) {
+  if (stockLevel === STOCK_LEVELS.LOW) {
     return "text-amber-600";
   }
   return "text-emerald-600";
@@ -38,31 +42,6 @@ function buildCartKey(productId, optionId, customAmount) {
     return productId + ":opt:" + optionId;
   }
   return productId + ":base";
-}
-
-function computeLocalCartTotals(cartItems, orderDiscount) {
-  let subtotal = 0;
-  for (let index = 0; index < cartItems.length; index++) {
-    const item = cartItems[index];
-    subtotal = subtotal + item.unit_price * item.quantity;
-  }
-  subtotal = Math.round(subtotal * 100) / 100;
-
-  let discount = Number(orderDiscount);
-  if (!Number.isFinite(discount) || discount < 0) {
-    discount = 0;
-  }
-  if (discount > subtotal) {
-    discount = subtotal;
-  }
-  discount = Math.round(discount * 100) / 100;
-
-  const total = Math.round((subtotal - discount) * 100) / 100;
-  return {
-    subtotal: subtotal,
-    discount: discount,
-    total: total
-  };
 }
 
 export function PosPage() {
@@ -346,23 +325,15 @@ export function PosPage() {
     }
   }
 
-  const filteredProducts = [];
-  const lowerSearch = searchQuery.trim().toLowerCase();
+  const categoryProducts = [];
   for (let index = 0; index < products.length; index++) {
     const product = products[index];
     if (selectedCategoryId !== "ALL" && product.category_id !== selectedCategoryId) {
       continue;
     }
-    if (lowerSearch.length > 0) {
-      const nameMatches = product.product_name.toLowerCase().includes(lowerSearch);
-      const barcodeMatches =
-        product.barcode !== null && product.barcode.toLowerCase().includes(lowerSearch);
-      if (!nameMatches && !barcodeMatches) {
-        continue;
-      }
-    }
-    filteredProducts.push(product);
+    categoryProducts.push(product);
   }
+  const filteredProducts = filterProducts(categoryProducts, searchQuery);
 
   const totals = computeLocalCartTotals(cartItems, orderDiscount);
 
@@ -381,14 +352,7 @@ export function PosPage() {
     changePreview = Math.round((tenderedValue - cashDueForChange) * 100) / 100;
   }
 
-  let errorElement = null;
-  if (errorBanner) {
-    errorElement = (
-      <div className="relative z-[60] mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700">
-        {errorBanner}
-      </div>
-    );
-  }
+  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-3" />;
 
   let lowStockBadge = null;
   if (lowStockProducts.length > 0) {

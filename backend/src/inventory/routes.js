@@ -107,7 +107,7 @@ export function createInventoryRouter(dependencies) {
     }
   );
 
-  router.get("/products/:productId/options", async function listOptions(request, response) {
+  router.get("/products/:productId/options", async function listSellingOptions(request, response) {
     const options = await dependencies.useCases.listSellingOptions({
       product_id: request.params.productId
     });
@@ -134,7 +134,7 @@ export function createInventoryRouter(dependencies) {
     }
   );
 
-  router.get("/products/:productId/transactions", async function listTx(request, response) {
+  router.get("/products/:productId/transactions", async function listInventoryTransactions(request, response) {
     const transactions = await dependencies.useCases.listInventoryTransactions({
       product_id: request.params.productId
     });

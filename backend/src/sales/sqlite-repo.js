@@ -170,11 +170,7 @@ export function createSqliteSalesRepository(database) {
       };
     },
     async listRecentSales(limitCount) {
-      let limit = limitCount;
-      if (!Number.isInteger(limit) || limit <= 0) {
-        limit = 50;
-      }
-      const rows = listRecentSalesStmt.all(limit);
+      const rows = listRecentSalesStmt.all(limitCount);
       const results = [];
       for (let index = 0; index < rows.length; index++) {
         results.push(mapSaleRow(rows[index]));

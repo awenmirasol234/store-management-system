@@ -4,6 +4,7 @@ import { api } from "../api.js";
 import { formatManilaDateTime, formatPeso, formatQuantity } from "../format.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
+import { ErrorBanner } from "../components/ErrorBanner.jsx";
 import { StatCard } from "../components/StatCard.jsx";
 
 export function DashboardPage(props) {
@@ -32,14 +33,7 @@ export function DashboardPage(props) {
     loadDashboard();
   }, []);
 
-  let errorElement = null;
-  if (errorBanner) {
-    errorElement = (
-      <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700">
-        {errorBanner}
-      </div>
-    );
-  }
+  let errorElement = <ErrorBanner message={errorBanner} className="mb-4" />;
 
   let todaySales = "₱0.00";
   let todayOrdersMeta = "0 orders";

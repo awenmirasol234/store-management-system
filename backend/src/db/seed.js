@@ -2,6 +2,7 @@ import path from "node:path";
 import { openSqliteDatabase } from "./sqlite.js";
 import { toMoneyInt, toQuantityInt } from "../shared/decimal.js";
 import { createDefaultIdGenerator, createSystemClock } from "../shared/ports.js";
+import { formatReceiptNumber } from "../sales/domain.js";
 
 const CATEGORIES = [
   {
@@ -1265,7 +1266,7 @@ export function seedDatabase(targetDbPath, clean = false) {
 
   for (let saleIndex = 0; saleIndex < SAMPLE_SALES.length; saleIndex = saleIndex + 1) {
     const saleData = SAMPLE_SALES[saleIndex];
-    const receiptNum = "RCP-" + compactDate + "-" + String(saleIndex + 1).padStart(4, "0");
+    const receiptNum = formatReceiptNumber(compactDate, saleIndex + 1);
     const existingSale = findSaleByReceiptStmt.get(receiptNum);
     if (existingSale) {
       continue;

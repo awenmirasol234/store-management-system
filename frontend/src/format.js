@@ -41,3 +41,13 @@ export function formatManilaDateTime(isoString) {
     minute: "2-digit"
   });
 }
+
+export function getManilaIsoDateOffset(daysOffset) {
+  const now = new Date();
+  const manilaMs = now.getTime() + 8 * 60 * 60 * 1000 + daysOffset * 24 * 60 * 60 * 1000;
+  const shifted = new Date(manilaMs);
+  const year = String(shifted.getUTCFullYear());
+  const month = String(shifted.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(shifted.getUTCDate()).padStart(2, "0");
+  return year + "-" + month + "-" + day;
+}

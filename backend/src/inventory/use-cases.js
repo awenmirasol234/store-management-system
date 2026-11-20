@@ -28,26 +28,27 @@ async function assertBarcodeAvailable(dependencies, barcode, ignoreProductId, ig
   }
 }
 
-export function createProductUseCase(dependencies) {
+export function createCreateProductUseCase(dependencies) {
   return async function execute(input) {
+    const safeInput = input || {};
     const now = dependencies.clock.nowIso();
-    const barcode = normalizeOptionalText(input.barcode, "barcode");
+    const barcode = normalizeOptionalText(safeInput.barcode, "barcode");
     await assertBarcodeAvailable(dependencies, barcode, null, null);
 
     const product = createProductEntity({
       product_id: dependencies.idGenerator.nextId(),
-      category_id: input.category_id,
-      product_name: input.product_name,
+      category_id: safeInput.category_id,
+      product_name: safeInput.product_name,
       barcode: barcode,
-      description: input.description,
-      image_url: input.image_url,
-      base_unit: input.base_unit,
-      current_stock: input.current_stock,
-      cost_price: input.cost_price,
-      selling_price: input.selling_price,
-      reorder_level: input.reorder_level,
-      allow_custom_amount: input.allow_custom_amount,
-      is_active: input.is_active,
+      description: safeInput.description,
+      image_url: safeInput.image_url,
+      base_unit: safeInput.base_unit,
+      current_stock: safeInput.current_stock,
+      cost_price: safeInput.cost_price,
+      selling_price: safeInput.selling_price,
+      reorder_level: safeInput.reorder_level,
+      allow_custom_amount: safeInput.allow_custom_amount,
+      is_active: safeInput.is_active,
       deleted_at: null,
       created_at: now,
       updated_at: now
@@ -67,31 +68,32 @@ function pickField(incomingValue, fallbackValue) {
 
 export function createUpdateProductUseCase(dependencies) {
   return async function execute(input) {
-    const existing = await dependencies.productRepository.findById(input.product_id);
+    const safeInput = input || {};
+    const existing = await dependencies.productRepository.findById(safeInput.product_id);
     if (!existing || existing.deleted_at !== null) {
-      throw new NotFoundError("Product not found: " + input.product_id);
+      throw new NotFoundError("Product not found: " + safeInput.product_id);
     }
 
     let nextBarcode = existing.barcode;
-    if (input.barcode !== undefined) {
-      nextBarcode = normalizeOptionalText(input.barcode, "barcode");
+    if (safeInput.barcode !== undefined) {
+      nextBarcode = normalizeOptionalText(safeInput.barcode, "barcode");
     }
     await assertBarcodeAvailable(dependencies, nextBarcode, existing.product_id, null);
 
     const updated = createProductEntity({
       product_id: existing.product_id,
-      category_id: pickField(input.category_id, existing.category_id),
-      product_name: pickField(input.product_name, existing.product_name),
+      category_id: pickField(safeInput.category_id, existing.category_id),
+      product_name: pickField(safeInput.product_name, existing.product_name),
       barcode: nextBarcode,
-      description: pickField(input.description, existing.description),
-      image_url: pickField(input.image_url, existing.image_url),
-      base_unit: pickField(input.base_unit, existing.base_unit),
+      description: pickField(safeInput.description, existing.description),
+      image_url: pickField(safeInput.image_url, existing.image_url),
+      base_unit: pickField(safeInput.base_unit, existing.base_unit),
       current_stock: existing.current_stock,
-      cost_price: pickField(input.cost_price, existing.cost_price),
-      selling_price: pickField(input.selling_price, existing.selling_price),
-      reorder_level: pickField(input.reorder_level, existing.reorder_level),
-      allow_custom_amount: pickField(input.allow_custom_amount, existing.allow_custom_amount),
-      is_active: pickField(input.is_active, existing.is_active),
+      cost_price: pickField(safeInput.cost_price, existing.cost_price),
+      selling_price: pickField(safeInput.selling_price, existing.selling_price),
+      reorder_level: pickField(safeInput.reorder_level, existing.reorder_level),
+      allow_custom_amount: pickField(safeInput.allow_custom_amount, existing.allow_custom_amount),
+      is_active: pickField(safeInput.is_active, existing.is_active),
       deleted_at: null,
       created_at: existing.created_at,
       updated_at: dependencies.clock.nowIso()
@@ -104,9 +106,10 @@ export function createUpdateProductUseCase(dependencies) {
 
 export function createDeleteProductUseCase(dependencies) {
   return async function execute(input) {
-    const existing = await dependencies.productRepository.findById(input.product_id);
+    const safeInput = input || {};
+    const existing = await dependencies.productRepository.findById(safeInput.product_id);
     if (!existing || existing.deleted_at !== null) {
-      throw new NotFoundError("Product not found: " + input.product_id);
+      throw new NotFoundError("Product not found: " + safeInput.product_id);
     }
 
     const now = dependencies.clock.nowIso();
@@ -123,13 +126,14 @@ export function createDeleteProductUseCase(dependencies) {
 
 export function createSaveSellingOptionUseCase(dependencies) {
   return async function execute(input) {
-    const product = await dependencies.productRepository.findById(input.product_id);
+    const safeInput = input || {};
+    const product = await dependencies.productRepository.findById(safeInput.product_id);
     if (!product || product.deleted_at !== null) {
-      throw new NotFoundError("Product not found: " + input.product_id);
+      throw new NotFoundError("Product not found: " + safeInput.product_id);
     }
 
     const now = dependencies.clock.nowIso();
-    let optionId = input.option_id;
+    let optionId = safeInput.option_id;
     let createdAt = now;
     if (optionId) {
       const existing = await dependencies.sellingOptionRepository.findById(optionId);
@@ -141,17 +145,17 @@ export function createSaveSellingOptionUseCase(dependencies) {
       optionId = dependencies.idGenerator.nextId();
     }
 
-    const barcode = normalizeOptionalText(input.barcode, "barcode");
+    const barcode = normalizeOptionalText(safeInput.barcode, "barcode");
     await assertBarcodeAvailable(dependencies, barcode, null, optionId);
 
     const option = createSellingOptionEntity({
       option_id: optionId,
       product_id: product.product_id,
-      option_name: input.option_name,
+      option_name: safeInput.option_name,
       barcode: barcode,
-      quantity: input.quantity,
-      price: input.price,
-      is_active: input.is_active,
+      quantity: safeInput.quantity,
+      price: safeInput.price,
+      is_active: safeInput.is_active,
       created_at: createdAt,
       updated_at: now
     });
@@ -163,35 +167,33 @@ export function createSaveSellingOptionUseCase(dependencies) {
 
 export function createStockInUseCase(dependencies) {
   return async function execute(input) {
+    const safeInput = input || {};
     return dependencies.unitOfWork.run(async function runStockIn() {
-      const product = await dependencies.productRepository.findById(input.product_id);
+      const product = await dependencies.productRepository.findById(safeInput.product_id);
       if (!product || product.deleted_at !== null) {
-        throw new NotFoundError("Product not found: " + input.product_id);
+        throw new NotFoundError("Product not found: " + safeInput.product_id);
       }
 
       let optionQuantity = null;
       let optionId = null;
-      if (input.option_id) {
-        const option = await dependencies.sellingOptionRepository.findById(input.option_id);
+      if (safeInput.option_id) {
+        const option = await dependencies.sellingOptionRepository.findById(safeInput.option_id);
         if (!option || option.product_id !== product.product_id) {
-          throw new NotFoundError("Selling option not found for product: " + input.option_id);
+          throw new NotFoundError("Selling option not found for product: " + safeInput.option_id);
         }
         optionQuantity = option.quantity;
         optionId = option.option_id;
       }
 
-      const addedQuantity = calculateStockInBaseQuantity(input.quantity, optionQuantity);
+      const addedQuantity = calculateStockInBaseQuantity(safeInput.quantity, optionQuantity);
       const addedQuantityInt = toQuantityInt(addedQuantity, "added_quantity");
       const currentStockInt = toQuantityInt(product.current_stock, "current_stock");
       const updatedStock = fromQuantityInt(currentStockInt + addedQuantityInt);
 
       let nextCostPrice = product.cost_price;
       let transactionUnitCost = product.cost_price;
-      if (input.unit_cost !== undefined && input.unit_cost !== null) {
-        const parsedCostInt = toMoneyInt(input.unit_cost, "unit_cost");
-        if (parsedCostInt < 0) {
-          throw new ValidationError("unit_cost cannot be negative");
-        }
+      if (safeInput.unit_cost !== undefined && safeInput.unit_cost !== null) {
+        const parsedCostInt = toMoneyInt(safeInput.unit_cost, "unit_cost");
         nextCostPrice = fromMoneyInt(parsedCostInt);
         transactionUnitCost = nextCostPrice;
       }
@@ -208,14 +210,14 @@ export function createStockInUseCase(dependencies) {
       const transaction = createInventoryTransactionEntity({
         transaction_id: dependencies.idGenerator.nextId(),
         product_id: product.product_id,
-        supplier_id: input.supplier_id,
+        supplier_id: safeInput.supplier_id,
         option_id: optionId,
         transaction_type: INVENTORY_TRANSACTION_TYPES.STOCK_IN,
         quantity: addedQuantity,
         unit_cost: transactionUnitCost,
-        reference_number: input.reference_number,
-        remarks: input.remarks,
-        created_by: input.created_by,
+        reference_number: safeInput.reference_number,
+        remarks: safeInput.remarks,
+        created_by: safeInput.created_by,
         created_at: now
       });
 
@@ -232,21 +234,22 @@ export function createStockInUseCase(dependencies) {
 
 export function createAdjustStockUseCase(dependencies) {
   return async function execute(input) {
+    const safeInput = input || {};
     return dependencies.unitOfWork.run(async function runAdjustStock() {
       const allowedTypes = new Set([
         INVENTORY_TRANSACTION_TYPES.ADJUSTMENT,
         INVENTORY_TRANSACTION_TYPES.DAMAGED,
         INVENTORY_TRANSACTION_TYPES.EXPIRED
       ]);
-      if (!allowedTypes.has(input.transaction_type)) {
+      if (!allowedTypes.has(safeInput.transaction_type)) {
         throw new ValidationError(
           "AdjustStock only supports ADJUSTMENT, DAMAGED, or EXPIRED"
         );
       }
 
-      const product = await dependencies.productRepository.findById(input.product_id);
+      const product = await dependencies.productRepository.findById(safeInput.product_id);
       if (!product || product.deleted_at !== null) {
-        throw new NotFoundError("Product not found: " + input.product_id);
+        throw new NotFoundError("Product not found: " + safeInput.product_id);
       }
 
       const now = dependencies.clock.nowIso();
@@ -255,12 +258,12 @@ export function createAdjustStockUseCase(dependencies) {
         product_id: product.product_id,
         supplier_id: null,
         option_id: null,
-        transaction_type: input.transaction_type,
-        quantity: input.quantity,
+        transaction_type: safeInput.transaction_type,
+        quantity: safeInput.quantity,
         unit_cost: product.cost_price,
-        reference_number: input.reference_number,
-        remarks: input.remarks,
-        created_by: input.created_by,
+        reference_number: safeInput.reference_number,
+        remarks: safeInput.remarks,
+        created_by: safeInput.created_by,
         created_at: now
       });
 

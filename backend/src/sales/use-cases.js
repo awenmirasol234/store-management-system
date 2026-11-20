@@ -105,8 +105,9 @@ function aggregateRequiredStockByProduct(lines) {
 
 export function createCalculateCartTotalsUseCase(dependencies) {
   return async function execute(input) {
-    const resolved = await resolveCartLines(dependencies, input.items);
-    const totals = applyOrderDiscount(resolved.subtotal_int, input.discount_amount);
+    const safeInput = input || {};
+    const resolved = await resolveCartLines(dependencies, safeInput.items);
+    const totals = applyOrderDiscount(resolved.subtotal_int, safeInput.discount_amount);
     const requiredByProduct = aggregateRequiredStockByProduct(resolved.lines);
 
     const stockWarnings = [];
@@ -190,11 +191,12 @@ async function recordCustomerCreditCharge(dependencies, creditContext, chargeInp
 
 export function createProcessSaleUseCase(dependencies) {
   return async function execute(input) {
+    const safeInput = input || {};
     return dependencies.unitOfWork.run(async function runProcessSale() {
-      const createdBy = requireNonEmptyText(input.created_by, "created_by");
-      const shiftId = normalizeOptionalText(input.shift_id, "shift_id");
-      const resolved = await resolveCartLines(dependencies, input.items);
-      const totals = applyOrderDiscount(resolved.subtotal_int, input.discount_amount);
+      const createdBy = requireNonEmptyText(safeInput.created_by, "created_by");
+      const shiftId = normalizeOptionalText(safeInput.shift_id, "shift_id");
+      const resolved = await resolveCartLines(dependencies, safeInput.items);
+      const totals = applyOrderDiscount(resolved.subtotal_int, safeInput.discount_amount);
       const requiredByProduct = aggregateRequiredStockByProduct(resolved.lines);
 
       for (const [productId, requiredInt] of requiredByProduct.entries()) {
@@ -206,12 +208,12 @@ export function createProcessSaleUseCase(dependencies) {
       }
 
       const payment = validatePaymentBreakdown({
-        payment_method: input.payment_method,
+        payment_method: safeInput.payment_method,
         total_amount: fromMoneyInt(totals.total_int),
-        cash_amount: input.cash_amount,
-        credit_amount: input.credit_amount,
-        amount_paid: input.amount_paid,
-        customer_id: input.customer_id
+        cash_amount: safeInput.cash_amount,
+        credit_amount: safeInput.credit_amount,
+        amount_paid: safeInput.amount_paid,
+        customer_id: safeInput.customer_id
       });
 
       const creditContext = await validateCustomerCredit(dependencies, payment);
@@ -314,18 +316,19 @@ function calculateProportionalInt(totalInt, partQuantityInt, wholeQuantityInt) {
 
 export function createProcessReturnUseCase(dependencies) {
   return async function execute(input) {
+    const safeInput = input || {};
     return dependencies.unitOfWork.run(async function runProcessReturn() {
-      const createdBy = requireNonEmptyText(input.created_by, "created_by");
-      const remarks = requireNonEmptyText(input.remarks, "remarks");
-      const shiftId = normalizeOptionalText(input.shift_id, "shift_id");
+      const createdBy = requireNonEmptyText(safeInput.created_by, "created_by");
+      const remarks = requireNonEmptyText(safeInput.remarks, "remarks");
+      const shiftId = normalizeOptionalText(safeInput.shift_id, "shift_id");
 
-      if (!Array.isArray(input.items) || input.items.length === 0) {
+      if (!Array.isArray(safeInput.items) || safeInput.items.length === 0) {
         throw new ValidationError("Return must include at least one item");
       }
 
-      const existingSaleRecord = await dependencies.salesRepository.findSaleById(input.sale_id);
+      const existingSaleRecord = await dependencies.salesRepository.findSaleById(safeInput.sale_id);
       if (!existingSaleRecord) {
-        throw new NotFoundError("Sale not found: " + input.sale_id);
+        throw new NotFoundError("Sale not found: " + safeInput.sale_id);
       }
 
       const sale = existingSaleRecord.sale;
@@ -343,8 +346,8 @@ export function createProcessReturnUseCase(dependencies) {
       let totalRefundInt = 0;
       const returnItems = [];
 
-      for (let index = 0; index < input.items.length; index++) {
-        const requestItem = input.items[index];
+      for (let index = 0; index < safeInput.items.length; index++) {
+        const requestItem = safeInput.items[index];
         const saleItem = itemsById.get(requestItem.sale_item_id);
         if (!saleItem) {
           throw new NotFoundError("Sale item not found in sale: " + requestItem.sale_item_id);

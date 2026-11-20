@@ -11,8 +11,10 @@ import {
 } from "lucide-react";
 import { api } from "../api.js";
 import { formatPeso, formatQuantity } from "../format.js";
+import { filterProducts, getStockLevel, STOCK_LEVELS } from "../products.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
+import { ErrorBanner } from "../components/ErrorBanner.jsx";
 import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
@@ -36,10 +38,11 @@ function createEmptyProductForm() {
 }
 
 function getStockBadgeTone(product) {
-  if (product.current_stock <= 0) {
+  const stockLevel = getStockLevel(product);
+  if (stockLevel === STOCK_LEVELS.OUT) {
     return "red";
   }
-  if (product.current_stock <= product.reorder_level) {
+  if (stockLevel === STOCK_LEVELS.LOW) {
     return "amber";
   }
   return "green";
@@ -341,32 +344,17 @@ export function InventoryPage() {
     }
   }
 
-  const filteredProducts = [];
-  const lowerQuery = searchQuery.trim().toLowerCase();
+  const stockFilteredProducts = [];
   for (let index = 0; index < products.length; index++) {
     const product = products[index];
-    if (lowStockOnly && product.current_stock > product.reorder_level) {
+    if (lowStockOnly && getStockLevel(product) === STOCK_LEVELS.HEALTHY) {
       continue;
     }
-    if (lowerQuery.length > 0) {
-      const nameHit = product.product_name.toLowerCase().includes(lowerQuery);
-      const barcodeHit =
-        product.barcode !== null && product.barcode.toLowerCase().includes(lowerQuery);
-      if (!nameHit && !barcodeHit) {
-        continue;
-      }
-    }
-    filteredProducts.push(product);
+    stockFilteredProducts.push(product);
   }
+  const filteredProducts = filterProducts(stockFilteredProducts, searchQuery);
 
-  let errorElement = null;
-  if (errorBanner) {
-    errorElement = (
-      <div className="relative z-[60] mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700">
-        {errorBanner}
-      </div>
-    );
-  }
+  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-4" />;
 
   let lowStockToggleVariant = "secondary";
   if (lowStockOnly) {

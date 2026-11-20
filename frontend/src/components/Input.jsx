@@ -23,6 +23,13 @@ export function Input(props) {
     );
   }
 
+  let helperElement = null;
+  if (props.helper) {
+    helperElement = (
+      <div className="mt-1 font-mono text-xs text-slate-500">{props.helper}</div>
+    );
+  }
+
   return (
     <div className={extraClass}>
       {labelElement}
@@ -42,6 +49,7 @@ export function Input(props) {
           fontClass
         }
       />
+      {helperElement}
     </div>
   );
 }

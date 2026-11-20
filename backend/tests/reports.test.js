@@ -6,7 +6,7 @@ import {
   createSqliteProductRepository,
   createSqliteSellingOptionRepository
 } from "../src/inventory/sqlite-repo.js";
-import { createProductUseCase } from "../src/inventory/use-cases.js";
+import { createCreateProductUseCase } from "../src/inventory/use-cases.js";
 import { createSqliteSalesRepository } from "../src/sales/sqlite-repo.js";
 import { PAYMENT_METHODS } from "../src/sales/domain.js";
 import { createProcessSaleUseCase } from "../src/sales/use-cases.js";
@@ -53,7 +53,7 @@ describe("reports SQLite repository", function () {
       salesRepository: createSqliteSalesRepository(database)
     };
 
-    const createProduct = createProductUseCase(deps);
+    const createProduct = createCreateProductUseCase(deps);
     const processSale = createProcessSaleUseCase(deps);
     const reportsRepo = createSqliteReportsRepository(database);
     const reportDeps = {

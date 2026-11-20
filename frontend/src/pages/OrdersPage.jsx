@@ -4,6 +4,7 @@ import { api } from "../api.js";
 import { formatManilaDateTime, formatPeso, formatQuantity } from "../format.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
+import { ErrorBanner } from "../components/ErrorBanner.jsx";
 import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
 import { ReceiptView } from "../components/ReceiptView.jsx";
@@ -114,14 +115,7 @@ export function OrdersPage() {
     }
   }
 
-  let errorElement = null;
-  if (errorBanner) {
-    errorElement = (
-      <div className="relative z-[60] mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700">
-        {errorBanner}
-      </div>
-    );
-  }
+  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-4" />;
 
   let tableBody = (
     <tr>

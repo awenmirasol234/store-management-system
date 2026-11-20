@@ -5,7 +5,7 @@ import {
   createAdjustStockUseCase,
   createDeleteProductUseCase,
   createGetLowStockProductsUseCase,
-  createProductUseCase,
+  createCreateProductUseCase,
   createSaveSellingOptionUseCase,
   createStockInUseCase
 } from "../src/inventory/use-cases.js";
@@ -83,7 +83,7 @@ function createInMemoryInventoryDeps() {
 describe("inventory domain and use cases", function () {
   it("creates a product with image_url and enforces cross-table barcode uniqueness", async function () {
     const deps = createInMemoryInventoryDeps();
-    const createProduct = createProductUseCase(deps);
+    const createProduct = createCreateProductUseCase(deps);
     const saveOption = createSaveSellingOptionUseCase(deps);
 
     const noodles = await createProduct({
@@ -134,7 +134,7 @@ describe("inventory domain and use cases", function () {
 
   it("stocks in by bulk pack/box multiplier and updates cost_price to latest unit_cost", async function () {
     const deps = createInMemoryInventoryDeps();
-    const createProduct = createProductUseCase(deps);
+    const createProduct = createCreateProductUseCase(deps);
     const saveOption = createSaveSellingOptionUseCase(deps);
     const stockIn = createStockInUseCase(deps);
 
@@ -173,7 +173,7 @@ describe("inventory domain and use cases", function () {
 
   it("enforces sign rules, remarks, and non-negative stock on AdjustStock", async function () {
     const deps = createInMemoryInventoryDeps();
-    const createProduct = createProductUseCase(deps);
+    const createProduct = createCreateProductUseCase(deps);
     const adjustStock = createAdjustStockUseCase(deps);
 
     const rice = await createProduct({
@@ -231,7 +231,7 @@ describe("inventory domain and use cases", function () {
 
   it("soft-deletes products via deleted_at and excludes them from low-stock alerts", async function () {
     const deps = createInMemoryInventoryDeps();
-    const createProduct = createProductUseCase(deps);
+    const createProduct = createCreateProductUseCase(deps);
     const deleteProduct = createDeleteProductUseCase(deps);
     const getLowStock = createGetLowStockProductsUseCase(deps);
 

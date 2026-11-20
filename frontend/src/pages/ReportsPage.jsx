@@ -1,19 +1,10 @@
 import { useEffect, useState } from "react";
 import { Banknote, CreditCard, TrendingUp, Wallet } from "lucide-react";
 import { api } from "../api.js";
-import { formatPeso, formatQuantity } from "../format.js";
+import { formatPeso, formatQuantity, getManilaIsoDateOffset } from "../format.js";
 import { Button } from "../components/Button.jsx";
+import { ErrorBanner } from "../components/ErrorBanner.jsx";
 import { StatCard } from "../components/StatCard.jsx";
-
-function getManilaIsoDateOffset(daysOffset) {
-  const now = new Date();
-  const manilaMs = now.getTime() + 8 * 60 * 60 * 1000 + daysOffset * 24 * 60 * 60 * 1000;
-  const shifted = new Date(manilaMs);
-  const year = String(shifted.getUTCFullYear());
-  const month = String(shifted.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(shifted.getUTCDate()).padStart(2, "0");
-  return year + "-" + month + "-" + day;
-}
 
 export function ReportsPage() {
   const [fromDate, setFromDate] = useState(function initFrom() {
@@ -60,14 +51,7 @@ export function ReportsPage() {
     setToDate(end);
   }
 
-  let errorElement = null;
-  if (errorBanner) {
-    errorElement = (
-      <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700">
-        {errorBanner}
-      </div>
-    );
-  }
+  let errorElement = <ErrorBanner message={errorBanner} className="mb-4" />;
 
   let grossSales = "₱0.00";
   let netProfit = "₱0.00";

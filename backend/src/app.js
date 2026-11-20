@@ -25,7 +25,7 @@ import {
   createListSellingOptionsUseCase,
   createListSuppliersUseCase,
   createLookupBarcodeUseCase,
-  createProductUseCase,
+  createCreateProductUseCase,
   createSaveSellingOptionUseCase,
   createStockInUseCase,
   createUpdateProductUseCase
@@ -91,7 +91,6 @@ export function createApp(options) {
   const idGenerator = config.idGenerator || createDefaultIdGenerator();
   const clock = config.clock || createSystemClock();
   const unitOfWork = createSqliteUnitOfWork(database);
-
   const productRepository = createSqliteProductRepository(database);
   const sellingOptionRepository = createSqliteSellingOptionRepository(database);
   const inventoryTransactionRepository = createSqliteInventoryTransactionRepository(database);
@@ -109,11 +108,12 @@ export function createApp(options) {
     inventoryTransactionRepository: inventoryTransactionRepository,
     categoryRepository: categoryRepository,
     supplierRepository: supplierRepository,
-    salesRepository: salesRepository
+    salesRepository: salesRepository,
+    reportsRepository: reportsRepository
   };
 
   const inventoryUseCases = {
-    createProduct: createProductUseCase(sharedDeps),
+    createProduct: createCreateProductUseCase(sharedDeps),
     updateProduct: createUpdateProductUseCase(sharedDeps),
     deleteProduct: createDeleteProductUseCase(sharedDeps),
     saveSellingOption: createSaveSellingOptionUseCase(sharedDeps),
@@ -140,12 +140,9 @@ export function createApp(options) {
   };
 
   const reportsUseCases = {
-    getSummary: createGetReportsSummaryUseCase({ reportsRepository: reportsRepository, clock: clock }),
-    getTopProducts: createGetTopProductsUseCase({ reportsRepository: reportsRepository, clock: clock }),
-    getDailyBreakdown: createGetDailyBreakdownUseCase({
-      reportsRepository: reportsRepository,
-      clock: clock
-    })
+    getSummary: createGetReportsSummaryUseCase(sharedDeps),
+    getTopProducts: createGetTopProductsUseCase(sharedDeps),
+    getDailyBreakdown: createGetDailyBreakdownUseCase(sharedDeps)
   };
 
   const app = express();

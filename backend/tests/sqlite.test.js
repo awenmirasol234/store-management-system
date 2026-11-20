@@ -7,7 +7,7 @@ import {
   createSqliteSellingOptionRepository
 } from "../src/inventory/sqlite-repo.js";
 import {
-  createProductUseCase,
+  createCreateProductUseCase,
   createSaveSellingOptionUseCase,
   createStockInUseCase
 } from "../src/inventory/use-cases.js";
@@ -50,7 +50,7 @@ function createSqliteDeps() {
 describe("SQLite repositories and UnitOfWork", function () {
   it("persists scaled integers accurately across StockIn, ProcessSale, and ProcessReturn", async function () {
     const deps = createSqliteDeps();
-    const createProduct = createProductUseCase(deps);
+    const createProduct = createCreateProductUseCase(deps);
     const saveOption = createSaveSellingOptionUseCase(deps);
     const stockIn = createStockInUseCase(deps);
     const processSale = createProcessSaleUseCase(deps);
@@ -119,7 +119,7 @@ describe("SQLite repositories and UnitOfWork", function () {
 
   it("rolls back all writes atomically when UnitOfWork throws mid-transaction", async function () {
     const deps = createSqliteDeps();
-    const createProduct = createProductUseCase(deps);
+    const createProduct = createCreateProductUseCase(deps);
 
     const water = await createProduct({
       product_name: "Water",
