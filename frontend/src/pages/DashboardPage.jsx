@@ -113,8 +113,8 @@ export function DashboardPage(props) {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
-      <div className="mb-5 sm:mb-7 flex items-center justify-between gap-3">
+    <div className="flex h-full flex-1 flex-col overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-7">
+      <div className="mb-5 sm:mb-6 flex items-center justify-between gap-3">
         <h1 className="text-lg font-bold text-slate-900">Dashboard</h1>
         <div className="flex items-center gap-2 sm:gap-3">
           <Button variant="secondary" size="sm" onClick={loadDashboard}>
@@ -135,7 +135,7 @@ export function DashboardPage(props) {
 
       {errorElement}
 
-      <div className="mb-6 sm:mb-8 grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-6 sm:mb-7 grid grid-cols-1 gap-4 sm:gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Today's Sales"
           value={todaySales}
@@ -163,8 +163,8 @@ export function DashboardPage(props) {
         />
       </div>
 
-      <div className="grid flex-1 grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
-        <section className="flex flex-col rounded-xl border border-slate-200 bg-white p-6">
+      <div className="grid flex-1 grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
+        <section className="flex flex-col rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-900">Low Stock</h2>
             <Button
@@ -180,7 +180,7 @@ export function DashboardPage(props) {
           {lowStockList}
         </section>
 
-        <section className="flex flex-col rounded-xl border border-slate-200 bg-white p-6">
+        <section className="flex flex-col rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-900">Recent Sales</h2>
             <Button

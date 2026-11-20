@@ -24,18 +24,18 @@ export function StatCard(props) {
 
   let footerElement = null;
   if (props.meta) {
-    footerElement = <div className="mt-2 font-mono text-xs text-slate-500">{props.meta}</div>;
+    footerElement = <div className="mt-1.5 font-mono text-xs text-slate-500">{props.meta}</div>;
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <div className="text-xs font-semibold text-slate-500">
             {props.label}
           </div>
           <div
-            className={"mt-2.5 font-mono text-2xl font-bold " + getValueToneClass(props.tone)}
+            className={"mt-2 font-mono text-2xl font-bold " + getValueToneClass(props.tone)}
           >
             {props.value}
           </div>

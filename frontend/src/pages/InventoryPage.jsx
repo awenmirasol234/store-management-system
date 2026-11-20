@@ -422,7 +422,7 @@ export function InventoryPage() {
       }
       return (
         <tr key={product.product_id} className="hover:bg-slate-50">
-          <td className="px-5 py-4">
+          <td className="px-5 py-3.5">
             <div className="flex items-center gap-3.5">
               <ProductThumb imageUrl={product.image_url} name={product.product_name} size="sm" />
               <div>
@@ -431,19 +431,19 @@ export function InventoryPage() {
               </div>
             </div>
           </td>
-          <td className="px-5 py-4 text-xs text-slate-600">{product.base_unit}</td>
-          <td className="px-5 py-4 font-mono text-sm text-slate-600 text-right">
+          <td className="px-5 py-3.5 text-xs text-slate-600">{product.base_unit}</td>
+          <td className="px-5 py-3.5 font-mono text-sm text-slate-600 text-right">
             {formatPeso(product.cost_price)}
           </td>
-          <td className="px-5 py-4 font-mono text-sm font-semibold text-slate-900 text-right">
+          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-slate-900 text-right">
             {formatPeso(product.selling_price)}
           </td>
-          <td className="px-5 py-4 text-right">
+          <td className="px-5 py-3.5 text-right">
             <Badge tone={getStockBadgeTone(product)} className="font-mono">
               {formatQuantity(product.current_stock)} {product.base_unit}
             </Badge>
           </td>
-          <td className="px-5 py-4">
+          <td className="px-5 py-3.5">
             <div className="flex items-center justify-end gap-1.5">
               <Button
                 variant="soft"
@@ -598,8 +598,8 @@ export function InventoryPage() {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-4 sm:p-6 lg:p-8">
-      <div className="mb-4 sm:mb-6 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+    <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-4 sm:p-6 lg:p-7">
+      <div className="mb-5 sm:mb-6 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-2 sm:gap-3.5 flex-1 min-w-56 sm:min-w-64">
           <div className="relative flex-1 max-w-sm">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -653,12 +653,12 @@ export function InventoryPage() {
         <table className="w-full border-collapse text-left">
           <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
             <tr>
-              <th className="px-5 py-3.5">Product</th>
-              <th className="px-5 py-3.5">Unit</th>
-              <th className="px-5 py-3.5 text-right">Cost</th>
-              <th className="px-5 py-3.5 text-right">Price</th>
-              <th className="px-5 py-3.5 text-right">Stock</th>
-              <th className="px-5 py-3.5 text-right">Actions</th>
+              <th className="px-5 py-3">Product</th>
+              <th className="px-5 py-3">Unit</th>
+              <th className="px-5 py-3 text-right">Cost</th>
+              <th className="px-5 py-3 text-right">Price</th>
+              <th className="px-5 py-3 text-right">Stock</th>
+              <th className="px-5 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">{productTableBody}</tbody>

@@ -67,7 +67,7 @@ export function Sidebar(props) {
     );
   } else {
     headerElement = (
-      <div className="flex items-center justify-between px-6 py-6">
+      <div className="flex items-center justify-between px-5 py-5">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shrink-0">
             <Store className="h-5 w-5" />
@@ -103,7 +103,7 @@ export function Sidebar(props) {
     );
   } else {
     footerElement = (
-      <div className="border-t border-white/10 px-5 py-5">
+      <div className="border-t border-white/10 px-5 py-4">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600/20 text-xs font-semibold text-blue-300 shrink-0">
             OW

@@ -189,22 +189,22 @@ export function TransactionsPage() {
     tableBody = filteredSales.map(function renderSaleRow(sale) {
       return (
         <tr key={sale.sale_id} className="hover:bg-slate-50">
-          <td className="px-5 py-4 font-mono text-sm font-semibold text-slate-900">
+          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-slate-900">
             #{sale.receipt_number}
           </td>
-          <td className="px-5 py-4 font-mono text-xs text-slate-600">
+          <td className="px-5 py-3.5 font-mono text-xs text-slate-600">
             {formatSmartDateTime(sale.created_at)}
           </td>
-          <td className="px-5 py-4">
+          <td className="px-5 py-3.5">
             <Badge tone={getPaymentTone(sale.payment_method)}>{sale.payment_method}</Badge>
           </td>
-          <td className="px-5 py-4 font-mono text-sm font-bold text-slate-900 text-right">
+          <td className="px-5 py-3.5 font-mono text-sm font-bold text-slate-900 text-right">
             {formatPeso(sale.total_amount)}
           </td>
-          <td className="px-5 py-4 font-mono text-xs text-slate-600 text-right">
+          <td className="px-5 py-3.5 font-mono text-xs text-slate-600 text-right">
             {formatPeso(sale.change_amount)}
           </td>
-          <td className="px-5 py-4 text-right">
+          <td className="px-5 py-3.5 text-right">
             <Button
               variant="secondary"
               size="sm"
@@ -353,8 +353,8 @@ export function TransactionsPage() {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-4 sm:p-6 lg:p-8">
-      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+    <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-4 sm:p-6 lg:p-7">
+      <div className="mb-5 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <h1 className="text-lg font-bold text-slate-900">Transactions</h1>
 
         <div className="flex items-center gap-2.5 flex-1 max-w-sm sm:justify-end">
@@ -390,12 +390,12 @@ export function TransactionsPage() {
         <table className="w-full border-collapse text-left">
           <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
             <tr>
-              <th className="px-5 py-3.5">Receipt</th>
-              <th className="px-5 py-3.5">Date (Manila)</th>
-              <th className="px-5 py-3.5">Payment</th>
-              <th className="px-5 py-3.5 text-right">Total</th>
-              <th className="px-5 py-3.5 text-right">Change</th>
-              <th className="px-5 py-3.5 text-right">Action</th>
+              <th className="px-5 py-3">Receipt</th>
+              <th className="px-5 py-3">Date (Manila)</th>
+              <th className="px-5 py-3">Payment</th>
+              <th className="px-5 py-3 text-right">Total</th>
+              <th className="px-5 py-3 text-right">Change</th>
+              <th className="px-5 py-3 text-right">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">{tableBody}</tbody>
