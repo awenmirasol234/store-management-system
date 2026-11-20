@@ -46,6 +46,11 @@ function buildCartKey(productId, optionId, customAmount) {
 
 export function PosPage() {
   const searchInputRef = useRef(null);
+  const categoryScrollRef = useRef(null);
+  const dragStartXRef = useRef(0);
+  const dragScrollLeftRef = useRef(0);
+  const hasDraggedCategoryRef = useRef(false);
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
@@ -375,6 +380,47 @@ export function PosPage() {
     );
   }
 
+  function handleCategoryMouseDown(event) {
+    if (event.button !== 0 || !categoryScrollRef.current) {
+      return;
+    }
+    hasDraggedCategoryRef.current = false;
+    dragStartXRef.current = event.pageX;
+    dragScrollLeftRef.current = categoryScrollRef.current.scrollLeft;
+
+    function handleWindowMouseMove(moveEvent) {
+      if (!categoryScrollRef.current) {
+        return;
+      }
+      const distance = moveEvent.pageX - dragStartXRef.current;
+      if (Math.abs(distance) > 5) {
+        hasDraggedCategoryRef.current = true;
+      }
+      categoryScrollRef.current.scrollLeft = dragScrollLeftRef.current - distance;
+    }
+
+    function handleWindowMouseUp() {
+      window.removeEventListener("mousemove", handleWindowMouseMove);
+      window.removeEventListener("mouseup", handleWindowMouseUp);
+      setTimeout(function resetDragFlag() {
+        hasDraggedCategoryRef.current = false;
+      }, 0);
+    }
+
+    window.addEventListener("mousemove", handleWindowMouseMove);
+    window.addEventListener("mouseup", handleWindowMouseUp);
+  }
+
+  function handleSelectCategory(categoryId) {
+    if (hasDraggedCategoryRef.current) {
+      return;
+    }
+    setSelectedCategoryId(categoryId);
+  }
+
+  const categoryContainerClass =
+    "mb-6 flex items-center gap-2.5 overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing select-none";
+
   let allCategoryClass =
     "shrink-0 rounded-lg px-4 py-2 text-xs font-medium cursor-pointer ";
   if (selectedCategoryId === "ALL") {
@@ -646,11 +692,20 @@ export function PosPage() {
         {errorElement}
 
         {/* Category Filter Pills */}
-        <div className="mb-6 flex items-center gap-2.5 overflow-x-auto pb-1.5">
+        <div
+          ref={categoryScrollRef}
+          onMouseDown={handleCategoryMouseDown}
+          onWheel={function handleCategoryWheel(event) {
+            if (event.deltaY !== 0) {
+              event.currentTarget.scrollLeft = event.currentTarget.scrollLeft + event.deltaY;
+            }
+          }}
+          className={categoryContainerClass}
+        >
           <button
             type="button"
             onClick={function selectAll() {
-              setSelectedCategoryId("ALL");
+              handleSelectCategory("ALL");
             }}
             className={allCategoryClass}
           >
@@ -671,7 +726,7 @@ export function PosPage() {
                 key={category.category_id}
                 type="button"
                 onClick={function selectCat() {
-                  setSelectedCategoryId(category.category_id);
+                  handleSelectCategory(category.category_id);
                 }}
                 className={pillClass}
               >

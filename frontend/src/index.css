@@ -25,6 +25,15 @@
   }
 }
 
+/* Hide scrollbars while preserving scroll functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* 58mm / 80mm thermal receipt print rules */
 @media print {
   body * {
