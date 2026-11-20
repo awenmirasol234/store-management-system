@@ -84,6 +84,7 @@ Reference specifications: `docs/product-inventory-and-selling-options.md` and `d
 - Follow `.agents/skills/ponytail/SKILL.md`: take the smallest complete change that solves the task.
 - Use **fundamental, beginner-maintainable JavaScript patterns**: plain functions, simple objects, `if`/`else`, `for` loops, `try`/`catch`, `async`/`await`, early returns, and clear intermediate variables.
 - **No ternary operators (`? :`)**: always use explicit `if`/`else` statements.
+- **No object spread syntax (`{ ...obj }`)**: always use `Object.assign({}, existing, updates)` or explicit property assignment so copied/updated fields are clear to beginners.
 - **No complex arguments or parameters**: keep parameter lists short and flat (or pass one simple flat object when multiple fields are needed); avoid nested destructuring, default-value gymnastics, or spread/rest tricks in function signatures.
 - Avoid advanced or clever patterns: no `Proxy`/`Reflect`, decorators, complex class inheritance/mixins, currying, dense functional chains, or tricky one-liners.
 - No speculative abstractions, wrappers, options, config, or "for later" boilerplate nobody asked for—while keeping the Clean Architecture layer boundaries intact.
