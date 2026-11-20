@@ -22,14 +22,14 @@ A full-stack **Store Management & POS System** tailored for Sari-Sari stores and
 | **Frontend UI (`frontend/`)** | React, Vite, JavaScript / JSX (no TypeScript), Tailwind CSS | Lightweight POS terminal, inventory admin, and reports SPA calling the Express API |
 | **Frontend State** | Built-in React state (`useState`, `useReducer`, `useContext`) | Local feature state (e.g., POS cart) and lightweight session/shift context (no external state library) |
 | **Validation & Domain** | Plain JavaScript (ESM) | Plain JS boundary validators and pure domain entities (no TypeScript, no Zod) |
-| **Local Database** | SQLite (WAL mode) via `better-sqlite3` (plain SQL) | Fast, zero-config, synchronous local persistence with exact scaled-integer storage (`×100` money, `×10,000` quantities) |
+| **Local Database** | SQLite (WAL mode) via built-in `node:sqlite` (plain SQL) | Fast, zero-config, zero-build synchronous local persistence with exact scaled-integer storage (`×100` money, `×10,000` quantities) |
 | **Backup / Sync** | Local SQLite backup download (MVP); pluggable `BackupSyncPort` (optional later) | Safe local backups first, without coupling business logic to a cloud provider |
 | **Testing** | Vitest | Domain/application unit tests (in-memory fakes), SQLite repository integration tests, and Express route tests |
 
 ### Local-First & Portable Relational Database Strategy
 1. **Primary Store Operations**: All reads and writes hit the local SQLite database (`WAL` mode + `PRAGMA foreign_keys = ON`) inside `backend/` so checkout never stalls if Wi-Fi drops.
 2. **Relational Database Portability (SQLite → PostgreSQL / MySQL)**:
-   - **Async Repository & `UnitOfWork` Ports**: All repository and `UnitOfWork` methods return Promises (`async`), even when backed by synchronous `better-sqlite3`, so swapping to async drivers (`pg`, `mysql2`) requires zero changes in `domain.js`, `use-cases.js`, or `routes.js`.
+   - **Async Repository & `UnitOfWork` Ports**: All repository and `UnitOfWork` methods return Promises (`async`), even when backed by synchronous `node:sqlite`, so swapping to async drivers (`pg`, `mysql2`) requires zero changes in `domain.js`, `use-cases.js`, or `routes.js`.
    - **Dialect-Isolated Adapters**: Place SQL implementations in `sqlite-repo.js` (future: `postgres-repo.js`, `mysql-repo.js`) and `db/sqlite.js`, selected in one composition root (`app.js`). Isolate dialect-specific DDL, `PRAGMA`s, and parameter placeholders (`?` vs `$1`) inside each dialect file.
    - **Portable Keys & Precision**: Generate IDs in the application (`IdGenerator`) instead of relying on DB-specific auto-increment behavior. Store exact numeric values in SQLite as scaled integers (`× 100` centavos, `× 10,000` quantities) converted in mappers—other relational adapters can use either `BIGINT` scaled integers or native `DECIMAL(12, 2)` / `DECIMAL(12, 4)` transparently.
    - **Contract Tests**: Run the same repository integration test suite against any relational adapter to guarantee identical behavior.
@@ -147,7 +147,7 @@ flowchart TB
 - Verify all business rules, stock deductions, and profit calculations using Vitest + in-memory repository fakes (no DB required).
 
 ### Phase 2: Local SQLite Persistence & Express REST API
-- Define SQLite schema and `UnitOfWork` in `backend/src/db/sqlite.js` (scaled integers for `DECIMAL(12, 2)` and `DECIMAL(12, 4)` with `PRAGMA foreign_keys = ON`) and plain SQL `better-sqlite3` adapters in `backend/src/<module>/sqlite-repo.js`.
+- Define SQLite schema and `UnitOfWork` in `backend/src/db/sqlite.js` (scaled integers for `DECIMAL(12, 2)` and `DECIMAL(12, 4)` with `PRAGMA foreign_keys = ON`) and plain SQL `node:sqlite` adapters in `backend/src/<module>/sqlite-repo.js`.
 - Add repository and transaction rollback integration tests in `backend/tests/`.
 - Wire Express routers, CORS, and centralized error handling in `backend/src/<module>/routes.js`, `backend/src/app.js`, and `backend/src/server.js`.
 

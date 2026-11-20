@@ -68,7 +68,7 @@ Reference specifications: `docs/product-inventory-and-selling-options.md` and `d
    - **SQLite Persistence Rule**: SQLite has no native `DECIMAL` type. Store monetary columns as scaled integer centavos (`× 100`) and quantity columns as scaled integer ten-thousandths (`× 10,000`), converting at the repository mapper boundary so arithmetic and SQL `SUM()` stay exact.
 3. **Transactional Integrity & Relational DB Portability**:
    - Sales processing and inventory deductions must execute atomically via a `UnitOfWork` / transaction port defined in `shared/ports.js` or `domain.js`.
-   - Keep all repository and `UnitOfWork` port methods `async` (Promise-returning) even for synchronous SQLite (`better-sqlite3`), use application-generated IDs (`IdGenerator`), and isolate dialect-specific SQL/DDL in `<dialect>-repo.js` and `db/<dialect>.js` so PostgreSQL or MySQL adapters can be plugged in without changing `domain.js`, `use-cases.js`, or `routes.js`.
+   - Keep all repository and `UnitOfWork` port methods `async` (Promise-returning) even for synchronous SQLite (`node:sqlite`), use application-generated IDs (`IdGenerator`), and isolate dialect-specific SQL/DDL in `<dialect>-repo.js` and `db/<dialect>.js` so PostgreSQL or MySQL adapters can be plugged in without changing `domain.js`, `use-cases.js`, or `routes.js`.
 4. **Historical Snapshots & Cost Policy**: Always snapshot `unit_price`, `unit_cost`, `option_name_snapshot`, and `base_quantity` on `SalesItem` at the time of sale so historical revenue and profit remain accurate. On `STOCK_IN`, update `Product.cost_price` to the latest `unit_cost`.
 5. **Backend Validation & Data Integrity**: Enforce all quantity, stock, payment, credit-limit, cross-table barcode uniqueness, product soft-delete (`deleted_at`), soft-disable (`is_active = false`), and sign rules in domain/application layers regardless of UI validation. Use `PHP (₱)` and `Asia/Manila` (`UTC+8`) for daily cutoffs.
 
@@ -77,7 +77,7 @@ Reference specifications: `docs/product-inventory-and-selling-options.md` and `d
 ## 4. Coding Standards
 
 - **Tech Stack**:
-  - **Backend (`backend/`)**: Node.js, Express, plain JavaScript (ESM, no TypeScript), plain JS validation functions (no Zod), `better-sqlite3` (plain SQL), Vitest.
+  - **Backend (`backend/`)**: Node.js, Express, plain JavaScript (ESM, no TypeScript), plain JS validation functions (no Zod), built-in `node:sqlite` (plain SQL), Vitest.
   - **Frontend (`frontend/`)**: React, Vite, plain JavaScript / JSX (no TypeScript), built-in React state (`useState`, `useReducer`, `useContext`; no external state library), Tailwind CSS.
 
 ### Simplicity & Beginner-Friendly Code (Ponytail Mode)
