@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   ArrowDownToLine,
   Layers,
+  MoreVertical,
   Pencil,
   Plus,
   Search,
@@ -91,6 +92,48 @@ export function InventoryPage() {
 
   // Delete product confirmation
   const [deleteConfirmProduct, setDeleteConfirmProduct] = useState(null);
+
+  // Grouped actions dropdown menu
+  const [actionMenu, setActionMenu] = useState(null);
+
+  useEffect(function bindActionMenuEscape() {
+    if (!actionMenu) {
+      return;
+    }
+    function onKeyDown(event) {
+      if (event.key === "Escape") {
+        setActionMenu(null);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return function cleanup() {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [actionMenu]);
+
+  function toggleActionMenu(event, product) {
+    event.stopPropagation();
+    if (actionMenu && actionMenu.product.product_id === product.product_id) {
+      setActionMenu(null);
+      return;
+    }
+    const rect = event.currentTarget.getBoundingClientRect();
+    let topPos = rect.bottom + 4;
+    if (typeof window !== "undefined") {
+      if (rect.bottom + 190 > window.innerHeight) {
+        topPos = Math.max(8, rect.top - 190);
+      }
+    }
+    let rightPos = 8;
+    if (typeof window !== "undefined") {
+      rightPos = Math.max(8, window.innerWidth - rect.right);
+    }
+    setActionMenu({
+      product: product,
+      top: topPos,
+      right: rightPos
+    });
+  }
 
   async function loadAll() {
     setErrorBanner("");
@@ -401,7 +444,7 @@ export function InventoryPage() {
             </Badge>
           </td>
           <td className="px-5 py-4">
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center justify-end gap-1.5">
               <Button
                 variant="soft"
                 size="sm"
@@ -412,43 +455,16 @@ export function InventoryPage() {
                 <ArrowDownToLine className="h-3.5 w-3.5" />
                 <span>Stock In</span>
               </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={function openOpt() {
-                  openOptionsModal(product);
+              <button
+                type="button"
+                onClick={function openMenu(event) {
+                  toggleActionMenu(event, product);
                 }}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700 cursor-pointer"
+                title="More actions"
               >
-                <Layers className="h-3.5 w-3.5" />
-                <span>Options</span>
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={function openAdj() {
-                  openAdjustModal(product);
-                }}
-              >
-                <SlidersHorizontal className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={function edit() {
-                  openEditProduct(product);
-                }}
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={function remove() {
-                  setDeleteConfirmProduct(product);
-                }}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+                <MoreVertical className="h-4 w-4" />
+              </button>
             </div>
           </td>
         </tr>
@@ -505,47 +521,16 @@ export function InventoryPage() {
               <ArrowDownToLine className="h-3.5 w-3.5" />
               <span>Stock In</span>
             </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={function openOpt() {
-                openOptionsModal(product);
+            <button
+              type="button"
+              onClick={function openMenu(event) {
+                toggleActionMenu(event, product);
               }}
-              className="flex-1 justify-center"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 cursor-pointer"
+              title="More actions"
             >
-              <Layers className="h-3.5 w-3.5" />
-              <span>Options</span>
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={function openAdj() {
-                openAdjustModal(product);
-              }}
-              title="Adjust Stock"
-            >
-              <SlidersHorizontal className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={function edit() {
-                openEditProduct(product);
-              }}
-              title="Edit Product"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={function remove() {
-                setDeleteConfirmProduct(product);
-              }}
-              title="Delete Product"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+              <MoreVertical className="h-4 w-4" />
+            </button>
           </div>
         </div>
       );
@@ -996,6 +981,78 @@ export function InventoryPage() {
           </div>
         </div>
       </Modal>
+
+      {/* Floating More Actions Dropdown */}
+      {actionMenu !== null && (
+        <div
+          className="fixed inset-0 z-50 select-none"
+          onClick={function closeMenu() {
+            setActionMenu(null);
+          }}
+        >
+          <div
+            style={{ top: actionMenu.top, right: actionMenu.right }}
+            className="fixed w-44 rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
+            onClick={function stopPropagation(event) {
+              event.stopPropagation();
+            }}
+          >
+            <button
+              type="button"
+              onClick={function handleEdit() {
+                const targetProduct = actionMenu.product;
+                setActionMenu(null);
+                openEditProduct(targetProduct);
+              }}
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer text-left"
+            >
+              <Pencil className="h-3.5 w-3.5 text-slate-400" />
+              <span>Edit Product</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={function handleOptions() {
+                const targetProduct = actionMenu.product;
+                setActionMenu(null);
+                openOptionsModal(targetProduct);
+              }}
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer text-left"
+            >
+              <Layers className="h-3.5 w-3.5 text-slate-400" />
+              <span>Selling Options</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={function handleAdjust() {
+                const targetProduct = actionMenu.product;
+                setActionMenu(null);
+                openAdjustModal(targetProduct);
+              }}
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer text-left"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5 text-slate-400" />
+              <span>Adjust Stock</span>
+            </button>
+
+            <div className="my-1 border-t border-slate-100" />
+
+            <button
+              type="button"
+              onClick={function handleDelete() {
+                const targetProduct = actionMenu.product;
+                setActionMenu(null);
+                setDeleteConfirmProduct(targetProduct);
+              }}
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 cursor-pointer text-left"
+            >
+              <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+              <span>Remove Product</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
