@@ -833,6 +833,175 @@ const PRODUCTS = [
   }
 ];
 
+function getMockProductImageUrl(item) {
+  if (item.image_url) {
+    return item.image_url;
+  }
+  const name = item.name.toLowerCase();
+  const categoryId = item.category_id;
+
+  if (categoryId === "cat_canned") {
+    if (name.includes("tuna")) {
+      return "https://images.unsplash.com/photo-1544943910-4c1dc44a0b27?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("beef") || name.includes("meat")) {
+      return "https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("sardine") || name.includes("mackerel")) {
+      return "https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("sausage") || name.includes("vienna")) {
+      return "https://images.unsplash.com/photo-1597692493666-bf10d32f918e?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("spam") || name.includes("luncheon")) {
+      return "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=400&auto=format&fit=crop&q=80";
+    }
+    return "https://images.unsplash.com/photo-1584727638096-042c45049ebe?w=400&auto=format&fit=crop&q=80";
+  }
+
+  if (categoryId === "cat_noodles") {
+    if (name.includes("pancit") || name.includes("canton")) {
+      return "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("spaghetti") || name.includes("pasta") || name.includes("macaroni")) {
+      return "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("spicy") || name.includes("chili")) {
+      return "https://images.unsplash.com/photo-1552611052-33e04de081de?w=400&auto=format&fit=crop&q=80";
+    }
+    return "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&auto=format&fit=crop&q=80";
+  }
+
+  if (categoryId === "cat_beverages") {
+    if (name.includes("coca-cola") || name.includes("coke")) {
+      return "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("royal") || name.includes("orange")) {
+      return "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("sprite") || name.includes("lemon")) {
+      return "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("water") || name.includes("nature") || name.includes("wilkins")) {
+      return "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("beer") || name.includes("san miguel") || name.includes("red horse")) {
+      return "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("juice") || name.includes("c2") || name.includes("tea")) {
+      return "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400&auto=format&fit=crop&q=80";
+    }
+    return "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&auto=format&fit=crop&q=80";
+  }
+
+  if (categoryId === "cat_coffee_milk") {
+    if (name.includes("milo") || name.includes("choco") || name.includes("ovaltine")) {
+      return "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("milk") || name.includes("bear brand")) {
+      return "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("black")) {
+      return "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("blanca") || name.includes("white")) {
+      return "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=400&auto=format&fit=crop&q=80";
+    }
+    return "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&auto=format&fit=crop&q=80";
+  }
+
+  if (categoryId === "cat_snacks") {
+    if (
+      name.includes("skyflakes") ||
+      name.includes("fita") ||
+      name.includes("rebisco") ||
+      name.includes("cracker")
+    ) {
+      return "https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?w=400&auto=format&fit=crop&q=80";
+    }
+    if (
+      name.includes("piattos") ||
+      name.includes("chips") ||
+      name.includes("crisps") ||
+      name.includes("nova")
+    ) {
+      return "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("chippy") || name.includes("corn")) {
+      return "https://images.unsplash.com/photo-1528751014936-863e6e7a319c?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("prawn") || name.includes("oishi")) {
+      return "https://images.unsplash.com/photo-1621447504864-d8686e12698c?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("nut") || name.includes("peanut") || name.includes("ding dong")) {
+      return "https://images.unsplash.com/photo-1569429593410-b498b3fb3387?w=400&auto=format&fit=crop&q=80";
+    }
+    return "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&auto=format&fit=crop&q=80";
+  }
+
+  if (categoryId === "cat_rice_cooking") {
+    if (name.includes("rice")) {
+      return "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("oil")) {
+      return "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("soy sauce")) {
+      return "https://images.unsplash.com/photo-1589135233689-d562f4b46c9a?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("vinegar")) {
+      return "https://images.unsplash.com/photo-1622205313162-be1d5712a43c?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("sarap") || name.includes("seasoning") || name.includes("mix")) {
+      return "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("sugar") || name.includes("salt")) {
+      return "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&auto=format&fit=crop&q=80";
+    }
+    return "https://images.unsplash.com/photo-1589135233689-d562f4b46c9a?w=400&auto=format&fit=crop&q=80";
+  }
+
+  if (categoryId === "cat_personal_care") {
+    if (name.includes("soap") || name.includes("safeguard")) {
+      return "https://images.unsplash.com/photo-1607006314640-1a6c0c2bc42c?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("shampoo") || name.includes("conditioner")) {
+      return "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("toothpaste") || name.includes("colgate") || name.includes("close-up")) {
+      return "https://images.unsplash.com/photo-1559591937-e1032b49298e?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("deodorant") || name.includes("rexona")) {
+      return "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&auto=format&fit=crop&q=80";
+    }
+    return "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=80";
+  }
+
+  if (categoryId === "cat_laundry_home") {
+    if (
+      name.includes("powder") ||
+      name.includes("detergent") ||
+      name.includes("surf") ||
+      name.includes("tide") ||
+      name.includes("ariel")
+    ) {
+      return "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("downy") || name.includes("fabric")) {
+      return "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("joy") || name.includes("dishwashing")) {
+      return "https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=400&auto=format&fit=crop&q=80";
+    }
+    if (name.includes("zonrox") || name.includes("bleach")) {
+      return "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&auto=format&fit=crop&q=80";
+    }
+    return "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=400&auto=format&fit=crop&q=80";
+  }
+
+  return "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&auto=format&fit=crop&q=80";
+}
+
 export function seedDatabase(targetDbPath, clean = false) {
   let resolvedPath = targetDbPath;
   if (!resolvedPath) {
@@ -914,6 +1083,7 @@ export function seedDatabase(targetDbPath, clean = false) {
     const costInt = toMoneyInt(item.cost, "cost");
     const priceInt = toMoneyInt(item.price, "price");
     const reorderInt = toQuantityInt(item.reorder, "reorder");
+    const mockImageUrl = getMockProductImageUrl(item);
 
     insertProdStmt.run(
       item.id,
@@ -921,7 +1091,7 @@ export function seedDatabase(targetDbPath, clean = false) {
       item.name,
       item.barcode,
       null,
-      null,
+      item.image_url || mockImageUrl,
       item.unit,
       stockInt,
       costInt,
@@ -969,7 +1139,7 @@ export function seedDatabase(targetDbPath, clean = false) {
 
   // 4. Seed Sample Completed Sales Transactions (12 sales across today and yesterday)
   const insertSaleStmt = database.prepare(`
-    INSERT INTO sales_transactions (
+    INSERT OR IGNORE INTO sales_transactions (
       sale_id, receipt_number, shift_id, customer_id, payment_method,
       subtotal_amount_int, discount_amount_int, total_amount_int,
       cash_amount_int, credit_amount_int, amount_paid_int, change_amount_int,
@@ -978,7 +1148,7 @@ export function seedDatabase(targetDbPath, clean = false) {
   `);
 
   const insertSaleItemStmt = database.prepare(`
-    INSERT INTO sales_items (
+    INSERT OR IGNORE INTO sales_items (
       sale_item_id, sale_id, product_id, option_id, option_name_snapshot,
       quantity_int, base_quantity_int, unit_price_int, unit_cost_int,
       discount_amount_int, subtotal_int
@@ -1089,10 +1259,19 @@ export function seedDatabase(targetDbPath, clean = false) {
     }
   ];
 
+  const findSaleByReceiptStmt = database.prepare(
+    "SELECT sale_id FROM sales_transactions WHERE receipt_number = ?"
+  );
+
   for (let saleIndex = 0; saleIndex < SAMPLE_SALES.length; saleIndex = saleIndex + 1) {
     const saleData = SAMPLE_SALES[saleIndex];
-    const saleId = idGen.nextId();
     const receiptNum = "RCP-" + compactDate + "-" + String(saleIndex + 1).padStart(4, "0");
+    const existingSale = findSaleByReceiptStmt.get(receiptNum);
+    if (existingSale) {
+      continue;
+    }
+
+    const saleId = idGen.nextId();
 
     let subtotalInt = 0;
     for (let itemIndex = 0; itemIndex < saleData.items.length; itemIndex = itemIndex + 1) {

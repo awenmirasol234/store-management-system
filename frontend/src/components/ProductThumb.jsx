@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { resolveImageUrl } from "../api.js";
 
 function getInitials(productName) {
@@ -8,13 +9,14 @@ function getInitials(productName) {
 }
 
 export function ProductThumb(props) {
+  const [hasError, setHasError] = useState(false);
   const imageSrc = resolveImageUrl(props.imageUrl);
   let sizeClass = "h-28 w-full";
   if (props.size === "sm") {
     sizeClass = "h-11 w-11 shrink-0";
   }
 
-  if (imageSrc) {
+  if (imageSrc && !hasError) {
     return (
       <div
         className={
@@ -24,6 +26,10 @@ export function ProductThumb(props) {
         <img
           src={imageSrc}
           alt={props.name}
+          loading="lazy"
+          onError={function handleError() {
+            setHasError(true);
+          }}
           className="h-full w-full object-cover"
         />
       </div>
