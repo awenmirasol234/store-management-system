@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { RotateCcw, Receipt } from "lucide-react";
+import { RotateCcw, Receipt, Search, X } from "lucide-react";
 import { api } from "../api.js";
 import { formatManilaDateTime, formatPeso, formatQuantity, formatSmartDateTime } from "../format.js";
 import { Badge } from "../components/Badge.jsx";
@@ -19,8 +19,43 @@ function getPaymentTone(method) {
   return "blue";
 }
 
+export function filterSales(salesList, query) {
+  if (!salesList || !Array.isArray(salesList)) {
+    return [];
+  }
+  let cleanQuery = "";
+  if (typeof query === "string") {
+    cleanQuery = query.trim().toLowerCase();
+    if (cleanQuery.startsWith("or #")) {
+      cleanQuery = cleanQuery.slice(4).trim();
+    } else if (cleanQuery.startsWith("or ")) {
+      cleanQuery = cleanQuery.slice(3).trim();
+    } else if (cleanQuery.startsWith("#")) {
+      cleanQuery = cleanQuery.slice(1).trim();
+    }
+  }
+
+  if (cleanQuery.length === 0) {
+    return salesList;
+  }
+
+  const matches = [];
+  for (let index = 0; index < salesList.length; index++) {
+    const sale = salesList[index];
+    if (!sale) {
+      continue;
+    }
+    const receiptStr = String(sale.receipt_number).toLowerCase();
+    if (receiptStr.includes(cleanQuery)) {
+      matches.push(sale);
+    }
+  }
+  return matches;
+}
+
 export function TransactionsPage() {
   const [sales, setSales] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [errorBanner, setErrorBanner] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [returnQuantities, setReturnQuantities] = useState({});
@@ -115,6 +150,24 @@ export function TransactionsPage() {
     }
   }
 
+  const filteredSales = filterSales(sales, searchQuery);
+
+  let clearButton = null;
+  if (searchQuery.trim().length > 0) {
+    clearButton = (
+      <button
+        type="button"
+        onClick={function clearSearch() {
+          setSearchQuery("");
+        }}
+        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
+        title="Clear search"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+    );
+  }
+
   let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-6" />;
 
   let tableBody = (
@@ -124,8 +177,16 @@ export function TransactionsPage() {
       </td>
     </tr>
   );
-  if (sales.length > 0) {
-    tableBody = sales.map(function renderSaleRow(sale) {
+  if (sales.length > 0 && filteredSales.length === 0) {
+    tableBody = (
+      <tr>
+        <td colSpan="6" className="px-5 py-14 text-center text-sm text-slate-500">
+          No transactions matching "{searchQuery}".
+        </td>
+      </tr>
+    );
+  } else if (filteredSales.length > 0) {
+    tableBody = filteredSales.map(function renderSaleRow(sale) {
       return (
         <tr key={sale.sale_id} className="hover:bg-slate-50">
           <td className="px-5 py-4 font-mono text-sm font-semibold text-slate-900">
@@ -240,11 +301,28 @@ export function TransactionsPage() {
 
   return (
     <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-8">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-lg font-bold text-slate-900">Transactions</h1>
-        <Button variant="secondary" size="sm" onClick={loadSales}>
-          Refresh
-        </Button>
+
+        <div className="flex items-center gap-3 flex-1 max-w-sm justify-end">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={function onSearch(event) {
+                setSearchQuery(event.target.value);
+              }}
+              placeholder="Search receipt #..."
+              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-8 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none"
+            />
+            {clearButton}
+          </div>
+
+          <Button variant="secondary" size="sm" onClick={loadSales}>
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {errorElement}
