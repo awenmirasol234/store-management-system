@@ -48,12 +48,12 @@ frontend/
     ├── format.js                # Peso, quantity, Manila date formatting helpers
     ├── products.js              # Shared product search filter and stock-level helper
     ├── cart.js                  # Local cart subtotal, discount, and total rounding
-    ├── components/              # Shared UI components (Badge.jsx, Button.jsx, ErrorBanner.jsx, Input.jsx, InventoryAdjustModal.jsx, InventoryStockInModal.jsx, Modal.jsx, PosCheckoutModal.jsx, ProductThumb.jsx, ReceiptView.jsx, Sidebar.jsx, StatCard.jsx)
+    ├── components/              # Shared UI components (Badge.jsx, BottomNav.jsx, Button.jsx, ErrorBanner.jsx, Input.jsx, InventoryAdjustModal.jsx, InventoryStockInModal.jsx, Modal.jsx, PosCheckoutModal.jsx, ProductThumb.jsx, ReceiptView.jsx, Sidebar.jsx, StatCard.jsx)
     ├── pages/                   # Flat screens (DashboardPage.jsx, PosPage.jsx, InventoryPage.jsx, TransactionsPage.jsx, ReportsPage.jsx)
     ├── App.jsx
     └── main.jsx                 # React + Vite entry point
 
-frontend/tests/                  # Flat Vitest tests (format.test.js, cart.test.js, products.test.js, transactions.test.js)
+frontend/tests/                  # Flat Vitest tests (format.test.js, cart.test.js, products.test.js, transactions.test.js, responsive_navigation.test.js)
 ```
 
 > If a single module file grows too large, split it into flat sibling files inside the same module folder (e.g., `stock-use-cases.js`) rather than adding nested subfolders.

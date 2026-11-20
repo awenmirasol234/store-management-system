@@ -221,6 +221,59 @@ export function TransactionsPage() {
     });
   }
 
+  let mobileSalesList = (
+    <div className="py-14 text-center text-sm text-slate-500">
+      No transactions recorded yet.
+    </div>
+  );
+  if (sales.length > 0 && filteredSales.length === 0) {
+    mobileSalesList = (
+      <div className="py-14 text-center text-sm text-slate-500">
+        No transactions matching "{searchQuery}".
+      </div>
+    );
+  } else if (filteredSales.length > 0) {
+    mobileSalesList = filteredSales.map(function renderSaleCard(sale) {
+      return (
+        <div
+          key={sale.sale_id}
+          className="rounded-xl border border-slate-200 bg-white p-4 space-y-3"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="font-mono text-sm font-bold text-slate-900">
+                #{sale.receipt_number}
+              </div>
+              <div className="font-mono text-xs text-slate-500 mt-0.5">
+                {formatSmartDateTime(sale.created_at)}
+              </div>
+            </div>
+            <Badge tone={getPaymentTone(sale.payment_method)}>{sale.payment_method}</Badge>
+          </div>
+
+          <div className="flex items-center justify-between border-t border-slate-100 pt-2.5">
+            <div>
+              <div className="text-[11px] text-slate-400">Total Amount</div>
+              <div className="font-mono text-base font-bold text-slate-900">
+                {formatPeso(sale.total_amount)}
+              </div>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={function open() {
+                openOrderDetails(sale.sale_id);
+              }}
+            >
+              <Receipt className="h-3.5 w-3.5" />
+              <span>Receipt / Return</span>
+            </Button>
+          </div>
+        </div>
+      );
+    });
+  }
+
   let modalTitle = "Order Details";
   let modalBody = null;
   if (selectedOrder) {
@@ -300,11 +353,11 @@ export function TransactionsPage() {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-4 sm:p-6 lg:p-8">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <h1 className="text-lg font-bold text-slate-900">Transactions</h1>
 
-        <div className="flex items-center gap-3 flex-1 max-w-sm justify-end">
+        <div className="flex items-center gap-2.5 flex-1 max-w-sm sm:justify-end">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
             <input
@@ -327,7 +380,13 @@ export function TransactionsPage() {
 
       {errorElement}
 
-      <div className="flex-1 overflow-auto rounded-xl border border-slate-200 bg-white">
+      {/* Mobile Card List (< md) */}
+      <div className="flex-1 overflow-y-auto space-y-3 md:hidden">
+        {mobileSalesList}
+      </div>
+
+      {/* Desktop Table (>= md) */}
+      <div className="hidden md:block flex-1 overflow-auto rounded-xl border border-slate-200 bg-white">
         <table className="w-full border-collapse text-left">
           <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
             <tr>

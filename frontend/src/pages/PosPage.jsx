@@ -71,6 +71,7 @@ export function PosPage() {
   const [lowStockModalOpen, setLowStockModalOpen] = useState(false);
 
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
   const [amountPaidInput, setAmountPaidInput] = useState("");
   const [cashPartInput, setCashPartInput] = useState("");
   const [customerIdInput, setCustomerIdInput] = useState("");
@@ -439,7 +440,7 @@ export function PosPage() {
     );
   } else {
     productGridContent = (
-      <div className="grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-5 sm:grid-cols-3 xl:grid-cols-4">
         {filteredProducts.map(function renderCard(product) {
           return (
             <button
@@ -448,7 +449,7 @@ export function PosPage() {
               onClick={function onCardClick() {
                 handleProductCardClick(product);
               }}
-              className="flex flex-col rounded-xl border border-slate-200 bg-white p-4 text-left transition-all hover:border-blue-300 hover:shadow-sm cursor-pointer"
+              className="flex flex-col rounded-xl border border-slate-200 bg-white p-3 sm:p-4 text-left transition-all hover:border-blue-300 hover:shadow-sm cursor-pointer"
             >
               <ProductThumb imageUrl={product.image_url} name={product.product_name} />
               <div className="mt-3 truncate text-sm font-semibold text-slate-900">
@@ -486,9 +487,9 @@ export function PosPage() {
               onClick={function dec() {
                 changeCartItemQty(item.key, -1);
               }}
-              className="p-1.5 text-slate-600 hover:text-slate-900 cursor-pointer"
+              className="flex h-8 w-8 items-center justify-center text-slate-600 hover:text-slate-900 active:bg-slate-200 cursor-pointer"
             >
-              <Minus className="h-3 w-3" />
+              <Minus className="h-3.5 w-3.5" />
             </button>
             <span className="min-w-8 text-center font-mono text-xs font-semibold text-slate-900">
               {formatQuantity(item.quantity)}
@@ -498,31 +499,31 @@ export function PosPage() {
               onClick={function inc() {
                 changeCartItemQty(item.key, 1);
               }}
-              className="p-1.5 text-slate-600 hover:text-slate-900 cursor-pointer"
+              className="flex h-8 w-8 items-center justify-center text-slate-600 hover:text-slate-900 active:bg-slate-200 cursor-pointer"
             >
-              <Plus className="h-3 w-3" />
+              <Plus className="h-3.5 w-3.5" />
             </button>
           </div>
         );
       }
 
       return (
-        <div key={item.key} className="flex items-center gap-3.5 py-4">
+        <div key={item.key} className="flex items-center gap-3.5 py-3.5">
           <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-semibold text-slate-900">
               {item.product_name}
             </div>
             <div className="mt-0.5 truncate text-xs text-slate-500">{item.option_label}</div>
-            <div className="mt-2.5 flex items-center gap-2">{qtyControl}</div>
+            <div className="mt-2 flex items-center gap-2">{qtyControl}</div>
           </div>
-          <div className="flex flex-col items-end gap-3">
+          <div className="flex flex-col items-end gap-2.5">
             <button
               type="button"
               onClick={function remove() {
                 removeCartItem(item.key);
               }}
-              className="text-slate-400 hover:text-rose-600 cursor-pointer"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -652,10 +653,110 @@ export function PosPage() {
     );
   }
 
+  const cartFooterContent = (
+    <div className="space-y-4 pt-2">
+      <div className="space-y-2 border-t border-slate-200 pt-4">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-slate-500">Subtotal</span>
+          <span className="font-mono font-medium text-slate-900">
+            {formatPeso(totals.subtotal)}
+          </span>
+        </div>
+        {discountSummaryRow}
+        <div className="flex items-center justify-between pt-2">
+          <span className="text-base font-bold text-slate-900">Total</span>
+          <span className="font-mono text-xl font-bold text-slate-900">
+            {formatPeso(totals.total)}
+          </span>
+        </div>
+      </div>
+
+      <Button
+        variant="primary"
+        size="lg"
+        disabled={cartItems.length === 0}
+        onClick={function handleCheckout() {
+          setMobileCartOpen(false);
+          openCheckoutModal();
+        }}
+        className="w-full justify-between px-5 py-3.5 text-base"
+      >
+        <span>Checkout</span>
+        <span className="font-mono font-bold">{formatPeso(totals.total)}</span>
+      </Button>
+
+      <div className="grid grid-cols-1 gap-2">
+        {[{ key: "CASH", label: "Cash", icon: Banknote }].map(function renderMethod(method) {
+          const IconComponent = method.icon;
+          const isSelected = paymentMethod === method.key;
+          let btnClass =
+            "flex flex-col items-center gap-1.5 rounded-lg border py-2 text-xs font-medium cursor-pointer ";
+          if (isSelected) {
+            btnClass = btnClass + "border-blue-600 bg-blue-50 text-blue-700";
+          } else {
+            btnClass = btnClass + "border-slate-200 bg-white text-slate-600 hover:bg-slate-50";
+          }
+          return (
+            <button
+              key={method.key}
+              type="button"
+              onClick={function selectMethod() {
+                setPaymentMethod(method.key);
+              }}
+              className={btnClass}
+            >
+              <IconComponent className="h-4 w-4" />
+              <span>{method.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  let mobileCartBar = null;
+  if (cartItems.length > 0) {
+    mobileCartBar = (
+      <div className="fixed bottom-16 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 p-3 backdrop-blur lg:hidden">
+        <button
+          type="button"
+          onClick={function openMobileCart() {
+            setMobileCartOpen(true);
+          }}
+          className="flex w-full items-center justify-between rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white shadow-md active:bg-blue-700 cursor-pointer"
+        >
+          <div className="flex items-center gap-2">
+            <ShoppingBag className="h-5 w-5" />
+            <span>Cart ({cartItems.length})</span>
+          </div>
+          <span className="font-mono text-sm font-bold">{formatPeso(totals.total)} →</span>
+        </button>
+      </div>
+    );
+  }
+
+  let mobileCartModal = (
+    <Modal
+      open={mobileCartOpen}
+      onClose={function closeMobileCart() {
+        setMobileCartOpen(false);
+      }}
+      title={"Current Sale (" + String(cartItems.length) + ")"}
+      size="sm"
+    >
+      <div className="flex flex-col space-y-4">
+        <div className="max-h-[45vh] overflow-y-auto divide-y divide-slate-100 pr-1">
+          {cartListContent}
+        </div>
+        {cartFooterContent}
+      </div>
+    </Modal>
+  );
+
   return (
     <div className="flex h-full flex-1 overflow-hidden bg-slate-50">
       {/* Center Catalog Workspace */}
-      <div className="flex flex-1 flex-col overflow-hidden p-7">
+      <div className="flex flex-1 flex-col overflow-hidden p-4 sm:p-6 lg:p-7">
         {/* Top Search & Low Stock Bar */}
         <div className="mb-5 flex items-center gap-3.5">
           <div className="relative flex-1">
@@ -740,7 +841,7 @@ export function PosPage() {
         <div className="flex-1 overflow-y-auto pr-1">{productGridContent}</div>
 
         {/* Bottom Quick Action Bar */}
-        <div className="mt-6 grid grid-cols-3 gap-4 pt-2">
+        <div className="mt-4 sm:mt-6 grid grid-cols-3 gap-2 sm:gap-4 pt-2">
           <Button
             variant="soft"
             size="lg"
@@ -749,9 +850,10 @@ export function PosPage() {
                 searchInputRef.current.focus();
               }
             }}
+            className="text-xs sm:text-sm px-2 sm:px-4"
           >
-            <ScanBarcode className="h-4 w-4" />
-            <span>Scan Barcode</span>
+            <ScanBarcode className="h-4 w-4 shrink-0" />
+            <span className="truncate">Scan Barcode</span>
           </Button>
           <Button
             variant="secondary"
@@ -760,19 +862,25 @@ export function PosPage() {
               setDiscountDraft(String(orderDiscount));
               setDiscountModalOpen(true);
             }}
+            className="text-xs sm:text-sm px-2 sm:px-4"
           >
-            <Tag className="h-4 w-4" />
-            <span>Apply Discount</span>
+            <Tag className="h-4 w-4 shrink-0" />
+            <span className="truncate">Discount</span>
           </Button>
-          <Button variant="secondary" size="lg" onClick={clearCart}>
-            <XCircle className="h-4 w-4" />
-            <span>Clear Sale</span>
+          <Button
+            variant="secondary"
+            size="lg"
+            onClick={clearCart}
+            className="text-xs sm:text-sm px-2 sm:px-4"
+          >
+            <XCircle className="h-4 w-4 shrink-0" />
+            <span className="truncate">Clear Sale</span>
           </Button>
         </div>
       </div>
 
-      {/* Right Current Sale Cart Panel */}
-      <aside className="flex w-96 shrink-0 flex-col border-l border-slate-200 bg-white">
+      {/* Right Current Sale Cart Panel (Desktop) */}
+      <aside className="hidden lg:flex w-80 xl:w-96 shrink-0 flex-col border-l border-slate-200 bg-white">
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
           <h2 className="text-base font-bold text-slate-900">
             Current Sale (<span className="font-mono">{cartItems.length}</span>)
@@ -783,64 +891,13 @@ export function PosPage() {
           {cartListContent}
         </div>
 
-        {/* Totals & Checkout */}
-        <div className="border-t border-slate-200 p-6 space-y-5">
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-500">Subtotal</span>
-              <span className="font-mono font-medium text-slate-900">
-                {formatPeso(totals.subtotal)}
-              </span>
-            </div>
-            {discountSummaryRow}
-            <div className="flex items-center justify-between pt-2.5">
-              <span className="text-base font-bold text-slate-900">Total</span>
-              <span className="font-mono text-xl font-bold text-slate-900">
-                {formatPeso(totals.total)}
-              </span>
-            </div>
-          </div>
-
-          <Button
-            variant="primary"
-            size="lg"
-            disabled={cartItems.length === 0}
-            onClick={openCheckoutModal}
-            className="w-full justify-between px-5 py-3.5 text-base"
-          >
-            <span>Checkout</span>
-            <span className="font-mono font-bold">{formatPeso(totals.total)}</span>
-          </Button>
-
-          {/* Payment Method Strip */}
-          <div className="grid grid-cols-1 gap-2.5">
-            {[{ key: "CASH", label: "Cash", icon: Banknote }].map(function renderMethod(method) {
-              const IconComponent = method.icon;
-              const isSelected = paymentMethod === method.key;
-              let btnClass =
-                "flex flex-col items-center gap-1.5 rounded-lg border py-2.5 text-xs font-medium cursor-pointer ";
-              if (isSelected) {
-                btnClass = btnClass + "border-blue-600 bg-blue-50 text-blue-700";
-              } else {
-                btnClass = btnClass + "border-slate-200 bg-white text-slate-600 hover:bg-slate-50";
-              }
-              return (
-                <button
-                  key={method.key}
-                  type="button"
-                  onClick={function selectMethod() {
-                    setPaymentMethod(method.key);
-                  }}
-                  className={btnClass}
-                >
-                  <IconComponent className="h-4 w-4" />
-                  <span>{method.label}</span>
-                </button>
-              );
-            })}
-          </div>
+        <div className="border-t border-slate-200 p-6">
+          {cartFooterContent}
         </div>
       </aside>
+
+      {mobileCartBar}
+      {mobileCartModal}
 
       {/* Selling Option / Tingi Picker Modal */}
       <Modal

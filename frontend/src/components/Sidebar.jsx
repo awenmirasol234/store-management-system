@@ -38,7 +38,7 @@ export function Sidebar(props) {
   }
 
   let asideClass =
-    "flex shrink-0 flex-col bg-[#181B2C] text-slate-300 select-none transition-all duration-200 ease-in-out ";
+    "hidden md:flex shrink-0 flex-col bg-[#181B2C] text-slate-300 select-none transition-all duration-200 ease-in-out ";
   if (collapsed) {
     asideClass = asideClass + "w-20";
   } else {

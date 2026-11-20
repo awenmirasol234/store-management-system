@@ -136,8 +136,8 @@ export function ReportsPage() {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-y-auto bg-slate-50 p-8">
-      <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
+    <div className="flex h-full flex-1 flex-col overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
+      <div className="mb-5 sm:mb-7 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
         <h1 className="text-lg font-bold text-slate-900">Reports</h1>
 
         <div className="flex flex-wrap items-center gap-2.5">
@@ -212,39 +212,43 @@ export function ReportsPage() {
         <StatCard label="Credit (Utang)" value={creditSales} tone="amber" icon={CreditCard} />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           <div className="border-b border-slate-200 px-5 py-4 text-sm font-bold text-slate-900">
             Daily Sales
           </div>
-          <table className="w-full border-collapse text-left">
-            <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
-              <tr>
-                <th className="px-5 py-3.5">Date</th>
-                <th className="px-5 py-3.5 text-right">Orders</th>
-                <th className="px-5 py-3.5 text-right">Sales</th>
-                <th className="px-5 py-3.5 text-right">Profit</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">{dailyTableBody}</tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left">
+              <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
+                <tr>
+                  <th className="px-5 py-3.5">Date</th>
+                  <th className="px-5 py-3.5 text-right">Orders</th>
+                  <th className="px-5 py-3.5 text-right">Sales</th>
+                  <th className="px-5 py-3.5 text-right">Profit</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">{dailyTableBody}</tbody>
+            </table>
+          </div>
         </section>
 
         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           <div className="border-b border-slate-200 px-5 py-4 text-sm font-bold text-slate-900">
             Top Products
           </div>
-          <table className="w-full border-collapse text-left">
-            <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
-              <tr>
-                <th className="px-5 py-3.5">Product</th>
-                <th className="px-5 py-3.5 text-right">Qty</th>
-                <th className="px-5 py-3.5 text-right">Revenue</th>
-                <th className="px-5 py-3.5 text-right">Profit</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">{topTableBody}</tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left">
+              <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
+                <tr>
+                  <th className="px-5 py-3.5">Product</th>
+                  <th className="px-5 py-3.5 text-right">Qty</th>
+                  <th className="px-5 py-3.5 text-right">Revenue</th>
+                  <th className="px-5 py-3.5 text-right">Profit</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">{topTableBody}</tbody>
+            </table>
+          </div>
         </section>
       </div>
     </div>

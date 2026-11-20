@@ -42,7 +42,8 @@ export function PosCheckoutModal(props) {
       { key: "exact", label: "Exact", amount: props.total },
       { key: "50", label: formatPeso(50), amount: 50 },
       { key: "100", label: formatPeso(100), amount: 100 },
-      { key: "500", label: formatPeso(500), amount: 500 }
+      { key: "500", label: formatPeso(500), amount: 500 },
+      { key: "1000", label: formatPeso(1000), amount: 1000 }
     ];
 
     cashTenderedSection = (
@@ -58,7 +59,7 @@ export function PosCheckoutModal(props) {
           }}
           required={true}
         />
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
           {quickBills.map(function renderQuickBill(bill) {
             return (
               <Button
@@ -75,9 +76,9 @@ export function PosCheckoutModal(props) {
             );
           })}
         </div>
-        <div className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3">
-          <span className="text-xs font-medium text-slate-500">Change</span>
-          <span className="font-mono text-base font-bold text-emerald-700">
+        <div className="flex items-center justify-between rounded-lg border-2 border-emerald-200 bg-emerald-50/50 px-4 py-3.5">
+          <span className="text-xs font-bold uppercase tracking-wide text-emerald-800">Change</span>
+          <span className="font-mono text-xl font-bold text-emerald-700">
             {formatPeso(props.changePreview)}
           </span>
         </div>
@@ -102,11 +103,11 @@ export function PosCheckoutModal(props) {
         {customerField}
         {splitCashField}
         {cashTenderedSection}
-        <div className="flex justify-end gap-3 pt-2">
-          <Button variant="secondary" onClick={props.onClose}>
+        <div className="flex items-center justify-end gap-3 pt-2">
+          <Button variant="secondary" onClick={props.onClose} className="flex-1 sm:flex-initial">
             Cancel
           </Button>
-          <Button type="submit" variant="primary" disabled={props.submitting}>
+          <Button type="submit" variant="primary" disabled={props.submitting} className="flex-1 sm:flex-initial">
             Confirm Sale
           </Button>
         </div>

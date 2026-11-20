@@ -1,0 +1,62 @@
+import { describe, expect, it } from "vitest";
+import React from "react";
+import { renderToString } from "react-dom/server";
+import { BottomNav } from "../src/components/BottomNav.jsx";
+import { PosCheckoutModal } from "../src/components/PosCheckoutModal.jsx";
+import { App } from "../src/App.jsx";
+
+describe("Responsive navigation & components", function () {
+  it("renders BottomNav with all 5 navigation tabs", function () {
+    const html = renderToString(
+      React.createElement(BottomNav, {
+        activePage: "pos",
+        onNavigate: function () {}
+      })
+    );
+    expect(html).toContain("Dashboard");
+    expect(html).toContain("POS");
+    expect(html).toContain("Inventory");
+    expect(html).toContain("History");
+    expect(html).toContain("Reports");
+    expect(html).toContain("md:hidden");
+  });
+
+  it("highlights active tab in BottomNav", function () {
+    const html = renderToString(
+      React.createElement(BottomNav, {
+        activePage: "inventory",
+        onNavigate: function () {}
+      })
+    );
+    expect(html).toContain("text-white font-semibold");
+    expect(html).toContain("text-blue-400");
+  });
+
+  it("renders PosCheckoutModal with ₱1,000 banknote preset and change section", function () {
+    const html = renderToString(
+      React.createElement(PosCheckoutModal, {
+        open: true,
+        paymentMethod: "CASH",
+        total: 550,
+        amountPaid: "1000",
+        changePreview: 450,
+        customerId: "",
+        cashPart: "",
+        submitting: false,
+        onClose: function () {},
+        onSubmit: function () {},
+        onAmountPaidChange: function () {}
+      })
+    );
+    expect(html).toContain("₱1,000.00");
+    expect(html).toContain("Change");
+    expect(html).toContain("₱450.00");
+  });
+
+  it("renders App without crashing on initial mount", function () {
+    const html = renderToString(React.createElement(App));
+    expect(typeof html).toBe("string");
+    expect(html.length).toBeGreaterThan(0);
+    expect(html).toContain("StoreFlow");
+  });
+});
