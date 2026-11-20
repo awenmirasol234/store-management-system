@@ -6,6 +6,7 @@ import {
   Plus,
   ScanBarcode,
   Search,
+  ShoppingBag,
   Tag,
   Trash2,
   XCircle
