@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, Banknote, Package, ShoppingBag, TrendingUp } from "lucide-react";
 import { api } from "../api.js";
-import { formatManilaDateTime, formatPeso, formatQuantity } from "../format.js";
+import { formatManilaDateTime, formatPeso, formatQuantity, formatSmartDateTime } from "../format.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
@@ -96,7 +96,7 @@ export function DashboardPage(props) {
                   #{sale.receipt_number}
                 </div>
                 <div className="mt-0.5 font-mono text-xs text-slate-500">
-                  {formatManilaDateTime(sale.created_at)}
+                  {formatSmartDateTime(sale.created_at)}
                 </div>
               </div>
               <div className="flex items-center gap-3">

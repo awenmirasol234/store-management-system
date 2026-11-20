@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Banknote, CreditCard, TrendingUp, Wallet } from "lucide-react";
 import { api } from "../api.js";
-import { formatPeso, formatQuantity, getManilaIsoDateOffset } from "../format.js";
+import { formatPeso, formatQuantity, formatSmartDate, getManilaIsoDateOffset } from "../format.js";
 import { Button } from "../components/Button.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
 import { StatCard } from "../components/StatCard.jsx";
@@ -79,7 +79,9 @@ export function ReportsPage() {
     dailyTableBody = dailyRows.map(function renderDay(row) {
       return (
         <tr key={row.date} className="hover:bg-slate-50">
-          <td className="px-5 py-3.5 font-mono text-sm font-medium text-slate-900">{row.date}</td>
+          <td className="px-5 py-3.5 font-mono text-sm font-medium text-slate-900">
+            {formatSmartDate(row.date)}
+          </td>
           <td className="px-5 py-3.5 font-mono text-sm text-slate-600 text-right">
             {row.sale_count}
           </td>

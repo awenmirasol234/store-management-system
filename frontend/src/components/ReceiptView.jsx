@@ -1,5 +1,5 @@
 import { Printer } from "lucide-react";
-import { formatManilaDateTime, formatPeso, formatQuantity } from "../format.js";
+import { formatPeso, formatQuantity, formatSmartDateTime } from "../format.js";
 import { Button } from "./Button.jsx";
 
 export function ReceiptView(props) {
@@ -38,7 +38,7 @@ export function ReceiptView(props) {
         <div className="text-center border-b border-dashed border-slate-300 pb-3 mb-3 space-y-0.5">
           <div className="text-sm font-bold">STOREFLOW POS</div>
           <div>OR #{sale.receipt_number}</div>
-          <div className="text-[11px] text-slate-600">{formatManilaDateTime(sale.created_at)}</div>
+          <div className="text-[11px] text-slate-600">{formatSmartDateTime(sale.created_at)}</div>
         </div>
 
         <div className="space-y-2 border-b border-dashed border-slate-300 pb-3 mb-3">

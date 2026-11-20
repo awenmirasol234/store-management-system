@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { RotateCcw, Receipt } from "lucide-react";
 import { api } from "../api.js";
-import { formatManilaDateTime, formatPeso, formatQuantity } from "../format.js";
+import { formatManilaDateTime, formatPeso, formatQuantity, formatSmartDateTime } from "../format.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
@@ -132,7 +132,7 @@ export function TransactionsPage() {
             #{sale.receipt_number}
           </td>
           <td className="px-5 py-4 font-mono text-xs text-slate-600">
-            {formatManilaDateTime(sale.created_at)}
+            {formatSmartDateTime(sale.created_at)}
           </td>
           <td className="px-5 py-4">
             <Badge tone={getPaymentTone(sale.payment_method)}>{sale.payment_method}</Badge>
