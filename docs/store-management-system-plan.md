@@ -152,9 +152,13 @@ flowchart TB
 - Wire Express routers, CORS, and centralized error handling in `backend/src/<module>/routes.js`, `backend/src/app.js`, and `backend/src/server.js`.
 
 ### Phase 3: React + Vite POS & Inventory Admin UI
-- Scaffold `frontend/` with React, Vite, plain JavaScript / JSX, and Tailwind CSS, plus an HTTP API client targeting the Express backend.
-- Build POS Checkout screen (search/barcode scan, selling option buttons, custom "tingi" modal, cart, discounts, payment & change calculator, browser `@media print` 58mm/80mm receipt).
-- Build Product & Inventory management screens (create/edit product with optional image upload, configure selling options, bulk stock-in by pack/box).
+- Scaffold `frontend/` with React, Vite, plain JavaScript / JSX, and Tailwind CSS, plus a single REST API client (`frontend/src/api.js`) targeting the Express backend.
+- **Locked 3-Column POS Cockpit Layout**:
+  - **Left dark navy sidebar**: Brand header, vertical nav (`Sales`, `Orders`, `Products`, plus Phase 4 links) with blue active pill (`bg-blue-600`), and bottom cashier/owner chip.
+  - **Center workspace (white/soft-gray surface)**: Top search/barcode bar (`Ctrl+K`) + low-stock bell badge, horizontal category filter pills, 4-column product image cards (image/placeholder, name, price `₱`, green/amber stock count), and bottom quick actions (`Scan Barcode`, `Apply Discount`, `Clear Cart`).
+  - **Right `Current Sale` cart panel**: Line items with thumbnail, option/tingi label, `- qty +` stepper, line subtotal, remove button, `Subtotal` / `Discount` / bold `Total`, full-width blue `Checkout` button (`bg-blue-600`), and payment selector (`Cash`, `Credit`, `Split`).
+- Build Orders & Returns screen (recent receipts, item details, partial/full return modal, browser `@media print` 58mm/80mm thermal receipt).
+- Build Product & Inventory management screen (create/edit product with optional image upload, configure selling options, bulk stock-in by pack/box, stock adjustments).
 
 ### Phase 4: Utang Ledger, Roles, Shifts, Reports & Local Backup
 - Implement `credit/`, `shifts/` (including `CashMovement`), and `reports/` modules end-to-end.

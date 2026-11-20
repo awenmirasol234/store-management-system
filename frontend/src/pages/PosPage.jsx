@@ -1,0 +1,1030 @@
+import { useEffect, useRef, useState } from "react";
+import {
+  Banknote,
+  Bell,
+  CreditCard,
+  Minus,
+  Plus,
+  ScanBarcode,
+  Search,
+  Split,
+  Tag,
+  Trash2,
+  XCircle
+} from "lucide-react";
+import { api } from "../api.js";
+import { formatPeso, formatQuantity } from "../format.js";
+import { Badge } from "../components/Badge.jsx";
+import { Button } from "../components/Button.jsx";
+import { Input } from "../components/Input.jsx";
+import { Modal } from "../components/Modal.jsx";
+import { ProductThumb } from "../components/ProductThumb.jsx";
+import { ReceiptView } from "../components/ReceiptView.jsx";
+
+function getStockTextClass(product) {
+  if (product.current_stock <= 0) {
+    return "text-rose-600";
+  }
+  if (product.current_stock <= product.reorder_level) {
+    return "text-amber-600";
+  }
+  return "text-emerald-600";
+}
+
+function buildCartKey(productId, optionId, customAmount) {
+  if (customAmount !== null && customAmount !== undefined) {
+    return productId + ":custom:" + String(Date.now()) + ":" + String(Math.random());
+  }
+  if (optionId) {
+    return productId + ":opt:" + optionId;
+  }
+  return productId + ":base";
+}
+
+function computeLocalCartTotals(cartItems, orderDiscount) {
+  let subtotal = 0;
+  for (let index = 0; index < cartItems.length; index++) {
+    const item = cartItems[index];
+    subtotal = subtotal + item.unit_price * item.quantity;
+  }
+  subtotal = Math.round(subtotal * 100) / 100;
+
+  let discount = Number(orderDiscount);
+  if (!Number.isFinite(discount) || discount < 0) {
+    discount = 0;
+  }
+  if (discount > subtotal) {
+    discount = subtotal;
+  }
+  discount = Math.round(discount * 100) / 100;
+
+  const total = Math.round((subtotal - discount) * 100) / 100;
+  return {
+    subtotal: subtotal,
+    discount: discount,
+    total: total
+  };
+}
+
+export function PosPage() {
+  const searchInputRef = useRef(null);
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [lowStockProducts, setLowStockProducts] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [errorBanner, setErrorBanner] = useState("");
+
+  const [cartItems, setCartItems] = useState([]);
+  const [orderDiscount, setOrderDiscount] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState("CASH");
+
+  const [pickerState, setPickerState] = useState(null);
+  const [customPesoInput, setCustomPesoInput] = useState("");
+
+  const [discountModalOpen, setDiscountModalOpen] = useState(false);
+  const [discountDraft, setDiscountDraft] = useState("");
+
+  const [lowStockModalOpen, setLowStockModalOpen] = useState(false);
+
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [amountPaidInput, setAmountPaidInput] = useState("");
+  const [cashPartInput, setCashPartInput] = useState("");
+  const [customerIdInput, setCustomerIdInput] = useState("");
+  const [submittingSale, setSubmittingSale] = useState(false);
+
+  const [completedReceipt, setCompletedReceipt] = useState(null);
+
+  async function loadCatalog() {
+    try {
+      const results = await Promise.all([
+        api.listProducts(),
+        api.listCategories(),
+        api.listLowStockProducts()
+      ]);
+      const activeProducts = [];
+      for (let index = 0; index < results[0].length; index++) {
+        if (results[0][index].is_active) {
+          activeProducts.push(results[0][index]);
+        }
+      }
+      setProducts(activeProducts);
+      setCategories(results[1]);
+      setLowStockProducts(results[2]);
+    } catch (error) {
+      setErrorBanner(error.message);
+    }
+  }
+
+  useEffect(function initLoad() {
+    loadCatalog();
+  }, []);
+
+  useEffect(function bindCtrlKShortcut() {
+    function onKeyDown(event) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return function cleanup() {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
+
+  function addItemToCart(product, option, customAmount) {
+    setErrorBanner("");
+    if (product.current_stock <= 0) {
+      setErrorBanner(product.product_name + " is out of stock");
+      return;
+    }
+
+    let optionIdForKey = null;
+    if (option) {
+      optionIdForKey = option.option_id;
+    }
+    const key = buildCartKey(product.product_id, optionIdForKey, customAmount);
+    setCartItems(function updateCart(previous) {
+      const next = [];
+      let found = false;
+      for (let index = 0; index < previous.length; index++) {
+        const existing = previous[index];
+        if (existing.key === key && existing.custom_amount === null) {
+          found = true;
+          next.push(
+            Object.assign({}, existing, {
+              quantity: existing.quantity + 1
+            })
+          );
+        } else {
+          next.push(existing);
+        }
+      }
+
+      if (!found) {
+        let label = "1 " + product.base_unit;
+        let unitPrice = product.selling_price;
+        let optionId = null;
+        let customValue = null;
+
+        if (customAmount !== null && customAmount !== undefined) {
+          customValue = Number(customAmount);
+          unitPrice = customValue;
+          label = "Custom (" + formatPeso(customValue) + ")";
+        } else if (option) {
+          optionId = option.option_id;
+          unitPrice = option.price;
+          label = option.option_name;
+        }
+
+        next.push({
+          key: key,
+          product_id: product.product_id,
+          product_name: product.product_name,
+          image_url: product.image_url,
+          option_id: optionId,
+          option_label: label,
+          custom_amount: customValue,
+          unit_price: unitPrice,
+          quantity: 1
+        });
+      }
+      return next;
+    });
+  }
+
+  async function handleProductCardClick(product) {
+    setErrorBanner("");
+    if (product.current_stock <= 0) {
+      setErrorBanner(product.product_name + " is out of stock");
+      return;
+    }
+
+    try {
+      const options = await api.listSellingOptions(product.product_id);
+      const activeOptions = [];
+      for (let index = 0; index < options.length; index++) {
+        if (options[index].is_active) {
+          activeOptions.push(options[index]);
+        }
+      }
+
+      if (activeOptions.length > 0 || product.allow_custom_amount) {
+        setCustomPesoInput("");
+        setPickerState({
+          product: product,
+          options: activeOptions
+        });
+        return;
+      }
+
+      addItemToCart(product, null, null);
+    } catch (error) {
+      setErrorBanner(error.message);
+    }
+  }
+
+  async function handleSearchKeyDown(event) {
+    if (event.key !== "Enter") {
+      return;
+    }
+    const trimmed = searchQuery.trim();
+    if (trimmed.length === 0) {
+      return;
+    }
+    event.preventDefault();
+    try {
+      const match = await api.lookupBarcode(trimmed);
+      addItemToCart(match.product, match.option, null);
+      setSearchQuery("");
+    } catch (error) {
+      setErrorBanner(error.message);
+    }
+  }
+
+  function changeCartItemQty(itemKey, delta) {
+    setCartItems(function update(previous) {
+      const next = [];
+      for (let index = 0; index < previous.length; index++) {
+        const item = previous[index];
+        if (item.key === itemKey) {
+          const nextQty = item.quantity + delta;
+          if (nextQty > 0) {
+            next.push(Object.assign({}, item, { quantity: nextQty }));
+          }
+        } else {
+          next.push(item);
+        }
+      }
+      return next;
+    });
+  }
+
+  function removeCartItem(itemKey) {
+    setCartItems(function update(previous) {
+      const next = [];
+      for (let index = 0; index < previous.length; index++) {
+        if (previous[index].key !== itemKey) {
+          next.push(previous[index]);
+        }
+      }
+      return next;
+    });
+  }
+
+  function clearCart() {
+    setCartItems([]);
+    setOrderDiscount(0);
+    setErrorBanner("");
+  }
+
+  function openCheckoutModal() {
+    if (cartItems.length === 0) {
+      return;
+    }
+    setErrorBanner("");
+    setAmountPaidInput(String(totals.total));
+    setCashPartInput("");
+    setCheckoutModalOpen(true);
+  }
+
+  async function handleCompleteSale(event) {
+    event.preventDefault();
+    setSubmittingSale(true);
+    setErrorBanner("");
+
+    try {
+      const payloadItems = [];
+      for (let index = 0; index < cartItems.length; index++) {
+        const item = cartItems[index];
+        if (item.custom_amount !== null) {
+          payloadItems.push({
+            product_id: item.product_id,
+            custom_amount: item.custom_amount
+          });
+        } else {
+          payloadItems.push({
+            product_id: item.product_id,
+            option_id: item.option_id,
+            quantity: item.quantity
+          });
+        }
+      }
+
+      const payload = {
+        items: payloadItems,
+        discount_amount: totals.discount,
+        payment_method: paymentMethod,
+        created_by: "owner"
+      };
+
+      if (paymentMethod === "CASH") {
+        payload.amount_paid = Number(amountPaidInput);
+      } else if (paymentMethod === "CREDIT") {
+        payload.customer_id = customerIdInput.trim();
+      } else {
+        const cashPart = Number(cashPartInput);
+        const creditPart = Math.round((totals.total - cashPart) * 100) / 100;
+        payload.customer_id = customerIdInput.trim();
+        payload.cash_amount = cashPart;
+        payload.credit_amount = creditPart;
+        payload.amount_paid = Number(amountPaidInput);
+      }
+
+      const result = await api.processSale(payload);
+      setCheckoutModalOpen(false);
+      clearCart();
+      setCompletedReceipt(result);
+      await loadCatalog();
+    } catch (error) {
+      setErrorBanner(error.message);
+    } finally {
+      setSubmittingSale(false);
+    }
+  }
+
+  const filteredProducts = [];
+  const lowerSearch = searchQuery.trim().toLowerCase();
+  for (let index = 0; index < products.length; index++) {
+    const product = products[index];
+    if (selectedCategoryId !== "ALL" && product.category_id !== selectedCategoryId) {
+      continue;
+    }
+    if (lowerSearch.length > 0) {
+      const nameMatches = product.product_name.toLowerCase().includes(lowerSearch);
+      const barcodeMatches =
+        product.barcode !== null && product.barcode.toLowerCase().includes(lowerSearch);
+      if (!nameMatches && !barcodeMatches) {
+        continue;
+      }
+    }
+    filteredProducts.push(product);
+  }
+
+  const totals = computeLocalCartTotals(cartItems, orderDiscount);
+
+  let cashDueForChange = totals.total;
+  if (paymentMethod === "SPLIT") {
+    const parsedCashPart = Number(cashPartInput);
+    if (Number.isFinite(parsedCashPart) && parsedCashPart > 0) {
+      cashDueForChange = parsedCashPart;
+    } else {
+      cashDueForChange = 0;
+    }
+  }
+  const tenderedValue = Number(amountPaidInput);
+  let changePreview = 0;
+  if (Number.isFinite(tenderedValue) && tenderedValue > cashDueForChange) {
+    changePreview = Math.round((tenderedValue - cashDueForChange) * 100) / 100;
+  }
+
+  let errorElement = null;
+  if (errorBanner) {
+    errorElement = (
+      <div className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700">
+        {errorBanner}
+      </div>
+    );
+  }
+
+  let lowStockBadge = null;
+  if (lowStockProducts.length > 0) {
+    lowStockBadge = (
+      <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 font-mono text-[10px] font-bold text-white">
+        {lowStockProducts.length}
+      </span>
+    );
+  }
+
+  let discountSummaryRow = null;
+  if (totals.discount > 0) {
+    discountSummaryRow = (
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-slate-500">Discount</span>
+        <span className="font-mono font-medium text-blue-600">
+          -{formatPeso(totals.discount)}
+        </span>
+      </div>
+    );
+  }
+
+  let allCategoryClass =
+    "shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-medium cursor-pointer ";
+  if (selectedCategoryId === "ALL") {
+    allCategoryClass = allCategoryClass + "bg-blue-600 font-semibold text-white";
+  } else {
+    allCategoryClass =
+      allCategoryClass + "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50";
+  }
+
+  let productGridContent = null;
+  if (filteredProducts.length === 0) {
+    productGridContent = (
+      <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white text-sm text-slate-500">
+        No products found. Add items in Products.
+      </div>
+    );
+  } else {
+    productGridContent = (
+      <div className="grid grid-cols-2 gap-3.5 md:grid-cols-3 xl:grid-cols-4">
+        {filteredProducts.map(function renderCard(product) {
+          return (
+            <button
+              key={product.product_id}
+              type="button"
+              onClick={function onCardClick() {
+                handleProductCardClick(product);
+              }}
+              className="flex flex-col rounded-xl border border-slate-200 bg-white p-3 text-left transition-all hover:border-blue-300 hover:shadow-sm cursor-pointer"
+            >
+              <ProductThumb imageUrl={product.image_url} name={product.product_name} />
+              <div className="mt-2.5 truncate text-sm font-semibold text-slate-900">
+                {product.product_name}
+              </div>
+              <div className="mt-0.5 font-mono text-sm font-bold text-slate-900">
+                {formatPeso(product.selling_price)}
+              </div>
+              <div className={"mt-1 font-mono text-xs font-medium " + getStockTextClass(product)}>
+                Stock: {formatQuantity(product.current_stock)} {product.base_unit}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  let cartListContent = null;
+  if (cartItems.length === 0) {
+    cartListContent = (
+      <div className="py-12 text-center text-sm text-slate-400">
+        Tap a product or scan a barcode
+      </div>
+    );
+  } else {
+    cartListContent = cartItems.map(function renderCartItem(item) {
+      const lineSubtotal = Math.round(item.unit_price * item.quantity * 100) / 100;
+      let qtyControl = <span className="font-mono text-xs text-slate-500">Tingi</span>;
+      if (item.custom_amount === null) {
+        qtyControl = (
+          <div className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50">
+            <button
+              type="button"
+              onClick={function dec() {
+                changeCartItemQty(item.key, -1);
+              }}
+              className="p-1 text-slate-600 hover:text-slate-900 cursor-pointer"
+            >
+              <Minus className="h-3 w-3" />
+            </button>
+            <span className="min-w-7 text-center font-mono text-xs font-semibold text-slate-900">
+              {formatQuantity(item.quantity)}
+            </span>
+            <button
+              type="button"
+              onClick={function inc() {
+                changeCartItemQty(item.key, 1);
+              }}
+              className="p-1 text-slate-600 hover:text-slate-900 cursor-pointer"
+            >
+              <Plus className="h-3 w-3" />
+            </button>
+          </div>
+        );
+      }
+
+      return (
+        <div key={item.key} className="flex items-center gap-3 py-3.5">
+          <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-semibold text-slate-900">
+              {item.product_name}
+            </div>
+            <div className="truncate text-xs text-slate-500">{item.option_label}</div>
+            <div className="mt-1.5 flex items-center gap-2">{qtyControl}</div>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <button
+              type="button"
+              onClick={function remove() {
+                removeCartItem(item.key);
+              }}
+              className="text-slate-400 hover:text-rose-600 cursor-pointer"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+            <div className="font-mono text-sm font-bold text-slate-900">
+              {formatPeso(lineSubtotal)}
+            </div>
+          </div>
+        </div>
+      );
+    });
+  }
+
+  let pickerTitle = "";
+  let pickerBody = null;
+  if (pickerState) {
+    pickerTitle = pickerState.product.product_name;
+    let tingiForm = null;
+    if (pickerState.product.allow_custom_amount) {
+      tingiForm = (
+        <form
+          onSubmit={function submitTingi(event) {
+            event.preventDefault();
+            const parsed = Number(customPesoInput);
+            if (!Number.isFinite(parsed) || parsed <= 0) {
+              return;
+            }
+            addItemToCart(pickerState.product, null, parsed);
+            setPickerState(null);
+          }}
+          className="border-t border-slate-200 pt-3 space-y-2.5"
+        >
+          <Input
+            label="Custom Peso Amount (Tingi)"
+            type="number"
+            step="0.01"
+            min="0.01"
+            value={customPesoInput}
+            onChange={function onChange(event) {
+              setCustomPesoInput(event.target.value);
+            }}
+            placeholder="e.g. 10.00"
+          />
+          <Button type="submit" variant="primary" className="w-full">
+            Add Custom Amount
+          </Button>
+        </form>
+      );
+    }
+
+    pickerBody = (
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={function pickBase() {
+              addItemToCart(pickerState.product, null, null);
+              setPickerState(null);
+            }}
+            className="flex w-full items-center justify-between rounded-lg border border-slate-200 px-3.5 py-2.5 text-left hover:border-blue-400 hover:bg-blue-50 cursor-pointer"
+          >
+            <span className="text-sm font-medium text-slate-900">
+              1 {pickerState.product.base_unit} (Default)
+            </span>
+            <span className="font-mono text-sm font-bold text-blue-700">
+              {formatPeso(pickerState.product.selling_price)}
+            </span>
+          </button>
+
+          {pickerState.options.map(function renderOption(option) {
+            return (
+              <button
+                key={option.option_id}
+                type="button"
+                onClick={function pickOption() {
+                  addItemToCart(pickerState.product, option, null);
+                  setPickerState(null);
+                }}
+                className="flex w-full items-center justify-between rounded-lg border border-slate-200 px-3.5 py-2.5 text-left hover:border-blue-400 hover:bg-blue-50 cursor-pointer"
+              >
+                <div>
+                  <div className="text-sm font-medium text-slate-900">{option.option_name}</div>
+                  <div className="font-mono text-xs text-slate-500">
+                    {formatQuantity(option.quantity)} {pickerState.product.base_unit}
+                  </div>
+                </div>
+                <span className="font-mono text-sm font-bold text-blue-700">
+                  {formatPeso(option.price)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {tingiForm}
+      </div>
+    );
+  }
+
+  let lowStockBody = (
+    <div className="py-6 text-center text-sm text-slate-500">All products are stocked.</div>
+  );
+  if (lowStockProducts.length > 0) {
+    lowStockBody = (
+      <div className="divide-y divide-slate-100">
+        {lowStockProducts.map(function renderLowStock(product) {
+          return (
+            <div key={product.product_id} className="flex items-center justify-between py-2.5">
+              <div>
+                <div className="text-sm font-semibold text-slate-900">{product.product_name}</div>
+                <div className="font-mono text-xs text-slate-500">
+                  Reorder at {formatQuantity(product.reorder_level)} {product.base_unit}
+                </div>
+              </div>
+              <Badge tone="amber" className="font-mono">
+                {formatQuantity(product.current_stock)} {product.base_unit}
+              </Badge>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  let customerField = null;
+  if (paymentMethod !== "CASH") {
+    customerField = (
+      <Input
+        label="Customer ID"
+        value={customerIdInput}
+        onChange={function onChange(event) {
+          setCustomerIdInput(event.target.value);
+        }}
+        placeholder="Enter customer ID"
+        required={true}
+      />
+    );
+  }
+
+  let splitCashField = null;
+  if (paymentMethod === "SPLIT") {
+    splitCashField = (
+      <Input
+        label="Cash Portion (₱)"
+        type="number"
+        step="0.01"
+        min="0.01"
+        value={cashPartInput}
+        onChange={function onChange(event) {
+          setCashPartInput(event.target.value);
+        }}
+        required={true}
+      />
+    );
+  }
+
+  let cashTenderedSection = null;
+  if (paymentMethod !== "CREDIT") {
+    const quickBills = [
+      { label: "Exact", amount: totals.total },
+      { label: formatPeso(50), amount: 50 },
+      { label: formatPeso(100), amount: 100 },
+      { label: formatPeso(500), amount: 500 }
+    ];
+    cashTenderedSection = (
+      <div className="space-y-2">
+        <Input
+          label="Cash Tendered (₱)"
+          type="number"
+          step="0.01"
+          min="0"
+          value={amountPaidInput}
+          onChange={function onChange(event) {
+            setAmountPaidInput(event.target.value);
+          }}
+          required={true}
+        />
+        <div className="grid grid-cols-4 gap-1.5">
+          {quickBills.map(function renderQuickBill(bill) {
+            return (
+              <Button
+                key={bill.label}
+                variant="secondary"
+                size="sm"
+                onClick={function fillBill() {
+                  setAmountPaidInput(String(bill.amount));
+                }}
+                className="font-mono"
+              >
+                {bill.label}
+              </Button>
+            );
+          })}
+        </div>
+        <div className="flex items-center justify-between rounded-lg border border-slate-200 px-3.5 py-2">
+          <span className="text-xs font-medium text-slate-500">Change</span>
+          <span className="font-mono text-base font-bold text-emerald-700">
+            {formatPeso(changePreview)}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  let receiptBody = null;
+  if (completedReceipt) {
+    receiptBody = (
+      <ReceiptView sale={completedReceipt.sale} items={completedReceipt.items} />
+    );
+  }
+
+  return (
+    <div className="flex h-full flex-1 overflow-hidden bg-slate-50">
+      {/* Center Catalog Workspace */}
+      <div className="flex flex-1 flex-col overflow-hidden p-5">
+        {/* Top Search & Low Stock Bar */}
+        <div className="mb-4 flex items-center gap-3">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={function onChange(event) {
+                setSearchQuery(event.target.value);
+              }}
+              onKeyDown={handleSearchKeyDown}
+              placeholder="Search by product or scan barcode..."
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-16 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            />
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[11px] text-slate-400">
+              Ctrl K
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={function openLowStock() {
+              setLowStockModalOpen(true);
+            }}
+            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 cursor-pointer"
+            title="Low Stock Alerts"
+          >
+            <Bell className="h-4 w-4" />
+            {lowStockBadge}
+          </button>
+        </div>
+
+        {errorElement}
+
+        {/* Category Filter Pills */}
+        <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-1">
+          <button
+            type="button"
+            onClick={function selectAll() {
+              setSelectedCategoryId("ALL");
+            }}
+            className={allCategoryClass}
+          >
+            All
+          </button>
+          {categories.map(function renderCategory(category) {
+            const isSelected = selectedCategoryId === category.category_id;
+            let pillClass =
+              "shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-medium cursor-pointer ";
+            if (isSelected) {
+              pillClass = pillClass + "bg-blue-600 font-semibold text-white";
+            } else {
+              pillClass =
+                pillClass + "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50";
+            }
+            return (
+              <button
+                key={category.category_id}
+                type="button"
+                onClick={function selectCat() {
+                  setSelectedCategoryId(category.category_id);
+                }}
+                className={pillClass}
+              >
+                {category.category_name}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 4-Column Product Grid */}
+        <div className="flex-1 overflow-y-auto pr-1">{productGridContent}</div>
+
+        {/* Bottom Quick Action Bar */}
+        <div className="mt-4 grid grid-cols-3 gap-3 pt-2">
+          <Button
+            variant="soft"
+            size="lg"
+            onClick={function focusBarcode() {
+              if (searchInputRef.current) {
+                searchInputRef.current.focus();
+              }
+            }}
+          >
+            <ScanBarcode className="h-4 w-4" />
+            <span>Scan Barcode</span>
+          </Button>
+          <Button
+            variant="secondary"
+            size="lg"
+            onClick={function openDiscount() {
+              setDiscountDraft(String(orderDiscount));
+              setDiscountModalOpen(true);
+            }}
+          >
+            <Tag className="h-4 w-4" />
+            <span>Apply Discount</span>
+          </Button>
+          <Button variant="secondary" size="lg" onClick={clearCart}>
+            <XCircle className="h-4 w-4" />
+            <span>Clear Sale</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Right Current Sale Cart Panel */}
+      <aside className="flex w-88 shrink-0 flex-col border-l border-slate-200 bg-white">
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+          <h2 className="text-base font-bold text-slate-900">
+            Current Sale (<span className="font-mono">{cartItems.length}</span>)
+          </h2>
+        </div>
+
+        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 px-5">
+          {cartListContent}
+        </div>
+
+        {/* Totals & Checkout */}
+        <div className="border-t border-slate-200 p-5 space-y-4">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-500">Subtotal</span>
+              <span className="font-mono font-medium text-slate-900">
+                {formatPeso(totals.subtotal)}
+              </span>
+            </div>
+            {discountSummaryRow}
+            <div className="flex items-center justify-between pt-1.5">
+              <span className="text-base font-bold text-slate-900">Total</span>
+              <span className="font-mono text-xl font-bold text-slate-900">
+                {formatPeso(totals.total)}
+              </span>
+            </div>
+          </div>
+
+          <Button
+            variant="primary"
+            size="lg"
+            disabled={cartItems.length === 0}
+            onClick={openCheckoutModal}
+            className="w-full justify-between px-5 py-3 text-base"
+          >
+            <span>Checkout</span>
+            <span className="font-mono font-bold">{formatPeso(totals.total)}</span>
+          </Button>
+
+          {/* Payment Method Strip */}
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { key: "CASH", label: "Cash", icon: Banknote },
+              { key: "CREDIT", label: "Credit", icon: CreditCard },
+              { key: "SPLIT", label: "Split", icon: Split }
+            ].map(function renderMethod(method) {
+              const IconComponent = method.icon;
+              const isSelected = paymentMethod === method.key;
+              let btnClass =
+                "flex flex-col items-center gap-1 rounded-lg border py-2 text-xs font-medium cursor-pointer ";
+              if (isSelected) {
+                btnClass = btnClass + "border-blue-600 bg-blue-50 text-blue-700";
+              } else {
+                btnClass = btnClass + "border-slate-200 bg-white text-slate-600 hover:bg-slate-50";
+              }
+              return (
+                <button
+                  key={method.key}
+                  type="button"
+                  onClick={function selectMethod() {
+                    setPaymentMethod(method.key);
+                  }}
+                  className={btnClass}
+                >
+                  <IconComponent className="h-4 w-4" />
+                  <span>{method.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </aside>
+
+      {/* Selling Option / Tingi Picker Modal */}
+      <Modal
+        open={pickerState !== null}
+        onClose={function closePicker() {
+          setPickerState(null);
+        }}
+        title={pickerTitle}
+        size="sm"
+      >
+        {pickerBody}
+      </Modal>
+
+      {/* Order Discount Modal */}
+      <Modal
+        open={discountModalOpen}
+        onClose={function closeDiscount() {
+          setDiscountModalOpen(false);
+        }}
+        title="Apply Order Discount"
+        size="sm"
+      >
+        <form
+          onSubmit={function saveDiscount(event) {
+            event.preventDefault();
+            const parsed = Number(discountDraft);
+            if (!Number.isFinite(parsed) || parsed < 0) {
+              setOrderDiscount(0);
+            } else {
+              setOrderDiscount(parsed);
+            }
+            setDiscountModalOpen(false);
+          }}
+          className="space-y-4"
+        >
+          <Input
+            label="Discount Amount (₱)"
+            type="number"
+            step="0.01"
+            min="0"
+            value={discountDraft}
+            onChange={function onChange(event) {
+              setDiscountDraft(event.target.value);
+            }}
+            placeholder="0.00"
+          />
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="secondary"
+              onClick={function cancel() {
+                setDiscountModalOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary">
+              Apply
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Low Stock Alerts Modal */}
+      <Modal
+        open={lowStockModalOpen}
+        onClose={function closeLowStock() {
+          setLowStockModalOpen(false);
+        }}
+        title="Low Stock Alerts"
+      >
+        {lowStockBody}
+      </Modal>
+
+      {/* Checkout Payment Modal */}
+      <Modal
+        open={checkoutModalOpen}
+        onClose={function closeCheckout() {
+          setCheckoutModalOpen(false);
+        }}
+        title={"Checkout — " + paymentMethod}
+        size="sm"
+      >
+        <form onSubmit={handleCompleteSale} className="space-y-4">
+          <div className="rounded-lg bg-slate-50 p-3.5 flex items-center justify-between">
+            <span className="text-sm font-medium text-slate-600">Total Due</span>
+            <span className="font-mono text-xl font-bold text-slate-900">
+              {formatPeso(totals.total)}
+            </span>
+          </div>
+          {customerField}
+          {splitCashField}
+          {cashTenderedSection}
+          <div className="flex justify-end gap-2 pt-1">
+            <Button
+              variant="secondary"
+              onClick={function cancelCheckout() {
+                setCheckoutModalOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" disabled={submittingSale}>
+              Confirm Sale
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Receipt Preview Modal */}
+      <Modal
+        open={completedReceipt !== null}
+        onClose={function closeReceipt() {
+          setCompletedReceipt(null);
+        }}
+        title="Sale Completed"
+        size="sm"
+      >
+        {receiptBody}
+      </Modal>
+    </div>
+  );
+}

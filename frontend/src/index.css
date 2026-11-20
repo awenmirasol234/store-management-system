@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+}
+
+/* 58mm / 80mm thermal receipt print rules */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #thermal-receipt,
+  #thermal-receipt * {
+    visibility: visible;
+  }
+  #thermal-receipt {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 72mm;
+    padding: 4mm;
+    background: #ffffff;
+    color: #000000;
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+}

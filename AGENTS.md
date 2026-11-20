@@ -128,6 +128,7 @@ Reference specifications: `docs/product-inventory-and-selling-options.md` and `d
 - **Think like a store owner / cashier**: Design every screen strictly around the real daily use case (fast checkout, quick stock-in, clear utang balance, clear shift cash count).
 - **No clutter or overloaded text**: No filler paragraphs, redundant subtitles, decorative widgets, or unnecessary labels—show only the fields and actions needed for the task.
 - **Scannable & fast**: Use short, plain labels, clear visual hierarchy (prices, totals, stock alerts stand out), and minimal clicks to complete primary actions.
+- **Monospace digits**: Always use a monospace font (`font-mono`) for all digits (prices, totals, discounts, change, stock counts, quantities, barcodes, and receipt numbers).
 
 ---
 
