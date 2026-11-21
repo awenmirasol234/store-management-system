@@ -2,6 +2,7 @@ import { formatQuantity } from "../format.js";
 import { Button } from "./Button.jsx";
 import { Input } from "./Input.jsx";
 import { Modal } from "./Modal.jsx";
+import { Select } from "./Select.jsx";
 
 export function InventoryAdjustModal(props) {
   const product = props.product;
@@ -19,20 +20,17 @@ export function InventoryAdjustModal(props) {
       size="sm"
     >
       <form onSubmit={props.onSubmit} className="space-y-5">
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-700">Type</label>
-          <select
-            value={props.adjustType}
-            onChange={function onTypeChange(event) {
-              props.onAdjustTypeChange(event.target.value);
-            }}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
-          >
-            <option value="DAMAGED">DAMAGED (Deduct)</option>
-            <option value="EXPIRED">EXPIRED (Deduct)</option>
-            <option value="ADJUSTMENT">ADJUSTMENT (+/-)</option>
-          </select>
-        </div>
+        <Select
+          label="Type"
+          value={props.adjustType}
+          onChange={function onTypeChange(event) {
+            props.onAdjustTypeChange(event.target.value);
+          }}
+        >
+          <option value="DAMAGED">DAMAGED (Deduct)</option>
+          <option value="EXPIRED">EXPIRED (Deduct)</option>
+          <option value="ADJUSTMENT">ADJUSTMENT (+/-)</option>
+        </Select>
 
         <Input
           label="Quantity"

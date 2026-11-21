@@ -5,6 +5,7 @@ import { formatPeso } from "../format.js";
 import { Button } from "./Button.jsx";
 import { Input } from "./Input.jsx";
 import { Modal } from "./Modal.jsx";
+import { Select } from "./Select.jsx";
 
 export function PosCheckoutModal(props) {
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
@@ -269,13 +270,13 @@ export function PosCheckoutModal(props) {
             Customer (Utang Account) <span className="text-rose-500">*</span>
           </label>
           <div className="flex gap-2">
-            <select
+            <Select
+              className="flex-1"
               value={props.customerId}
               onChange={function onCustomerChange(event) {
                 props.onCustomerIdChange(event.target.value);
               }}
               required={true}
-              className="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 cursor-pointer"
             >
               <option value="">— Select Customer —</option>
               {customerList.map(function renderCustomerOption(customer) {
@@ -285,7 +286,7 @@ export function PosCheckoutModal(props) {
                   </option>
                 );
               })}
-            </select>
+            </Select>
             <Button
               type="button"
               variant="secondary"

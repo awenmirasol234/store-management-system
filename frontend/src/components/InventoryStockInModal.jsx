@@ -2,6 +2,7 @@ import { formatQuantity } from "../format.js";
 import { Button } from "./Button.jsx";
 import { Input } from "./Input.jsx";
 import { Modal } from "./Modal.jsx";
+import { Select } from "./Select.jsx";
 
 export function InventoryStockInModal(props) {
   const product = props.product;
@@ -20,25 +21,22 @@ export function InventoryStockInModal(props) {
       size="sm"
     >
       <form onSubmit={props.onSubmit} className="space-y-5">
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-700">Stock-In Unit</label>
-          <select
-            value={props.optionId}
-            onChange={function onOptChange(event) {
-              props.onOptionIdChange(event.target.value);
-            }}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
-          >
-            <option value="">Base Unit (1 {unitLabel})</option>
-            {props.options.map(function renderOpt(option) {
-              return (
-                <option key={option.option_id} value={option.option_id}>
-                  {option.option_name} ({formatQuantity(option.quantity)} {unitLabel})
-                </option>
-              );
-            })}
-          </select>
-        </div>
+        <Select
+          label="Stock-In Unit"
+          value={props.optionId}
+          onChange={function onOptChange(event) {
+            props.onOptionIdChange(event.target.value);
+          }}
+        >
+          <option value="">Base Unit (1 {unitLabel})</option>
+          {props.options.map(function renderOpt(option) {
+            return (
+              <option key={option.option_id} value={option.option_id}>
+                {option.option_name} ({formatQuantity(option.quantity)} {unitLabel})
+              </option>
+            );
+          })}
+        </Select>
 
         <div className="grid grid-cols-2 gap-4">
           <Input
@@ -65,25 +63,22 @@ export function InventoryStockInModal(props) {
           />
         </div>
 
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-700">Supplier</label>
-          <select
-            value={props.supplierId}
-            onChange={function onSupChange(event) {
-              props.onSupplierIdChange(event.target.value);
-            }}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
-          >
-            <option value="">None</option>
-            {props.suppliers.map(function renderSup(supplier) {
-              return (
-                <option key={supplier.supplier_id} value={supplier.supplier_id}>
-                  {supplier.supplier_name}
-                </option>
-              );
-            })}
-          </select>
-        </div>
+        <Select
+          label="Supplier"
+          value={props.supplierId}
+          onChange={function onSupChange(event) {
+            props.onSupplierIdChange(event.target.value);
+          }}
+        >
+          <option value="">None</option>
+          {props.suppliers.map(function renderSup(supplier) {
+            return (
+              <option key={supplier.supplier_id} value={supplier.supplier_id}>
+                {supplier.supplier_name}
+              </option>
+            );
+          })}
+        </Select>
 
         <Input
           label="Reference / DR #"

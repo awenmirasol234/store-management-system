@@ -19,6 +19,7 @@ import { ErrorBanner } from "../components/ErrorBanner.jsx";
 import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
+import { Select } from "../components/Select.jsx";
 import { InventoryStockInModal } from "../components/InventoryStockInModal.jsx";
 import { InventoryAdjustModal } from "../components/InventoryAdjustModal.jsx";
 
@@ -693,25 +694,22 @@ export function InventoryPage() {
               }}
               placeholder="Optional"
             />
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-slate-700">Category</label>
-              <select
-                value={productForm.category_id}
-                onChange={function onChange(event) {
-                  updateProductField("category_id", event.target.value);
-                }}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
-              >
-                <option value="">Uncategorized</option>
-                {categories.map(function renderCatOption(category) {
-                  return (
-                    <option key={category.category_id} value={category.category_id}>
-                      {category.category_name}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
+            <Select
+              label="Category"
+              value={productForm.category_id}
+              onChange={function onChange(event) {
+                updateProductField("category_id", event.target.value);
+              }}
+            >
+              <option value="">Uncategorized</option>
+              {categories.map(function renderCatOption(category) {
+                return (
+                  <option key={category.category_id} value={category.category_id}>
+                    {category.category_name}
+                  </option>
+                );
+              })}
+            </Select>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
