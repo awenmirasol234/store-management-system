@@ -1,10 +1,19 @@
-import path from "node:path";
 import { createApp } from "./app.js";
 
-const backendRoot = path.resolve(import.meta.dirname, "..");
-const portValue = Number(process.env.PORT) || 3001;
-const databasePath = process.env.DATABASE_PATH || path.join(backendRoot, "data", "store.db");
-const uploadsDir = process.env.UPLOADS_DIR || path.join(backendRoot, "uploads");
+function requireEnv(name) {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error("Missing required environment variable: " + name);
+  }
+  return value;
+}
+
+const portValue = Number(requireEnv("PORT"));
+if (!Number.isInteger(portValue) || portValue <= 0) {
+  throw new Error("PORT must be a positive integer");
+}
+const databasePath = requireEnv("DATABASE_PATH");
+const uploadsDir = requireEnv("UPLOADS_DIR");
 
 const runtime = createApp({
   databasePath: databasePath,

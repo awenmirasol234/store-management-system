@@ -292,9 +292,13 @@ export function seedDatabase(targetDbPath, shouldClean) {
 // Direct CLI invocation
 const isMain = process.argv[1] && process.argv[1].endsWith("seed.js");
 if (isMain) {
+  const databasePath = process.env.DATABASE_PATH;
+  if (!databasePath) {
+    throw new Error("Missing required environment variable: DATABASE_PATH");
+  }
   const shouldClean = process.argv.includes("--clean");
   console.log("Seeding store database (clean: " + shouldClean + ")...");
-  const stats = seedDatabase(null, shouldClean);
+  const stats = seedDatabase(databasePath, shouldClean);
   console.log("Database seeded successfully!");
   console.log("  Categories:             " + stats.categories);
   console.log("  Suppliers:              " + stats.suppliers);
