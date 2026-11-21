@@ -1,5 +1,5 @@
 import { formatQuantity } from "../format.js";
-import { Button } from "./Button.jsx";
+import { FormActions } from "./FormActions.jsx";
 import { Input } from "./Input.jsx";
 import { Modal } from "./Modal.jsx";
 import { Select } from "./Select.jsx";
@@ -90,14 +90,7 @@ export function InventoryStockInModal(props) {
           placeholder="Optional"
         />
 
-        <div className="flex justify-end gap-3 pt-2">
-          <Button variant="secondary" onClick={props.onClose}>
-            Cancel
-          </Button>
-          <Button type="submit" variant="primary">
-            Add Stock
-          </Button>
-        </div>
+        <FormActions onCancel={props.onClose} confirmLabel="Add Stock" />
       </form>
     </Modal>
   );

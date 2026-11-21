@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
 import { RotateCcw, Receipt, Search, X } from "lucide-react";
 import { api } from "../api.js";
-import { formatManilaDateTime, formatPeso, formatQuantity, formatSmartDateTime } from "../format.js";
+import { formatPeso, formatQuantity, formatSmartDateTime } from "../format.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
+import { DataTable } from "../components/DataTable.jsx";
+import { EmptyState } from "../components/EmptyState.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
 import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
+import { PageHeader } from "../components/PageHeader.jsx";
+import { PageLayout } from "../components/PageLayout.jsx";
 import { ReceiptView } from "../components/ReceiptView.jsx";
+import { TableEmptyRow } from "../components/TableEmptyRow.jsx";
 
 function getPaymentTone(method) {
   if (method === "CASH") {
@@ -170,20 +175,13 @@ export function TransactionsPage() {
 
   let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-6" />;
 
-  let tableBody = (
-    <tr>
-      <td colSpan="6" className="px-5 py-14 text-center text-sm text-slate-500">
-        No completed sales yet.
-      </td>
-    </tr>
-  );
+  let tableBody = <TableEmptyRow colSpan="6" message="No completed sales yet." />;
   if (sales.length > 0 && filteredSales.length === 0) {
     tableBody = (
-      <tr>
-        <td colSpan="6" className="px-5 py-14 text-center text-sm text-slate-500">
-          No transactions matching "{searchQuery}".
-        </td>
-      </tr>
+      <TableEmptyRow
+        colSpan="6"
+        message={'No transactions matching "' + searchQuery + '".'}
+      />
     );
   } else if (filteredSales.length > 0) {
     tableBody = filteredSales.map(function renderSaleRow(sale) {
@@ -221,16 +219,10 @@ export function TransactionsPage() {
     });
   }
 
-  let mobileSalesList = (
-    <div className="py-14 text-center text-sm text-slate-500">
-      No transactions recorded yet.
-    </div>
-  );
+  let mobileSalesList = <EmptyState message="No transactions recorded yet." />;
   if (sales.length > 0 && filteredSales.length === 0) {
     mobileSalesList = (
-      <div className="py-14 text-center text-sm text-slate-500">
-        No transactions matching "{searchQuery}".
-      </div>
+      <EmptyState message={'No transactions matching "' + searchQuery + '".'} />
     );
   } else if (filteredSales.length > 0) {
     mobileSalesList = filteredSales.map(function renderSaleCard(sale) {
@@ -353,10 +345,8 @@ export function TransactionsPage() {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-4 sm:p-6 lg:p-7">
-      <div className="mb-5 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-        <h1 className="text-lg font-bold text-slate-900">Transactions</h1>
-
+    <PageLayout>
+      <PageHeader title="Transactions" stackOnMobile={true}>
         <div className="flex items-center gap-2.5 flex-1 max-w-sm sm:justify-end">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
@@ -376,7 +366,7 @@ export function TransactionsPage() {
             Refresh
           </Button>
         </div>
-      </div>
+      </PageHeader>
 
       {errorElement}
 
@@ -387,8 +377,9 @@ export function TransactionsPage() {
 
       {/* Desktop Table (>= md) */}
       <div className="hidden md:block flex-1 overflow-auto rounded-xl border border-slate-200 bg-white">
-        <table className="w-full border-collapse text-left">
-          <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
+        <DataTable
+          stickyHead={true}
+          headRow={
             <tr>
               <th className="px-5 py-3">Receipt</th>
               <th className="px-5 py-3">Date (Manila)</th>
@@ -397,9 +388,10 @@ export function TransactionsPage() {
               <th className="px-5 py-3 text-right">Change</th>
               <th className="px-5 py-3 text-right">Action</th>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">{tableBody}</tbody>
-        </table>
+          }
+        >
+          {tableBody}
+        </DataTable>
       </div>
 
       <Modal
@@ -412,6 +404,6 @@ export function TransactionsPage() {
       >
         {modalBody}
       </Modal>
-    </div>
+    </PageLayout>
   );
 }

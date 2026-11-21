@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  Banknote,
   Bell,
-  CreditCard,
   Minus,
   Plus,
   ScanBarcode,
@@ -10,7 +8,6 @@ import {
   ShoppingBag,
   Tag,
   Trash2,
-  Wallet,
   XCircle
 } from "lucide-react";
 import { api } from "../api.js";
@@ -19,9 +16,12 @@ import { formatPeso, formatQuantity } from "../format.js";
 import { getStockLevel, filterProducts, STOCK_LEVELS } from "../products.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
+import { EmptyState } from "../components/EmptyState.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
+import { FormActions } from "../components/FormActions.jsx";
 import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
+import { PaymentMethodToggle } from "../components/PaymentMethodToggle.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
 import { ReceiptView } from "../components/ReceiptView.jsx";
 import { PosCheckoutModal } from "../components/PosCheckoutModal.jsx";
@@ -519,9 +519,7 @@ export function PosPage() {
   let cartListContent = null;
   if (cartItems.length === 0) {
     cartListContent = (
-      <div className="py-16 text-center text-sm text-slate-400">
-        Tap a product or scan a barcode
-      </div>
+      <EmptyState message="Tap a product or scan a barcode" padding="lg" tone="faint" />
     );
   } else {
     cartListContent = cartItems.map(function renderCartItem(item) {
@@ -669,9 +667,7 @@ export function PosPage() {
     );
   }
 
-  let lowStockBody = (
-    <div className="py-10 text-center text-sm text-slate-500">All products are stocked.</div>
-  );
+  let lowStockBody = <EmptyState message="All products are stocked." padding="sm" />;
   if (lowStockProducts.length > 0) {
     lowStockBody = (
       <div className="divide-y divide-slate-100">
@@ -733,35 +729,10 @@ export function PosPage() {
         <span className="font-mono font-bold">{formatPeso(totals.total)}</span>
       </Button>
 
-      <div className="grid grid-cols-2 gap-2">
-        {[
-          { key: "CASH", label: "Cash", icon: Banknote },
-          { key: "CREDIT", label: "Utang", icon: CreditCard }
-        ].map(function renderMethod(method) {
-          const IconComponent = method.icon;
-          const isSelected = paymentMethod === method.key;
-          let btnClass =
-            "flex flex-col items-center gap-1.5 rounded-lg border py-2 text-xs font-medium cursor-pointer ";
-          if (isSelected) {
-            btnClass = btnClass + "border-blue-600 bg-blue-50 text-blue-700 font-semibold";
-          } else {
-            btnClass = btnClass + "border-slate-200 bg-white text-slate-600 hover:bg-slate-50";
-          }
-          return (
-            <button
-              key={method.key}
-              type="button"
-              onClick={function selectMethod() {
-                handlePaymentMethodChange(method.key);
-              }}
-              className={btnClass}
-            >
-              <IconComponent className="h-4 w-4" />
-              <span>{method.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      <PaymentMethodToggle
+        paymentMethod={paymentMethod}
+        onChange={handlePaymentMethodChange}
+      />
     </div>
   );
 
@@ -995,19 +966,13 @@ export function PosPage() {
             }}
             placeholder="0.00"
           />
-          <div className="flex justify-end gap-3 pt-1">
-            <Button
-              variant="secondary"
-              onClick={function cancel() {
-                setDiscountModalOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary">
-              Apply
-            </Button>
-          </div>
+          <FormActions
+            onCancel={function cancel() {
+              setDiscountModalOpen(false);
+            }}
+            confirmLabel="Apply"
+            className="pt-1"
+          />
         </form>
       </Modal>
 

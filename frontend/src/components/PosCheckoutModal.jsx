@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Banknote, CreditCard, Wallet, UserPlus, AlertCircle } from "lucide-react";
+import { UserPlus, AlertCircle } from "lucide-react";
 import { api } from "../api.js";
 import { formatPeso } from "../format.js";
 import { Button } from "./Button.jsx";
+import { ErrorBanner } from "./ErrorBanner.jsx";
 import { Input } from "./Input.jsx";
 import { Modal } from "./Modal.jsx";
+import { PaymentMethodToggle } from "./PaymentMethodToggle.jsx";
 import { Select } from "./Select.jsx";
 
 export function PosCheckoutModal(props) {
@@ -126,21 +128,12 @@ export function PosCheckoutModal(props) {
     }
   }
 
-  const paymentMethods = [
-    { key: "CASH", label: "Cash", icon: Banknote },
-    { key: "CREDIT", label: "Utang", icon: CreditCard }
-  ];
-
   let customerSection = null;
   if (props.paymentMethod !== "CASH") {
     if (isCreatingCustomer) {
       let customerErrorBanner = null;
       if (customerError.length > 0) {
-        customerErrorBanner = (
-          <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
-            {customerError}
-          </div>
-        );
+        customerErrorBanner = <ErrorBanner message={customerError} />;
       }
 
       customerSection = (
@@ -445,32 +438,10 @@ export function PosCheckoutModal(props) {
     >
       <form onSubmit={props.onSubmit} className="space-y-4">
         {/* Payment Method Switcher */}
-        <div className="grid grid-cols-2 gap-2">
-          {paymentMethods.map(function renderMethodButton(method) {
-            const Icon = method.icon;
-            const isSelected = props.paymentMethod === method.key;
-            let tabClass =
-              "flex flex-col items-center gap-1 rounded-xl border py-2 text-xs font-medium cursor-pointer transition-colors ";
-            if (isSelected) {
-              tabClass = tabClass + "border-blue-600 bg-blue-50 text-blue-700 font-semibold shadow-sm";
-            } else {
-              tabClass = tabClass + "border-slate-200 bg-white text-slate-600 hover:bg-slate-50";
-            }
-            return (
-              <button
-                key={method.key}
-                type="button"
-                onClick={function selectMethod() {
-                  props.onPaymentMethodChange(method.key);
-                }}
-                className={tabClass}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{method.label}</span>
-              </button>
-            );
-          })}
-        </div>
+        <PaymentMethodToggle
+          paymentMethod={props.paymentMethod}
+          onChange={props.onPaymentMethodChange}
+        />
 
         {/* Total Due Banner */}
         <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 border border-slate-200/80">

@@ -15,11 +15,16 @@ import { formatPeso, formatQuantity } from "../format.js";
 import { filterProducts, getStockLevel, STOCK_LEVELS } from "../products.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
+import { DataTable } from "../components/DataTable.jsx";
+import { EmptyState } from "../components/EmptyState.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
+import { FormActions } from "../components/FormActions.jsx";
 import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
+import { PageLayout } from "../components/PageLayout.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
 import { Select } from "../components/Select.jsx";
+import { TableEmptyRow } from "../components/TableEmptyRow.jsx";
 import { InventoryStockInModal } from "../components/InventoryStockInModal.jsx";
 import { InventoryAdjustModal } from "../components/InventoryAdjustModal.jsx";
 
@@ -409,11 +414,7 @@ export function InventoryPage() {
   }
 
   let productTableBody = (
-    <tr>
-      <td colSpan="6" className="px-5 py-14 text-center text-sm text-slate-500">
-        No products yet. Click Add Product to start.
-      </td>
-    </tr>
+    <TableEmptyRow colSpan="6" message="No products yet. Click Add Product to start." />
   );
   if (filteredProducts.length > 0) {
     productTableBody = filteredProducts.map(function renderRow(product) {
@@ -473,11 +474,7 @@ export function InventoryPage() {
     });
   }
 
-  let mobileCardsContent = (
-    <div className="py-14 text-center text-sm text-slate-500">
-      No products yet. Tap Add Product to start.
-    </div>
-  );
+  let mobileCardsContent = <EmptyState message="No products yet. Tap Add Product to start." />;
   if (filteredProducts.length > 0) {
     mobileCardsContent = filteredProducts.map(function renderProductCard(product) {
       let barcodeText = "—";
@@ -599,7 +596,7 @@ export function InventoryPage() {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-hidden bg-slate-50 p-4 sm:p-6 lg:p-7">
+    <PageLayout>
       <div className="mb-5 sm:mb-6 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-2 sm:gap-3.5 flex-1 min-w-56 sm:min-w-64">
           <div className="relative flex-1 max-w-sm">
@@ -651,8 +648,9 @@ export function InventoryPage() {
 
       {/* Desktop Product Table (>= md) */}
       <div className="hidden md:block flex-1 overflow-auto rounded-xl border border-slate-200 bg-white">
-        <table className="w-full border-collapse text-left">
-          <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
+        <DataTable
+          stickyHead={true}
+          headRow={
             <tr>
               <th className="px-5 py-3">Product</th>
               <th className="px-5 py-3">Unit</th>
@@ -661,9 +659,10 @@ export function InventoryPage() {
               <th className="px-5 py-3 text-right">Stock</th>
               <th className="px-5 py-3 text-right">Actions</th>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">{productTableBody}</tbody>
-        </table>
+          }
+        >
+          {productTableBody}
+        </DataTable>
       </div>
 
       {/* Add / Edit Product Modal */}
@@ -790,19 +789,13 @@ export function InventoryPage() {
             <span>Allow custom peso amount ("Tingi")</span>
           </label>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Button
-              variant="secondary"
-              onClick={function cancel() {
-                setProductModalOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary" disabled={savingProduct}>
-              Save Product
-            </Button>
-          </div>
+          <FormActions
+            onCancel={function cancel() {
+              setProductModalOpen(false);
+            }}
+            confirmLabel="Save Product"
+            disabled={savingProduct}
+          />
         </form>
       </Modal>
 
@@ -825,19 +818,13 @@ export function InventoryPage() {
             placeholder="e.g. Beverages"
             required={true}
           />
-          <div className="flex justify-end gap-3 pt-1">
-            <Button
-              variant="secondary"
-              onClick={function cancel() {
-                setCategoryModalOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary">
-              Save
-            </Button>
-          </div>
+          <FormActions
+            onCancel={function cancel() {
+              setCategoryModalOpen(false);
+            }}
+            confirmLabel="Save"
+            className="pt-1"
+          />
         </form>
       </Modal>
 
@@ -958,25 +945,18 @@ export function InventoryPage() {
             <span className="font-semibold text-slate-900">{deleteProductName}</span>? This
             product will be archived and will no longer appear on the POS screen.
           </p>
-          <div className="flex justify-end gap-3 pt-2">
-            <Button
-              variant="secondary"
-              onClick={function cancel() {
-                setDeleteConfirmProduct(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="danger"
-              onClick={function confirm() {
-                handleDeleteProduct(deleteConfirmProduct);
-                setDeleteConfirmProduct(null);
-              }}
-            >
-              Remove Product
-            </Button>
-          </div>
+          <FormActions
+            onCancel={function cancel() {
+              setDeleteConfirmProduct(null);
+            }}
+            confirmType="button"
+            confirmVariant="danger"
+            confirmLabel="Remove Product"
+            onConfirm={function confirm() {
+              handleDeleteProduct(deleteConfirmProduct);
+              setDeleteConfirmProduct(null);
+            }}
+          />
         </div>
       </Modal>
 
@@ -1051,6 +1031,6 @@ export function InventoryPage() {
           </div>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 }

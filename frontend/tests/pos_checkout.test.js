@@ -126,6 +126,7 @@ describe("PosCheckoutModal rendering tests", function () {
     expect(html).toContain("Utang Portion");
     expect(html).toContain("50/50 Split");
     expect(html).toContain("Mang Tomas");
+    expect(html).toContain('max="500"');
   });
 
   it("disables Confirm Sale button when customer is not selected for CREDIT", function () {

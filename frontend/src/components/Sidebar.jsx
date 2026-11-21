@@ -1,22 +1,6 @@
 import { useState } from "react";
-import {
-  BarChart3,
-  ChevronLeft,
-  ChevronRight,
-  LayoutDashboard,
-  Package,
-  Receipt,
-  ShoppingBag,
-  Store
-} from "lucide-react";
-
-const NAV_ITEMS = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { key: "pos", label: "POS", icon: ShoppingBag },
-  { key: "inventory", label: "Inventory", icon: Package },
-  { key: "transactions", label: "Transactions", icon: Receipt },
-  { key: "reports", label: "Reports", icon: BarChart3 }
-];
+import { ChevronLeft, ChevronRight, Store } from "lucide-react";
+import { NAV_ITEMS } from "../navigation.js";
 
 export function Sidebar(props) {
   const [collapsed, setCollapsed] = useState(function initCollapsed() {

@@ -1,18 +1,4 @@
-import {
-  BarChart3,
-  LayoutDashboard,
-  Package,
-  Receipt,
-  ShoppingBag
-} from "lucide-react";
-
-const NAV_ITEMS = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { key: "pos", label: "POS", icon: ShoppingBag },
-  { key: "inventory", label: "Inventory", icon: Package },
-  { key: "transactions", label: "History", icon: Receipt },
-  { key: "reports", label: "Reports", icon: BarChart3 }
-];
+import { NAV_ITEMS } from "../navigation.js";
 
 export function BottomNav(props) {
   return (
@@ -47,7 +33,7 @@ export function BottomNav(props) {
               className={buttonClass}
             >
               <IconComponent className={iconClass} />
-              <span>{item.label}</span>
+              <span>{item.shortLabel}</span>
             </button>
           );
         })}

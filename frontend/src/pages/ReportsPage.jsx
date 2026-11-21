@@ -3,8 +3,12 @@ import { Banknote, CreditCard, TrendingUp, Wallet } from "lucide-react";
 import { api } from "../api.js";
 import { formatPeso, formatQuantity, formatSmartDate, getManilaIsoDateOffset } from "../format.js";
 import { Button } from "../components/Button.jsx";
+import { DataTable } from "../components/DataTable.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
+import { PageHeader } from "../components/PageHeader.jsx";
+import { PageLayout } from "../components/PageLayout.jsx";
 import { StatCard } from "../components/StatCard.jsx";
+import { TableEmptyRow } from "../components/TableEmptyRow.jsx";
 
 export function ReportsPage() {
   const [fromDate, setFromDate] = useState(function initFrom() {
@@ -69,11 +73,7 @@ export function ReportsPage() {
   }
 
   let dailyTableBody = (
-    <tr>
-      <td colSpan="4" className="px-5 py-12 text-center text-sm text-slate-500">
-        No sales in this date range.
-      </td>
-    </tr>
+    <TableEmptyRow colSpan="4" message="No sales in this date range." padding="md" />
   );
   if (dailyRows.length > 0) {
     dailyTableBody = dailyRows.map(function renderDay(row) {
@@ -97,11 +97,7 @@ export function ReportsPage() {
   }
 
   let topTableBody = (
-    <tr>
-      <td colSpan="4" className="px-5 py-12 text-center text-sm text-slate-500">
-        No product sales in this date range.
-      </td>
-    </tr>
+    <TableEmptyRow colSpan="4" message="No product sales in this date range." padding="md" />
   );
   if (topProducts.length > 0) {
     topTableBody = topProducts.map(function renderProduct(item) {
@@ -136,10 +132,8 @@ export function ReportsPage() {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-7">
-      <div className="mb-5 sm:mb-6 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-        <h1 className="text-lg font-bold text-slate-900">Reports</h1>
-
+    <PageLayout scroll={true}>
+      <PageHeader title="Reports">
         <div className="flex flex-wrap items-center gap-2.5">
           <Button
             variant={todayVariant}
@@ -189,7 +183,7 @@ export function ReportsPage() {
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
           />
         </div>
-      </div>
+      </PageHeader>
 
       {errorElement}
 
@@ -218,17 +212,18 @@ export function ReportsPage() {
             Daily Sales
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
-              <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
+            <DataTable
+              headRow={
                 <tr>
                   <th className="px-5 py-3">Date</th>
                   <th className="px-5 py-3 text-right">Orders</th>
                   <th className="px-5 py-3 text-right">Sales</th>
                   <th className="px-5 py-3 text-right">Profit</th>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">{dailyTableBody}</tbody>
-            </table>
+              }
+            >
+              {dailyTableBody}
+            </DataTable>
           </div>
         </section>
 
@@ -237,20 +232,21 @@ export function ReportsPage() {
             Top Products
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
-              <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
+            <DataTable
+              headRow={
                 <tr>
                   <th className="px-5 py-3">Product</th>
                   <th className="px-5 py-3 text-right">Qty</th>
                   <th className="px-5 py-3 text-right">Revenue</th>
                   <th className="px-5 py-3 text-right">Profit</th>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">{topTableBody}</tbody>
-            </table>
+              }
+            >
+              {topTableBody}
+            </DataTable>
           </div>
         </section>
       </div>
-    </div>
+    </PageLayout>
   );
 }

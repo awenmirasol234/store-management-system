@@ -38,6 +38,7 @@ export function Input(props) {
         type={inputType}
         step={props.step}
         min={props.min}
+        max={props.max}
         value={props.value}
         onChange={props.onChange}
         onKeyDown={props.onKeyDown}

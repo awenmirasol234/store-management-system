@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, Banknote, Package, ShoppingBag, TrendingUp } from "lucide-react";
 import { api } from "../api.js";
-import { formatManilaDateTime, formatPeso, formatQuantity, formatSmartDateTime } from "../format.js";
+import { formatPeso, formatQuantity, formatSmartDateTime } from "../format.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
+import { EmptyState } from "../components/EmptyState.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
+import { PageHeader } from "../components/PageHeader.jsx";
+import { PageLayout } from "../components/PageLayout.jsx";
 import { StatCard } from "../components/StatCard.jsx";
 
 export function DashboardPage(props) {
@@ -55,9 +58,7 @@ export function DashboardPage(props) {
     lowStockTone = "amber";
   }
 
-  let lowStockList = (
-    <div className="py-12 text-center text-sm text-slate-500">All stock levels are healthy.</div>
-  );
+  let lowStockList = <EmptyState message="All stock levels are healthy." padding="md" />;
   if (lowStock.length > 0) {
     lowStockList = (
       <div className="divide-y divide-slate-100">
@@ -82,9 +83,7 @@ export function DashboardPage(props) {
     );
   }
 
-  let recentSalesList = (
-    <div className="py-12 text-center text-sm text-slate-500">No sales recorded yet.</div>
-  );
+  let recentSalesList = <EmptyState message="No sales recorded yet." padding="md" />;
   if (recentSales.length > 0) {
     recentSalesList = (
       <div className="divide-y divide-slate-100">
@@ -113,9 +112,8 @@ export function DashboardPage(props) {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-7">
-      <div className="mb-5 sm:mb-6 flex items-center justify-between gap-3">
-        <h1 className="text-lg font-bold text-slate-900">Dashboard</h1>
+    <PageLayout scroll={true}>
+      <PageHeader title="Dashboard">
         <div className="flex items-center gap-2 sm:gap-3">
           <Button variant="secondary" size="sm" onClick={loadDashboard}>
             Refresh
@@ -131,7 +129,7 @@ export function DashboardPage(props) {
             <span>Open POS</span>
           </Button>
         </div>
-      </div>
+      </PageHeader>
 
       {errorElement}
 
@@ -196,6 +194,6 @@ export function DashboardPage(props) {
           {recentSalesList}
         </section>
       </div>
-    </div>
+    </PageLayout>
   );
 }

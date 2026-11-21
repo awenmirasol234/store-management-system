@@ -2,27 +2,12 @@ import { useState } from "react";
 import { Store } from "lucide-react";
 import { Sidebar } from "./components/Sidebar.jsx";
 import { BottomNav } from "./components/BottomNav.jsx";
+import { getPageTitle } from "./navigation.js";
 import { DashboardPage } from "./pages/DashboardPage.jsx";
 import { PosPage } from "./pages/PosPage.jsx";
 import { TransactionsPage } from "./pages/TransactionsPage.jsx";
 import { InventoryPage } from "./pages/InventoryPage.jsx";
 import { ReportsPage } from "./pages/ReportsPage.jsx";
-
-function getPageTitle(pageKey) {
-  if (pageKey === "pos") {
-    return "Point of Sale";
-  }
-  if (pageKey === "inventory") {
-    return "Inventory";
-  }
-  if (pageKey === "transactions") {
-    return "Transactions";
-  }
-  if (pageKey === "reports") {
-    return "Reports";
-  }
-  return "Dashboard";
-}
 
 export function App() {
   const [activePage, setActivePage] = useState("dashboard");

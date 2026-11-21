@@ -4,6 +4,7 @@ import { renderToString } from "react-dom/server";
 import { BottomNav } from "../src/components/BottomNav.jsx";
 import { PosCheckoutModal } from "../src/components/PosCheckoutModal.jsx";
 import { App } from "../src/App.jsx";
+import { getPageTitle } from "../src/navigation.js";
 
 describe("Responsive navigation & components", function () {
   it("renders BottomNav with all 5 navigation tabs", function () {
@@ -51,6 +52,12 @@ describe("Responsive navigation & components", function () {
     expect(html).toContain("₱1,000.00");
     expect(html).toContain("Change");
     expect(html).toContain("₱450.00");
+  });
+
+  it("keeps page titles in the shared navigation config", function () {
+    expect(getPageTitle("pos")).toBe("Point of Sale");
+    expect(getPageTitle("transactions")).toBe("Transactions");
+    expect(getPageTitle("unknown")).toBe("Dashboard");
   });
 
   it("renders App without crashing on initial mount", function () {
