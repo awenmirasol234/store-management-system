@@ -11,6 +11,20 @@ Open `http://localhost:8080`.
 
 Run seeding while the shop is idle. `--clean` deletes existing sales and inventory history first.
 
+## Deploying published images
+
+CI publishes both images to GitHub Container Registry. Pull them instead of building when deploying:
+
+```bash
+docker login ghcr.io -u awenmirasol234
+IMAGE_TAG=sha-abc1234 docker compose pull
+IMAGE_TAG=sha-abc1234 docker compose up -d
+```
+
+Log in only when the packages are private. `IMAGE_TAG` defaults to `latest`; use a `sha-...` tag or a release tag such as `1.2.3` for a pinned deployment. Set it in `.env` to keep the same tag across commands. Always run `docker compose pull` before `docker compose up`; without a local image, Compose would build from source.
+
+To roll back, set `IMAGE_TAG` to the previous `sha-...` tag, then run `docker compose pull` and `docker compose up -d`. The `store_data` volume is not changed.
+
 ## Recreating services
 
 Nginx resolves `backend:3001` once at startup. After recreating only the backend (`docker compose up -d --force-recreate backend`), run `docker compose restart nginx` to avoid a 502 from the old address.
