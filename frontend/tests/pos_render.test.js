@@ -79,4 +79,24 @@ describe("PosPage SSR test", function () {
     expect(html).toContain("Collapse Cart Panel");
     expect(html).toContain("Current Sale");
   });
+
+  it("renders mobile cart bar with md:hidden to prevent conflict on tablet/desktop", function () {
+    const html = renderToString(
+      React.createElement(PosPage, {
+        initialCartItems: [
+          {
+            key: "prod-1:base",
+            product_id: "prod-1",
+            product_name: "C2 Cool & Clean",
+            selling_price: 25,
+            quantity: 1,
+            base_quantity_per_unit: 1
+          }
+        ]
+      })
+    );
+    expect(html).toContain("fixed bottom-16 left-0 right-0 z-30");
+    expect(html).toContain("md:hidden");
+    expect(html).not.toContain("backdrop-blur lg:hidden");
+  });
 });

@@ -59,7 +59,11 @@ export function PosPage(props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [errorBanner, setErrorBanner] = useState("");
 
-  const [cartItems, setCartItems] = useState([]);
+  let initialCart = [];
+  if (props && props.initialCartItems) {
+    initialCart = props.initialCartItems;
+  }
+  const [cartItems, setCartItems] = useState(initialCart);
   const [orderDiscount, setOrderDiscount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("CASH");
 
@@ -898,7 +902,7 @@ export function PosPage(props) {
   let mobileCartBar = null;
   if (cartItems.length > 0) {
     mobileCartBar = (
-      <div className="fixed bottom-16 left-0 right-0 z-30 border-t border-[#E9E9E9] bg-white/95 p-3 backdrop-blur lg:hidden">
+      <div className="fixed bottom-16 left-0 right-0 z-30 border-t border-[#E9E9E9] bg-white/95 p-3 backdrop-blur md:hidden">
         <button
           type="button"
           onClick={function openMobileCart() {
