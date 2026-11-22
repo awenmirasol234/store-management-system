@@ -1,10 +1,10 @@
 # Retail POS Dashboard — Tactical Design System & Implementation Blueprint
 
-> **Status:** Active Reference & Implementation Guide
+> **Status:** Active reference. The base tokens, responsive shell, navigation, shared primitives, POS layout, and receipt print styles are implemented. Remaining visual work is listed as roadmap work.
 >
 > **Target Platform:** StoreFlow POS (React 19, Tailwind CSS v4, Node.js SQLite Backend)
 >
-> **Source Specification:** Retail POS Dashboard Design System (`c:\Users\awen\Downloads\retail-pos-design-system.md`)
+> **Source Specification:** This repository's frontend source and the product requirements in `docs/product-inventory-and-selling-options.md`.
 >
 > **Mandatory Agent Rules:** [AGENTS.md](../AGENTS.md) & [.agents/skills/ponytail/SKILL.md](../.agents/skills/ponytail/SKILL.md) (`full` mode: 0 ternary operators, 0 object spread syntax)
 
@@ -377,17 +377,17 @@ When implementing this design system, every coding agent must strictly enforce:
 
 ## 7. Execution Phasing & Verification
 
-### Phase 1: Foundations & Shared Primitives
-- Update `frontend/src/index.css` with `@theme` design tokens.
-- Refactor `Button.jsx`, `Badge.jsx`, `Input.jsx`, `ProductThumb.jsx`, `Modal.jsx`, `StatCard.jsx`.
-- Verify typography test suite (`npm test tests/typography.test.js`).
+### Completed Phase 1: Foundations & Shared Primitives
+- `frontend/src/index.css` defines the visual tokens, Inter typography, tabular numbers, scrollbar helper, and thermal receipt print rules.
+- Shared buttons, badges, inputs, product thumbnails, modals, and stat cards use the token system.
+- Verify typography and shared-component tests when changing these primitives.
 
-### Phase 2: Navigation Shell
-- Refactor `Sidebar.jsx` and `BottomNav.jsx` to near-black `#171717` and lime-green active item treatment.
-- Update `tests/responsive_navigation.test.js` assertions.
-- Verify shell rendering across desktop, tablet, and mobile breakpoints.
+### Completed Phase 2: Navigation Shell
+- `Sidebar.jsx` supports expanded/collapsed desktop navigation and shift/staff controls.
+- `BottomNav.jsx` provides role-filtered mobile navigation with the near-black/lime treatment.
+- Authentication and role filtering are handled by `App.jsx` and `navigation.js`.
 
-### Phase 3: POS Cockpit Redesign
+### Completed Phase 3: POS Cockpit
 - Redesign `PosPage.jsx`:
   - Search & quick actions bar.
   - Category filter pills (rounded-full with count badges).
@@ -395,7 +395,12 @@ When implementing this design system, every coding agent must strictly enforce:
   - Pinned right transaction panel with stepper controls and lime-green checkout button.
 - Verify `tests/pos_render.test.js` and `tests/pos_checkout.test.js`.
 
-### Phase 4: Secondary Pages & Modals Alignment
-- Apply new tokens to `InventoryPage.jsx`, `CustomersPage.jsx`, `ReportsPage.jsx`, `TransactionsPage.jsx`, `CashierShiftModal.jsx`, and `NotFoundPage.jsx`.
-- Run full Vitest suite and production build (`npm run build`).
-- Verify zero AST violations (0 ternaries, 0 spreads).
+### Completed Phase 4: Secondary Pages & Modals
+- Inventory, customers/utang, reports, transactions, setup, login, shift, and receipt screens are present.
+- Continue to apply tokens when changing existing screens rather than introducing a second visual system.
+
+### Remaining visual roadmap
+
+- Improve visual consistency in screens that still contain legacy blue/slate utility classes.
+- Add or refine visual regression coverage for responsive layouts and key checkout flows.
+- Keep direct printer integration out of the UI layer; browser print remains the current receipt path.

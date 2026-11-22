@@ -1,5 +1,9 @@
 # Reusable Product Inventory and Flexible Selling Module
 
+> **Status:** Current business specification. Inventory, selling options, stock movements, sales, returns, credit, and shifts are implemented. Hardware bridges and cloud synchronization remain roadmap items.
+>
+> **Implementation note:** This specification describes business behavior independently of the SQLite adapter. SQLite stores money and quantities as scaled integers; application values use the decimal forms described below.
+
 ## 1. Overview
 
 A reusable inventory management module designed for Sari-Sari Stores and small retail businesses.

@@ -1,34 +1,32 @@
 # Contributing
 
-## Before changing code
+## Before changing code or documentation
 
-1. Read `AGENTS.md`.
-2. Read the affected module and its related tests.
-3. Inspect callers, routes, repositories, fixtures, exports, and configuration.
-4. Check `git status` and preserve changes you did not make.
-5. Identify the smallest complete change that satisfies the request.
+1. Read `AGENTS.md` and the relevant documentation.
+2. Inspect the affected module, callers, tests, fixtures, exports, and configuration.
+3. Check `git status` and preserve changes you did not make.
+4. Choose the smallest complete change.
+5. Keep business rules in domain/application code and keep documentation aligned with actual behavior.
 
 ## Implementation rules
 
-- Keep dependencies inside the architecture boundaries described in [`ARCHITECTURE.md`](ARCHITECTURE.md).
-- Reuse existing helpers, errors, repositories, and components before adding new code.
-- Keep business rules in backend domain/application code.
+- Follow the boundaries in [`ARCHITECTURE.md`](ARCHITECTURE.md).
+- Reuse existing helpers, errors, repositories, and components.
 - Validate input at every trust boundary.
 - Preserve transaction and rollback behavior.
 - Do not add dependencies, abstractions, or configuration without a concrete need.
 - Do not commit secrets, databases, uploads, build output, or temporary files.
-- Update related documentation when behavior or structure changes.
 
-## Tests
+## Verification
 
-Run backend tests for backend changes:
+Backend changes:
 
 ```bash
 cd backend
 npm test
 ```
 
-Run frontend tests and the production build for frontend changes:
+Frontend changes:
 
 ```bash
 cd frontend
@@ -36,27 +34,23 @@ npm test
 npm run build
 ```
 
-Run focused checks for the changed behavior, then run the broader relevant suite. Add tests for new business rules, validation, calculations, persistence behavior, API contracts, or critical UI flows.
-
-For documentation and configuration changes, run:
+Documentation or configuration changes:
 
 ```bash
 git diff --check
 ```
 
-Report any check that could not run. Do not claim an unrun command passed.
+Run focused checks first, then the broader relevant suite. Report checks that could not run.
 
 ## Review checklist
 
-Before finishing:
-
 - Review the complete diff.
-- Confirm all affected callers, tests, fixtures, exports, configuration, and documentation are updated.
+- Confirm callers, tests, fixtures, exports, configuration, and related documentation are updated.
 - Confirm no unrelated files changed.
 - Confirm errors remain user-safe and secrets are not exposed.
-- Confirm changed business rules have boundary and failure tests.
-- Confirm the final response states what changed, what passed, and what remains unchecked.
+- Confirm new business rules have boundary and failure tests.
+- State completed checks and remaining risks in the final summary.
 
-## Docker verification
+## Docker safety
 
-Use the deployment instructions in [`docs/docker-deployment.md`](docs/docker-deployment.md) for Compose operations. Do not run commands that delete the database volume unless the data loss is explicitly intended and confirmed.
+Use [`docs/docker-deployment.md`](docs/docker-deployment.md) for Compose operations. Do not run commands that delete the database volume unless data loss is explicitly intended and confirmed.

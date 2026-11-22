@@ -1,8 +1,10 @@
-# Store Management System — Architecture & Implementation Plan
+# Store Management System — Current Architecture & Roadmap
 
 ## 1. System Overview
 
-A full-stack **Store Management & POS System** tailored for Sari-Sari stores and small retail businesses. It builds directly on [product-inventory-and-selling-options.md](./product-inventory-and-selling-options.md) and adheres to the **Module-First Clean Architecture** and coding standards defined in [AGENTS.md](../AGENTS.md).
+A full-stack **Store Management & POS System** tailored for Sari-Sari stores and small retail businesses. It builds directly on [product-inventory-and-selling-options.md](./product-inventory-and-selling-options.md) and follows the module-first Clean Architecture described in [`ARCHITECTURE.md`](../ARCHITECTURE.md).
+
+> **Document status:** Sections describing the current system are authoritative for implemented behavior. Items under the roadmap are planned or deferred and must not be treated as available features.
 
 ### Core Design Goals
 - **Fast, Frictionless POS**: Support 1-tap selling options, barcode scanning, and ad-hoc "tingi" peso amounts.
@@ -11,6 +13,13 @@ A full-stack **Store Management & POS System** tailored for Sari-Sari stores and
 - **Local-First Reliability**: Run smoothly offline on a local SQLite database with manual backup download and optional cloud sync later.
 - **Philippine Retail Defaults**: Currency is `PHP (₱)` and business day cutoffs use `Asia/Manila` (`UTC+8`).
 - **Modular & Testable**: Keep all business rules in `domain.js` and `use-cases.js`, testable without a database or UI.
+
+## Current implementation status
+
+- **Implemented backend modules:** authentication and RBAC, inventory, selling options, stock movements, sales, returns, customer credit, cashier shifts, cash movements, and reports.
+- **Implemented frontend screens:** setup, login, dashboard, POS, inventory, customers/utang, transactions, and owner-only reports.
+- **Implemented deployment:** Docker Compose, Nginx proxy, health checks, persistent SQLite/uploads volume, and CI image publishing.
+- **Deferred:** direct ESC/POS hardware integration, automated cloud synchronization, and future modules not present in the repository.
 
 ---
 
@@ -88,10 +97,10 @@ flowchart TB
 
 ---
 
-## 4. Planned Modules & Capabilities
+## 4. Current Modules & Capabilities
 
 ### 4.1 Inventory & Restocking (`inventory/`)
-- **Status**: Implemented (inventory, sales, reports). Credit and shifts remain planned.
+- **Status**: Implemented.
 - **Use Cases**:
   - `CreateProduct`, `UpdateProduct`, `DeleteProduct`, `ManageSellingOptions` (enforces barcode uniqueness across active non-deleted `Product.barcode` and `ProductSellingOption.barcode`; soft-deletes products via `deleted_at` and disables via `is_active = false`).
   - **Product Images**: Optional `image_url` on `Product`. Store uploaded images locally under `backend/uploads/products/` served statically at `/uploads/products/<filename>`, validating image MIME type (`jpeg`/`png`/`webp`) and max file size (2 MB) at the Express boundary.
@@ -109,11 +118,11 @@ flowchart TB
   - Optional line-item and order-level `discount_amount` (cannot exceed subtotal).
 - **Use Cases**:
   - `CalculateCartTotals` (preview line subtotals, discounts, and `base_quantity` deductions before checkout)
-  - `ProcessSale` (executes inside `UnitOfWork`: validates stock; creates `SalesTransaction` + `SalesItem` snapshots; records negative `SALE` `InventoryTransaction`; deducts `Product.current_stock`. Credit paths fail closed until `credit/` is wired.)
+   - `ProcessSale` (executes inside `UnitOfWork`: validates stock; creates `SalesTransaction` + `SalesItem` snapshots; records negative `SALE` `InventoryTransaction`; deducts `Product.current_stock`; supports configured cash, credit, and split payments.)
   - `ProcessReturn` (links to original `sale_id` / `sale_item_id`, prevents returning more than remaining sold quantity, records positive `RETURN` `InventoryTransaction` to restore stock, and refunds credit balance first before cash on `CREDIT`/`SPLIT` sales)
 
 ### 4.3 Customer Credit / "Utang" Ledger (`credit/`)
-- **Status**: Not implemented. POS credit and split are hidden; sale use cases fail closed until repositories are wired.
+- **Status**: Implemented in the backend and frontend. Customer balances, credit transactions, payments, and credit-aware sales/returns are wired.
 - **Entities**:
   - `Customer`: `customer_id`, `full_name`, `phone`, `address`, `credit_limit`, `current_balance`, `is_active`
   - `CreditTransaction`: `credit_tx_id`, `customer_id`, `sale_id` (nullable), `shift_id` (nullable), `type` (`CHARGE` | `PAYMENT` | `RETURN_ADJUSTMENT`), `amount`, `remarks`, `created_by`, `created_at`
@@ -123,7 +132,7 @@ flowchart TB
   - Supports partial payments (`PAYMENT`) that reduce `current_balance` and record `shift_id` when paid in cash.
 
 ### 4.4 User Roles & Shift Management (`auth/` & `shifts/`)
-- **Status**: Backend `auth/` (roles, scrypt PIN hashing, sessions, setup, login/logout, rate limiting, and RBAC) is implemented. Frontend UI and cashier shifts (`shifts/`) remain planned.
+- **Status**: Implemented. Authentication, scrypt PIN hashing, sessions, setup, login/logout, rate limiting, RBAC, shifts, cash movements, and frontend shift controls are wired.
 - **Roles & First-Time Setup**:
   - `OWNER`: Full access (products, cost prices, stock adjustments, profit reports, user management, backups).
   - `CASHIER`: POS checkout, customer utang payments (within limits), own shift open/close.
@@ -146,34 +155,36 @@ flowchart TB
 
 ---
 
-## 5. Phased Implementation Roadmap
+## 5. Historical phases and remaining roadmap
 
-### Phase 1: Backend Core Domain & Application Use Cases (In-Memory)
+Phases 1–4 are substantially complete in the current repository. They remain below as a record of the original implementation sequence, not as a list of unstarted work.
+
+### Completed Phase 1: Backend Core Domain & Application Use Cases
 - Initialize `backend/` (plain ESM JavaScript + Vitest) with `backend/src/shared/` (`decimal.js`, `errors.js`, `ports.js`).
 - Add `inventory/` domain entities, repository port contracts, and `StockIn` / `AdjustStock` / `GetLowStockProducts` use cases.
 - Add `sales/` `CalculateCartTotals`, `ProcessSale`, and `ProcessReturn` use cases.
 - Verify all business rules, stock deductions, and profit calculations using Vitest + in-memory repository fakes (no DB required).
 
-### Phase 2: Local SQLite Persistence & Express REST API
+### Completed Phase 2: Local SQLite Persistence & Express REST API
 - Define SQLite schema and `UnitOfWork` in `backend/src/db/sqlite.js` (scaled integers for `DECIMAL(12, 2)` and `DECIMAL(12, 4)` with `PRAGMA foreign_keys = ON`) and plain SQL `node:sqlite` adapters in `backend/src/<module>/sqlite-repo.js`.
 - Add repository and transaction rollback integration tests in `backend/tests/`.
 - Wire Express routers, CORS, and centralized error handling in `backend/src/<module>/routes.js`, `backend/src/app.js`, and `backend/src/server.js`.
 
-### Phase 3: React + Vite POS & Inventory Admin UI
+### Completed Phase 3: React + Vite POS & Inventory Admin UI
 - Scaffold `frontend/` with React, Vite, plain JavaScript / JSX, and Tailwind CSS, plus a single REST API client (`frontend/src/api.js`) targeting the Express backend.
 - **Locked 3-Column POS Cockpit Layout**:
-  - **Left dark navy sidebar**: Brand header, vertical nav (`Sales`, `Orders`, `Products`, plus Phase 4 links) with blue active pill (`bg-blue-600`), and bottom cashier/owner chip.
+   - **Left dark sidebar**: Brand header, role-filtered navigation, lime active treatment, and cashier/owner controls.
   - **Center workspace (white/soft-gray surface)**: Top search/barcode bar (`Ctrl+K`) + low-stock bell badge, horizontal category filter pills, 4-column product image cards (image/placeholder, name, price `₱`, green/amber stock count), and bottom quick actions (`Scan Barcode`, `Apply Discount`, `Clear Cart`).
   - **Right `Current Sale` cart panel**: Line items with thumbnail, option/tingi label, `- qty +` stepper, line subtotal, remove button, `Subtotal` / `Discount` / bold `Total`, full-width blue `Checkout` button (`bg-blue-600`), and payment selector (`Cash`, `Credit`, `Split`).
 - Build Orders & Returns screen (recent receipts, item details, partial/full return modal, browser `@media print` 58mm/80mm thermal receipt).
 - Build Product & Inventory management screen (create/edit product with optional image upload, configure selling options, bulk stock-in by pack/box, stock adjustments).
 
-### Phase 4: Utang Ledger, Roles, Shifts, Reports & Local Backup
-- Implement `credit/` and `shifts/` (including `CashMovement`) end-to-end; `reports/` is already implemented.
-- Add first-time Owner setup and PIN login for Owner and Cashier roles.
-- Build Shift Open/Close reconciliation, Sales/Profit dashboard (`Asia/Manila` daily cutoffs), and one-click local SQLite backup download.
+### Completed Phase 4: Utang Ledger, Roles, Shifts, and Reports
+- `credit/`, `auth/`, and `shifts/` are wired end-to-end.
+- First-time owner setup, PIN login, owner/cashier roles, shift controls, and reports are available.
+- A dedicated one-click backup endpoint is not currently present; protect the SQLite volume with an operational backup procedure.
 
-### Phase 5 (Optional / Deferred): Direct Hardware Bridge & Cloud Sync
+### Remaining Phase 5 (Optional / Deferred): Direct Hardware Bridge & Cloud Sync
 - Add optional direct ESC/POS thermal printer adapter (WebUSB / serial / local print agent).
 - Implement `BackupSyncPort` for automated cloud snapshot upload or incremental sync.
 
@@ -184,5 +195,7 @@ flowchart TB
 - **Integration Tests**: SQLite repository and `UnitOfWork` rollback tests to guarantee atomic sales + stock deductions.
 - **Checks Before Every Commit**:
   ```bash
-  cd backend && npm test
-  ```
+   cd backend && npm test
+   cd ../frontend && npm test
+   npm run build
+   ```
