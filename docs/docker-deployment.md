@@ -21,7 +21,13 @@ IMAGE_TAG=sha-abc1234 docker compose pull
 IMAGE_TAG=sha-abc1234 docker compose up -d
 ```
 
-Log in only when the packages are private. `IMAGE_TAG` defaults to `latest`; use a `sha-...` tag or a release tag such as `1.2.3` for a pinned deployment. Set it in `.env` to keep the same tag across commands. Always run `docker compose pull` before `docker compose up`; without a local image, Compose would build from source.
+To pull and recreate containers in one command:
+
+```bash
+docker compose up -d --pull always
+```
+
+Log in only when the packages are private. `IMAGE_TAG` defaults to `latest`; use a `sha-...` tag or a release tag such as `1.2.3` for a pinned deployment. Set it in `.env` to keep the same tag across commands. Pull before starting: either run `docker compose pull` first or add `--pull always`. Without a local image, Compose would build from source.
 
 To roll back, set `IMAGE_TAG` to the previous `sha-...` tag, then run `docker compose pull` and `docker compose up -d`. The `store_data` volume is not changed.
 
