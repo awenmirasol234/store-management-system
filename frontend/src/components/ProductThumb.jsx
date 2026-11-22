@@ -20,7 +20,7 @@ export function ProductThumb(props) {
     return (
       <div
         className={
-          "overflow-hidden rounded-lg bg-slate-100 flex items-center justify-center " + sizeClass
+          "overflow-hidden rounded-xl bg-[#EEEEED] flex items-center justify-center p-2 " + sizeClass
         }
       >
         <img
@@ -30,7 +30,7 @@ export function ProductThumb(props) {
           onError={function handleError() {
             setHasError(true);
           }}
-          className="h-full w-full object-cover"
+          className="max-h-full max-w-full object-contain"
         />
       </div>
     );
@@ -39,7 +39,7 @@ export function ProductThumb(props) {
   return (
     <div
       className={
-        "rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 font-semibold text-sm select-none " +
+        "rounded-xl bg-[#EEEEED] flex items-center justify-center text-[#777777] font-semibold text-sm select-none " +
         sizeClass
       }
     >

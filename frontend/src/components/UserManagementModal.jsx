@@ -327,7 +327,7 @@ export function UserManagementModal(props) {
         {addFormElement}
 
         {/* Staff List */}
-        <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white overflow-hidden">
+        <div className="divide-y divide-[#E9E9E9] rounded-xl border border-[#E9E9E9] bg-white overflow-hidden">
           {staffListContent}
         </div>
       </div>

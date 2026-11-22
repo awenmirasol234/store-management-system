@@ -52,7 +52,7 @@ function getStockBadgeTone(product) {
   if (stockLevel === STOCK_LEVELS.LOW) {
     return "amber";
   }
-  return "green";
+  return "dark";
 }
 
 export function InventoryPage() {
@@ -444,21 +444,21 @@ export function InventoryPage() {
         barcodeText = product.barcode;
       }
       return (
-        <tr key={product.product_id} className="hover:bg-slate-50">
+        <tr key={product.product_id} className="hover:bg-[#EEEEED]/50 transition-colors">
           <td className="px-5 py-3.5">
             <div className="flex items-center gap-3.5">
               <ProductThumb imageUrl={product.image_url} name={product.product_name} size="sm" />
               <div>
-                <div className="text-sm font-semibold text-slate-900">{product.product_name}</div>
-                <div className="mt-0.5 font-mono text-xs text-slate-500">{barcodeText}</div>
+                <div className="text-sm font-semibold text-[#151515]">{product.product_name}</div>
+                <div className="mt-0.5 font-mono text-xs text-[#777777]">{barcodeText}</div>
               </div>
             </div>
           </td>
-          <td className="px-5 py-3.5 text-xs text-slate-600">{product.base_unit}</td>
-          <td className="px-5 py-3.5 font-mono text-sm text-slate-600 text-right">
+          <td className="px-5 py-3.5 text-xs text-[#777777]">{product.base_unit}</td>
+          <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">
             {formatPeso(product.cost_price)}
           </td>
-          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-slate-900 text-right">
+          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right">
             {formatPeso(product.selling_price)}
           </td>
           <td className="px-5 py-3.5 text-right">
@@ -483,7 +483,7 @@ export function InventoryPage() {
                 onClick={function openMenu(event) {
                   toggleActionMenu(event, product);
                 }}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700 cursor-pointer"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E9E9E9] bg-white text-[#777777] hover:border-[#151515] hover:bg-[#EEEEED] hover:text-[#151515] transition-colors cursor-pointer"
                 title="More actions"
               >
                 <MoreVertical className="h-4 w-4" />
@@ -505,13 +505,13 @@ export function InventoryPage() {
       return (
         <div
           key={product.product_id}
-          className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs space-y-3"
+          className="rounded-2xl border border-[#E9E9E9] bg-white p-4 shadow-xs space-y-3"
         >
           <div className="flex items-start gap-3">
             <ProductThumb imageUrl={product.image_url} name={product.product_name} size="md" />
             <div className="min-w-0 flex-1">
-              <div className="font-semibold text-slate-900 truncate">{product.product_name}</div>
-              <div className="text-xs text-slate-500 font-mono mt-0.5">Barcode: {barcodeText}</div>
+              <div className="font-semibold text-[#151515] truncate">{product.product_name}</div>
+              <div className="text-xs text-[#777777] font-mono mt-0.5">Barcode: {barcodeText}</div>
               <div className="mt-1 flex items-center gap-2">
                 <Badge tone={getStockBadgeTone(product)} className="font-mono text-xs">
                   {formatQuantity(product.current_stock)} {product.base_unit}
@@ -519,16 +519,16 @@ export function InventoryPage() {
               </div>
             </div>
             <div className="text-right">
-              <div className="font-mono font-bold text-slate-900">
+              <div className="font-mono font-bold text-[#151515]">
                 {formatPeso(product.selling_price)}
               </div>
-              <div className="font-mono text-tiny text-slate-500 mt-0.5">
+              <div className="font-mono text-tiny text-[#777777] mt-0.5">
                 Cost: {formatPeso(product.cost_price)}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+          <div className="flex items-center gap-2 pt-2 border-t border-[#E9E9E9]">
             <Button
               variant="soft"
               size="sm"
@@ -545,7 +545,7 @@ export function InventoryPage() {
               onClick={function openMenu(event) {
                 toggleActionMenu(event, product);
               }}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 cursor-pointer"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] transition-colors cursor-pointer"
               title="More actions"
             >
               <MoreVertical className="h-4 w-4" />
@@ -580,23 +580,23 @@ export function InventoryPage() {
   }
 
   let optionsListContent = (
-    <div className="py-6 text-center text-xs text-slate-500">
+    <div className="py-6 text-center text-xs text-[#777777]">
       No extra selling options yet.
     </div>
   );
   if (productOptions.length > 0 && optionsModalProduct) {
     optionsListContent = (
-      <div className="divide-y divide-slate-100 rounded-lg border border-slate-200">
+      <div className="divide-y divide-[#E9E9E9] rounded-xl border border-[#E9E9E9]">
         {productOptions.map(function renderOpt(option) {
           return (
             <div key={option.option_id} className="flex items-center justify-between px-4 py-3">
               <div>
-                <div className="text-sm font-medium text-slate-900">{option.option_name}</div>
-                <div className="mt-0.5 font-mono text-xs text-slate-500">
+                <div className="text-sm font-medium text-[#151515]">{option.option_name}</div>
+                <div className="mt-0.5 font-mono text-xs text-[#777777]">
                   {formatQuantity(option.quantity)} {optionsModalProduct.base_unit}
                 </div>
               </div>
-              <div className="font-mono text-sm font-bold text-slate-900">
+              <div className="font-mono text-sm font-bold text-[#151515]">
                 {formatPeso(option.price)}
               </div>
             </div>
@@ -629,7 +629,7 @@ export function InventoryPage() {
       <div className="mb-5 sm:mb-6 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-2 sm:gap-3.5 flex-1 min-w-56 sm:min-w-64">
           <div className="relative flex-1 max-w-sm">
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
             <input
               type="text"
               value={searchQuery}
@@ -637,7 +637,7 @@ export function InventoryPage() {
                 setSearchQuery(event.target.value);
               }}
               placeholder="Search products or barcode..."
-              className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2.5 pl-10 pr-3.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
             />
           </div>
           <Button
@@ -676,7 +676,7 @@ export function InventoryPage() {
       </div>
 
       {/* Desktop Product Table (>= md) */}
-      <div className="hidden md:block flex-1 overflow-auto rounded-xl border border-slate-200 bg-white">
+      <div className="hidden md:block flex-1 overflow-auto rounded-2xl border border-[#E9E9E9] bg-white">
         <DataTable
           stickyHead={true}
           headRow={
@@ -796,9 +796,9 @@ export function InventoryPage() {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-slate-700">Product Image</label>
-            <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-xs text-slate-600 hover:border-blue-400">
-              <Upload className="h-4 w-4 text-slate-400" />
+            <label className="mb-1.5 block text-xs font-medium text-[#151515]">Product Image</label>
+            <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-dashed border-[#E9E9E9] bg-[#EEEEED]/40 px-4 py-3 text-xs text-[#151515] hover:border-[#151515] transition-colors">
+              <Upload className="h-4 w-4 text-[#777777]" />
               <span>{imageUploadLabel}</span>
               <input
                 type="file"
@@ -813,14 +813,14 @@ export function InventoryPage() {
             </label>
           </div>
 
-          <label className="flex items-center gap-2.5 py-1 text-xs font-medium text-slate-700 cursor-pointer">
+          <label className="flex items-center gap-2.5 py-1 text-xs font-medium text-[#151515] cursor-pointer">
             <input
               type="checkbox"
               checked={productForm.allow_custom_amount}
               onChange={function onCheck(event) {
                 updateProductField("allow_custom_amount", event.target.checked);
               }}
-              className="rounded border-slate-300 text-blue-600"
+              className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30"
             />
             <span>Allow custom peso amount ("Tingi")</span>
           </label>
@@ -875,7 +875,7 @@ export function InventoryPage() {
         <div className="space-y-5">
           {optionsListContent}
 
-          <form onSubmit={handleAddOption} className="space-y-4 border-t border-slate-200 pt-4">
+          <form onSubmit={handleAddOption} className="space-y-4 border-t border-[#E9E9E9] pt-4">
             <div className="text-xs font-semibold text-slate-700">Add Selling Option</div>
             <div className="grid grid-cols-2 gap-4">
               <Input
@@ -1006,7 +1006,7 @@ export function InventoryPage() {
         >
           <div
             style={{ top: actionMenu.top, right: actionMenu.right }}
-            className="fixed w-44 rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
+            className="fixed w-44 rounded-xl border border-[#E9E9E9] bg-white p-1 shadow-lg"
             onClick={function stopPropagation(event) {
               event.stopPropagation();
             }}
@@ -1018,9 +1018,9 @@ export function InventoryPage() {
                 setActionMenu(null);
                 openEditProduct(targetProduct);
               }}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer text-left"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-[#151515] hover:bg-[#EEEEED] transition-colors cursor-pointer text-left"
             >
-              <Pencil className="h-3.5 w-3.5 text-slate-400" />
+              <Pencil className="h-3.5 w-3.5 text-[#777777]" />
               <span>Edit Product</span>
             </button>
 
@@ -1031,9 +1031,9 @@ export function InventoryPage() {
                 setActionMenu(null);
                 openOptionsModal(targetProduct);
               }}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer text-left"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-[#151515] hover:bg-[#EEEEED] transition-colors cursor-pointer text-left"
             >
-              <Layers className="h-3.5 w-3.5 text-slate-400" />
+              <Layers className="h-3.5 w-3.5 text-[#777777]" />
               <span>Selling Options</span>
             </button>
 
@@ -1044,13 +1044,13 @@ export function InventoryPage() {
                 setActionMenu(null);
                 openAdjustModal(targetProduct);
               }}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer text-left"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-[#151515] hover:bg-[#EEEEED] transition-colors cursor-pointer text-left"
             >
-              <SlidersHorizontal className="h-3.5 w-3.5 text-slate-400" />
+              <SlidersHorizontal className="h-3.5 w-3.5 text-[#777777]" />
               <span>Adjust Stock</span>
             </button>
 
-            <div className="my-1 border-t border-slate-100" />
+            <div className="my-1 border-t border-[#E9E9E9]" />
 
             <button
               type="button"
@@ -1059,7 +1059,7 @@ export function InventoryPage() {
                 setActionMenu(null);
                 setDeleteConfirmProduct(targetProduct);
               }}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 cursor-pointer text-left"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
             >
               <Trash2 className="h-3.5 w-3.5 text-rose-500" />
               <span>Remove Product</span>

@@ -191,20 +191,20 @@ export function TransactionsPage() {
   } else if (filteredSales.length > 0) {
     tableBody = filteredSales.map(function renderSaleRow(sale) {
       return (
-        <tr key={sale.sale_id} className="hover:bg-slate-50">
-          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-slate-900">
+        <tr key={sale.sale_id} className="hover:bg-[#EEEEED]/50 transition-colors">
+          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515]">
             #{sale.receipt_number}
           </td>
-          <td className="px-5 py-3.5 font-mono text-xs text-slate-600">
+          <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">
             {formatSmartDateTime(sale.created_at)}
           </td>
           <td className="px-5 py-3.5">
             <Badge tone={getPaymentTone(sale.payment_method)}>{sale.payment_method}</Badge>
           </td>
-          <td className="px-5 py-3.5 font-mono text-sm font-bold text-slate-900 text-right">
+          <td className="px-5 py-3.5 font-mono text-sm font-bold text-[#151515] text-right">
             {formatPeso(sale.total_amount)}
           </td>
-          <td className="px-5 py-3.5 font-mono text-xs text-slate-600 text-right">
+          <td className="px-5 py-3.5 font-mono text-xs text-[#777777] text-right">
             {formatPeso(sale.change_amount)}
           </td>
           <td className="px-5 py-3.5 text-right">
@@ -234,24 +234,24 @@ export function TransactionsPage() {
       return (
         <div
           key={sale.sale_id}
-          className="rounded-xl border border-slate-200 bg-white p-4 space-y-3"
+          className="rounded-2xl border border-[#E9E9E9] bg-white p-4 space-y-3"
         >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="font-mono text-sm font-bold text-slate-900">
+              <div className="font-mono text-sm font-bold text-[#151515]">
                 #{sale.receipt_number}
               </div>
-              <div className="font-mono text-xs text-slate-500 mt-0.5">
+              <div className="font-mono text-xs text-[#777777] mt-0.5">
                 {formatSmartDateTime(sale.created_at)}
               </div>
             </div>
             <Badge tone={getPaymentTone(sale.payment_method)}>{sale.payment_method}</Badge>
           </div>
 
-          <div className="flex items-center justify-between border-t border-slate-100 pt-2.5">
+          <div className="flex items-center justify-between border-t border-[#E9E9E9] pt-2.5">
             <div>
-              <div className="text-tiny text-slate-400">Total Amount</div>
-              <div className="font-mono text-base font-bold text-slate-900">
+              <div className="text-tiny text-[#777777]">Total Amount</div>
+              <div className="font-mono text-base font-bold text-[#151515]">
                 {formatPeso(sale.total_amount)}
               </div>
             </div>
@@ -278,7 +278,7 @@ export function TransactionsPage() {
     let returnStatusBanner = null;
     if (returnMessage) {
       returnStatusBanner = (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 px-3.5 py-2.5 text-xs font-medium text-blue-800">
+        <div className="rounded-xl border border-[#E9E9E9] bg-[#EEEEED] px-3.5 py-2.5 text-xs font-medium text-[#151515]">
           {returnMessage}
         </div>
       );
@@ -288,9 +288,9 @@ export function TransactionsPage() {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <ReceiptView sale={selectedOrder.sale} items={selectedOrder.items} />
 
-        <form onSubmit={handleProcessReturn} className="space-y-4 border-t pt-5 md:border-l md:border-t-0 md:pl-7 md:pt-0 border-slate-200">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-            <RotateCcw className="h-4 w-4 text-blue-600" />
+        <form onSubmit={handleProcessReturn} className="space-y-4 border-t pt-5 md:border-l md:border-t-0 md:pl-7 md:pt-0 border-[#E9E9E9]">
+          <div className="flex items-center gap-2 text-sm font-semibold text-[#151515]">
+            <RotateCcw className="h-4 w-4 text-[#151515]" />
             <span>Return Items</span>
           </div>
           {returnStatusBanner}
@@ -304,13 +304,13 @@ export function TransactionsPage() {
               return (
                 <div
                   key={item.sale_item_id}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3.5"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-[#E9E9E9] p-3.5"
                 >
                   <div className="min-w-0">
-                    <div className="truncate text-xs font-semibold text-slate-900">
+                    <div className="truncate text-xs font-semibold text-[#151515]">
                       {item.option_name_snapshot}
                     </div>
-                    <div className="mt-0.5 font-mono text-tiny text-slate-500">
+                    <div className="mt-0.5 font-mono text-tiny text-[#777777]">
                       Sold: {formatQuantity(item.quantity)} · {formatPeso(item.subtotal)}
                     </div>
                   </div>
@@ -324,7 +324,7 @@ export function TransactionsPage() {
                       updateReturnQty(item.sale_item_id, event.target.value);
                     }}
                     placeholder="0"
-                    className="w-20 rounded-md border border-slate-200 px-2.5 py-1.5 text-right font-mono text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
+                    className="w-20 rounded-xl border border-[#E9E9E9] bg-white px-2.5 py-1.5 text-right font-mono text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30"
                   />
                 </div>
               );
@@ -354,7 +354,7 @@ export function TransactionsPage() {
       <PageHeader title="Transactions" stackOnMobile={true}>
         <div className="flex items-center gap-2.5 flex-1 max-w-sm sm:justify-end">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#777777]" />
             <input
               type="text"
               value={searchQuery}
@@ -362,7 +362,7 @@ export function TransactionsPage() {
                 setSearchQuery(event.target.value);
               }}
               placeholder="Search receipt #..."
-              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-8 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2 pl-9 pr-8 text-xs text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
             />
             {clearButton}
           </div>
@@ -381,7 +381,7 @@ export function TransactionsPage() {
       </div>
 
       {/* Desktop Table (>= md) */}
-      <div className="hidden md:block flex-1 overflow-auto rounded-xl border border-slate-200 bg-white">
+      <div className="hidden md:block flex-1 overflow-auto rounded-2xl border border-[#E9E9E9] bg-white">
         <DataTable
           stickyHead={true}
           headRow={

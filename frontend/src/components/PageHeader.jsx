@@ -8,7 +8,7 @@ export function PageHeader(props) {
 
   return (
     <div className={containerClass}>
-      <h1 className="text-lg font-bold text-slate-900">{props.title}</h1>
+      <h1 className="text-xl font-bold text-[#151515]">{props.title}</h1>
       {props.children}
     </div>
   );

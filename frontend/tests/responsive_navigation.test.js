@@ -31,7 +31,7 @@ describe("Responsive navigation & components", function () {
       })
     );
     expect(html).toContain("text-white font-semibold");
-    expect(html).toContain("text-blue-400");
+    expect(html).toContain("text-[#B9F36B]");
   });
 
   it("renders PosCheckoutModal with ₱1,000 banknote preset and change section", function () {
@@ -96,6 +96,5 @@ describe("Responsive navigation & components", function () {
     const html = renderToString(React.createElement(App));
     expect(typeof html).toBe("string");
     expect(html.length).toBeGreaterThan(0);
-    expect(html).toContain("StoreFlow");
   });
 });

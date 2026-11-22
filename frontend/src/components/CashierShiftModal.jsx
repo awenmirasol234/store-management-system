@@ -171,9 +171,9 @@ export function CashierShiftModal(props) {
           <div className="mt-2.5 flex flex-wrap gap-2">
             {PRESET_OPENING_FUNDS.map(function renderPreset(presetAmount) {
               const isSelected = Number(openingCashInput) === presetAmount;
-              let buttonTone = "border-slate-200 bg-white text-slate-700 hover:bg-slate-50";
+              let buttonTone = "border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515]";
               if (isSelected) {
-                buttonTone = "border-blue-600 bg-blue-50 text-blue-700 font-semibold";
+                buttonTone = "border-[#151515] bg-[#151515] text-white font-semibold";
               }
               return (
                 <button
@@ -223,12 +223,12 @@ export function CashierShiftModal(props) {
   } else if (mode === "MOVEMENT") {
     // 2. CASH MOVEMENT FORM
     let cashInSelected = movementType === "CASH_IN";
-    let inButtonClass = "border-slate-200 bg-white text-slate-600 hover:bg-slate-50";
+    let inButtonClass = "border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED]";
     if (cashInSelected) {
       inButtonClass = "border-emerald-600 bg-emerald-50 text-emerald-700 font-semibold";
     }
 
-    let outButtonClass = "border-slate-200 bg-white text-slate-600 hover:bg-slate-50";
+    let outButtonClass = "border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED]";
     if (!cashInSelected) {
       outButtonClass = "border-rose-600 bg-rose-50 text-rose-700 font-semibold";
     }
@@ -349,8 +349,8 @@ export function CashierShiftModal(props) {
           label = "Overage: +" + formatPeso(variance);
         }
         varianceElement = (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex items-center justify-between">
-            <span className="text-2xs font-medium text-slate-600">Calculated Variance</span>
+          <div className="rounded-xl border border-[#E9E9E9] bg-[#EEEEED]/40 p-3 flex items-center justify-between">
+            <span className="text-2xs font-medium text-[#777777]">Calculated Variance</span>
             <Badge tone={tone}>{label}</Badge>
           </div>
         );
@@ -361,9 +361,9 @@ export function CashierShiftModal(props) {
       <form onSubmit={handleCloseShiftSubmit} className="space-y-4">
         {errorElement}
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-1">
-          <div className="text-2xs font-medium text-slate-500">Expected Cash in Drawer</div>
-          <div className="text-xl font-bold font-mono text-slate-900">
+        <div className="rounded-xl border border-[#E9E9E9] bg-[#EEEEED]/40 p-3.5 space-y-1">
+          <div className="text-2xs font-medium text-[#777777]">Expected Cash in Drawer</div>
+          <div className="text-xl font-bold font-mono text-[#151515]">
             {formatPeso(expectedCash)}
           </div>
         </div>
@@ -438,16 +438,16 @@ export function CashierShiftModal(props) {
         {errorElement}
 
         {/* Shift Header Status */}
-        <div className="flex items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50/60 p-3.5">
+        <div className="flex items-center justify-between rounded-xl border border-[#E9E9E9] bg-[#EEEEED] p-3.5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#171717] text-white">
               <Clock className="h-4 w-4" />
             </div>
             <div>
-              <div className="text-xs font-semibold text-slate-900">
+              <div className="text-xs font-semibold text-[#151515]">
                 Active Cashier Drawer
               </div>
-              <div className="text-2xs text-slate-500">
+              <div className="text-2xs text-[#777777]">
                 Opened {formatSmartDateTime(shift.opened_at)}
               </div>
             </div>
@@ -456,57 +456,57 @@ export function CashierShiftModal(props) {
         </div>
 
         {/* Big Expected Balance Card */}
-        <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50/50 p-4 text-center">
-          <div className="text-2xs font-semibold uppercase tracking-wider text-blue-700">
+        <div className="rounded-2xl border border-[#E9E9E9] bg-[#F5F5F4] p-4 text-center">
+          <div className="text-2xs font-semibold uppercase tracking-wider text-[#777777]">
             Expected Cash in Drawer
           </div>
-          <div className="mt-1 font-mono text-2xl font-black text-blue-950 sm:text-3xl">
+          <div className="mt-1 font-mono text-2xl font-bold text-[#151515] sm:text-3xl">
             {formatPeso(expectedCash)}
           </div>
-          <div className="mt-1 text-3xs text-blue-600">
+          <div className="mt-1 text-3xs text-[#777777]">
             Current calculated drawer balance based on sales and cash events
           </div>
         </div>
 
         {/* Breakdown Grid */}
         <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
-          <div className="rounded-lg border border-slate-200 bg-white p-2.5">
-            <div className="text-3xs text-slate-400 font-medium">Starting Fund</div>
-            <div className="font-mono font-semibold text-slate-800">
+          <div className="rounded-xl border border-[#E9E9E9] bg-white p-2.5">
+            <div className="text-3xs text-[#777777] font-medium">Starting Fund</div>
+            <div className="font-mono font-semibold text-[#151515]">
               {formatPeso(openingCash)}
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-2.5">
-            <div className="text-3xs text-slate-400 font-medium">Cash Sales</div>
+          <div className="rounded-xl border border-[#E9E9E9] bg-white p-2.5">
+            <div className="text-3xs text-[#777777] font-medium">Cash Sales</div>
             <div className="font-mono font-semibold text-emerald-600">
               {"+" + formatPeso(cashSales)}
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-2.5">
-            <div className="text-3xs text-slate-400 font-medium">Utang Collected</div>
+          <div className="rounded-xl border border-[#E9E9E9] bg-white p-2.5">
+            <div className="text-3xs text-[#777777] font-medium">Utang Collected</div>
             <div className="font-mono font-semibold text-emerald-600">
               {"+" + formatPeso(utangCollected)}
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-2.5">
-            <div className="text-3xs text-slate-400 font-medium">Cash In (Topups)</div>
-            <div className="font-mono font-semibold text-blue-600">
+          <div className="rounded-xl border border-[#E9E9E9] bg-white p-2.5">
+            <div className="text-3xs text-[#777777] font-medium">Cash In (Topups)</div>
+            <div className="font-mono font-semibold text-[#151515]">
               {"+" + formatPeso(cashIn)}
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-2.5">
-            <div className="text-3xs text-slate-400 font-medium">Cash Out (Payouts)</div>
+          <div className="rounded-xl border border-[#E9E9E9] bg-white p-2.5">
+            <div className="text-3xs text-[#777777] font-medium">Cash Out (Payouts)</div>
             <div className="font-mono font-semibold text-rose-600">
               {"-" + formatPeso(cashOut)}
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-2.5">
-            <div className="text-3xs text-slate-400 font-medium">Cash Refunds</div>
+          <div className="rounded-xl border border-[#E9E9E9] bg-white p-2.5">
+            <div className="text-3xs text-[#777777] font-medium">Cash Refunds</div>
             <div className="font-mono font-semibold text-rose-600">
               {"-" + formatPeso(cashRefunds)}
             </div>

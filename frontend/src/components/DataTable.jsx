@@ -1,5 +1,5 @@
 export function DataTable(props) {
-  let headClass = "bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600";
+  let headClass = "bg-[#EEEEED] border-b border-[#E9E9E9] text-xs font-semibold text-[#151515]";
   if (props.stickyHead) {
     headClass = "sticky top-0 " + headClass;
   }
@@ -7,7 +7,7 @@ export function DataTable(props) {
   return (
     <table className="w-full border-collapse text-left">
       <thead className={headClass}>{props.headRow}</thead>
-      <tbody className="divide-y divide-slate-100">{props.children}</tbody>
+      <tbody className="divide-y divide-[#E9E9E9]">{props.children}</tbody>
     </table>
   );
 }

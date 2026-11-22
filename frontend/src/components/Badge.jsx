@@ -1,6 +1,9 @@
 function getToneClasses(tone) {
+  if (tone === "dark") {
+    return "bg-[#171717] text-white border-transparent";
+  }
   if (tone === "green") {
-    return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    return "bg-[#B9F36B] text-[#151515] border-transparent font-medium";
   }
   if (tone === "amber") {
     return "bg-amber-50 text-amber-700 border-amber-200";
@@ -11,7 +14,10 @@ function getToneClasses(tone) {
   if (tone === "blue") {
     return "bg-blue-50 text-blue-700 border-blue-200";
   }
-  return "bg-slate-100 text-slate-700 border-slate-200";
+  if (tone === "neutral") {
+    return "bg-[#EEEEED] text-[#777777] border-[#E9E9E9]";
+  }
+  return "bg-[#EEEEED] text-[#777777] border-[#E9E9E9]";
 }
 
 export function Badge(props) {

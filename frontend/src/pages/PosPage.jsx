@@ -424,7 +424,7 @@ export function PosPage(props) {
   let lowStockBadge = null;
   if (lowStockProducts.length > 0) {
     lowStockBadge = (
-      <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 font-mono text-2xs font-bold text-white">
+      <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#151515] px-1 font-mono text-2xs font-bold text-[#B9F36B]">
         {lowStockProducts.length}
       </span>
     );
@@ -481,48 +481,73 @@ export function PosPage(props) {
   }
 
   const categoryContainerClass =
-    "mb-4 flex items-center gap-2.5 overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing select-none";
+    "mb-4 flex items-center gap-2 overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing select-none";
 
   let allCategoryClass =
-    "shrink-0 rounded-lg px-4 py-2 text-xs font-medium cursor-pointer ";
+    "shrink-0 rounded-full px-4 py-2 text-xs font-medium cursor-pointer transition-colors flex items-center gap-2 ";
+  let allCountClass = "px-2 py-0.5 rounded-full text-2xs font-semibold ";
   if (selectedCategoryId === "ALL") {
-    allCategoryClass = allCategoryClass + "bg-blue-600 font-semibold text-white";
+    allCategoryClass = allCategoryClass + "bg-[#151515] font-semibold text-white shadow-xs";
+    allCountClass = allCountClass + "bg-[#B9F36B] text-[#151515]";
   } else {
     allCategoryClass =
-      allCategoryClass + "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50";
+      allCategoryClass + "bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#151515]";
+    allCountClass = allCountClass + "bg-[#EEEEED] text-[#777777]";
   }
 
   let productGridContent = null;
   if (filteredProducts.length === 0) {
     productGridContent = (
-      <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white text-sm text-slate-500">
+      <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-[#E9E9E9] bg-white text-sm text-[#777777]">
         No products found. Add items in Products.
       </div>
     );
   } else {
     productGridContent = (
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-5 sm:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-4 sm:grid-cols-3 xl:grid-cols-4">
         {filteredProducts.map(function renderCard(product) {
+          let categoryName = product.base_unit;
+          if (product.category_name) {
+            categoryName = product.category_name;
+          }
           return (
-            <button
+            <div
               key={product.product_id}
-              type="button"
-              onClick={function onCardClick() {
-                handleProductCardClick(product);
-              }}
-              className="flex flex-col rounded-xl border border-slate-200 bg-white p-3 sm:p-4 text-left transition-all hover:border-blue-300 hover:shadow-sm cursor-pointer"
+              className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-3 sm:p-3.5 text-left transition-all hover:border-[#151515]/30 hover:shadow-xs justify-between"
             >
-              <ProductThumb imageUrl={product.image_url} name={product.product_name} />
-              <div className="mt-3 truncate text-sm font-semibold text-slate-900">
-                {product.product_name}
+              <div
+                onClick={function onCardClick() {
+                  handleProductCardClick(product);
+                }}
+                className="cursor-pointer"
+              >
+                <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-[#EEEEED] flex items-center justify-center p-2">
+                  <div className="absolute left-2 top-2 z-10 rounded-md bg-[#171717] px-2 py-0.5 font-mono text-2xs font-medium text-white shadow-xs">
+                    Stock: {formatQuantity(product.current_stock)}
+                  </div>
+                  <ProductThumb imageUrl={product.image_url} name={product.product_name} />
+                </div>
+                <div className="mt-3 truncate text-xs font-medium text-[#151515]">
+                  {product.product_name}
+                </div>
+                <div className="mt-0.5 truncate text-2xs text-[#777777]">
+                  {categoryName}
+                </div>
+                <div className="mt-1 font-mono text-sm font-semibold text-[#151515]">
+                  {formatPeso(product.selling_price)}
+                </div>
               </div>
-              <div className="mt-1 font-mono text-sm font-bold text-slate-900">
-                {formatPeso(product.selling_price)}
-              </div>
-              <div className={"mt-1.5 font-mono text-xs font-medium " + getStockTextClass(product)}>
-                Stock: {formatQuantity(product.current_stock)} {product.base_unit}
-              </div>
-            </button>
+              <button
+                type="button"
+                onClick={function onAddClick() {
+                  handleProductCardClick(product);
+                }}
+                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#E9E9E9] bg-white py-2 text-xs font-semibold text-[#151515] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>Add to Cart</span>
+              </button>
+            </div>
           );
         })}
       </div>
@@ -537,20 +562,20 @@ export function PosPage(props) {
   } else {
     cartListContent = cartItems.map(function renderCartItem(item) {
       const lineSubtotal = Math.round(item.unit_price * item.quantity * 100) / 100;
-      let qtyControl = <span className="font-mono text-xs text-slate-500">Tingi</span>;
+      let qtyControl = <span className="font-mono text-xs text-[#777777]">Tingi</span>;
       if (item.custom_amount === null) {
         qtyControl = (
-          <div className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50">
+          <div className="inline-flex items-center rounded-lg border border-[#E9E9E9] bg-white">
             <button
               type="button"
               onClick={function dec() {
                 changeCartItemQty(item.key, -1);
               }}
-              className="flex h-8 w-8 items-center justify-center text-slate-600 hover:text-slate-900 active:bg-slate-200 cursor-pointer"
+              className="flex h-7 w-7 items-center justify-center text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] rounded-l-lg cursor-pointer transition-colors"
             >
-              <Minus className="h-3.5 w-3.5" />
+              <Minus className="h-3 w-3" />
             </button>
-            <span className="min-w-8 text-center font-mono text-xs font-semibold text-slate-900">
+            <span className="min-w-8 text-center font-mono text-xs font-semibold text-[#151515]">
               {formatQuantity(item.quantity)}
             </span>
             <button
@@ -558,9 +583,9 @@ export function PosPage(props) {
               onClick={function inc() {
                 changeCartItemQty(item.key, 1);
               }}
-              className="flex h-8 w-8 items-center justify-center text-slate-600 hover:text-slate-900 active:bg-slate-200 cursor-pointer"
+              className="flex h-7 w-7 items-center justify-center text-[#151515] hover:bg-[#B9F36B]/40 rounded-r-lg cursor-pointer transition-colors"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-3 w-3" />
             </button>
           </div>
         );
@@ -570,10 +595,10 @@ export function PosPage(props) {
         <div key={item.key} className="flex items-center gap-3.5 py-3.5">
           <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
           <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-semibold text-slate-900">
+            <div className="truncate text-xs font-semibold text-[#151515]">
               {item.product_name}
             </div>
-            <div className="mt-0.5 truncate text-xs text-slate-500">{item.option_label}</div>
+            <div className="mt-0.5 truncate text-2xs text-[#777777]">{item.option_label}</div>
             <div className="mt-2 flex items-center gap-2">{qtyControl}</div>
           </div>
           <div className="flex flex-col items-end gap-2.5">
@@ -582,11 +607,11 @@ export function PosPage(props) {
               onClick={function remove() {
                 removeCartItem(item.key);
               }}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-[#777777] hover:bg-rose-50 hover:text-rose-600 cursor-pointer transition-colors"
             >
               <Trash2 className="h-4 w-4" />
             </button>
-            <div className="font-mono text-sm font-bold text-slate-900">
+            <div className="font-mono text-sm font-semibold text-[#151515]">
               {formatPeso(lineSubtotal)}
             </div>
           </div>
@@ -612,7 +637,7 @@ export function PosPage(props) {
             addItemToCart(pickerState.product, null, parsed);
             setPickerState(null);
           }}
-          className="border-t border-slate-200 pt-4 space-y-4"
+          className="border-t border-[#E9E9E9] pt-4 space-y-4"
         >
           <Input
             label="Custom Peso Amount (Tingi)"
@@ -641,12 +666,12 @@ export function PosPage(props) {
               addItemToCart(pickerState.product, null, null);
               setPickerState(null);
             }}
-            className="flex w-full items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-blue-400 hover:bg-blue-50 cursor-pointer"
+            className="flex w-full items-center justify-between rounded-xl border border-[#E9E9E9] px-4 py-3 text-left hover:border-[#151515] hover:bg-[#EEEEED] transition-colors cursor-pointer"
           >
-            <span className="text-sm font-medium text-slate-900">
+            <span className="text-sm font-medium text-[#151515]">
               1 {pickerState.product.base_unit} (Default)
             </span>
-            <span className="font-mono text-sm font-bold text-blue-700">
+            <span className="font-mono text-sm font-bold text-[#151515]">
               {formatPeso(pickerState.product.selling_price)}
             </span>
           </button>
@@ -660,15 +685,15 @@ export function PosPage(props) {
                   addItemToCart(pickerState.product, option, null);
                   setPickerState(null);
                 }}
-                className="flex w-full items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-blue-400 hover:bg-blue-50 cursor-pointer"
+                className="flex w-full items-center justify-between rounded-xl border border-[#E9E9E9] px-4 py-3 text-left hover:border-[#151515] hover:bg-[#EEEEED] transition-colors cursor-pointer"
               >
                 <div>
-                  <div className="text-sm font-medium text-slate-900">{option.option_name}</div>
-                  <div className="mt-0.5 font-mono text-xs text-slate-500">
+                  <div className="text-sm font-medium text-[#151515]">{option.option_name}</div>
+                  <div className="mt-0.5 font-mono text-xs text-[#777777]">
                     {formatQuantity(option.quantity)} {pickerState.product.base_unit}
                   </div>
                 </div>
-                <span className="font-mono text-sm font-bold text-blue-700">
+                <span className="font-mono text-sm font-bold text-[#151515]">
                   {formatPeso(option.price)}
                 </span>
               </button>
@@ -683,13 +708,13 @@ export function PosPage(props) {
   let lowStockBody = <EmptyState message="All products are stocked." padding="sm" />;
   if (lowStockProducts.length > 0) {
     lowStockBody = (
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y divide-[#E9E9E9]">
         {lowStockProducts.map(function renderLowStock(product) {
           return (
             <div key={product.product_id} className="flex items-center justify-between py-3.5">
               <div>
-                <div className="text-sm font-semibold text-slate-900">{product.product_name}</div>
-                <div className="mt-0.5 font-mono text-xs text-slate-500">
+                <div className="text-sm font-semibold text-[#151515]">{product.product_name}</div>
+                <div className="mt-0.5 font-mono text-xs text-[#777777]">
                   Reorder at {formatQuantity(product.reorder_level)} {product.base_unit}
                 </div>
               </div>
@@ -712,17 +737,17 @@ export function PosPage(props) {
 
   const cartFooterContent = (
     <div className="space-y-4 pt-2">
-      <div className="space-y-2 border-t border-slate-200 pt-4">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-slate-500">Subtotal</span>
-          <span className="font-mono font-medium text-slate-900">
+      <div className="space-y-2 border-t border-[#E9E9E9] pt-4">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-[#777777]">Subtotal</span>
+          <span className="font-mono font-medium text-[#151515]">
             {formatPeso(totals.subtotal)}
           </span>
         </div>
         {discountSummaryRow}
         <div className="flex items-center justify-between pt-2">
-          <span className="text-base font-bold text-slate-900">Total</span>
-          <span className="font-mono text-xl font-bold text-slate-900">
+          <span className="text-base font-bold text-[#151515]">Total</span>
+          <span className="font-mono text-xl font-bold text-[#151515]">
             {formatPeso(totals.total)}
           </span>
         </div>
@@ -752,13 +777,13 @@ export function PosPage(props) {
   let mobileCartBar = null;
   if (cartItems.length > 0) {
     mobileCartBar = (
-      <div className="fixed bottom-16 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 p-3 backdrop-blur lg:hidden">
+      <div className="fixed bottom-16 left-0 right-0 z-30 border-t border-[#E9E9E9] bg-white/95 p-3 backdrop-blur lg:hidden">
         <button
           type="button"
           onClick={function openMobileCart() {
             setMobileCartOpen(true);
           }}
-          className="flex w-full items-center justify-between rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white shadow-md active:bg-blue-700 cursor-pointer"
+          className="flex w-full items-center justify-between rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] px-4 py-3 font-semibold text-[#151515] shadow-xs active:scale-[0.99] cursor-pointer transition-all"
         >
           <div className="flex items-center gap-2">
             <ShoppingBag className="h-5 w-5" />
@@ -780,7 +805,7 @@ export function PosPage(props) {
       size="sm"
     >
       <div className="flex flex-col space-y-4">
-        <div className="max-h-[45vh] overflow-y-auto divide-y divide-slate-100 pr-1">
+        <div className="max-h-[45vh] overflow-y-auto divide-y divide-[#E9E9E9] pr-1">
           {cartListContent}
         </div>
         {cartFooterContent}
@@ -800,7 +825,7 @@ export function PosPage(props) {
       <button
         type="button"
         onClick={props.onOpenShiftModal}
-        className="flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer shadow-xs shrink-0"
+        className="flex h-11 items-center gap-2 rounded-xl border border-[#E9E9E9] bg-white px-3.5 text-xs font-medium text-[#151515] hover:bg-[#EEEEED] cursor-pointer shadow-xs shrink-0 transition-colors"
         title="Cash Drawer & Shift Reconciliation"
       >
         <Wallet className={"h-4 w-4 " + shiftIconClass} />
@@ -810,13 +835,13 @@ export function PosPage(props) {
   }
 
   return (
-    <div className="flex h-full flex-1 overflow-hidden bg-slate-50">
+    <div className="flex h-full flex-1 overflow-hidden bg-[#F5F5F4]">
       {/* Center Catalog Workspace */}
       <div className="flex flex-1 flex-col overflow-hidden p-3.5 sm:p-5 lg:p-6">
         {/* Top Search & Low Stock Bar */}
         <div className="mb-5 flex items-center gap-3.5">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
             <input
               ref={searchInputRef}
               type="text"
@@ -826,9 +851,9 @@ export function PosPage(props) {
               }}
               onKeyDown={handleSearchKeyDown}
               placeholder="Search by product or scan barcode..."
-              className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-20 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-xl border border-[#E9E9E9] bg-white py-3 pl-11 pr-20 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
             />
-            <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-tiny text-slate-400">
+            <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 rounded border border-[#E9E9E9] bg-[#EEEEED] px-2 py-0.5 font-mono text-tiny text-[#777777]">
               Ctrl K
             </span>
           </div>
@@ -840,7 +865,7 @@ export function PosPage(props) {
             onClick={function openLowStock() {
               setLowStockModalOpen(true);
             }}
-            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 cursor-pointer shrink-0"
+            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] cursor-pointer shrink-0 transition-colors"
             title="Low Stock Alerts"
           >
             <Bell className="h-4 w-4" />
@@ -868,17 +893,18 @@ export function PosPage(props) {
             }}
             className={allCategoryClass}
           >
-            All
+            <span>All</span>
+            <span className={allCountClass}>{products.length}</span>
           </button>
           {categories.map(function renderCategory(category) {
             const isSelected = selectedCategoryId === category.category_id;
             let pillClass =
-              "shrink-0 rounded-lg px-4 py-2 text-xs font-medium cursor-pointer ";
+              "shrink-0 rounded-full px-4 py-2 text-xs font-medium cursor-pointer transition-colors ";
             if (isSelected) {
-              pillClass = pillClass + "bg-blue-600 font-semibold text-white";
+              pillClass = pillClass + "bg-[#151515] font-semibold text-white shadow-xs";
             } else {
               pillClass =
-                pillClass + "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50";
+                pillClass + "bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#151515]";
             }
             return (
               <button
@@ -938,18 +964,18 @@ export function PosPage(props) {
       </div>
 
       {/* Right Current Sale Cart Panel (Desktop) */}
-      <aside className="hidden lg:flex w-80 xl:w-96 shrink-0 flex-col border-l border-slate-200 bg-white">
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-          <h2 className="text-base font-bold text-slate-900">
+      <aside className="hidden lg:flex w-80 xl:w-96 shrink-0 flex-col border-l border-[#E9E9E9] bg-white">
+        <div className="flex items-center justify-between border-b border-[#E9E9E9] px-5 py-4">
+          <h2 className="text-base font-semibold text-[#151515]">
             Current Sale (<span className="font-mono">{cartItems.length}</span>)
           </h2>
         </div>
 
-        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 px-5">
+        <div className="flex-1 overflow-y-auto divide-y divide-[#E9E9E9] px-5">
           {cartListContent}
         </div>
 
-        <div className="border-t border-slate-200 p-5">
+        <div className="border-t border-[#E9E9E9] p-5">
           {cartFooterContent}
         </div>
       </aside>

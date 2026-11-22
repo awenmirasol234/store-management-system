@@ -32,19 +32,19 @@ export function Modal(props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-3 sm:p-6">
       <div
         className={
-          "w-full rounded-xl bg-white shadow-xl border border-slate-200 max-h-[92vh] flex flex-col " +
+          "w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col " +
           widthClass
         }
       >
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3.5 sm:px-6 sm:py-4">
-          <h2 className="text-base font-bold text-slate-900">{props.title}</h2>
+        <div className="flex items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 sm:px-6 sm:py-4">
+          <h2 className="text-base font-semibold text-[#151515]">{props.title}</h2>
           <button
             type="button"
             onClick={props.onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] cursor-pointer transition-colors"
           >
             <X className="h-4 w-4" />
           </button>

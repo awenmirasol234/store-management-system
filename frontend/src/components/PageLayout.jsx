@@ -9,7 +9,7 @@ export function PageLayout(props) {
       className={
         "flex h-full flex-1 flex-col " +
         overflowClass +
-        " bg-slate-50 p-4 sm:p-6 lg:p-7"
+        " bg-[#F5F5F4] p-4 sm:p-6 lg:p-7"
       }
     >
       {props.children}

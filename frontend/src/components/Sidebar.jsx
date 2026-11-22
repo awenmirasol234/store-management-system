@@ -52,7 +52,7 @@ export function Sidebar(props) {
   }
 
   let asideClass =
-    "hidden md:flex shrink-0 flex-col bg-[#181B2C] text-slate-300 select-none transition-all duration-200 ease-in-out ";
+    "hidden md:flex shrink-0 flex-col bg-[#171717] text-white select-none transition-all duration-200 ease-in-out ";
   if (collapsed) {
     asideClass = asideClass + "w-20";
   } else {
@@ -64,7 +64,7 @@ export function Sidebar(props) {
     headerElement = (
       <div className="flex flex-col items-center gap-3 py-6">
         <div
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shrink-0"
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] text-[#151515] shrink-0"
           title="StoreFlow POS"
         >
           <Store className="h-5 w-5" />
@@ -72,7 +72,7 @@ export function Sidebar(props) {
         <button
           type="button"
           onClick={handleToggle}
-          className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white cursor-pointer"
+          className="rounded-lg p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white cursor-pointer transition-colors"
           title="Expand sidebar"
         >
           <ChevronRight className="h-4 w-4" />
@@ -83,18 +83,18 @@ export function Sidebar(props) {
     headerElement = (
       <div className="flex items-center justify-between px-5 py-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] text-[#151515] shrink-0">
             <Store className="h-5 w-5" />
           </div>
           <div>
             <div className="text-sm font-bold text-white leading-tight">StoreFlow</div>
-            <div className="text-xs text-slate-400">POS</div>
+            <div className="text-xs text-[#A3A3A3]">POS</div>
           </div>
         </div>
         <button
           type="button"
           onClick={handleToggle}
-          className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white cursor-pointer"
+          className="rounded-lg p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white cursor-pointer transition-colors"
           title="Collapse sidebar"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -110,7 +110,7 @@ export function Sidebar(props) {
         type="button"
         onClick={props.onLogout}
         title="Sign out"
-        className="p-1.5 text-slate-400 hover:bg-rose-500/20 hover:text-rose-300 rounded-lg cursor-pointer"
+        className="p-1.5 text-[#A3A3A3] hover:bg-rose-500/20 hover:text-rose-300 rounded-lg cursor-pointer transition-colors"
       >
         <LogOut className="h-4 w-4" />
       </button>
@@ -123,9 +123,9 @@ export function Sidebar(props) {
       <button
         type="button"
         onClick={props.onOpenUserModal}
-        className="flex w-full items-center gap-2 rounded-lg bg-white/5 px-2.5 py-1.5 text-2xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition cursor-pointer"
+        className="flex w-full items-center gap-2 rounded-lg bg-white/5 px-2.5 py-1.5 text-2xs font-medium text-[#A3A3A3] hover:bg-white/10 hover:text-white transition cursor-pointer"
       >
-        <Users className="h-3.5 w-3.5 text-blue-400" />
+        <Users className="h-3.5 w-3.5 text-[#A3A3A3]" />
         <span>Manage Staff</span>
       </button>
     );
@@ -136,23 +136,23 @@ export function Sidebar(props) {
     let dotTone = "bg-amber-400";
     let statusLabel = "No Shift";
     if (props.activeShift) {
-      dotTone = "bg-emerald-400";
+      dotTone = "bg-[#B9F36B]";
       statusLabel = "Shift Open";
     }
     cashDrawerButton = (
       <button
         type="button"
         onClick={props.onOpenShiftModal}
-        className="flex w-full items-center justify-between rounded-lg bg-white/5 px-2.5 py-1.5 text-2xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition cursor-pointer"
+        className="flex w-full items-center justify-between rounded-lg bg-white/5 px-2.5 py-1.5 text-2xs font-medium text-[#A3A3A3] hover:bg-white/10 hover:text-white transition cursor-pointer"
         title="Cash Drawer & Shifts"
       >
         <div className="flex items-center gap-2">
-          <Wallet className="h-3.5 w-3.5 text-blue-400" />
+          <Wallet className="h-3.5 w-3.5 text-[#A3A3A3]" />
           <span>Cash Drawer</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className={"h-1.5 w-1.5 rounded-full " + dotTone} />
-          <span className="text-3xs text-slate-400">{statusLabel}</span>
+          <span className="text-3xs text-[#A3A3A3]">{statusLabel}</span>
         </div>
       </button>
     );
@@ -169,7 +169,7 @@ export function Sidebar(props) {
         type="button"
         onClick={props.onOpenShiftModal}
         title={drawerTitle}
-        className="p-1.5 text-slate-400 hover:bg-white/10 hover:text-white rounded-lg cursor-pointer"
+        className="p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white rounded-lg cursor-pointer transition-colors"
       >
         <Wallet className="h-4 w-4" />
       </button>
@@ -181,7 +181,7 @@ export function Sidebar(props) {
     footerElement = (
       <div className="border-t border-white/10 p-3 flex flex-col items-center gap-2">
         <div
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600/20 text-xs font-semibold text-blue-300 shrink-0"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs font-semibold text-white shrink-0"
           title={displayName + " (" + displayRole + ")"}
         >
           {initials}
@@ -195,12 +195,12 @@ export function Sidebar(props) {
       <div className="border-t border-white/10 px-4 py-3 space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600/20 text-xs font-semibold text-blue-300 shrink-0">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs font-semibold text-white shrink-0">
               {initials}
             </div>
             <div className="min-w-0">
               <div className="truncate text-xs font-semibold text-white">{displayName}</div>
-              <div className="text-tiny text-slate-400">{displayRole}</div>
+              <div className="text-tiny text-[#A3A3A3]">{displayRole}</div>
             </div>
           </div>
           {logoutButton}
@@ -220,7 +220,7 @@ export function Sidebar(props) {
           const IconComponent = item.icon;
           const isActive = props.activePage === item.key;
           let itemClass =
-            "flex w-full items-center rounded-lg text-sm font-medium transition-colors cursor-pointer ";
+            "flex w-full items-center rounded-xl text-xs font-medium transition-colors cursor-pointer ";
           if (collapsed) {
             itemClass = itemClass + "justify-center px-0 py-3 ";
           } else {
@@ -228,9 +228,9 @@ export function Sidebar(props) {
           }
 
           if (isActive) {
-            itemClass = itemClass + "bg-blue-600 text-white";
+            itemClass = itemClass + "bg-[#B9F36B] text-[#151515] font-semibold shadow-xs";
           } else {
-            itemClass = itemClass + "text-slate-300 hover:bg-white/5 hover:text-white";
+            itemClass = itemClass + "text-[#A3A3A3] hover:bg-white/5 hover:text-white";
           }
 
           let labelSpan = <span>{item.label}</span>;

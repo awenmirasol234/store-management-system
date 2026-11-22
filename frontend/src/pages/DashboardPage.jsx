@@ -53,7 +53,7 @@ export function DashboardPage(props) {
   let todayProfit = "₱0.00";
   let lowStockCountText = "0";
   let stockValue = "₱0.00";
-  let activeProductsMeta = "0 products";
+  let activeProductsMeta = "0 active";
   if (summary) {
     todaySales = formatPeso(summary.gross_sales);
     todayOrdersMeta = String(summary.sale_count) + " orders";
@@ -71,15 +71,15 @@ export function DashboardPage(props) {
   let lowStockList = <EmptyState message="All stock levels are healthy." padding="md" />;
   if (lowStock.length > 0) {
     lowStockList = (
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y divide-[#E9E9E9]">
         {lowStock.slice(0, 8).map(function renderLowItem(product) {
           return (
             <div key={product.product_id} className="flex items-center justify-between py-3.5">
               <div className="min-w-0 pr-4">
-                <div className="truncate text-sm font-medium text-slate-900">
+                <div className="truncate text-sm font-medium text-[#151515]">
                   {product.product_name}
                 </div>
-                <div className="mt-0.5 font-mono text-xs text-slate-500">
+                <div className="mt-0.5 font-mono text-xs text-[#777777]">
                   Reorder: {formatQuantity(product.reorder_level)} {product.base_unit}
                 </div>
               </div>
@@ -96,21 +96,21 @@ export function DashboardPage(props) {
   let recentSalesList = <EmptyState message="No sales recorded yet." padding="md" />;
   if (recentSales.length > 0) {
     recentSalesList = (
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y divide-[#E9E9E9]">
         {recentSales.map(function renderSale(sale) {
           return (
             <div key={sale.sale_id} className="flex items-center justify-between py-3.5">
               <div>
-                <div className="font-mono text-sm font-semibold text-slate-900">
+                <div className="font-mono text-sm font-semibold text-[#151515]">
                   #{sale.receipt_number}
                 </div>
-                <div className="mt-0.5 font-mono text-xs text-slate-500">
+                <div className="mt-0.5 font-mono text-xs text-[#777777]">
                   {formatSmartDateTime(sale.created_at)}
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Badge tone="blue">{sale.payment_method}</Badge>
-                <span className="font-mono text-sm font-bold text-slate-900">
+                <span className="font-mono text-sm font-bold text-[#151515]">
                   {formatPeso(sale.total_amount)}
                 </span>
               </div>
@@ -156,9 +156,9 @@ export function DashboardPage(props) {
       </div>
 
       <div className="grid flex-1 grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
-        <section className="flex flex-col rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
+        <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-5 sm:p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-900">Low Stock</h2>
+            <h2 className="text-base font-semibold text-[#151515]">Low Stock</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -172,9 +172,9 @@ export function DashboardPage(props) {
           {lowStockList}
         </section>
 
-        <section className="flex flex-col rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
+        <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-5 sm:p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-900">Recent Sales</h2>
+            <h2 className="text-base font-semibold text-[#151515]">Recent Sales</h2>
             <Button
               variant="ghost"
               size="sm"

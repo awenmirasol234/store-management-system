@@ -17,7 +17,7 @@ export function Input(props) {
   let labelElement = null;
   if (props.label) {
     labelElement = (
-      <label className="mb-1.5 block text-xs font-medium text-slate-700">
+      <label className="mb-1.5 block text-xs font-medium text-[#151515]">
         {props.label}
       </label>
     );
@@ -26,7 +26,7 @@ export function Input(props) {
   let helperElement = null;
   if (props.helper) {
     helperElement = (
-      <div className="mt-1.5 font-mono text-xs text-slate-500">{props.helper}</div>
+      <div className="mt-1.5 font-mono text-xs text-[#777777]">{props.helper}</div>
     );
   }
 
@@ -46,7 +46,7 @@ export function Input(props) {
         required={props.required}
         disabled={props.disabled}
         className={
-          "w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100" +
+          "w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors" +
           fontClass
         }
       />

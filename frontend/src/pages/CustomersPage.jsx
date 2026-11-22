@@ -17,11 +17,11 @@ import { StatCard } from "../components/StatCard.jsx";
 import { TableEmptyRow } from "../components/TableEmptyRow.jsx";
 
 function getFilterButtonClass(filterKey, currentFilter) {
-  let buttonClass = "rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer ";
+  let buttonClass = "rounded-full px-3.5 py-1.5 text-xs font-semibold cursor-pointer transition-colors ";
   if (filterKey === currentFilter) {
-    buttonClass = buttonClass + "bg-blue-600 text-white";
+    buttonClass = buttonClass + "bg-[#151515] text-white shadow-xs";
   } else {
-    buttonClass = buttonClass + "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50";
+    buttonClass = buttonClass + "border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515]";
   }
   return buttonClass;
 }
@@ -223,18 +223,18 @@ export function CustomersPage(props) {
       }
 
       return (
-        <tr key={customer.customer_id} className="hover:bg-slate-50">
+        <tr key={customer.customer_id} className="hover:bg-[#EEEEED]/50 transition-colors">
           <td className="px-4 py-3">
-            <div className="font-semibold text-slate-900">{customer.full_name}</div>
+            <div className="font-semibold text-[#151515]">{customer.full_name}</div>
           </td>
-          <td className="px-4 py-3 text-xs text-slate-600">
+          <td className="px-4 py-3 text-xs text-[#777777]">
             <div>{phoneDisplay}</div>
-            <div className="text-slate-400 max-w-xs truncate">{addressDisplay}</div>
+            <div className="text-[#777777]/70 max-w-xs truncate">{addressDisplay}</div>
           </td>
           <td className={"px-4 py-3 text-right text-sm " + balanceClass}>
             {formatPeso(customer.current_balance)}
           </td>
-          <td className="px-4 py-3 text-right font-mono text-xs text-slate-600">
+          <td className="px-4 py-3 text-right font-mono text-xs text-[#777777]">
             {limitDisplay}
           </td>
           <td className="px-4 py-3">{statusBadge}</td>
@@ -318,7 +318,7 @@ export function CustomersPage(props) {
       {/* Search Bar & Filter Tabs */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:w-80">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
           <input
             type="text"
             placeholder="Search name, phone, address..."
@@ -326,7 +326,7 @@ export function CustomersPage(props) {
             onChange={function handleSearch(event) {
               setSearchQuery(event.target.value);
             }}
-            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2 pl-10 pr-4 text-xs sm:text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
           />
         </div>
 
@@ -372,7 +372,7 @@ export function CustomersPage(props) {
       </div>
 
       {/* Main Customers Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white shadow-xs">
         <DataTable headRow={tableHeadRow} stickyHead={true}>
           {tableBodyContent}
         </DataTable>

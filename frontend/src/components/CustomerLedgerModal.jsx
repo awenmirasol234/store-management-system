@@ -74,7 +74,7 @@ export function CustomerLedgerModal(props) {
   let contentElement = null;
   if (loading) {
     contentElement = (
-      <div className="flex h-48 items-center justify-center text-sm text-slate-500">
+      <div className="flex h-48 items-center justify-center text-sm text-[#777777]">
         Loading transaction ledger...
       </div>
     );
@@ -98,7 +98,7 @@ export function CustomerLedgerModal(props) {
     );
 
     contentElement = (
-      <div className="overflow-x-auto rounded-lg border border-slate-200">
+      <div className="overflow-x-auto rounded-xl border border-[#E9E9E9]">
         <DataTable headRow={headRow} stickyHead={true}>
           {transactions.map(function renderTxRow(tx) {
             let badgeTone = "slate";
@@ -136,8 +136,8 @@ export function CustomerLedgerModal(props) {
             }
 
             return (
-              <tr key={tx.credit_tx_id} className="hover:bg-slate-50">
-                <td className="px-4 py-3 text-xs text-slate-600 whitespace-nowrap">
+              <tr key={tx.credit_tx_id} className="hover:bg-[#EEEEED]/50 transition-colors">
+                <td className="px-4 py-3 text-xs text-[#151515] whitespace-nowrap">
                   {formatSmartDateTime(tx.created_at)}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
@@ -146,10 +146,10 @@ export function CustomerLedgerModal(props) {
                 <td className={"px-4 py-3 text-right text-xs whitespace-nowrap " + amountClass}>
                   {amountDisplay}
                 </td>
-                <td className="px-4 py-3 text-xs text-slate-600 whitespace-nowrap">
+                <td className="px-4 py-3 text-xs text-[#777777] whitespace-nowrap">
                   {cashierDisplay}
                 </td>
-                <td className="px-4 py-3 text-xs text-slate-500 max-w-xs truncate">
+                <td className="px-4 py-3 text-xs text-[#777777] max-w-xs truncate">
                   {remarksDisplay}
                 </td>
               </tr>
@@ -164,18 +164,18 @@ export function CustomerLedgerModal(props) {
     <Modal open={props.open} onClose={props.onClose} title="Customer Credit Ledger" size="xl">
       <div className="p-5 sm:p-6 space-y-4">
         {/* Customer Balance Summary Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#E9E9E9] bg-[#EEEEED]/40 p-4">
           <div>
-            <div className="text-xs font-semibold text-slate-500">Customer</div>
-            <div className="text-base font-bold text-slate-900">{customerName}</div>
+            <div className="text-xs font-semibold text-[#777777]">Customer</div>
+            <div className="text-base font-bold text-[#151515]">{customerName}</div>
           </div>
           <div className="flex items-center gap-6">
             <div>
-              <div className="text-xs font-semibold text-slate-500">Credit Limit</div>
-              <div className="font-mono text-sm font-bold text-slate-700">{creditLimitDisplay}</div>
+              <div className="text-xs font-semibold text-[#777777]">Credit Limit</div>
+              <div className="font-mono text-sm font-bold text-[#151515]">{creditLimitDisplay}</div>
             </div>
             <div>
-              <div className="text-xs font-semibold text-slate-500">Current Utang</div>
+              <div className="text-xs font-semibold text-[#777777]">Current Utang</div>
               <div className="font-mono text-base font-bold text-rose-600">
                 {formatPeso(currentBalance)}
               </div>

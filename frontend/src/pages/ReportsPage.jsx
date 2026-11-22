@@ -78,14 +78,14 @@ export function ReportsPage() {
   if (dailyRows.length > 0) {
     dailyTableBody = dailyRows.map(function renderDay(row) {
       return (
-        <tr key={row.date} className="hover:bg-slate-50">
-          <td className="px-5 py-3.5 font-mono text-sm font-medium text-slate-900">
+        <tr key={row.date} className="hover:bg-[#EEEEED]/50 transition-colors">
+          <td className="px-5 py-3.5 font-mono text-sm font-medium text-[#151515]">
             {formatSmartDate(row.date)}
           </td>
-          <td className="px-5 py-3.5 font-mono text-sm text-slate-600 text-right">
+          <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">
             {row.sale_count}
           </td>
-          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-slate-900 text-right">
+          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right">
             {formatPeso(row.gross_sales)}
           </td>
           <td className="px-5 py-3.5 font-mono text-sm font-semibold text-emerald-700 text-right">
@@ -102,12 +102,12 @@ export function ReportsPage() {
   if (topProducts.length > 0) {
     topTableBody = topProducts.map(function renderProduct(item) {
       return (
-        <tr key={item.product_id} className="hover:bg-slate-50">
-          <td className="px-5 py-3.5 text-sm font-medium text-slate-900">{item.product_name}</td>
-          <td className="px-5 py-3.5 font-mono text-sm text-slate-600 text-right">
+        <tr key={item.product_id} className="hover:bg-[#EEEEED]/50 transition-colors">
+          <td className="px-5 py-3.5 text-sm font-medium text-[#151515]">{item.product_name}</td>
+          <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">
             {formatQuantity(item.quantity_sold)} {item.base_unit}
           </td>
-          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-slate-900 text-right">
+          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right">
             {formatPeso(item.revenue)}
           </td>
           <td className="px-5 py-3.5 font-mono text-sm font-semibold text-emerald-700 text-right">
@@ -170,9 +170,9 @@ export function ReportsPage() {
               setActivePreset("CUSTOM");
               setFromDate(event.target.value);
             }}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
+            className="rounded-xl border border-[#E9E9E9] bg-white px-3 py-2 font-mono text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
           />
-          <span className="text-xs text-slate-400">to</span>
+          <span className="text-xs text-[#777777]">to</span>
           <input
             type="date"
             value={toDate}
@@ -180,7 +180,7 @@ export function ReportsPage() {
               setActivePreset("CUSTOM");
               setToDate(event.target.value);
             }}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
+            className="rounded-xl border border-[#E9E9E9] bg-white px-3 py-2 font-mono text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
           />
         </div>
       </PageHeader>
@@ -207,8 +207,8 @@ export function ReportsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
-        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <div className="border-b border-slate-200 px-5 py-4 text-sm font-bold text-slate-900">
+        <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
+          <div className="border-b border-[#E9E9E9] px-5 py-4 text-base font-semibold text-[#151515]">
             Daily Sales
           </div>
           <div className="overflow-x-auto">
@@ -227,8 +227,8 @@ export function ReportsPage() {
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <div className="border-b border-slate-200 px-5 py-4 text-sm font-bold text-slate-900">
+        <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
+          <div className="border-b border-[#E9E9E9] px-5 py-4 text-base font-semibold text-[#151515]">
             Top Products
           </div>
           <div className="overflow-x-auto">

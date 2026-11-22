@@ -12,11 +12,11 @@ export function PaymentMethodToggle(props) {
         const IconComponent = method.icon;
         const isSelected = props.paymentMethod === method.key;
         let buttonClass =
-          "flex flex-col items-center gap-1.5 rounded-lg border py-2 text-xs font-medium cursor-pointer ";
+          "flex flex-col items-center gap-1.5 rounded-xl border py-2 text-xs font-medium cursor-pointer transition-colors ";
         if (isSelected) {
-          buttonClass = buttonClass + "border-blue-600 bg-blue-50 text-blue-700 font-semibold";
+          buttonClass = buttonClass + "border-[#151515] bg-[#151515] text-white font-semibold shadow-xs";
         } else {
-          buttonClass = buttonClass + "border-slate-200 bg-white text-slate-600 hover:bg-slate-50";
+          buttonClass = buttonClass + "border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515]";
         }
         return (
           <button

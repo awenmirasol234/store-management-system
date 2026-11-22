@@ -16,7 +16,7 @@ export function BottomNav(props) {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 border-t border-white/10 bg-[#181B2C] select-none md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 border-t border-[#262626] bg-[#171717] select-none md:hidden">
       <div className={gridClass}>
         {items.map(function renderBottomItem(item) {
           const IconComponent = item.icon;
@@ -27,14 +27,14 @@ export function BottomNav(props) {
           if (isActive) {
             buttonClass = buttonClass + "text-white font-semibold";
           } else {
-            buttonClass = buttonClass + "text-slate-400 hover:text-slate-200";
+            buttonClass = buttonClass + "text-[#A3A3A3] hover:text-white";
           }
 
           let iconClass = "h-5 w-5 ";
           if (isActive) {
-            iconClass = iconClass + "text-blue-400";
+            iconClass = iconClass + "text-[#B9F36B]";
           } else {
-            iconClass = iconClass + "text-slate-400";
+            iconClass = iconClass + "text-[#A3A3A3]";
           }
 
           return (

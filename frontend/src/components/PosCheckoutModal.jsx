@@ -225,30 +225,30 @@ export function PosCheckoutModal(props) {
         }
 
         selectedCustomerCard = (
-          <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-3 space-y-2">
+          <div className="rounded-xl border border-[#E9E9E9] bg-[#EEEEED]/40 p-3 space-y-2">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold text-slate-900">{selectedCustomer.full_name}</span>
-                <span className="ml-2 text-tiny text-slate-500 font-mono">{phoneDisplay}</span>
+                <span className="text-xs font-bold text-[#151515]">{selectedCustomer.full_name}</span>
+                <span className="ml-2 text-tiny text-[#777777] font-mono">{phoneDisplay}</span>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs pt-1.5 border-t border-slate-200/80">
+            <div className="grid grid-cols-2 gap-2 text-xs pt-1.5 border-t border-[#E9E9E9]">
               <div>
-                <span className="text-slate-500">Current Utang: </span>
-                <span className="font-mono font-bold text-slate-800">
+                <span className="text-[#777777]">Current Utang: </span>
+                <span className="font-mono font-bold text-[#151515]">
                   {formatPeso(selectedCustomer.current_balance)}
                 </span>
               </div>
               <div>
-                <span className="text-slate-500">Credit Limit: </span>
-                <span className="font-mono font-medium text-slate-700">
+                <span className="text-[#777777]">Credit Limit: </span>
+                <span className="font-mono font-medium text-[#151515]">
                   {limitDisplay}
                 </span>
               </div>
             </div>
-            <div className="flex items-center justify-between text-xs pt-1.5 border-t border-slate-200/80">
-              <span className="text-slate-600 font-medium">Projected New Utang:</span>
-              <span className="font-mono font-bold text-blue-700 text-sm">
+            <div className="flex items-center justify-between text-xs pt-1.5 border-t border-[#E9E9E9]">
+              <span className="text-[#777777] font-medium">Projected New Utang:</span>
+              <span className="font-mono font-bold text-[#151515] text-sm">
                 {formatPeso(projectedBalance)}
               </span>
             </div>
@@ -307,9 +307,9 @@ export function PosCheckoutModal(props) {
     }
 
     splitCashSection = (
-      <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3.5">
+      <div className="space-y-3 rounded-xl border border-[#E9E9E9] bg-[#EEEEED]/40 p-3.5">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#151515]">
             Payment Breakdown
           </span>
           <Button
@@ -403,9 +403,9 @@ export function PosCheckoutModal(props) {
             );
           })}
         </div>
-        <div className="flex items-center justify-between rounded-lg border-2 border-emerald-200 bg-emerald-50/50 px-4 py-3">
-          <span className="text-xs font-bold uppercase tracking-wide text-emerald-800">Change</span>
-          <span className="font-mono text-xl font-bold text-emerald-700">
+        <div className="flex items-center justify-between rounded-xl border border-[#E9E9E9] bg-[#EEEEED] px-4 py-3">
+          <span className="text-xs font-semibold uppercase tracking-wide text-[#777777]">Change</span>
+          <span className="font-mono text-xl font-bold text-[#151515]">
             {formatPeso(props.changePreview)}
           </span>
         </div>
@@ -413,16 +413,16 @@ export function PosCheckoutModal(props) {
     );
   } else {
     cashTenderedSection = (
-      <div className="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50/70 p-4">
+      <div className="flex items-center justify-between rounded-xl border border-[#E9E9E9] bg-[#EEEEED] p-4">
         <div>
-          <div className="text-xs font-bold uppercase tracking-wider text-blue-900">
+          <div className="text-xs font-semibold uppercase tracking-wider text-[#151515]">
             Total Charged to Utang
           </div>
-          <div className="text-tiny text-blue-700 mt-0.5">
+          <div className="text-tiny text-[#777777] mt-0.5">
             Will be added to customer's ledger upon confirmation
           </div>
         </div>
-        <span className="font-mono text-xl font-bold text-blue-800">
+        <span className="font-mono text-xl font-bold text-[#151515]">
           {formatPeso(props.total)}
         </span>
       </div>
@@ -444,11 +444,11 @@ export function PosCheckoutModal(props) {
         />
 
         {/* Total Due Banner */}
-        <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 border border-slate-200/80">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <div className="flex items-center justify-between rounded-xl bg-[#F5F5F4] px-4 py-3 border border-[#E9E9E9]">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#777777]">
             Total Due
           </span>
-          <span className="font-mono text-xl font-bold text-slate-900">
+          <span className="font-mono text-xl font-bold text-[#151515]">
             {formatPeso(props.total)}
           </span>
         </div>

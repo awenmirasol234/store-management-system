@@ -1,20 +1,20 @@
 function getVariantClasses(variant) {
   if (variant === "primary") {
-    return "bg-blue-600 text-white hover:bg-blue-700 border-transparent";
+    return "bg-[#B9F36B] text-[#151515] hover:bg-[#A8E65A] border-transparent shadow-xs active:scale-[0.99]";
+  }
+  if (variant === "secondary") {
+    return "bg-white text-[#151515] hover:bg-[#EEEEED] border-[#E9E9E9]";
   }
   if (variant === "soft") {
-    return "bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-100";
+    return "bg-[#EEEEED] text-[#151515] hover:bg-[#E2E2E1] border-transparent";
   }
   if (variant === "danger") {
     return "bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-200";
   }
   if (variant === "ghost") {
-    return "bg-transparent text-slate-600 hover:bg-slate-100 border-transparent";
+    return "bg-transparent text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] border-transparent";
   }
-  if (variant === "secondary") {
-    return "bg-white text-slate-800 hover:bg-slate-50 border-slate-200";
-  }
-  return "bg-white text-slate-800 hover:bg-slate-50 border-slate-200";
+  return "bg-white text-[#151515] hover:bg-[#EEEEED] border-[#E9E9E9]";
 }
 
 function getSizeClasses(size) {
@@ -39,7 +39,7 @@ export function Button(props) {
   }
 
   const classes =
-    "inline-flex items-center justify-center gap-2 rounded-lg border font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed " +
+    "inline-flex items-center justify-center gap-2 rounded-xl border font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed " +
     getVariantClasses(props.variant) +
     " " +
     getSizeClasses(props.size) +

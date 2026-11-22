@@ -13,9 +13,9 @@ function getPaddingClass(padding) {
 
 function getToneClass(tone) {
   if (tone === "faint") {
-    return "text-slate-400";
+    return "text-[#777777]/70";
   }
-  return "text-slate-500";
+  return "text-[#777777]";
 }
 
 export function EmptyState(props) {

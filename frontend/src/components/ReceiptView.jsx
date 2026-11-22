@@ -33,7 +33,7 @@ export function ReceiptView(props) {
     <div className="space-y-5">
       <div
         id="thermal-receipt"
-        className="mx-auto w-full max-w-[300px] rounded-lg border border-slate-200 bg-white p-5 font-mono text-xs text-slate-900"
+        className="mx-auto w-full max-w-[300px] rounded-xl border border-[#E9E9E9] bg-white p-5 font-mono text-xs text-[#151515]"
       >
         <div className="text-center border-b border-dashed border-slate-300 pb-3 mb-3 space-y-0.5">
           <div className="text-sm font-bold">STOREFLOW POS</div>
