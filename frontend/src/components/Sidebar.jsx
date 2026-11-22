@@ -103,6 +103,34 @@ export function Sidebar(props) {
     );
   }
 
+  let logoutButton = null;
+  if (props.onLogout) {
+    logoutButton = (
+      <button
+        type="button"
+        onClick={props.onLogout}
+        title="Sign out"
+        className="p-1.5 text-slate-400 hover:bg-rose-500/20 hover:text-rose-300 rounded-lg cursor-pointer"
+      >
+        <LogOut className="h-4 w-4" />
+      </button>
+    );
+  }
+
+  let manageStaffButton = null;
+  if (isOwner && props.onOpenUserModal) {
+    manageStaffButton = (
+      <button
+        type="button"
+        onClick={props.onOpenUserModal}
+        className="flex w-full items-center gap-2 rounded-lg bg-white/5 px-2.5 py-1.5 text-2xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition cursor-pointer"
+      >
+        <Users className="h-3.5 w-3.5 text-blue-400" />
+        <span>Manage Staff</span>
+      </button>
+    );
+  }
+
   let footerElement = null;
   if (collapsed) {
     footerElement = (
@@ -113,16 +141,7 @@ export function Sidebar(props) {
         >
           {initials}
         </div>
-        {props.onLogout ? (
-          <button
-            type="button"
-            onClick={props.onLogout}
-            title="Sign out"
-            className="p-1.5 text-slate-400 hover:bg-rose-500/20 hover:text-rose-300 rounded-lg cursor-pointer"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
-        ) : null}
+        {logoutButton}
       </div>
     );
   } else {
@@ -138,28 +157,9 @@ export function Sidebar(props) {
               <div className="text-tiny text-slate-400">{displayRole}</div>
             </div>
           </div>
-          {props.onLogout ? (
-            <button
-              type="button"
-              onClick={props.onLogout}
-              title="Sign out"
-              className="p-1.5 text-slate-400 hover:bg-rose-500/20 hover:text-rose-300 rounded-lg cursor-pointer"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-          ) : null}
+          {logoutButton}
         </div>
-
-        {isOwner && props.onOpenUserModal ? (
-          <button
-            type="button"
-            onClick={props.onOpenUserModal}
-            className="flex w-full items-center gap-2 rounded-lg bg-white/5 px-2.5 py-1.5 text-2xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition cursor-pointer"
-          >
-            <Users className="h-3.5 w-3.5 text-blue-400" />
-            <span>Manage Staff</span>
-          </button>
-        ) : null}
+        {manageStaffButton}
       </div>
     );
   }

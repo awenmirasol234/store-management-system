@@ -227,6 +227,86 @@ export function UserManagementModal(props) {
     );
   }
 
+  let staffListContent = null;
+  if (loading) {
+    staffListContent = (
+      <div className="p-6 text-center text-xs text-slate-400">Loading staff accounts...</div>
+    );
+  } else if (users.length === 0) {
+    staffListContent = (
+      <div className="p-6 text-center text-xs text-slate-400">No staff members found.</div>
+    );
+  } else {
+    staffListContent = users.map(function renderUserRow(user) {
+      const isSelf = props.currentUser && props.currentUser.user_id === user.user_id;
+      let roleBadgeTone = "blue";
+      if (user.role === "CASHIER") {
+        roleBadgeTone = "amber";
+      }
+
+      let activeTone = "red";
+      let activeLabel = "Inactive";
+      let toggleLabel = "Activate";
+      if (user.is_active) {
+        activeTone = "green";
+        activeLabel = "Active";
+        toggleLabel = "Deactivate";
+      }
+
+      let youBadge = null;
+      if (isSelf) {
+        youBadge = (
+          <span className="text-3xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">
+            You
+          </span>
+        );
+      }
+
+      let toggleButton = null;
+      if (!isSelf) {
+        toggleButton = (
+          <button
+            type="button"
+            onClick={function () {
+              handleToggleActive(user);
+            }}
+            className="text-2xs font-medium text-slate-500 hover:text-slate-800 underline cursor-pointer"
+          >
+            {toggleLabel}
+          </button>
+        );
+      }
+
+      return (
+        <div
+          key={user.user_id}
+          className="flex items-center justify-between p-3.5 hover:bg-slate-50 transition"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
+              {user.username.slice(0, 2).toUpperCase()}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-800">
+                  {user.full_name}
+                </span>
+                {youBadge}
+              </div>
+              <div className="text-2xs text-slate-400">@{user.username}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <Badge tone={roleBadgeTone}>{user.role}</Badge>
+            <Badge tone={activeTone}>{activeLabel}</Badge>
+            {toggleButton}
+          </div>
+        </div>
+      );
+    });
+  }
+
   return (
     <Modal
       open={props.open}
@@ -248,71 +328,7 @@ export function UserManagementModal(props) {
 
         {/* Staff List */}
         <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white overflow-hidden">
-          {loading ? (
-            <div className="p-6 text-center text-xs text-slate-400">Loading staff accounts...</div>
-          ) : users.length === 0 ? (
-            <div className="p-6 text-center text-xs text-slate-400">No staff members found.</div>
-          ) : (
-            users.map(function renderUserRow(user) {
-              const isSelf = props.currentUser && props.currentUser.user_id === user.user_id;
-              let roleBadgeTone = "blue";
-              if (user.role === "CASHIER") {
-                roleBadgeTone = "amber";
-              }
-
-              let activeTone = "red";
-              let activeLabel = "Inactive";
-              let toggleLabel = "Activate";
-              if (user.is_active) {
-                activeTone = "green";
-                activeLabel = "Active";
-                toggleLabel = "Deactivate";
-              }
-
-              return (
-                <div
-                  key={user.user_id}
-                  className="flex items-center justify-between p-3.5 hover:bg-slate-50 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
-                      {user.username.slice(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-slate-800">
-                          {user.full_name}
-                        </span>
-                        {isSelf ? (
-                          <span className="text-3xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">
-                            You
-                          </span>
-                        ) : null}
-                      </div>
-                      <div className="text-2xs text-slate-400">@{user.username}</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2.5">
-                    <Badge tone={roleBadgeTone}>{user.role}</Badge>
-                    <Badge tone={activeTone}>{activeLabel}</Badge>
-
-                    {!isSelf ? (
-                      <button
-                        type="button"
-                        onClick={function () {
-                          handleToggleActive(user);
-                        }}
-                        className="text-2xs font-medium text-slate-500 hover:text-slate-800 underline cursor-pointer"
-                      >
-                        {toggleLabel}
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
-              );
-            })
-          )}
+          {staffListContent}
         </div>
       </div>
     </Modal>
