@@ -21,4 +21,11 @@ describe("PosPage SSR test", function () {
     expect(html).toContain("Cash");
     expect(html).toContain("Utang");
   });
+
+  it("renders Clear Cart action in cart header and quick actions bar", function () {
+    const html = renderToString(React.createElement(PosPage));
+    expect(html).toContain("Clear");
+    expect(html).toContain("Clear Sale");
+    expect(html).toContain("Clear all items in cart");
+  });
 });

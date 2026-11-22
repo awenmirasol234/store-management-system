@@ -77,6 +77,7 @@ export function PosPage(props) {
 
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const [amountPaidInput, setAmountPaidInput] = useState("");
   const [cashPartInput, setCashPartInput] = useState("");
   const [customerIdInput, setCustomerIdInput] = useState("");
@@ -277,6 +278,15 @@ export function PosPage(props) {
     setCartItems([]);
     setOrderDiscount(0);
     setErrorBanner("");
+    setClearConfirmOpen(false);
+    setMobileCartOpen(false);
+  }
+
+  function handleRequestClearCart() {
+    if (cartItems.length === 0) {
+      return;
+    }
+    setClearConfirmOpen(true);
   }
 
   function handlePaymentMethodChange(newMethod) {
@@ -805,6 +815,20 @@ export function PosPage(props) {
       size="sm"
     >
       <div className="flex flex-col space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-[#E9E9E9]">
+          <span className="text-xs text-[#777777]">
+            <span className="font-mono">{cartItems.length}</span> item(s) in cart
+          </span>
+          <button
+            type="button"
+            disabled={cartItems.length === 0}
+            onClick={handleRequestClearCart}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-[#777777] hover:bg-rose-50 hover:text-rose-600 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            <span>Clear Cart</span>
+          </button>
+        </div>
         <div className="max-h-[45vh] overflow-y-auto divide-y divide-[#E9E9E9] pr-1">
           {cartListContent}
         </div>
@@ -954,7 +978,8 @@ export function PosPage(props) {
           <Button
             variant="secondary"
             size="lg"
-            onClick={clearCart}
+            disabled={cartItems.length === 0}
+            onClick={handleRequestClearCart}
             className="text-xs sm:text-sm px-2 sm:px-4"
           >
             <XCircle className="h-4 w-4 shrink-0" />
@@ -969,6 +994,16 @@ export function PosPage(props) {
           <h2 className="text-base font-semibold text-[#151515]">
             Current Sale (<span className="font-mono">{cartItems.length}</span>)
           </h2>
+          <button
+            type="button"
+            disabled={cartItems.length === 0}
+            onClick={handleRequestClearCart}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-[#777777] hover:bg-rose-50 hover:text-rose-600 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors"
+            title="Clear all items in cart"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            <span>Clear</span>
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto divide-y divide-[#E9E9E9] px-5">
@@ -1079,6 +1114,35 @@ export function PosPage(props) {
           setCustomerIdInput(newCustomer.customer_id);
         }}
       />
+
+      {/* Clear Cart Confirmation Modal */}
+      <Modal
+        open={clearConfirmOpen}
+        onClose={function closeClearConfirm() {
+          setClearConfirmOpen(false);
+        }}
+        title="Clear Current Sale"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-[#777777]">
+            Are you sure you want to clear all{" "}
+            <span className="font-semibold text-[#151515] font-mono">
+              {cartItems.length}
+            </span>{" "}
+            item(s) from the current sale? Any applied discounts will also be removed.
+          </p>
+          <FormActions
+            onCancel={function cancelClear() {
+              setClearConfirmOpen(false);
+            }}
+            confirmType="button"
+            confirmVariant="danger"
+            confirmLabel="Clear Cart"
+            onConfirm={clearCart}
+          />
+        </div>
+      </Modal>
 
       {/* Receipt Preview Modal */}
       <Modal
