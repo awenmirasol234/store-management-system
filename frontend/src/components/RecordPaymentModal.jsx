@@ -117,7 +117,7 @@ export function RecordPaymentModal(props) {
 
   return (
     <Modal open={props.open} onClose={props.onClose} title="Record Utang Payment">
-      <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {errorElement}
 
         {/* Customer Balance Summary Card */}

@@ -17,7 +17,7 @@ export function InventoryAdjustModal(props) {
       open={true}
       onClose={props.onClose}
       title={title}
-      size="sm"
+      size="md"
     >
       <form onSubmit={props.onSubmit} className="space-y-5">
         <Select

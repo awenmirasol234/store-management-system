@@ -550,7 +550,7 @@ export function CashierShiftModal(props) {
   }
 
   return (
-    <Modal open={props.open} onClose={props.onClose} title={modalTitle} maxWidth="max-w-md">
+    <Modal open={props.open} onClose={props.onClose} title={modalTitle} size="md">
       {modalContent}
     </Modal>
   );

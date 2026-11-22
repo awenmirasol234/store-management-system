@@ -162,7 +162,7 @@ export function CustomerLedgerModal(props) {
 
   return (
     <Modal open={props.open} onClose={props.onClose} title="Customer Credit Ledger" size="xl">
-      <div className="p-5 sm:p-6 space-y-4">
+      <div className="space-y-4">
         {/* Customer Balance Summary Bar */}
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#E9E9E9] bg-[#EEEEED]/40 p-4">
           <div>

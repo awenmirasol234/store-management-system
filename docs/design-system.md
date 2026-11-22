@@ -332,11 +332,17 @@ Every component must be written in plain beginner-readable JavaScript following 
 **Tactical Rules:**
 - Backdrop: `fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-3 sm:p-6`.
 - Card Container: `w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col`.
-- Sizing Tokens: `sm` (`max-w-sm`), `md` (`max-w-md`), `lg` (`max-w-lg`, default), `xl` (`max-w-2xl`), `2xl` (`max-w-3xl`).
-- Header: `flex items-center justify-between border-b border-[#E9E9E9] px-6 py-4`.
+- Single Outer Padding Contract: `Modal.jsx` owns all modal content padding via `<div className="overflow-y-auto p-4 sm:p-6">{props.children}</div>`. Modal child views (`<form>` or `<div>`) **must never** define their own outer padding (`p-*` or `px-*`/`py-*`). Content flows strictly with `space-y-4` or `space-y-5`.
+- Semantic Sizing Scale:
+  - `size="sm"` (`max-w-sm` = 384px): Confirmation dialogs, single-value pickers, discount prompt, receipt view, mobile cart sheet.
+  - `size="md"` (`max-w-md` = 448px): Operational forms and multi-input rows (`InventoryStockInModal`, `InventoryAdjustModal`, `CashierShiftModal`).
+  - `size="lg"` (`max-w-lg` = 512px, default): Multi-field forms (`CustomerModal`, `RecordPaymentModal`, Product Form, User Management, Selling Options, Low Stock list).
+  - `size="xl"` (`max-w-2xl` = 672px): Multi-column cockpits and ledger tables (`PosCheckoutModal`, `CustomerLedgerModal`, Order Return / Receipt view).
+- Header: `flex items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 sm:px-6 sm:py-4`.
 - Title: `text-base font-semibold text-[#151515]`.
 - Close Button: `h-9 w-9 rounded-lg text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] transition-colors`.
 - Checkout Cockpit Layout: `PosCheckoutModal` uses `size="xl"` (`max-w-2xl`) with a balanced 2-column layout (`grid-cols-1 md:grid-cols-2 gap-5`), symmetrical 2×3 banknote presets (`Exact`, `₱50`, `₱100`, `₱200`, `₱500`, `₱1,000`), and a lime-green accented Change Due card (`border-[#B9F36B] bg-[#B9F36B]/15`).
+- Footer Actions: standard `<FormActions ... />` (`flex justify-end gap-3 pt-2`) for all confirm/cancel actions.
 
 ### 4.10 Metric Cards (`frontend/src/components/StatCard.jsx`)
 

@@ -312,7 +312,7 @@ export function UserManagementModal(props) {
       open={props.open}
       onClose={props.onClose}
       title="Staff & User Management"
-      maxWidth="max-w-xl"
+      size="lg"
     >
       <div className="space-y-4">
         {errorElement}
