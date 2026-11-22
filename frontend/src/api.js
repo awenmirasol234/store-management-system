@@ -1,10 +1,68 @@
 const API_BASE = import.meta.env.VITE_API_BASE || "";
+const TOKEN_KEY = "storeflow_auth_token";
+let inMemoryToken = null;
+
+export function getAuthToken() {
+  try {
+    if (
+      typeof window !== "undefined" &&
+      window.localStorage &&
+      typeof window.localStorage.getItem === "function"
+    ) {
+      const stored = window.localStorage.getItem(TOKEN_KEY);
+      if (stored !== null && stored !== undefined) {
+        return stored;
+      }
+    }
+  } catch (error) {
+    // fallback to in-memory
+  }
+  return inMemoryToken;
+}
+
+export function setAuthToken(token) {
+  inMemoryToken = token || null;
+  try {
+    if (
+      typeof window !== "undefined" &&
+      window.localStorage &&
+      typeof window.localStorage.setItem === "function"
+    ) {
+      if (token) {
+        window.localStorage.setItem(TOKEN_KEY, token);
+      } else {
+        window.localStorage.removeItem(TOKEN_KEY);
+      }
+    }
+  } catch (error) {
+    // ignore storage error
+  }
+}
+
+export function clearAuthToken() {
+  inMemoryToken = null;
+  try {
+    if (
+      typeof window !== "undefined" &&
+      window.localStorage &&
+      typeof window.localStorage.removeItem === "function"
+    ) {
+      window.localStorage.removeItem(TOKEN_KEY);
+    }
+  } catch (error) {
+    // ignore storage error
+  }
+}
 
 async function request(method, path, body) {
   const options = {
     method: method,
     headers: {}
   };
+  const token = getAuthToken();
+  if (token) {
+    options.headers["Authorization"] = "Bearer " + token;
+  }
   if (body !== undefined && !(body instanceof FormData)) {
     options.headers["Content-Type"] = "application/json";
     options.body = JSON.stringify(body);
@@ -17,6 +75,9 @@ async function request(method, path, body) {
   const payload = await response.json();
 
   if (!response.ok) {
+    if (response.status === 401 && path !== "/api/auth/login" && path !== "/api/auth/setup") {
+      clearAuthToken();
+    }
     let message = "Request failed";
     if (payload && payload.error && payload.error.message) {
       message = payload.error.message;
@@ -166,6 +227,33 @@ export const api = {
       "GET",
       "/api/customers/" + encodeURIComponent(customerId) + "/transactions" + buildQuery(params)
     );
+  },
+  getAuthStatus() {
+    return request("GET", "/api/auth/status");
+  },
+  setupInitialOwner(data) {
+    return request("POST", "/api/auth/setup", data);
+  },
+  login(data) {
+    return request("POST", "/api/auth/login", data);
+  },
+  logout() {
+    return request("POST", "/api/auth/logout", {});
+  },
+  getMe() {
+    return request("GET", "/api/auth/me");
+  },
+  changePin(data) {
+    return request("POST", "/api/auth/change-pin", data);
+  },
+  listUsers() {
+    return request("GET", "/api/users");
+  },
+  createUser(data) {
+    return request("POST", "/api/users", data);
+  },
+  updateUser(userId, data) {
+    return request("PATCH", "/api/users/" + encodeURIComponent(userId), data);
   }
 };
 

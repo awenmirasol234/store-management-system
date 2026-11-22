@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { api, resolveImageUrl } from "../src/api.js";
+import {
+  api,
+  clearAuthToken,
+  getAuthToken,
+  resolveImageUrl,
+  setAuthToken
+} from "../src/api.js";
 
 function stubFetchSuccess(data) {
   const fetchMock = vi.fn(function mockFetch() {
@@ -108,5 +114,74 @@ describe("api client", function () {
       "http://example.com/photo.png"
     );
     expect(resolveImageUrl("/uploads/photo.png")).toBe("/uploads/photo.png");
+  });
+
+  it("attaches auth token when present and handles auth endpoints", async function () {
+    clearAuthToken();
+    expect(getAuthToken()).toBeNull();
+
+    setAuthToken("test_token_123");
+    expect(getAuthToken()).toBe("test_token_123");
+
+    const fetchMock = stubFetchSuccess({ username: "owner" });
+    const me = await api.getMe();
+    expect(me).toEqual({ username: "owner" });
+
+    const callHeaders = fetchMock.mock.calls[0][1].headers;
+    expect(callHeaders.Authorization).toBe("Bearer test_token_123");
+
+    await api.getAuthStatus();
+    expect(fetchMock.mock.calls[1][0]).toBe("/api/auth/status");
+
+    await api.setupInitialOwner({ username: "owner", pin: "1234" });
+    expect(fetchMock.mock.calls[2][0]).toBe("/api/auth/setup");
+    expect(fetchMock.mock.calls[2][1].method).toBe("POST");
+
+    await api.login({ username: "owner", pin: "1234" });
+    expect(fetchMock.mock.calls[3][0]).toBe("/api/auth/login");
+
+    await api.logout();
+    expect(fetchMock.mock.calls[4][0]).toBe("/api/auth/logout");
+
+    await api.listUsers();
+    expect(fetchMock.mock.calls[5][0]).toBe("/api/users");
+
+    await api.createUser({ username: "cashier1", pin: "5678" });
+    expect(fetchMock.mock.calls[6][0]).toBe("/api/users");
+    expect(fetchMock.mock.calls[6][1].method).toBe("POST");
+
+    await api.updateUser("u1", { is_active: false });
+    expect(fetchMock.mock.calls[7][0]).toBe("/api/users/u1");
+    expect(fetchMock.mock.calls[7][1].method).toBe("PATCH");
+
+    await api.changePin({ current_pin: "1234", new_pin: "5678" });
+    expect(fetchMock.mock.calls[8][0]).toBe("/api/auth/change-pin");
+    expect(fetchMock.mock.calls[8][1].method).toBe("POST");
+
+    clearAuthToken();
+    expect(getAuthToken()).toBeNull();
+  });
+
+  it("automatically clears stored auth token when receiving 401 Unauthorized", async function () {
+    setAuthToken("stale_token_999");
+    expect(getAuthToken()).toBe("stale_token_999");
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(function mockFetch() {
+        return Promise.resolve({
+          ok: false,
+          status: 401,
+          json: function readJson() {
+            return Promise.resolve({
+              error: { code: "UNAUTHORIZED", message: "Session expired" }
+            });
+          }
+        });
+      })
+    );
+
+    await expect(api.listProducts()).rejects.toThrow("Session expired");
+    expect(getAuthToken()).toBeNull();
   });
 });

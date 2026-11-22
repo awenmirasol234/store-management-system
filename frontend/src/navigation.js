@@ -28,9 +28,24 @@ export const NAV_ITEMS = [
     label: "Reports",
     shortLabel: "Reports",
     pageTitle: "Reports",
-    icon: BarChart3
+    icon: BarChart3,
+    roles: ["OWNER"]
   }
 ];
+
+export function getFilteredNavItems(role) {
+  if (!role || role === "OWNER") {
+    return NAV_ITEMS;
+  }
+  const filtered = [];
+  for (let index = 0; index < NAV_ITEMS.length; index = index + 1) {
+    const item = NAV_ITEMS[index];
+    if (!item.roles || item.roles.includes(role)) {
+      filtered.push(item);
+    }
+  }
+  return filtered;
+}
 
 export function getPageTitle(pageKey) {
   for (let index = 0; index < NAV_ITEMS.length; index++) {

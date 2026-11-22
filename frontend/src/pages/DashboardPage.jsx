@@ -19,14 +19,24 @@ export function DashboardPage(props) {
   async function loadDashboard() {
     setErrorBanner("");
     try {
-      const results = await Promise.all([
-        api.getReportsSummary(),
-        api.listLowStockProducts(),
-        api.listSales(8)
-      ]);
-      setSummary(results[0]);
-      setLowStock(results[1]);
-      setRecentSales(results[2]);
+      const isCashier = props && props.currentUser && props.currentUser.role === "CASHIER";
+      if (isCashier) {
+        const results = await Promise.all([
+          api.listLowStockProducts(),
+          api.listSales(8)
+        ]);
+        setLowStock(results[0]);
+        setRecentSales(results[1]);
+      } else {
+        const results = await Promise.all([
+          api.getReportsSummary(),
+          api.listLowStockProducts(),
+          api.listSales(8)
+        ]);
+        setSummary(results[0]);
+        setLowStock(results[1]);
+        setRecentSales(results[2]);
+      }
     } catch (error) {
       setErrorBanner(error.message);
     }

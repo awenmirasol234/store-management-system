@@ -131,10 +131,15 @@ export function TransactionsPage() {
     setSubmittingReturn(true);
     setReturnMessage("");
     try {
+      let createdBy = "owner";
+      if (props && props.currentUser && props.currentUser.username) {
+        createdBy = props.currentUser.username;
+      }
+
       const result = await api.processReturn(selectedOrder.sale.sale_id, {
         items: itemsToReturn,
         remarks: returnRemarks,
-        created_by: "owner"
+        created_by: createdBy
       });
       setReturnMessage(
         "Returned. Refund: " +

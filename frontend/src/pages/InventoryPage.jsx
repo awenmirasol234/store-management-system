@@ -340,11 +340,16 @@ export function InventoryPage() {
     }
     setErrorBanner("");
     try {
+      let createdBy = "owner";
+      if (props && props.currentUser && props.currentUser.username) {
+        createdBy = props.currentUser.username;
+      }
+
       const payload = {
         product_id: stockInProduct.product_id,
         quantity: Number(stockInQty),
         unit_cost: Number(stockInUnitCost),
-        created_by: "owner"
+        created_by: createdBy
       };
       if (stockInOptionId) {
         payload.option_id = stockInOptionId;
@@ -382,12 +387,17 @@ export function InventoryPage() {
       if ((adjustType === "DAMAGED" || adjustType === "EXPIRED") && qtyValue > 0) {
         qtyValue = -qtyValue;
       }
+      let createdBy = "owner";
+      if (props && props.currentUser && props.currentUser.username) {
+        createdBy = props.currentUser.username;
+      }
+
       await api.adjustStock({
         product_id: adjustProduct.product_id,
         transaction_type: adjustType,
         quantity: qtyValue,
         remarks: adjustRemarks,
-        created_by: "owner"
+        created_by: createdBy
       });
       setAdjustProduct(null);
       await loadAll();

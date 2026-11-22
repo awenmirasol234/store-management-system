@@ -47,7 +47,7 @@ function buildCartKey(productId, optionId, customAmount) {
   return productId + ":base";
 }
 
-export function PosPage() {
+export function PosPage(props) {
   const searchInputRef = useRef(null);
   const categoryScrollRef = useRef(null);
   const dragStartXRef = useRef(0);
@@ -343,11 +343,16 @@ export function PosPage() {
         }
       }
 
+      let createdBy = "owner";
+      if (props && props.currentUser && props.currentUser.username) {
+        createdBy = props.currentUser.username;
+      }
+
       const payload = {
         items: payloadItems,
         discount_amount: totals.discount,
         payment_method: paymentMethod,
-        created_by: "owner"
+        created_by: createdBy
       };
 
       if (paymentMethod === "CASH") {

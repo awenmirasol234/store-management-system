@@ -1,10 +1,22 @@
-import { NAV_ITEMS } from "../navigation.js";
+import { getFilteredNavItems } from "../navigation.js";
 
 export function BottomNav(props) {
+  let userRole = null;
+  if (props && props.currentUser) {
+    userRole = props.currentUser.role;
+  }
+  const items = getFilteredNavItems(userRole);
+  let gridClass = "grid h-full w-full ";
+  if (items.length === 4) {
+    gridClass = gridClass + "grid-cols-4";
+  } else {
+    gridClass = gridClass + "grid-cols-5";
+  }
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 border-t border-white/10 bg-[#181B2C] select-none md:hidden">
-      <div className="grid h-full w-full grid-cols-5">
-        {NAV_ITEMS.map(function renderBottomItem(item) {
+      <div className={gridClass}>
+        {items.map(function renderBottomItem(item) {
           const IconComponent = item.icon;
           const isActive = props.activePage === item.key;
 
