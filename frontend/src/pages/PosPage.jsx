@@ -505,7 +505,7 @@ export function PosPage(props) {
   let lowStockBadge = null;
   if (lowStockProducts.length > 0) {
     lowStockBadge = (
-      <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#151515] px-1 font-mono text-2xs font-bold text-[#B9F36B]">
+      <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 font-mono text-2xs font-bold text-white shadow-xs">
         {lowStockProducts.length}
       </span>
     );

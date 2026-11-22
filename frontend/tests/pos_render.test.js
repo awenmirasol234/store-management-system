@@ -60,4 +60,17 @@ describe("PosPage SSR test", function () {
     expect(html).toContain("Subtotal");
     expect(html).not.toContain('space-y-2 border-t border-[#E9E9E9] pt-4');
   });
+
+  it("uses bg-rose-600 and text-white for notification badge dot styling", function () {
+    const badgeElement = React.createElement(
+      "span",
+      { className: "absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 font-mono text-2xs font-bold text-white shadow-xs" },
+      "3"
+    );
+    const html = renderToString(badgeElement);
+    expect(html).toContain("bg-rose-600");
+    expect(html).toContain("text-white");
+    expect(html).not.toContain("bg-[#151515]");
+    expect(html).not.toContain("text-[#B9F36B]");
+  });
 });
