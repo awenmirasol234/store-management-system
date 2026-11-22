@@ -65,7 +65,7 @@ npm run dev
 
 Open `http://localhost:5173`. Vite proxies `/api` and `/uploads` to `http://localhost:3001`.
 
-On the first visit, create the initial owner account. The application then requires login. Set `ENFORCE_AUTH=true` when the backend must enforce authentication and role checks for API routes.
+On the first visit, create the initial owner account. The application then requires login in the UI. Set `ENFORCE_AUTH=true` when the backend must enforce authentication and role checks for API routes. The default is `false` for local development.
 
 ## Seed local data
 

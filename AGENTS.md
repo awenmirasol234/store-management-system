@@ -47,7 +47,7 @@ backend/
 ├── src/
 │   ├── shared/                  # Shared validation, errors, decimal helpers, and ports
 │   ├── db/                      # SQLite connection, schema, and unit of work
-│   ├── <module>/                # inventory, sales, credit, reports, or future modules
+│   ├── <module>/                # auth, inventory, sales, credit, shifts, or reports
 │   │   ├── domain.js            # Entities, rules, errors, and port contracts
 │   │   ├── use-cases.js         # Application workflows
 │   │   ├── sqlite-repo.js       # SQLite adapter

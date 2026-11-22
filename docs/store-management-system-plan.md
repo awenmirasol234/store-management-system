@@ -10,7 +10,7 @@ A full-stack **Store Management & POS System** tailored for Sari-Sari stores and
 - **Fast, Frictionless POS**: Support 1-tap selling options, barcode scanning, and ad-hoc "tingi" peso amounts.
 - **Owner-First, Clutter-Free UI**: No overloaded text, filler descriptions, or extra labels—every screen shows only what the business owner or cashier needs for that exact use case.
 - **Accurate Inventory & Profit**: Maintain stock in a single `base_unit` (`DECIMAL(12, 4)`), support bulk pack/box stock-ins, and snapshot `unit_price` and `unit_cost` (`DECIMAL(12, 2)`) on every sale.
-- **Local-First Reliability**: Run smoothly offline on a local SQLite database with manual backup download and optional cloud sync later.
+- **Local-First Reliability**: Run smoothly offline on a local SQLite database with operational volume backups and optional cloud sync later.
 - **Philippine Retail Defaults**: Currency is `PHP (₱)` and business day cutoffs use `Asia/Manila` (`UTC+8`).
 - **Modular & Testable**: Keep all business rules in `domain.js` and `use-cases.js`, testable without a database or UI.
 
@@ -32,7 +32,7 @@ A full-stack **Store Management & POS System** tailored for Sari-Sari stores and
 | **Frontend State** | Built-in React state (`useState`, `useReducer`, `useContext`) | Local feature state (e.g., POS cart) and lightweight session/shift context (no external state library) |
 | **Validation & Domain** | Plain JavaScript (ESM) | Plain JS boundary validators and pure domain entities (no TypeScript, no Zod) |
 | **Local Database** | SQLite (WAL mode) via built-in `node:sqlite` (plain SQL) | Fast, zero-config, zero-build synchronous local persistence with exact scaled-integer storage (`×100` money, `×10,000` quantities) |
-| **Backup / Sync** | Local SQLite backup download (MVP); pluggable `BackupSyncPort` (optional later) | Safe local backups first, without coupling business logic to a cloud provider |
+| **Backup / Sync** | Operational backup of the persistent SQLite volume; automated cloud sync is deferred | Protect local data first, without coupling business logic to a cloud provider |
 | **Testing** | Vitest | Domain/application unit tests (in-memory fakes), SQLite repository integration tests, and Express route tests |
 
 ### Local-First & Portable Relational Database Strategy
@@ -42,7 +42,7 @@ A full-stack **Store Management & POS System** tailored for Sari-Sari stores and
    - **Dialect-Isolated Adapters**: Place SQL implementations in `sqlite-repo.js` (future: `postgres-repo.js`, `mysql-repo.js`) and `db/sqlite.js`, selected in one composition root (`app.js`). Isolate dialect-specific DDL, `PRAGMA`s, and parameter placeholders (`?` vs `$1`) inside each dialect file.
    - **Portable Keys & Precision**: Generate IDs in the application (`IdGenerator`) instead of relying on DB-specific auto-increment behavior. Store exact numeric values in SQLite as scaled integers (`× 100` centavos, `× 10,000` quantities) converted in mappers—other relational adapters can use either `BIGINT` scaled integers or native `DECIMAL(12, 2)` / `DECIMAL(12, 4)` transparently.
    - **Contract Tests**: Run the same repository integration test suite against any relational adapter to guarantee identical behavior.
-3. **Backup Port**: Support one-click local SQLite backup download via an Express endpoint in MVP; keep `BackupSyncPort` in `shared/` for optional cloud snapshot uploads later.
+3. **Backup Operations**: Back up the persistent SQLite volume using the deployment or host backup procedure. No application backup endpoint is currently implemented.
 
 ### REST API Contract (`frontend/` ↔ `backend/`)
 - **Resource-Based Endpoints**: Expose clean REST routes under `/api/<resource>` (e.g., `/api/products`, `/api/sales`, `/api/customers`, `/api/shifts`, `/api/reports`).
@@ -59,16 +59,17 @@ The repository separates the standalone **Express backend** (`backend/`) from th
 ```text
 backend/
 ├── src/
-│   ├── shared/                      # decimal.js, errors.js, ports.js (UnitOfWork, Clock, IdGenerator, BackupSyncPort)
+│   ├── shared/                      # decimal.js, errors.js, ports.js, validation, and security helpers
 │   ├── db/                          # sqlite.js (connection, schema DDL, UnitOfWork)
 │   ├── inventory/                   # domain.js, use-cases.js, sqlite-repo.js, routes.js
 │   ├── sales/                       # domain.js, use-cases.js, sqlite-repo.js, routes.js
-│   ├── credit/                      # Planned: domain.js, use-cases.js, sqlite-repo.js, routes.js
-│   ├── shifts/                      # Planned: domain.js, use-cases.js, sqlite-repo.js, routes.js
+│   ├── credit/                      # domain.js, use-cases.js, sqlite-repo.js, routes.js
+│   ├── auth/                        # domain.js, use-cases.js, sqlite-repo.js, middleware.js, routes.js
+│   ├── shifts/                      # domain.js, use-cases.js, sqlite-repo.js, routes.js
 │   ├── reports/                     # domain.js, use-cases.js, sqlite-repo.js, routes.js
 │   ├── app.js                       # Express app composition (middleware, module routers, error handler)
 │   └── server.js                    # HTTP server entry point
-└── tests/                           # Flat test files (inventory.test.js, sales.test.js, reports.test.js, shared.test.js, sqlite.test.js, routes.test.js)
+└── tests/                           # Flat Vitest files for auth, credit, inventory, reports, sales, shifts, SQLite, and routes
 
 frontend/
 └── src/
@@ -78,11 +79,11 @@ frontend/
     ├── cart.js                      # Local cart subtotal, discount, and total rounding
     ├── navigation.js                # Shared navigation items and page titles
     ├── components/                  # Shared UI components (Badge.jsx, BottomNav.jsx, Button.jsx, DataTable.jsx, EmptyState.jsx, ErrorBanner.jsx, FormActions.jsx, Input.jsx, InventoryAdjustModal.jsx, InventoryStockInModal.jsx, Modal.jsx, PageHeader.jsx, PageLayout.jsx, PaymentMethodToggle.jsx, PosCheckoutModal.jsx, ProductThumb.jsx, ReceiptView.jsx, Select.jsx, Sidebar.jsx, StatCard.jsx, TableEmptyRow.jsx)
-    ├── pages/                       # Flat screens (DashboardPage.jsx, PosPage.jsx, InventoryPage.jsx, TransactionsPage.jsx, ReportsPage.jsx)
+    ├── pages/                       # Flat screens (setup, login, dashboard, POS, inventory, customers, transactions, reports, and 404)
     ├── App.jsx
     └── main.jsx                     # React + Vite entry point
 
-frontend/tests/                      # Flat Vitest tests (format.test.js, cart.test.js, products.test.js, transactions.test.js, responsive_navigation.test.js, pos_render.test.js, pos_checkout.test.js, inventory_render.test.js, pages_render.test.js, typography.test.js)
+frontend/tests/                      # Flat Vitest tests for API, auth, cart, customers, inventory, POS, products, reports, shifts, typography, and navigation
 ```
 
 ### Dependency Flow
@@ -134,7 +135,7 @@ flowchart TB
 ### 4.4 User Roles & Shift Management (`auth/` & `shifts/`)
 - **Status**: Implemented. Authentication, scrypt PIN hashing, sessions, setup, login/logout, rate limiting, RBAC, shifts, cash movements, and frontend shift controls are wired.
 - **Roles & First-Time Setup**:
-  - `OWNER`: Full access (products, cost prices, stock adjustments, profit reports, user management, backups).
+  - `OWNER`: Full access (products, cost prices, stock adjustments, profit reports, and user management).
   - `CASHIER`: POS checkout, customer utang payments (within limits), own shift open/close.
   - On first launch with an empty `users` table, prompt to create the initial `OWNER` account and PIN.
 - **Shift Cash Drawer**:
@@ -175,7 +176,7 @@ Phases 1–4 are substantially complete in the current repository. They remain b
 - **Locked 3-Column POS Cockpit Layout**:
    - **Left dark sidebar**: Brand header, role-filtered navigation, lime active treatment, and cashier/owner controls.
   - **Center workspace (white/soft-gray surface)**: Top search/barcode bar (`Ctrl+K`) + low-stock bell badge, horizontal category filter pills, 4-column product image cards (image/placeholder, name, price `₱`, green/amber stock count), and bottom quick actions (`Scan Barcode`, `Apply Discount`, `Clear Cart`).
-  - **Right `Current Sale` cart panel**: Line items with thumbnail, option/tingi label, `- qty +` stepper, line subtotal, remove button, `Subtotal` / `Discount` / bold `Total`, full-width blue `Checkout` button (`bg-blue-600`), and payment selector (`Cash`, `Credit`, `Split`).
+   - **Right `Current Sale` cart panel**: Line items with thumbnail, option/tingi label, `- qty +` stepper, line subtotal, remove button, `Subtotal` / `Discount` / bold `Total`, full-width lime `Checkout` button, and payment selector (`Cash`, `Credit`, `Split`).
 - Build Orders & Returns screen (recent receipts, item details, partial/full return modal, browser `@media print` 58mm/80mm thermal receipt).
 - Build Product & Inventory management screen (create/edit product with optional image upload, configure selling options, bulk stock-in by pack/box, stock adjustments).
 
@@ -186,7 +187,7 @@ Phases 1–4 are substantially complete in the current repository. They remain b
 
 ### Remaining Phase 5 (Optional / Deferred): Direct Hardware Bridge & Cloud Sync
 - Add optional direct ESC/POS thermal printer adapter (WebUSB / serial / local print agent).
-- Implement `BackupSyncPort` for automated cloud snapshot upload or incremental sync.
+- Add automated cloud snapshot upload or incremental sync without coupling the domain to a provider.
 
 ---
 
