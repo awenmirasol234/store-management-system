@@ -4,7 +4,7 @@ import { api, clearAuthToken, getAuthToken } from "./api.js";
 import { Sidebar } from "./components/Sidebar.jsx";
 import { BottomNav } from "./components/BottomNav.jsx";
 import { UserManagementModal } from "./components/UserManagementModal.jsx";
-import { getPageTitle } from "./navigation.js";
+import { getPageFromPath, getPageTitle, getPathFromPage } from "./navigation.js";
 import { DashboardPage } from "./pages/DashboardPage.jsx";
 import { PosPage } from "./pages/PosPage.jsx";
 import { TransactionsPage } from "./pages/TransactionsPage.jsx";
@@ -13,13 +13,58 @@ import { CustomersPage } from "./pages/CustomersPage.jsx";
 import { ReportsPage } from "./pages/ReportsPage.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
 import { SetupPage } from "./pages/SetupPage.jsx";
+import { NotFoundPage } from "./pages/NotFoundPage.jsx";
 
-export function App() {
+export function App(props) {
+  let initialActivePage = "dashboard";
+  if (props && props.initialPage) {
+    initialActivePage = props.initialPage;
+  } else if (typeof window !== "undefined" && window.location && window.location.pathname) {
+    const parsedPage = getPageFromPath(window.location.pathname);
+    if (parsedPage) {
+      initialActivePage = parsedPage;
+    }
+  }
+
   const [currentUser, setCurrentUser] = useState(null);
   const [isSetupRequired, setIsSetupRequired] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
-  const [activePage, setActivePage] = useState("dashboard");
+  const [activePage, setActivePage] = useState(initialActivePage);
   const [userModalOpen, setUserModalOpen] = useState(false);
+
+  function handleNavigate(pageKey) {
+    setActivePage(pageKey);
+    if (
+      typeof window !== "undefined" &&
+      window.history &&
+      typeof window.history.pushState === "function"
+    ) {
+      const targetPath = getPathFromPage(pageKey);
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState(null, "", targetPath);
+      }
+    }
+  }
+
+  useEffect(function initRouting() {
+    function handlePopState() {
+      if (typeof window !== "undefined" && window.location) {
+        const page = getPageFromPath(window.location.pathname);
+        if (page) {
+          setActivePage(page);
+        } else {
+          setActivePage("dashboard");
+        }
+      }
+    }
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("popstate", handlePopState);
+      return function cleanup() {
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
+  }, []);
 
   useEffect(function initAuth() {
     let isCancelled = false;
@@ -44,9 +89,7 @@ export function App() {
           }
           if (user) {
             setCurrentUser(user);
-            if (user.role === "OWNER") {
-              setActivePage("dashboard");
-            } else {
+            if (initialActivePage === "dashboard" && user.role === "CASHIER") {
               setActivePage("pos");
             }
           }
@@ -69,10 +112,10 @@ export function App() {
   function handleAuthSuccess(user, token) {
     setCurrentUser(user);
     setIsSetupRequired(false);
-    if (user.role === "OWNER") {
-      setActivePage("dashboard");
-    } else {
-      setActivePage("pos");
+    if (activePage === "dashboard" && user.role === "CASHIER") {
+      handleNavigate("pos");
+    } else if (activePage !== "not-found") {
+      handleNavigate(activePage);
     }
   }
 
@@ -82,7 +125,7 @@ export function App() {
     });
     clearAuthToken();
     setCurrentUser(null);
-    setActivePage("pos");
+    handleNavigate("pos");
   }
 
   // Initial SSR or loading check
@@ -107,8 +150,10 @@ export function App() {
     return <LoginPage onLoginSuccess={handleAuthSuccess} />;
   }
 
-  let pageElement = <DashboardPage onNavigate={setActivePage} currentUser={currentUser} />;
-  if (activePage === "pos") {
+  let pageElement = null;
+  if (activePage === "dashboard") {
+    pageElement = <DashboardPage onNavigate={handleNavigate} currentUser={currentUser} />;
+  } else if (activePage === "pos") {
     pageElement = <PosPage currentUser={currentUser} />;
   } else if (activePage === "inventory") {
     pageElement = <InventoryPage currentUser={currentUser} />;
@@ -120,8 +165,22 @@ export function App() {
     if (currentUser.role === "OWNER") {
       pageElement = <ReportsPage currentUser={currentUser} />;
     } else {
-      pageElement = <PosPage currentUser={currentUser} />;
+      pageElement = (
+        <NotFoundPage
+          onNavigate={handleNavigate}
+          currentUser={currentUser}
+          requestedPath="reports"
+        />
+      );
     }
+  } else {
+    pageElement = (
+      <NotFoundPage
+        onNavigate={handleNavigate}
+        currentUser={currentUser}
+        requestedPath={activePage}
+      />
+    );
   }
 
   let mobileInitials = "OW";
@@ -171,7 +230,7 @@ export function App() {
 
       <Sidebar
         activePage={activePage}
-        onNavigate={setActivePage}
+        onNavigate={handleNavigate}
         currentUser={currentUser}
         onLogout={handleLogout}
         onOpenUserModal={function () {
@@ -183,7 +242,7 @@ export function App() {
 
       <BottomNav
         activePage={activePage}
-        onNavigate={setActivePage}
+        onNavigate={handleNavigate}
         currentUser={currentUser}
       />
 

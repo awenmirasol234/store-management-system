@@ -4,7 +4,7 @@ import { renderToString } from "react-dom/server";
 import { BottomNav } from "../src/components/BottomNav.jsx";
 import { PosCheckoutModal } from "../src/components/PosCheckoutModal.jsx";
 import { App } from "../src/App.jsx";
-import { getPageTitle } from "../src/navigation.js";
+import { getPageFromPath, getPageTitle, getPathFromPage, isValidPage } from "../src/navigation.js";
 
 describe("Responsive navigation & components", function () {
   it("renders BottomNav with all 5 navigation tabs", function () {
@@ -59,7 +59,37 @@ describe("Responsive navigation & components", function () {
     expect(getPageTitle("pos")).toBe("Point of Sale");
     expect(getPageTitle("customers")).toBe("Customer Credit & Utang");
     expect(getPageTitle("transactions")).toBe("Transactions");
+    expect(getPageTitle("not-found")).toBe("Page Not Found");
     expect(getPageTitle("unknown")).toBe("Dashboard");
+  });
+
+  it("resolves paths with getPageFromPath", function () {
+    expect(getPageFromPath("/")).toBe(null);
+    expect(getPageFromPath("")).toBe(null);
+    expect(getPageFromPath("/pos")).toBe("pos");
+    expect(getPageFromPath("/inventory")).toBe("inventory");
+    expect(getPageFromPath("/customers")).toBe("customers");
+    expect(getPageFromPath("/transactions")).toBe("transactions");
+    expect(getPageFromPath("/reports")).toBe("reports");
+    expect(getPageFromPath("/404")).toBe("not-found");
+    expect(getPageFromPath("/not-found")).toBe("not-found");
+    expect(getPageFromPath("/non-existent-route")).toBe("not-found");
+    expect(getPageFromPath("/settings/nested/deep")).toBe("not-found");
+  });
+
+  it("formats URLs with getPathFromPage", function () {
+    expect(getPathFromPage("dashboard")).toBe("/");
+    expect(getPathFromPage("pos")).toBe("/pos");
+    expect(getPathFromPage("inventory")).toBe("/inventory");
+    expect(getPathFromPage("not-found")).toBe("/404");
+  });
+
+  it("validates pages with isValidPage", function () {
+    expect(isValidPage("pos")).toBe(true);
+    expect(isValidPage("inventory")).toBe(true);
+    expect(isValidPage("reports")).toBe(true);
+    expect(isValidPage("invalid")).toBe(false);
+    expect(isValidPage("")).toBe(false);
   });
 
   it("renders App without crashing on initial mount", function () {
