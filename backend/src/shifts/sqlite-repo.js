@@ -112,6 +112,33 @@ export function createSqliteShiftRepository(database) {
     WHERE shift_id = ?
   `);
 
+  const listByUserAndStatusStmt = database.prepare(`
+    SELECT * FROM cashier_shifts
+    WHERE user_id = ? AND status = ?
+    ORDER BY opened_at DESC
+    LIMIT ? OFFSET ?
+  `);
+
+  const listByUserStmt = database.prepare(`
+    SELECT * FROM cashier_shifts
+    WHERE user_id = ?
+    ORDER BY opened_at DESC
+    LIMIT ? OFFSET ?
+  `);
+
+  const listByStatusStmt = database.prepare(`
+    SELECT * FROM cashier_shifts
+    WHERE status = ?
+    ORDER BY opened_at DESC
+    LIMIT ? OFFSET ?
+  `);
+
+  const listAllShiftsStmt = database.prepare(`
+    SELECT * FROM cashier_shifts
+    ORDER BY opened_at DESC
+    LIMIT ? OFFSET ?
+  `);
+
   return {
     async save(shift) {
       let expectedInt = null;
@@ -200,36 +227,13 @@ export function createSqliteShiftRepository(database) {
 
       let rows = [];
       if (safeFilters.user_id && safeFilters.status) {
-        const stmt = database.prepare(`
-          SELECT * FROM cashier_shifts
-          WHERE user_id = ? AND status = ?
-          ORDER BY opened_at DESC
-          LIMIT ? OFFSET ?
-        `);
-        rows = stmt.all(safeFilters.user_id, safeFilters.status, limit, offset);
+        rows = listByUserAndStatusStmt.all(safeFilters.user_id, safeFilters.status, limit, offset);
       } else if (safeFilters.user_id) {
-        const stmt = database.prepare(`
-          SELECT * FROM cashier_shifts
-          WHERE user_id = ?
-          ORDER BY opened_at DESC
-          LIMIT ? OFFSET ?
-        `);
-        rows = stmt.all(safeFilters.user_id, limit, offset);
+        rows = listByUserStmt.all(safeFilters.user_id, limit, offset);
       } else if (safeFilters.status) {
-        const stmt = database.prepare(`
-          SELECT * FROM cashier_shifts
-          WHERE status = ?
-          ORDER BY opened_at DESC
-          LIMIT ? OFFSET ?
-        `);
-        rows = stmt.all(safeFilters.status, limit, offset);
+        rows = listByStatusStmt.all(safeFilters.status, limit, offset);
       } else {
-        const stmt = database.prepare(`
-          SELECT * FROM cashier_shifts
-          ORDER BY opened_at DESC
-          LIMIT ? OFFSET ?
-        `);
-        rows = stmt.all(limit, offset);
+        rows = listAllShiftsStmt.all(limit, offset);
       }
 
       const listResult = [];

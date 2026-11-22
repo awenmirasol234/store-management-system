@@ -270,40 +270,22 @@ export function createApp(options) {
   );
 
   if (enforceAuth) {
+    const requireAuthOrOwnerForWrite = function checkAuth(request, response, next) {
+      if (request.method === "GET") {
+        authMiddleware.requireAuth(request, response, next);
+      } else {
+        authMiddleware.requireRole([ROLES.OWNER])(request, response, next);
+      }
+    };
+
     app.use("/api/reports", authMiddleware.requireRole([ROLES.OWNER]));
     app.use("/api/sales", authMiddleware.requireAuth);
     app.use("/api/customers", authMiddleware.requireAuth);
-
-    app.use("/api/products", function checkProductsAuth(request, response, next) {
-      if (request.method === "GET") {
-        authMiddleware.requireAuth(request, response, next);
-      } else {
-        authMiddleware.requireRole([ROLES.OWNER])(request, response, next);
-      }
-    });
-
+    app.use("/api/products", requireAuthOrOwnerForWrite);
     app.use("/api/inventory", authMiddleware.requireRole([ROLES.OWNER]));
-
-    app.use("/api/categories", function checkCategoriesAuth(request, response, next) {
-      if (request.method === "GET") {
-        authMiddleware.requireAuth(request, response, next);
-      } else {
-        authMiddleware.requireRole([ROLES.OWNER])(request, response, next);
-      }
-    });
-
-    app.use("/api/suppliers", function checkSuppliersAuth(request, response, next) {
-      if (request.method === "GET") {
-        authMiddleware.requireAuth(request, response, next);
-      } else {
-        authMiddleware.requireRole([ROLES.OWNER])(request, response, next);
-      }
-    });
-
-    app.use("/api/units", function checkUnitsAuth(request, response, next) {
-      authMiddleware.requireAuth(request, response, next);
-    });
-
+    app.use("/api/categories", requireAuthOrOwnerForWrite);
+    app.use("/api/suppliers", requireAuthOrOwnerForWrite);
+    app.use("/api/units", authMiddleware.requireAuth);
     app.use("/api/shifts", authMiddleware.requireAuth);
   }
 

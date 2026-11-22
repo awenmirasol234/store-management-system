@@ -1,5 +1,6 @@
 import { ValidationError } from "../shared/errors.js";
 import { fromMoneyInt, toMoneyInt } from "../shared/decimal.js";
+import { normalizeOptionalText, requireNonEmptyText } from "../shared/validation.js";
 
 export const SHIFT_STATUSES = {
   OPEN: "OPEN",
@@ -10,27 +11,6 @@ export const CASH_MOVEMENT_TYPES = {
   CASH_IN: "CASH_IN",
   CASH_OUT: "CASH_OUT"
 };
-
-function requireNonEmptyText(value, fieldName) {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new ValidationError(fieldName + " must be a non-empty string");
-  }
-  return value.trim();
-}
-
-function normalizeOptionalText(value, fieldName) {
-  if (value === null || value === undefined || value === "") {
-    return null;
-  }
-  if (typeof value !== "string") {
-    throw new ValidationError(fieldName + " must be a string");
-  }
-  const trimmed = value.trim();
-  if (trimmed.length === 0) {
-    return null;
-  }
-  return trimmed;
-}
 
 export function validateShiftStatus(status) {
   if (status !== SHIFT_STATUSES.OPEN && status !== SHIFT_STATUSES.CLOSED) {
