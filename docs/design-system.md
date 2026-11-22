@@ -257,7 +257,12 @@ Every component must be written in plain beginner-readable JavaScript following 
 ### 4.6 Right Transaction Panel & Cart (`frontend/src/pages/PosPage.jsx`)
 
 **Tactical Rules:**
-- Header: `flex items-center justify-between border-b border-[#E9E9E9] px-5 py-4`. Title: `text-base font-semibold text-[#151515]`.
+- Collapsible States & Responsive Breakpoints:
+  - Container (Expanded, default on desktop `>= 1024px`): `hidden md:flex w-80 xl:w-96 shrink-0 flex-col border-l border-[#E9E9E9] bg-white transition-all duration-200 ease-in-out`.
+  - Header Collapse Button: `<ChevronRight className="h-4 w-4" />` with `title="Collapse Cart Panel"`.
+  - Container (Collapsed, default on tablet `< 1024px`): `hidden md:flex w-16 sm:w-20 shrink-0 flex-col justify-between border-l border-[#E9E9E9] bg-white py-4 transition-all duration-200 ease-in-out select-none`.
+  - Collapsed Rail Controls: Expand button (`<ChevronLeft className="h-4 w-4" />`), shopping bag icon with item count badge, compact count/total summary, and quick lime-green "Pay" CTA button (`bg-[#B9F36B]`).
+- Header: `flex items-center justify-between border-b border-[#E9E9E9] px-4 py-3.5 sm:px-5 sm:py-4`. Title: `text-base font-semibold text-[#151515]`.
 - Cart Items List: `flex-1 overflow-y-auto divide-y divide-[#E9E9E9] px-5`.
 - Cart Item Row:
   - Product thumbnail: Small 44×44px square in `#EEEEED` container (`ProductThumb size="sm"`).

@@ -73,4 +73,10 @@ describe("PosPage SSR test", function () {
     expect(html).not.toContain("bg-[#151515]");
     expect(html).not.toContain("text-[#B9F36B]");
   });
+
+  it("renders cart panel with collapse toggle in header", function () {
+    const html = renderToString(React.createElement(PosPage));
+    expect(html).toContain("Collapse Cart Panel");
+    expect(html).toContain("Current Sale");
+  });
 });

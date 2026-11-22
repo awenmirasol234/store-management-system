@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Bell,
+  ChevronLeft,
+  ChevronRight,
   Minus,
   Plus,
   ScanBarcode,
@@ -71,6 +73,12 @@ export function PosPage(props) {
 
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
+  const [cartCollapsed, setCartCollapsed] = useState(function initCartState() {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      return true;
+    }
+    return false;
+  });
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const [amountPaidInput, setAmountPaidInput] = useState("");
   const [cashPartInput, setCashPartInput] = useState("");
@@ -125,6 +133,18 @@ export function PosPage(props) {
     window.addEventListener("keydown", onKeyDown);
     return function cleanup() {
       window.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
+
+  useEffect(function bindResizeListener() {
+    function handleResize() {
+      if (typeof window !== "undefined" && window.innerWidth < 1024) {
+        setCartCollapsed(true);
+      }
+    }
+    window.addEventListener("resize", handleResize);
+    return function cleanup() {
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -955,6 +975,126 @@ export function PosPage(props) {
     );
   }
 
+  let rightSideCartPanel = null;
+  if (cartCollapsed) {
+    let itemUnitLabel = "items";
+    if (cartItems.length === 1) {
+      itemUnitLabel = "item";
+    }
+
+    let badgeCounter = null;
+    if (cartItems.length > 0) {
+      badgeCounter = (
+        <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#151515] px-1 font-mono text-3xs font-bold text-white shadow-xs">
+          {cartItems.length}
+        </span>
+      );
+    }
+
+    rightSideCartPanel = (
+      <aside
+        className="hidden md:flex w-16 sm:w-20 shrink-0 flex-col justify-between border-l border-[#E9E9E9] bg-white py-4 transition-all duration-200 ease-in-out select-none"
+        aria-label="Collapsed Cart Summary"
+      >
+        {/* Top: Expand Toggle & Icon Badge */}
+        <div className="flex flex-col items-center gap-3 px-2">
+          <button
+            type="button"
+            onClick={function expandCart() {
+              setCartCollapsed(false);
+            }}
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#151515] hover:bg-[#EEEEED] cursor-pointer shadow-xs transition-colors"
+            title="Expand Cart Panel"
+            aria-label="Expand Cart Panel"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <div
+            onClick={function expandOnBadgeClick() {
+              setCartCollapsed(false);
+            }}
+            className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-[#EEEEED] text-[#151515] hover:bg-[#E2E2E1] transition-colors"
+            title={String(cartItems.length) + " item(s) in cart"}
+          >
+            <ShoppingBag className="h-5 w-5" />
+            {badgeCounter}
+          </div>
+        </div>
+
+        {/* Middle: Compact Summary (Item Count & Total) */}
+        <div
+          onClick={function expandOnSummaryClick() {
+            setCartCollapsed(false);
+          }}
+          className="flex flex-col items-center gap-1 px-1 py-3 text-center cursor-pointer hover:bg-[#F5F5F4] rounded-xl mx-1 transition-colors"
+          title="Click to expand cart details"
+        >
+          <span className="text-3xs font-semibold uppercase tracking-wider text-[#777777]">
+            {cartItems.length} {itemUnitLabel}
+          </span>
+          <span className="font-mono text-xs font-bold text-[#151515] break-all px-0.5">
+            {formatPeso(totals.total)}
+          </span>
+        </div>
+
+        {/* Bottom: Quick Pay Trigger */}
+        <div className="flex flex-col items-center gap-2 px-2">
+          <button
+            type="button"
+            onClick={openCheckoutModal}
+            disabled={cartItems.length === 0}
+            className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] text-[#151515] shadow-xs disabled:opacity-30 disabled:pointer-events-none cursor-pointer active:scale-95 transition-all"
+            title="Proceed to Checkout"
+            aria-label="Proceed to Checkout"
+          >
+            <span className="font-mono text-xs font-bold uppercase tracking-tight">Pay</span>
+          </button>
+        </div>
+      </aside>
+    );
+  } else {
+    rightSideCartPanel = (
+      <aside className="hidden md:flex w-80 xl:w-96 shrink-0 flex-col border-l border-[#E9E9E9] bg-white transition-all duration-200 ease-in-out">
+        <div className="flex items-center justify-between border-b border-[#E9E9E9] px-4 py-3.5 sm:px-5 sm:py-4">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={function collapseCart() {
+                setCartCollapsed(true);
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] cursor-pointer transition-colors"
+              title="Collapse Cart Panel"
+              aria-label="Collapse Cart Panel"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+            <h2 className="text-base font-semibold text-[#151515]">
+              Current Sale (<span className="font-mono">{cartItems.length}</span>)
+            </h2>
+          </div>
+          <button
+            type="button"
+            disabled={cartItems.length === 0}
+            onClick={handleRequestClearCart}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-[#777777] hover:bg-rose-50 hover:text-rose-600 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors"
+            title="Clear all items in cart"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            <span>Clear</span>
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto divide-y divide-[#E9E9E9] px-5">
+          {cartListContent}
+        </div>
+
+        <div className="border-t border-[#E9E9E9] p-5">
+          {cartFooterContent}
+        </div>
+      </aside>
+    );
+  }
+
   return (
     <div className="flex h-full flex-1 overflow-hidden bg-[#F5F5F4]">
       {/* Center Catalog Workspace */}
@@ -1084,32 +1224,8 @@ export function PosPage(props) {
         </div>
       </div>
 
-      {/* Right Current Sale Cart Panel (Desktop) */}
-      <aside className="hidden lg:flex w-80 xl:w-96 shrink-0 flex-col border-l border-[#E9E9E9] bg-white">
-        <div className="flex items-center justify-between border-b border-[#E9E9E9] px-5 py-4">
-          <h2 className="text-base font-semibold text-[#151515]">
-            Current Sale (<span className="font-mono">{cartItems.length}</span>)
-          </h2>
-          <button
-            type="button"
-            disabled={cartItems.length === 0}
-            onClick={handleRequestClearCart}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-[#777777] hover:bg-rose-50 hover:text-rose-600 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors"
-            title="Clear all items in cart"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            <span>Clear</span>
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto divide-y divide-[#E9E9E9] px-5">
-          {cartListContent}
-        </div>
-
-        <div className="border-t border-[#E9E9E9] p-5">
-          {cartFooterContent}
-        </div>
-      </aside>
+      {/* Right Current Sale Cart Panel (Desktop & Tablet Collapsible) */}
+      {rightSideCartPanel}
 
       {mobileCartBar}
       {mobileCartModal}
