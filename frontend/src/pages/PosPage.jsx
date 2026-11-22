@@ -500,7 +500,7 @@ export function PosPage(props) {
     );
   } else {
     productGridContent = (
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-4 sm:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
         {filteredProducts.map(function renderCard(product) {
           let categoryName = product.base_unit;
           if (product.category_name) {
@@ -518,8 +518,8 @@ export function PosPage(props) {
                   }}
                   className="cursor-pointer"
                 >
-                  <div className="relative aspect-square w-full overflow-hidden bg-[#EEEEED]">
-                    <div className="absolute left-2.5 top-2.5 z-10 rounded-md bg-[#171717]/85 backdrop-blur-xs px-2 py-0.5 font-mono text-2xs font-medium text-white shadow-xs">
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#EEEEED]">
+                    <div className="absolute left-2 top-2 z-10 rounded-md bg-[#171717]/85 backdrop-blur-xs px-1.5 py-0.5 font-mono text-3xs sm:text-2xs font-medium text-white shadow-xs">
                       Stock: {formatQuantity(product.current_stock)}
                     </div>
                     <ProductThumb
@@ -528,7 +528,7 @@ export function PosPage(props) {
                       fullBleed={true}
                     />
                   </div>
-                  <div className="p-3 sm:p-3.5 pb-0 sm:pb-0">
+                  <div className="p-2.5 sm:p-3 pb-0 sm:pb-0">
                     <div className="truncate text-xs font-medium text-[#151515]">
                       {product.product_name}
                     </div>
@@ -541,15 +541,15 @@ export function PosPage(props) {
                   </div>
                 </div>
               </div>
-              <div className="p-3 sm:p-3.5 pt-3 sm:pt-3">
+              <div className="p-2.5 sm:p-3 pt-2.5 sm:pt-2.5">
                 <button
                   type="button"
                   onClick={function onAddClick() {
                     handleProductCardClick(product);
                   }}
-                  className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#E9E9E9] bg-white py-2 text-xs font-semibold text-[#151515] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
+                  className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1.5 text-xs font-semibold text-[#151515] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
                 >
-                  <Plus className="h-3.5 w-3.5" />
+                  <Plus className="h-3 w-3" />
                   <span>Add to Cart</span>
                 </button>
               </div>
