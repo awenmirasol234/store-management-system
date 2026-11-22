@@ -12,7 +12,12 @@ import {
   XCircle
 } from "lucide-react";
 import { api } from "../api.js";
-import { computeLocalCartTotals } from "../cart.js";
+import {
+  calculateProductCartStockUsage,
+  canAddStockToCart,
+  computeItemBaseQuantity,
+  computeLocalCartTotals
+} from "../cart.js";
 import { formatPeso, formatQuantity } from "../format.js";
 import { getStockLevel, filterProducts, STOCK_LEVELS } from "../products.js";
 import { Badge } from "../components/Badge.jsx";
@@ -125,9 +130,30 @@ export function PosPage(props) {
 
   function addItemToCart(product, option, customAmount) {
     setErrorBanner("");
+    if (!product) {
+      return false;
+    }
     if (product.current_stock <= 0) {
       setErrorBanner(product.product_name + " is out of stock");
-      return;
+      return false;
+    }
+
+    const baseQuantityPerUnit = computeItemBaseQuantity({
+      product: product,
+      option: option,
+      customAmount: customAmount,
+      quantity: 1
+    });
+
+    const stockCheck = canAddStockToCart({
+      cartItems: cartItems,
+      product: product,
+      additionalBaseQuantity: baseQuantityPerUnit
+    });
+
+    if (!stockCheck.allowed) {
+      setErrorBanner(stockCheck.message);
+      return false;
     }
 
     let optionIdForKey = null;
@@ -173,6 +199,9 @@ export function PosPage(props) {
           product_id: product.product_id,
           product_name: product.product_name,
           image_url: product.image_url,
+          base_unit: product.base_unit,
+          current_stock: product.current_stock,
+          base_quantity_per_unit: baseQuantityPerUnit,
           option_id: optionId,
           option_label: label,
           custom_amount: customValue,
@@ -182,6 +211,7 @@ export function PosPage(props) {
       }
       return next;
     });
+    return true;
   }
 
   async function handleProductCardClick(product) {
@@ -226,14 +256,65 @@ export function PosPage(props) {
     event.preventDefault();
     try {
       const match = await api.lookupBarcode(trimmed);
-      addItemToCart(match.product, match.option, null);
-      setSearchQuery("");
+      const added = addItemToCart(match.product, match.option, null);
+      if (added) {
+        setSearchQuery("");
+      }
     } catch (error) {
       setErrorBanner(error.message);
     }
   }
 
   function changeCartItemQty(itemKey, delta) {
+    setErrorBanner("");
+    if (delta > 0) {
+      let targetItem = null;
+      for (let index = 0; index < cartItems.length; index++) {
+        if (cartItems[index].key === itemKey) {
+          targetItem = cartItems[index];
+          break;
+        }
+      }
+
+      if (!targetItem) {
+        return;
+      }
+
+      let targetProduct = null;
+      for (let index = 0; index < products.length; index++) {
+        if (products[index].product_id === targetItem.product_id) {
+          targetProduct = products[index];
+          break;
+        }
+      }
+
+      if (!targetProduct) {
+        targetProduct = {
+          product_id: targetItem.product_id,
+          product_name: targetItem.product_name,
+          base_unit: targetItem.base_unit,
+          current_stock: targetItem.current_stock
+        };
+      }
+
+      let perUnit = Number(targetItem.base_quantity_per_unit);
+      if (!Number.isFinite(perUnit) || perUnit <= 0) {
+        perUnit = 1;
+      }
+      const additionalBaseQuantity = perUnit * delta;
+
+      const stockCheck = canAddStockToCart({
+        cartItems: cartItems,
+        product: targetProduct,
+        additionalBaseQuantity: additionalBaseQuantity
+      });
+
+      if (!stockCheck.allowed) {
+        setErrorBanner(stockCheck.message);
+        return;
+      }
+    }
+
     setCartItems(function update(previous) {
       const next = [];
       for (let index = 0; index < previous.length; index++) {
@@ -252,6 +333,7 @@ export function PosPage(props) {
   }
 
   function removeCartItem(itemKey) {
+    setErrorBanner("");
     setCartItems(function update(previous) {
       const next = [];
       for (let index = 0; index < previous.length; index++) {
@@ -630,6 +712,12 @@ export function PosPage(props) {
   let pickerBody = null;
   if (pickerState) {
     pickerTitle = pickerState.product.product_name;
+
+    let pickerErrorBanner = null;
+    if (errorBanner) {
+      pickerErrorBanner = <ErrorBanner message={errorBanner} className="mb-4" />;
+    }
+
     let tingiForm = null;
     if (pickerState.product.allow_custom_amount) {
       tingiForm = (
@@ -640,8 +728,10 @@ export function PosPage(props) {
             if (!Number.isFinite(parsed) || parsed <= 0) {
               return;
             }
-            addItemToCart(pickerState.product, null, parsed);
-            setPickerState(null);
+            const added = addItemToCart(pickerState.product, null, parsed);
+            if (added) {
+              setPickerState(null);
+            }
           }}
           className="border-t border-[#E9E9E9] pt-4 space-y-4"
         >
@@ -665,12 +755,15 @@ export function PosPage(props) {
 
     pickerBody = (
       <div className="space-y-5">
+        {pickerErrorBanner}
         <div className="space-y-2.5">
           <button
             type="button"
             onClick={function pickBase() {
-              addItemToCart(pickerState.product, null, null);
-              setPickerState(null);
+              const added = addItemToCart(pickerState.product, null, null);
+              if (added) {
+                setPickerState(null);
+              }
             }}
             className="flex w-full items-center justify-between rounded-xl border border-[#E9E9E9] px-4 py-3 text-left hover:border-[#151515] hover:bg-[#EEEEED] transition-colors cursor-pointer"
           >
@@ -688,8 +781,10 @@ export function PosPage(props) {
                 key={option.option_id}
                 type="button"
                 onClick={function pickOption() {
-                  addItemToCart(pickerState.product, option, null);
-                  setPickerState(null);
+                  const added = addItemToCart(pickerState.product, option, null);
+                  if (added) {
+                    setPickerState(null);
+                  }
                 }}
                 className="flex w-full items-center justify-between rounded-xl border border-[#E9E9E9] px-4 py-3 text-left hover:border-[#151515] hover:bg-[#EEEEED] transition-colors cursor-pointer"
               >
@@ -801,6 +896,11 @@ export function PosPage(props) {
     );
   }
 
+  let cartErrorBanner = null;
+  if (errorBanner) {
+    cartErrorBanner = <ErrorBanner message={errorBanner} className="mb-2" />;
+  }
+
   let mobileCartModal = (
     <Modal
       open={mobileCartOpen}
@@ -811,6 +911,7 @@ export function PosPage(props) {
       size="sm"
     >
       <div className="flex flex-col space-y-4">
+        {cartErrorBanner}
         <div className="flex items-center justify-between pb-2 border-b border-[#E9E9E9]">
           <span className="text-xs text-[#777777]">
             <span className="font-mono">{cartItems.length}</span> item(s) in cart
