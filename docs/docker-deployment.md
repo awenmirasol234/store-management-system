@@ -43,3 +43,14 @@ $env:PORT="3001"; $env:DATABASE_PATH="./data/store.db"; $env:UPLOADS_DIR="./uplo
 ```bash
 PORT=3001 DATABASE_PATH=./data/store.db UPLOADS_DIR=./uploads npm start
 ```
+
+## Published images
+
+GitHub Actions runs tests for both apps, then builds both images. It publishes them to GitHub Container Registry on pushes to `main` and on `v*` tags:
+
+- `ghcr.io/awenmirasol234/store-management-system-backend`
+- `ghcr.io/awenmirasol234/store-management-system-frontend`
+
+Every published image is tagged with `sha-<short-sha>`. Pushes to `main` also tag `latest`. Version tags such as `v1.2.3` also tag `1.2.3` and `1.2`. Pull requests run tests and build both images without publishing.
+
+Authentication uses the workflow `GITHUB_TOKEN`, so no extra repository secrets are required. The first published package is private until its visibility is changed to public in the GitHub package settings.
