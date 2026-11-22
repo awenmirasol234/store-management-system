@@ -87,6 +87,19 @@ import {
   createUsersRouter
 } from "./auth/routes.js";
 import { ROLES } from "./auth/domain.js";
+import {
+  createSqliteCashMovementRepository,
+  createSqliteShiftRepository
+} from "./shifts/sqlite-repo.js";
+import {
+  createCloseShiftUseCase,
+  createGetActiveShiftUseCase,
+  createGetShiftUseCase,
+  createListShiftsUseCase,
+  createOpenShiftUseCase,
+  createRecordCashMovementUseCase
+} from "./shifts/use-cases.js";
+import { createShiftsRouter } from "./shifts/routes.js";
 
 function createErrorHandler() {
   return function handleError(error, request, response, next) {
@@ -143,6 +156,8 @@ export function createApp(options) {
   const reportsRepository = createSqliteReportsRepository(database);
   const userRepository = createSqliteUserRepository(database);
   const sessionRepository = createSqliteSessionRepository(database);
+  const shiftRepository = createSqliteShiftRepository(database);
+  const cashMovementRepository = createSqliteCashMovementRepository(database);
   const rateLimiter = createInMemoryRateLimiter();
 
   const sharedDeps = {
@@ -161,6 +176,8 @@ export function createApp(options) {
     reportsRepository: reportsRepository,
     userRepository: userRepository,
     sessionRepository: sessionRepository,
+    shiftRepository: shiftRepository,
+    cashMovementRepository: cashMovementRepository,
     rateLimiter: rateLimiter
   };
 
@@ -205,6 +222,15 @@ export function createApp(options) {
     listCustomers: createListCustomersUseCase(sharedDeps),
     recordPayment: createRecordPaymentUseCase(sharedDeps),
     listCreditTransactions: createListCreditTransactionsUseCase(sharedDeps)
+  };
+
+  const shiftsUseCases = {
+    openShift: createOpenShiftUseCase(sharedDeps),
+    getActiveShift: createGetActiveShiftUseCase(sharedDeps),
+    recordCashMovement: createRecordCashMovementUseCase(sharedDeps),
+    closeShift: createCloseShiftUseCase(sharedDeps),
+    getShift: createGetShiftUseCase(sharedDeps),
+    listShifts: createListShiftsUseCase(sharedDeps)
   };
 
   const authUseCases = {
@@ -277,6 +303,8 @@ export function createApp(options) {
     app.use("/api/units", function checkUnitsAuth(request, response, next) {
       authMiddleware.requireAuth(request, response, next);
     });
+
+    app.use("/api/shifts", authMiddleware.requireAuth);
   }
 
   app.use(
@@ -308,6 +336,13 @@ export function createApp(options) {
     })
   );
 
+  app.use(
+    "/api",
+    createShiftsRouter({
+      useCases: shiftsUseCases
+    })
+  );
+
   app.use(function handleNotFound(request, response) {
     response.status(404).json({
       error: {
@@ -333,14 +368,17 @@ export function createApp(options) {
       salesRepository: salesRepository,
       reportsRepository: reportsRepository,
       userRepository: userRepository,
-      sessionRepository: sessionRepository
+      sessionRepository: sessionRepository,
+      shiftRepository: shiftRepository,
+      cashMovementRepository: cashMovementRepository
     },
     useCases: {
       inventory: inventoryUseCases,
       sales: salesUseCases,
       reports: reportsUseCases,
       credit: creditUseCases,
-      auth: authUseCases
+      auth: authUseCases,
+      shifts: shiftsUseCases
     }
   };
 }

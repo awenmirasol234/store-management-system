@@ -225,6 +225,40 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_user_sessions_token
 
 CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id
   ON user_sessions(user_id);
+
+CREATE TABLE IF NOT EXISTS cashier_shifts (
+  shift_id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  opened_at TEXT NOT NULL,
+  closed_at TEXT,
+  opening_cash_int INTEGER NOT NULL,
+  expected_cash_int INTEGER,
+  actual_cash_int INTEGER,
+  variance_int INTEGER,
+  notes TEXT,
+  status TEXT NOT NULL DEFAULT 'OPEN',
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_shifts_user_id
+  ON cashier_shifts(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_shifts_status
+  ON cashier_shifts(status);
+
+CREATE TABLE IF NOT EXISTS cash_movements (
+  movement_id TEXT PRIMARY KEY,
+  shift_id TEXT NOT NULL,
+  type TEXT NOT NULL,
+  amount_int INTEGER NOT NULL,
+  remarks TEXT NOT NULL,
+  created_by TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (shift_id) REFERENCES cashier_shifts(shift_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_cash_movements_shift_id
+  ON cash_movements(shift_id);
 `;
 
 export function openSqliteDatabase(databasePath) {
