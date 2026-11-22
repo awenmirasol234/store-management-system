@@ -2,6 +2,13 @@ node_modules
 data
 uploads
 tests
+coverage
 .env
 .env.*
 *.log
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+.DS_Store
+Thumbs.db
