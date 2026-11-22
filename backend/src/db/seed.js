@@ -34,6 +34,8 @@ export function seedDatabase(targetDbPath, shouldClean) {
       database.exec("DELETE FROM products");
       database.exec("DELETE FROM suppliers");
       database.exec("DELETE FROM product_categories");
+      database.exec("DELETE FROM user_sessions");
+      database.exec("DELETE FROM users");
     }
 
     // 1. Seed Categories

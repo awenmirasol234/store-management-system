@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import multer from "multer";
 import { DomainError } from "./shared/errors.js";
+import { createSecurityHeadersMiddleware } from "./shared/security-headers.js";
 import { createDefaultIdGenerator, createSystemClock } from "./shared/ports.js";
 import { createSqliteUnitOfWork, openSqliteDatabase } from "./db/sqlite.js";
 import {
@@ -60,6 +61,30 @@ import {
   createUpdateCustomerUseCase
 } from "./credit/use-cases.js";
 import { createCreditRouter } from "./credit/routes.js";
+import {
+  createSqliteSessionRepository,
+  createSqliteUserRepository
+} from "./auth/sqlite-repo.js";
+import {
+  createChangePinUseCase,
+  createCreateUserUseCase,
+  createGetAuthStatusUseCase,
+  createGetCurrentUserUseCase,
+  createListUsersUseCase,
+  createLoginUseCase,
+  createLogoutUseCase,
+  createSetupInitialOwnerUseCase,
+  createUpdateUserUseCase
+} from "./auth/use-cases.js";
+import {
+  createAuthMiddleware,
+  createInMemoryRateLimiter
+} from "./auth/middleware.js";
+import {
+  createAuthRouter,
+  createUsersRouter
+} from "./auth/routes.js";
+import { ROLES } from "./auth/domain.js";
 
 function createErrorHandler() {
   return function handleError(error, request, response, next) {
@@ -113,6 +138,9 @@ export function createApp(options) {
   const creditTransactionRepository = createSqliteCreditTransactionRepository(database);
   const salesRepository = createSqliteSalesRepository(database);
   const reportsRepository = createSqliteReportsRepository(database);
+  const userRepository = createSqliteUserRepository(database);
+  const sessionRepository = createSqliteSessionRepository(database);
+  const rateLimiter = createInMemoryRateLimiter();
 
   const sharedDeps = {
     idGenerator: idGenerator,
@@ -126,7 +154,10 @@ export function createApp(options) {
     customerRepository: customerRepository,
     creditTransactionRepository: creditTransactionRepository,
     salesRepository: salesRepository,
-    reportsRepository: reportsRepository
+    reportsRepository: reportsRepository,
+    userRepository: userRepository,
+    sessionRepository: sessionRepository,
+    rateLimiter: rateLimiter
   };
 
   const inventoryUseCases = {
@@ -171,14 +202,73 @@ export function createApp(options) {
     listCreditTransactions: createListCreditTransactionsUseCase(sharedDeps)
   };
 
+  const authUseCases = {
+    getAuthStatus: createGetAuthStatusUseCase(sharedDeps),
+    setupInitialOwner: createSetupInitialOwnerUseCase(sharedDeps),
+    login: createLoginUseCase(sharedDeps),
+    logout: createLogoutUseCase(sharedDeps),
+    getCurrentUser: createGetCurrentUserUseCase(sharedDeps),
+    createUser: createCreateUserUseCase(sharedDeps),
+    updateUser: createUpdateUserUseCase(sharedDeps),
+    listUsers: createListUsersUseCase(sharedDeps),
+    changePin: createChangePinUseCase(sharedDeps)
+  };
+
+  const authMiddleware = createAuthMiddleware(authUseCases);
+  const enforceAuth = Boolean(config.enforceAuth || process.env.ENFORCE_AUTH === "true");
+
   const app = express();
+  app.use(createSecurityHeadersMiddleware());
   app.use(cors());
   app.use(express.json());
   app.use("/uploads", express.static(uploadsDir));
+  app.use(authMiddleware.authenticate);
 
   app.get("/api/health", function healthCheck(request, response) {
     response.json({ data: { status: "ok" } });
   });
+
+  app.use("/api/auth", createAuthRouter(authUseCases));
+  app.use(
+    "/api/users",
+    createUsersRouter({
+      useCases: authUseCases,
+      authMiddleware: authMiddleware,
+      enforceAuth: enforceAuth
+    })
+  );
+
+  if (enforceAuth) {
+    app.use("/api/reports", authMiddleware.requireRole([ROLES.OWNER]));
+    app.use("/api/sales", authMiddleware.requireAuth);
+    app.use("/api/credit", authMiddleware.requireAuth);
+
+    app.use("/api/products", function checkProductsAuth(request, response, next) {
+      if (request.method === "GET") {
+        authMiddleware.requireAuth(request, response, next);
+      } else {
+        authMiddleware.requireRole([ROLES.OWNER])(request, response, next);
+      }
+    });
+
+    app.use("/api/inventory", authMiddleware.requireRole([ROLES.OWNER]));
+
+    app.use("/api/categories", function checkCategoriesAuth(request, response, next) {
+      if (request.method === "GET") {
+        authMiddleware.requireAuth(request, response, next);
+      } else {
+        authMiddleware.requireRole([ROLES.OWNER])(request, response, next);
+      }
+    });
+
+    app.use("/api/suppliers", function checkSuppliersAuth(request, response, next) {
+      if (request.method === "GET") {
+        authMiddleware.requireAuth(request, response, next);
+      } else {
+        authMiddleware.requireRole([ROLES.OWNER])(request, response, next);
+      }
+    });
+  }
 
   app.use(
     "/api",
@@ -222,6 +312,26 @@ export function createApp(options) {
 
   return {
     app: app,
-    database: database
+    database: database,
+    repositories: {
+      productRepository: productRepository,
+      sellingOptionRepository: sellingOptionRepository,
+      inventoryTransactionRepository: inventoryTransactionRepository,
+      categoryRepository: categoryRepository,
+      supplierRepository: supplierRepository,
+      customerRepository: customerRepository,
+      creditTransactionRepository: creditTransactionRepository,
+      salesRepository: salesRepository,
+      reportsRepository: reportsRepository,
+      userRepository: userRepository,
+      sessionRepository: sessionRepository
+    },
+    useCases: {
+      inventory: inventoryUseCases,
+      sales: salesUseCases,
+      reports: reportsUseCases,
+      credit: creditUseCases,
+      auth: authUseCases
+    }
   };
 }

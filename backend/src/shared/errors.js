@@ -35,3 +35,36 @@ export class ConflictError extends DomainError {
     this.name = "ConflictError";
   }
 }
+
+export class UnauthorizedError extends DomainError {
+  constructor(message) {
+    let text = message;
+    if (!text) {
+      text = "Authentication required";
+    }
+    super(text, "UNAUTHORIZED", 401);
+    this.name = "UnauthorizedError";
+  }
+}
+
+export class ForbiddenError extends DomainError {
+  constructor(message) {
+    let text = message;
+    if (!text) {
+      text = "Access forbidden";
+    }
+    super(text, "FORBIDDEN", 403);
+    this.name = "ForbiddenError";
+  }
+}
+
+export class TooManyRequestsError extends DomainError {
+  constructor(message) {
+    let text = message;
+    if (!text) {
+      text = "Too many requests, please try again later";
+    }
+    super(text, "TOO_MANY_REQUESTS", 429);
+    this.name = "TooManyRequestsError";
+  }
+}

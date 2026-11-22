@@ -49,6 +49,7 @@ Backend modules use a flat structure:
 backend/src/
 ├── shared/       # Decimal helpers, validation, errors, and ports
 ├── db/           # SQLite connection, schema, and unit of work
+├── auth/         # Authentication, users, sessions, and RBAC
 ├── inventory/    # Products, selling options, suppliers, stock
 ├── sales/        # Checkout, sales, returns
 ├── credit/       # Customers, balances, and credit transactions

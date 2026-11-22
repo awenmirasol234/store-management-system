@@ -122,7 +122,8 @@ flowchart TB
   - Enforces optional `credit_limit` before approving a `CHARGE`.
   - Supports partial payments (`PAYMENT`) that reduce `current_balance` and record `shift_id` when paid in cash.
 
-### 4.4 User Roles & Shift Management (`shifts/`)
+### 4.4 User Roles & Shift Management (`auth/` & `shifts/`)
+- **Status**: Backend `auth/` (roles, scrypt PIN hashing, sessions, setup, login/logout, rate limiting, and RBAC) is implemented. Frontend UI and cashier shifts (`shifts/`) remain planned.
 - **Roles & First-Time Setup**:
   - `OWNER`: Full access (products, cost prices, stock adjustments, profit reports, user management, backups).
   - `CASHIER`: POS checkout, customer utang payments (within limits), own shift open/close.

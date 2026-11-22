@@ -189,6 +189,36 @@ CREATE INDEX IF NOT EXISTS idx_credit_tx_customer_id
 
 CREATE INDEX IF NOT EXISTS idx_credit_tx_created_at
   ON credit_transactions(created_at);
+
+CREATE TABLE IF NOT EXISTS users (
+  user_id TEXT PRIMARY KEY,
+  username TEXT NOT NULL UNIQUE,
+  full_name TEXT NOT NULL,
+  role TEXT NOT NULL,
+  pin_hash TEXT NOT NULL,
+  pin_salt TEXT NOT NULL,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username
+  ON users(username);
+
+CREATE TABLE IF NOT EXISTS user_sessions (
+  session_id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  token TEXT NOT NULL UNIQUE,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_sessions_token
+  ON user_sessions(token);
+
+CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id
+  ON user_sessions(user_id);
 `;
 
 export function openSqliteDatabase(databasePath) {
