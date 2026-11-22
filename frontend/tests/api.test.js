@@ -162,6 +162,31 @@ describe("api client", function () {
     expect(getAuthToken()).toBeNull();
   });
 
+  it("calls cashier shifts endpoints with expected parameters", async function () {
+    const fetchMock = stubFetchSuccess({ shift_id: "s1" });
+
+    await api.openShift({ opening_cash: 1000, notes: "Morning" });
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/shifts/open");
+    expect(fetchMock.mock.calls[0][1].method).toBe("POST");
+
+    await api.getActiveShift("u1");
+    expect(fetchMock.mock.calls[1][0]).toBe("/api/shifts/active?user_id=u1");
+
+    await api.recordCashMovement("s1", { type: "CASH_IN", amount: 500, remarks: "Topup" });
+    expect(fetchMock.mock.calls[2][0]).toBe("/api/shifts/s1/movements");
+    expect(fetchMock.mock.calls[2][1].method).toBe("POST");
+
+    await api.closeShift("s1", { actual_cash: 1500, notes: "Balanced" });
+    expect(fetchMock.mock.calls[3][0]).toBe("/api/shifts/s1/close");
+    expect(fetchMock.mock.calls[3][1].method).toBe("POST");
+
+    await api.getShift("s1");
+    expect(fetchMock.mock.calls[4][0]).toBe("/api/shifts/s1");
+
+    await api.listShifts({ user_id: "u1", status: "OPEN" });
+    expect(fetchMock.mock.calls[5][0]).toBe("/api/shifts?user_id=u1&status=OPEN");
+  });
+
   it("automatically clears stored auth token when receiving 401 Unauthorized", async function () {
     setAuthToken("stale_token_999");
     expect(getAuthToken()).toBe("stale_token_999");

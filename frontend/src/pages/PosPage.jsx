@@ -8,6 +8,7 @@ import {
   ShoppingBag,
   Tag,
   Trash2,
+  Wallet,
   XCircle
 } from "lucide-react";
 import { api } from "../api.js";
@@ -355,6 +356,10 @@ export function PosPage(props) {
         created_by: createdBy
       };
 
+      if (props.activeShift && props.activeShift.shift_id) {
+        payload.shift_id = props.activeShift.shift_id;
+      }
+
       if (paymentMethod === "CASH") {
         payload.amount_paid = Number(amountPaidInput);
       } else if (paymentMethod === "CREDIT") {
@@ -370,6 +375,9 @@ export function PosPage(props) {
       }
 
       const result = await api.processSale(payload);
+      if (props.onShiftChange) {
+        props.onShiftChange();
+      }
       setCheckoutModalOpen(false);
       clearCart();
       setCustomerIdInput("");
@@ -780,6 +788,27 @@ export function PosPage(props) {
     </Modal>
   );
 
+  let shiftButton = null;
+  if (props.onOpenShiftModal) {
+    let shiftBadgeText = "Open Shift";
+    let shiftIconClass = "text-amber-500";
+    if (props.activeShift) {
+      shiftBadgeText = "Shift Active";
+      shiftIconClass = "text-emerald-600";
+    }
+    shiftButton = (
+      <button
+        type="button"
+        onClick={props.onOpenShiftModal}
+        className="flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer shadow-xs shrink-0"
+        title="Cash Drawer & Shift Reconciliation"
+      >
+        <Wallet className={"h-4 w-4 " + shiftIconClass} />
+        <span className="hidden sm:inline">{shiftBadgeText}</span>
+      </button>
+    );
+  }
+
   return (
     <div className="flex h-full flex-1 overflow-hidden bg-slate-50">
       {/* Center Catalog Workspace */}
@@ -804,12 +833,14 @@ export function PosPage(props) {
             </span>
           </div>
 
+          {shiftButton}
+
           <button
             type="button"
             onClick={function openLowStock() {
               setLowStockModalOpen(true);
             }}
-            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 cursor-pointer"
+            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 cursor-pointer shrink-0"
             title="Low Stock Alerts"
           >
             <Bell className="h-4 w-4" />

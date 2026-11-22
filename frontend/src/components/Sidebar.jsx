@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, LogOut, Store, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Store, Users, Wallet } from "lucide-react";
 import { getFilteredNavItems } from "../navigation.js";
 
 export function Sidebar(props) {
@@ -131,6 +131,51 @@ export function Sidebar(props) {
     );
   }
 
+  let cashDrawerButton = null;
+  if (props.onOpenShiftModal) {
+    let dotTone = "bg-amber-400";
+    let statusLabel = "No Shift";
+    if (props.activeShift) {
+      dotTone = "bg-emerald-400";
+      statusLabel = "Shift Open";
+    }
+    cashDrawerButton = (
+      <button
+        type="button"
+        onClick={props.onOpenShiftModal}
+        className="flex w-full items-center justify-between rounded-lg bg-white/5 px-2.5 py-1.5 text-2xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition cursor-pointer"
+        title="Cash Drawer & Shifts"
+      >
+        <div className="flex items-center gap-2">
+          <Wallet className="h-3.5 w-3.5 text-blue-400" />
+          <span>Cash Drawer</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className={"h-1.5 w-1.5 rounded-full " + dotTone} />
+          <span className="text-3xs text-slate-400">{statusLabel}</span>
+        </div>
+      </button>
+    );
+  }
+
+  let collapsedDrawerButton = null;
+  if (props.onOpenShiftModal) {
+    let drawerTitle = "Cash Drawer (No Shift)";
+    if (props.activeShift) {
+      drawerTitle = "Cash Drawer (Shift Open)";
+    }
+    collapsedDrawerButton = (
+      <button
+        type="button"
+        onClick={props.onOpenShiftModal}
+        title={drawerTitle}
+        className="p-1.5 text-slate-400 hover:bg-white/10 hover:text-white rounded-lg cursor-pointer"
+      >
+        <Wallet className="h-4 w-4" />
+      </button>
+    );
+  }
+
   let footerElement = null;
   if (collapsed) {
     footerElement = (
@@ -141,6 +186,7 @@ export function Sidebar(props) {
         >
           {initials}
         </div>
+        {collapsedDrawerButton}
         {logoutButton}
       </div>
     );
@@ -159,6 +205,7 @@ export function Sidebar(props) {
           </div>
           {logoutButton}
         </div>
+        {cashDrawerButton}
         {manageStaffButton}
       </div>
     );

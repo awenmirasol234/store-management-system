@@ -14,6 +14,7 @@ import { ReportsPage } from "./pages/ReportsPage.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
 import { SetupPage } from "./pages/SetupPage.jsx";
 import { NotFoundPage } from "./pages/NotFoundPage.jsx";
+import { CashierShiftModal } from "./components/CashierShiftModal.jsx";
 
 export function App(props) {
   let initialActivePage = "dashboard";
@@ -31,6 +32,21 @@ export function App(props) {
   const [authChecked, setAuthChecked] = useState(false);
   const [activePage, setActivePage] = useState(initialActivePage);
   const [userModalOpen, setUserModalOpen] = useState(false);
+  const [activeShift, setActiveShift] = useState(null);
+  const [shiftModalOpen, setShiftModalOpen] = useState(false);
+
+  async function loadActiveShift(userId) {
+    try {
+      const result = await api.getActiveShift(userId);
+      if (result && result.shift) {
+        setActiveShift(Object.assign({}, result.shift, { summary: result.summary }));
+      } else {
+        setActiveShift(null);
+      }
+    } catch (error) {
+      setActiveShift(null);
+    }
+  }
 
   function handleNavigate(pageKey) {
     setActivePage(pageKey);
@@ -89,6 +105,7 @@ export function App(props) {
           }
           if (user) {
             setCurrentUser(user);
+            loadActiveShift(user.user_id);
             if (initialActivePage === "dashboard" && user.role === "CASHIER") {
               setActivePage("pos");
             }
@@ -112,6 +129,7 @@ export function App(props) {
   function handleAuthSuccess(user, token) {
     setCurrentUser(user);
     setIsSetupRequired(false);
+    loadActiveShift(user.user_id);
     if (activePage === "dashboard" && user.role === "CASHIER") {
       handleNavigate("pos");
     } else if (activePage !== "not-found") {
@@ -125,6 +143,7 @@ export function App(props) {
     });
     clearAuthToken();
     setCurrentUser(null);
+    setActiveShift(null);
     handleNavigate("pos");
   }
 
@@ -154,7 +173,20 @@ export function App(props) {
   if (activePage === "dashboard") {
     pageElement = <DashboardPage onNavigate={handleNavigate} currentUser={currentUser} />;
   } else if (activePage === "pos") {
-    pageElement = <PosPage currentUser={currentUser} />;
+    pageElement = (
+      <PosPage
+        currentUser={currentUser}
+        activeShift={activeShift}
+        onOpenShiftModal={function () {
+          setShiftModalOpen(true);
+        }}
+        onShiftChange={function () {
+          if (currentUser) {
+            loadActiveShift(currentUser.user_id);
+          }
+        }}
+      />
+    );
   } else if (activePage === "inventory") {
     pageElement = <InventoryPage currentUser={currentUser} />;
   } else if (activePage === "customers") {
@@ -232,9 +264,13 @@ export function App(props) {
         activePage={activePage}
         onNavigate={handleNavigate}
         currentUser={currentUser}
+        activeShift={activeShift}
         onLogout={handleLogout}
         onOpenUserModal={function () {
           setUserModalOpen(true);
+        }}
+        onOpenShiftModal={function () {
+          setShiftModalOpen(true);
         }}
       />
 
@@ -252,6 +288,20 @@ export function App(props) {
           setUserModalOpen(false);
         }}
         currentUser={currentUser}
+      />
+
+      <CashierShiftModal
+        open={shiftModalOpen}
+        onClose={function () {
+          setShiftModalOpen(false);
+        }}
+        currentUser={currentUser}
+        activeShift={activeShift}
+        onShiftChange={function () {
+          if (currentUser) {
+            return loadActiveShift(currentUser.user_id);
+          }
+        }}
       />
     </div>
   );

@@ -257,6 +257,43 @@ export const api = {
   },
   updateUser(userId, data) {
     return request("PATCH", "/api/users/" + encodeURIComponent(userId), data);
+  },
+  openShift(data) {
+    return request("POST", "/api/shifts/open", data);
+  },
+  getActiveShift(userId) {
+    let path = "/api/shifts/active";
+    if (userId) {
+      path = path + "?user_id=" + encodeURIComponent(userId);
+    }
+    return request("GET", path);
+  },
+  closeShift(shiftId, data) {
+    return request("POST", "/api/shifts/" + encodeURIComponent(shiftId) + "/close", data);
+  },
+  recordCashMovement(shiftId, data) {
+    return request("POST", "/api/shifts/" + encodeURIComponent(shiftId) + "/movements", data);
+  },
+  getShift(shiftId) {
+    return request("GET", "/api/shifts/" + encodeURIComponent(shiftId));
+  },
+  listShifts(filters) {
+    const params = new URLSearchParams();
+    if (filters) {
+      if (filters.user_id) {
+        params.set("user_id", filters.user_id);
+      }
+      if (filters.status) {
+        params.set("status", filters.status);
+      }
+      if (filters.limit) {
+        params.set("limit", String(filters.limit));
+      }
+      if (filters.offset) {
+        params.set("offset", String(filters.offset));
+      }
+    }
+    return request("GET", "/api/shifts" + buildQuery(params));
   }
 };
 
