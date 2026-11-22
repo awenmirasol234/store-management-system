@@ -192,18 +192,16 @@ export function ReportsPage() {
           label="Gross Sales"
           value={grossSales}
           meta={ordersMeta}
-          tone="blue"
           icon={Banknote}
         />
         <StatCard
           label="Net Profit"
           value={netProfit}
           meta={cogsMeta}
-          tone="green"
           icon={TrendingUp}
         />
         <StatCard label="Cash Sales" value={cashSales} icon={Wallet} />
-        <StatCard label="Credit (Utang)" value={creditSales} tone="amber" icon={CreditCard} />
+        <StatCard label="Credit (Utang)" value={creditSales} icon={CreditCard} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">

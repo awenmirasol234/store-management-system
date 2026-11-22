@@ -63,11 +63,6 @@ export function DashboardPage(props) {
     activeProductsMeta = String(summary.active_product_count) + " active";
   }
 
-  let lowStockTone = "green";
-  if (lowStock.length > 0) {
-    lowStockTone = "amber";
-  }
-
   let lowStockList = <EmptyState message="All stock levels are healthy." padding="md" />;
   if (lowStock.length > 0) {
     lowStockList = (
@@ -132,19 +127,16 @@ export function DashboardPage(props) {
           label="Today's Sales"
           value={todaySales}
           meta={todayOrdersMeta}
-          tone="blue"
           icon={Banknote}
         />
         <StatCard
           label="Today's Profit"
           value={todayProfit}
-          tone="green"
           icon={TrendingUp}
         />
         <StatCard
           label="Low Stock Alerts"
           value={lowStockCountText}
-          tone={lowStockTone}
           icon={AlertTriangle}
         />
         <StatCard
