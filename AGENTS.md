@@ -1,159 +1,176 @@
-# AGENTS.md
+# Agent Instructions
 
-This file defines the architectural standards, project structure, and conventions for all contributors and AI agents working in `store-management-system`.
+These rules apply to every coding agent working in this repository.
 
-> **Required Skill:** Always load and follow `.agents/skills/ponytail/SKILL.md` (`full` mode) before making any code or documentation changes.
+## Required Preparation
 
-## 1. Architecture Standard: Clean Architecture
+- Read the files that directly affect the requested change before editing.
+- Inspect the callers, tests, fixtures, exports, configuration, and related documentation for every function or file you change.
+- Read `.agents/skills/ponytail/SKILL.md` and apply its `full` mode before making code or documentation changes.
+- Check the working tree before editing.
+- Keep the change limited to the requested behavior. Do not rewrite unrelated code or documentation.
+- Preserve existing behavior unless the request explicitly changes it.
+- Ask for clarification when requirements, behavior, authorization, or an implementation choice is unclear.
 
-This project follows **Module-First Clean Architecture**. Business logic and domain rules are isolated from frameworks, databases, and UI so modules (such as the reusable inventory and flexible selling module) remain portable and testable.
+## Documentation Responsibilities
 
-### The Dependency Rule
+- Keep `AGENTS.md` limited to persistent rules for coding agents.
+- Put project overview, prerequisites, setup, installation, and usage instructions in `README.md`.
+- Put detailed architecture, folder responsibilities, and design decisions in `ARCHITECTURE.md` or the relevant file under `docs/`.
+- Put contribution workflow and collaboration procedures in `CONTRIBUTING.md`.
+- Put specialized repeatable procedures in the applicable `SKILL.md`.
+- Keep `docs/product-inventory-and-selling-options.md` as the source for inventory and selling rules.
+- Keep `docs/store-management-system-plan.md` as the source for the broader architecture and implementation plan.
+- Update related documentation when a code change makes documented behavior inaccurate.
+- Do not copy detailed specifications, roadmaps, or setup procedures into `AGENTS.md`.
 
-Dependencies **must only point inward** (enforced by file role inside each flat module folder):
+## Architecture
 
-```text
-routes.js (presentation)  ──▶  use-cases.js (application)  ──▶  domain.js (domain)
-*-repo.js (infrastructure) ───────────────────────────────────▶  domain.js / use-cases.js
-```
+- Keep dependencies pointing inward:
+  - Presentation calls application use cases.
+  - Application use cases depend on domain rules and injected ports.
+  - Infrastructure implements domain ports.
+  - Domain code does not import frameworks, databases, UI code, repositories, or use cases.
+- Keep business rules in `domain.js` or `use-cases.js`, not in routes, repositories, database adapters, or React components.
+- Keep database, HTTP, Express, and third-party code outside the domain layer.
+- Use dependency injection for repositories, clocks, ID generators, and unit-of-work implementations.
+- Keep each module focused on one business area.
+- Follow the existing flat module layout. Do not add nested folders inside a module or barrel `index.js` files.
+- If a module file becomes too large, split it into flat sibling files with clear responsibilities.
 
-- **Domain (`domain.js`)**: Pure business entities, validation rules, domain errors, and port contracts. **Must never** import from `use-cases.js`, `*-repo.js`, `routes.js`, databases, Express, or UI libraries.
-- **Application (`use-cases.js`)**: Use cases and orchestration logic. Depends **only** on `domain.js` (and `shared/`). Interacts with persistence exclusively through injected repository/`UnitOfWork` ports.
-- **Infrastructure (`sqlite-repo.js`, future `postgres-repo.js` / `mysql-repo.js`)**: Concrete SQL adapters implementing domain repository contracts. Depends on `domain.js` and `shared/`.
-- **Presentation (`routes.js`, React `pages/`)**: Express routers and UI screens. Depends on `use-cases.js` (or REST API)—never directly on `*-repo.js` or database clients.
+## Repository Structure
 
----
-
-## 2. Standard Project Structure
-
-The project separates the standalone **Express backend** (`backend/`) from the **React + Vite frontend** (`frontend/`). **No nested subfolders inside modules** and no barrel `index.js` files—keep every module flat (max 1 folder under `src/`) with clean separation by file role:
+Use the existing structure unless the requested change requires otherwise:
 
 ```text
 backend/
 ├── src/
-│   ├── shared/                  # decimal.js, errors.js, ports.js, validation.js
-│   ├── db/                      # sqlite.js (connection, schema DDL, UnitOfWork)
-│   ├── <module>/                # Flat module folder (inventory, sales, reports)
-│   │   ├── domain.js            # Entities, validation rules, errors, repository contracts
-│   │   ├── use-cases.js         # Single-responsibility use cases
-│   │   ├── sqlite-repo.js       # SQLite adapter (add postgres-repo.js / mysql-repo.js to swap DB)
-│   │   └── routes.js            # Express REST router
-│   ├── app.js                   # Express app setup (middleware, routes, error handler)
+│   ├── shared/                  # Shared validation, errors, decimal helpers, and ports
+│   ├── db/                      # SQLite connection, schema, and unit of work
+│   ├── <module>/                # inventory, sales, credit, reports, or future modules
+│   │   ├── domain.js            # Entities, rules, errors, and port contracts
+│   │   ├── use-cases.js         # Application workflows
+│   │   ├── sqlite-repo.js       # SQLite adapter
+│   │   └── routes.js            # Express routes
+│   ├── app.js                   # Composition root and middleware
 │   └── server.js                # HTTP server entry point
-└── tests/                       # Flat test files (inventory.test.js, sales.test.js, reports.test.js, shared.test.js, sqlite.test.js, routes.test.js)
+└── tests/                       # Backend Vitest tests
 
 frontend/
 └── src/
-    ├── api.js                   # Single REST API client for Express
-    ├── format.js                # Peso, quantity, Manila date formatting helpers
-    ├── products.js              # Shared product search filter and stock-level helper
-    ├── cart.js                  # Local cart subtotal, discount, and total rounding
-    ├── navigation.js            # Shared navigation items and page titles
-    ├── components/              # Shared UI components (Badge.jsx, BottomNav.jsx, Button.jsx, DataTable.jsx, EmptyState.jsx, ErrorBanner.jsx, FormActions.jsx, Input.jsx, InventoryAdjustModal.jsx, InventoryStockInModal.jsx, Modal.jsx, PageHeader.jsx, PageLayout.jsx, PaymentMethodToggle.jsx, PosCheckoutModal.jsx, ProductThumb.jsx, ReceiptView.jsx, Select.jsx, Sidebar.jsx, StatCard.jsx, TableEmptyRow.jsx)
-    ├── pages/                   # Flat screens (DashboardPage.jsx, PosPage.jsx, InventoryPage.jsx, TransactionsPage.jsx, ReportsPage.jsx)
+    ├── api.js                   # Shared REST API client
+    ├── format.js                # Currency, quantity, and date formatting
+    ├── products.js              # Shared product helpers
+    ├── cart.js                  # Cart calculations
+    ├── navigation.js            # Navigation definitions
+    ├── components/              # Shared React components
+    ├── pages/                   # Page-level React screens
     ├── App.jsx
-    └── main.jsx                 # React + Vite entry point
+    └── main.jsx
 
-frontend/tests/                  # Flat Vitest tests (format.test.js, cart.test.js, products.test.js, transactions.test.js, responsive_navigation.test.js, pos_render.test.js, pos_checkout.test.js, inventory_render.test.js, pages_render.test.js, typography.test.js)
+frontend/tests/                  # Frontend Vitest tests
 ```
 
-> If a single module file grows too large, split it into flat sibling files inside the same module folder (e.g., `stock-use-cases.js`) rather than adding nested subfolders.
+## Backend Rules
 
-> **Current status:** Inventory, sales, and reports run on SQLite with Express and React. Credit, roles, and shifts are still planned; POS payment is cash-only until credit is wired.
+- Use Node.js, Express, ESM JavaScript, plain SQL, built-in `node:sqlite`, and Vitest.
+- Do not add TypeScript, Zod, or another state/validation framework unless the user explicitly requests it.
+- Define domain entities, validation, errors, and repository contracts in `domain.js`.
+- Define application workflows as small use cases in `use-cases.js`.
+- Implement repository contracts in `sqlite-repo.js` or another dialect-specific adapter.
+- Keep repository and unit-of-work methods asynchronous, even when SQLite operations are synchronous.
+- Generate IDs in the application through the injected ID generator.
+- Keep dialect-specific SQL, schema, pragmas, and parameter handling inside database adapters.
+- Return `{ data }` for successful API responses.
+- Let the shared error handler return `{ error: { code, message } }` for failures.
+- Keep routes responsible for HTTP input/output and delegation. Do not put business rules or direct database calls in routes.
+- Validate all request input at the HTTP boundary and validate business rules again in the domain/application layer.
+- Reject invalid types, missing fields, unsupported values, negative quantities, invalid prices, and invalid payment amounts before persistence.
+- Never expose internal errors, credentials, file paths, or sensitive data in API responses.
 
----
+## Data and Business Rules
 
-## 3. Domain & Module Guidelines
+- Keep product inventory in one `base_unit`.
+- Represent packs, bundles, promotions, weight or volume presets, and flexible prices with `ProductSellingOption`.
+- Store monetary values at two-decimal precision.
+- Store inventory and option quantities at four-decimal precision.
+- Store SQLite money as integer centavos (`× 100`) and quantities as integer ten-thousandths (`× 10,000`).
+- Convert scaled values only at repository mapping boundaries.
+- Process sales, inventory deductions, and related records in one unit-of-work transaction.
+- Snapshot `unit_price`, `unit_cost`, `option_name_snapshot`, and `base_quantity` when recording a sale.
+- Update product cost from the latest stock-in unit cost while preserving historical snapshots.
+- Record every inventory movement and enforce its transaction-type sign rules.
+- Enforce barcode uniqueness across products and selling options.
+- Soft-delete products with `deleted_at`; exclude deleted products from normal queries, POS results, and low-stock alerts.
+- Use `is_active = false` to disable products, selling options, categories, suppliers, or other supported records without deleting history.
+- Use PHP (`₱`) for money and `Asia/Manila` (`UTC+8`) for business-day calculations.
 
-Reference specifications: `docs/product-inventory-and-selling-options.md` and `docs/store-management-system-plan.md`.
+## Frontend Rules
 
-1. **Single Unified Selling Model**: Keep product inventory in one `base_unit` on `Product`, and represent packs, bundles, promos, weight/volume presets, and flexible prices via `ProductSellingOption` (`quantity` in `base_unit` + `price`). Do not create separate pricing models per selling method.
-2. **Numeric Precision**:
-   - Monetary values (`cost_price`, `selling_price`, `price`, `unit_price`, `unit_cost`, `subtotal`, totals): `DECIMAL(12, 2)`.
-   - Inventory and option quantities (`current_stock`, `reorder_level`, `quantity`, `base_quantity`): `DECIMAL(12, 4)` to support fractional weights and volumes.
-   - **SQLite Persistence Rule**: SQLite has no native `DECIMAL` type. Store monetary columns as scaled integer centavos (`× 100`) and quantity columns as scaled integer ten-thousandths (`× 10,000`), converting at the repository mapper boundary so arithmetic and SQL `SUM()` stay exact.
-3. **Transactional Integrity & Relational DB Portability**:
-   - Sales processing and inventory deductions must execute atomically via a `UnitOfWork` / transaction port defined in `shared/ports.js` or `domain.js`.
-   - Keep all repository and `UnitOfWork` port methods `async` (Promise-returning) even for synchronous SQLite (`node:sqlite`), use application-generated IDs (`IdGenerator`), and isolate dialect-specific SQL/DDL in `<dialect>-repo.js` and `db/<dialect>.js` so PostgreSQL or MySQL adapters can be plugged in without changing `domain.js`, `use-cases.js`, or `routes.js`.
-4. **Historical Snapshots & Cost Policy**: Always snapshot `unit_price`, `unit_cost`, `option_name_snapshot`, and `base_quantity` on `SalesItem` at the time of sale so historical revenue and profit remain accurate. On `STOCK_IN`, update `Product.cost_price` to the latest `unit_cost`.
-5. **Backend Validation & Data Integrity**: Enforce all quantity, stock, payment, credit-limit, cross-table barcode uniqueness, product soft-delete (`deleted_at`), soft-disable (`is_active = false`), and sign rules in domain/application layers regardless of UI validation. Use `PHP (₱)` and `Asia/Manila` (`UTC+8`) for daily cutoffs.
+- Use React, Vite, plain JavaScript/JSX, Tailwind CSS, and built-in React state.
+- Do not add an external state-management library for local feature state.
+- Send all backend requests through `frontend/src/api.js`.
+- Inspect `frontend/src/components/` before creating a component.
+- Reuse an existing shared component when it meets the requirement.
+- Create a shared component only when the UI or behavior is used by multiple pages or clearly belongs to the shared design system.
+- Keep shared components independent of page-specific data and workflows.
+- Keep page-specific orchestration in `frontend/src/pages/`.
+- Keep business calculations in shared helpers such as `cart.js`, `format.js`, or `products.js`, not in large JSX render blocks.
+- Preserve keyboard, focus, semantic HTML, readable contrast, and usable mobile layouts.
+- Use Inter for all text and digits.
+- Keep screens fast to scan: use short labels, clear totals, visible stock alerts, and only the actions needed for the task.
+- Do not add decorative content, redundant labels, or filler descriptions.
 
----
+## JavaScript Style
 
-## 4. Coding Standards
+- Use plain, beginner-readable JavaScript with clear intermediate variables and early returns.
+- Use `if`/`else` statements instead of ternary operators.
+- Do not use object spread syntax. Use explicit property assignment or `Object.assign`.
+- Keep function parameters short and flat. Pass one simple flat object when several related values are required.
+- Avoid `Proxy`, `Reflect`, decorators, complex inheritance, mixins, currying, dense functional chains, and clever one-liners.
+- Keep each function focused on one responsibility.
+- Use `camelCase` for variables and functions, `PascalCase` for classes and React components, and `kebab-case` for files and directories unless an existing convention requires otherwise.
+- Use descriptive names. Avoid unclear abbreviations and single-letter variables except for conventional loop counters.
+- Reuse existing helpers, errors, validators, repositories, and components before adding new ones.
+- Add an abstraction only when the current change has a real repeated need for it.
+- Add comments only to explain why non-obvious behavior is required.
+- Mark intentional shortcuts with `shortcut: <limit>, <when to upgrade>`.
 
-- **Tech Stack**:
-  - **Backend (`backend/`)**: Node.js, Express, plain JavaScript (ESM, no TypeScript), plain JS validation functions (no Zod), built-in `node:sqlite` (plain SQL), Vitest.
-  - **Frontend (`frontend/`)**: React, Vite, plain JavaScript / JSX (no TypeScript), built-in React state (`useState`, `useReducer`, `useContext`; no external state library), Tailwind CSS.
+## Error Handling and Security
 
-### Simplicity & Beginner-Friendly Code (Ponytail Mode)
-- Follow `.agents/skills/ponytail/SKILL.md`: take the smallest complete change that solves the task.
-- Use **fundamental, beginner-maintainable JavaScript patterns**: plain functions, simple objects, `if`/`else`, `for` loops, `try`/`catch`, `async`/`await`, early returns, and clear intermediate variables.
-- **No ternary operators (`? :`)**: always use explicit `if`/`else` statements.
-- **No object spread syntax (`{ ...obj }`)**: always use `Object.assign({}, existing, updates)` or explicit property assignment so copied/updated fields are clear to beginners.
-- **No complex arguments or parameters**: keep parameter lists short and flat (or pass one simple flat object when multiple fields are needed); avoid nested destructuring, default-value gymnastics, or spread/rest tricks in function signatures.
-- Avoid advanced or clever patterns: no `Proxy`/`Reflect`, decorators, complex class inheritance/mixins, currying, dense functional chains, or tricky one-liners.
-- No speculative abstractions, wrappers, options, config, or "for later" boilerplate nobody asked for—while keeping the Clean Architecture layer boundaries intact.
-- Never cut trust-boundary validation, error handling that prevents data loss, or security. Mark any intentional shortcut with `shortcut: <limit>, <when to upgrade>`.
+- Validate untrusted input before processing, storing, or rendering it.
+- Sanitize values before persistence or display when the boundary requires it.
+- Handle expected errors explicitly and return clear user-safe messages.
+- Never silently ignore a failed operation.
+- Preserve transactions and rollback behavior when moving or merging code.
+- Do not commit secrets, credentials, local databases, generated build output, temporary files, or environment-specific configuration.
+- Confirm destructive or irreversible operations before executing them.
 
-### Variable Naming
-- Use descriptive, concise, and meaningful names for variables, functions, classes, and files that communicate purpose and meaning.
-- Avoid single-letter variable names (`x`, `i`, `j`, `n`), except for conventional loop counters when appropriate.
-- Avoid unclear two-letter variable names (`id`, `db`, `fn`) when a more descriptive name improves readability.
-- Apply consistent naming conventions throughout the codebase.
+## Testing and Verification
 
-### Single Responsibility
-- **One function per responsibility**: every function must do one clear job only.
-- Keep functions small and focused; split validation, calculation, and side effects into separate helper functions rather than mixing them in one function.
-
-### Loose Coupling
-- Keep components independent and avoid unnecessary dependencies between modules.
-- Depend on abstractions (`domain.js` port contracts) where appropriate and use dependency injection when it improves flexibility and testability.
-
-### Code Reusability & Consistent Patterns
-- Reuse existing utilities, validators, error classes, and helpers (`backend/src/shared/`, `frontend/src/api.js`, `frontend/src/components/`) instead of duplicating logic.
-- Follow the **same repeatable pattern** in every module so any file feels familiar to a beginner:
-  - **File naming**: `kebab-case.js` for backend modules and utilities; `PascalCase.jsx` for React components.
-  - **Use cases**: Plain factory function `create<UseCaseName>(dependencies)` returning an `async function execute(input)` (or a single named `async` function) with uniform input/output objects.
-  - **Repositories**: Plain factory function `createSqlite<Entity>Repository(database)` returning an object of `async` methods matching the `domain.js` port contract.
-  - **Express routes**: One `create<Module>Router(useCases)` per module returning a consistent JSON shape (`{ data }` on success, `{ error: { code, message } }` on failure via one shared error middleware).
-  - **Frontend**: Shared API client wrapper and reusable UI components (buttons, inputs, modals, tables) used consistently across features.
-- Do not introduce abstractions without a practical need; extract shared code only when it is genuinely reused across two or more places.
-
-### Error Handling
-- Validate inputs at appropriate boundaries using plain JavaScript guards and domain rules.
-- Handle expected errors explicitly; never silently ignore errors.
-- Provide clear and useful error messages.
-
-### Comments and Documentation
-- Write comments only when they provide useful context; explain *why* something is done rather than repeating *what* the code does.
-- Document important business rules and complex logic.
-- Keep comments short, accurate, and up to date.
-
-### UI & UX Standards (Owner-First, No Clutter)
-- **Think like a store owner / cashier**: Design every screen strictly around the real daily use case (fast checkout, quick stock-in, clear utang balance, clear shift cash count).
-- **No clutter or overloaded text**: No filler paragraphs, redundant subtitles, decorative widgets, or unnecessary labels—show only the fields and actions needed for the task.
-- **Scannable & fast**: Use short, plain labels, clear visual hierarchy (prices, totals, stock alerts stand out), and minimal clicks to complete primary actions.
-- **Single font**: Use Inter for all text, including digits. `font-mono` resolves to Inter, and tabular numbers keep numeric columns aligned.
-
----
-
-## 5. Testing, Maintainability & Implementation Workflow
-
-### Testing
-- Write unit tests for important business logic covering normal cases, edge cases (negative stock, fractional quantities, precision limits, transaction sign rules), and failure cases.
-- Keep code easy to test independently: `domain.js` and `use-cases.js` tests must run without a database or network using in-memory fakes for repository ports.
-
-### Maintainability
-- Follow existing project conventions and preserve existing functionality.
-- Avoid unrelated changes; remove dead code only when safe.
-- Keep documentation consistent with the implementation.
-
-### Implementation Practices
-- Inspect existing code and understand the architecture and dependencies before making changes.
-- Improve existing implementations instead of rewriting them unnecessarily.
-- Choose the simplest solution that satisfies the requirements.
-- Verify changes with required checks before completing work:
+- Add or update a focused test for every new non-trivial branch, loop, parser, money calculation, security rule, or business rule.
+- Test valid input, missing input, invalid input, boundary values, and failure behavior.
+- Test domain and application logic with in-memory fakes so those tests do not require a database or network.
+- Add integration tests for SQLite persistence, transactions, mapping, and rollback behavior when those areas change.
+- Add route tests when API status codes, request validation, or response envelopes change.
+- Add frontend tests for changed calculations, rendering, responsive navigation, or critical user flows.
+- Run the checks relevant to the files changed.
+- For backend changes, run:
   ```bash
   cd backend && npm test
   ```
+- For frontend changes, run:
+  ```bash
+  cd frontend && npm test
+  cd frontend && npm run build
+  ```
+- Run `git diff --check` for documentation or configuration changes.
+- Report checks that could not run and any remaining risk. Do not claim an unchecked command passed.
+
+## Change Review
+
+- Review the final diff before finishing.
+- Confirm that every changed caller, test, fixture, export, configuration entry, and related document is updated.
+- Remove only dead code introduced by the change or made clearly safe to remove.
+- Do not reset, discard, or overwrite changes that you did not make.
+- Keep the final response concise: state the result, list verification performed, and identify skipped checks or remaining risks.
