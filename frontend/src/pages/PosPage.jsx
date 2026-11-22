@@ -494,15 +494,12 @@ export function PosPage(props) {
     "mb-4 flex items-center gap-2 overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing select-none";
 
   let allCategoryClass =
-    "shrink-0 rounded-full px-4 py-2 text-xs font-medium cursor-pointer transition-colors flex items-center gap-2 ";
-  let allCountClass = "px-2 py-0.5 rounded-full text-2xs font-semibold ";
+    "shrink-0 rounded-full px-4 py-2 text-xs font-medium cursor-pointer transition-colors ";
   if (selectedCategoryId === "ALL") {
     allCategoryClass = allCategoryClass + "bg-[#151515] font-semibold text-white shadow-xs";
-    allCountClass = allCountClass + "bg-[#B9F36B] text-[#151515]";
   } else {
     allCategoryClass =
       allCategoryClass + "bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#151515]";
-    allCountClass = allCountClass + "bg-[#EEEEED] text-[#777777]";
   }
 
   let productGridContent = null;
@@ -917,8 +914,7 @@ export function PosPage(props) {
             }}
             className={allCategoryClass}
           >
-            <span>All</span>
-            <span className={allCountClass}>{products.length}</span>
+            All
           </button>
           {categories.map(function renderCategory(category) {
             const isSelected = selectedCategoryId === category.category_id;
