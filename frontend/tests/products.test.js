@@ -16,6 +16,14 @@ describe("stock levels", function () {
   it("marks healthy stock when stock is above reorder level", function () {
     expect(getStockLevel({ current_stock: 10, reorder_level: 5 })).toBe(STOCK_LEVELS.HEALTHY);
   });
+
+  it("treats missing and invalid stock values as out of stock", function () {
+    expect(getStockLevel(null)).toBe(STOCK_LEVELS.OUT);
+    expect(getStockLevel({ current_stock: "abc", reorder_level: 5 })).toBe(STOCK_LEVELS.OUT);
+    expect(getStockLevel({ current_stock: 10, reorder_level: "abc" })).toBe(
+      STOCK_LEVELS.HEALTHY
+    );
+  });
 });
 
 describe("filter products", function () {
@@ -40,5 +48,16 @@ describe("filter products", function () {
   it("returns all products when search query is empty or whitespace", function () {
     const results = filterProducts(sampleProducts, "  ");
     expect(results.length).toBe(3);
+  });
+
+  it("handles invalid product lists, queries, and numeric barcodes", function () {
+    expect(filterProducts(null, "rice")).toEqual([]);
+    expect(filterProducts(sampleProducts, 123).length).toBe(3);
+    expect(filterProducts([null, sampleProducts[0]], "").length).toBe(1);
+
+    const numericBarcodeProducts = [{ product_id: "p1", product_name: "Rice", barcode: 480001 }];
+    const results = filterProducts(numericBarcodeProducts, "480");
+    expect(results.length).toBe(1);
+    expect(results[0].product_id).toBe("p1");
   });
 });

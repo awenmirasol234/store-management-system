@@ -20,4 +20,21 @@ describe("cart totals", function () {
     expect(totals.discount).toBe(33.33);
     expect(totals.total).toBe(66.67);
   });
+
+  it("returns zero totals for an empty cart", function () {
+    expect(computeLocalCartTotals([], 10)).toEqual({
+      subtotal: 0,
+      discount: 0,
+      total: 0
+    });
+  });
+
+  it("accepts numeric strings and ignores infinite discounts", function () {
+    const totals = computeLocalCartTotals([{ unit_price: "10", quantity: 2 }], "3.5");
+    expect(totals.subtotal).toBe(20);
+    expect(totals.discount).toBe(3.5);
+    expect(totals.total).toBe(16.5);
+
+    expect(computeLocalCartTotals([{ unit_price: 10, quantity: 1 }], Infinity).discount).toBe(0);
+  });
 });
