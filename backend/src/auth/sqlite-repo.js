@@ -59,7 +59,10 @@ export function createSqliteUserRepository(database) {
 
   return {
     async createUser(user) {
-      const activeInt = user.is_active ? 1 : 0;
+      let activeInt = 0;
+      if (user.is_active) {
+        activeInt = 1;
+      }
       insertStmt.run(
         user.user_id,
         user.username,
@@ -75,7 +78,10 @@ export function createSqliteUserRepository(database) {
     },
 
     async updateUser(userId, fields) {
-      const activeInt = fields.is_active ? 1 : 0;
+      let activeInt = 0;
+      if (fields.is_active) {
+        activeInt = 1;
+      }
       updateStmt.run(
         fields.full_name,
         fields.role,

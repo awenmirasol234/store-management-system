@@ -25,8 +25,18 @@ export function createAuthRouter(authUseCases) {
 
   router.post("/login", async function login(request, response, next) {
     try {
-      const ip = request.ip || (request.socket ? request.socket.remoteAddress : "local") || "local";
-      const username = request.body ? request.body.username : "";
+      let ip = "local";
+      if (request.ip) {
+        ip = request.ip;
+      } else if (request.socket && request.socket.remoteAddress) {
+        ip = request.socket.remoteAddress;
+      }
+
+      let username = "";
+      if (request.body && request.body.username) {
+        username = request.body.username;
+      }
+
       const clientKey = ip + ":" + String(username);
       const payload = Object.assign({}, request.body, { clientKey: clientKey });
       const result = await authUseCases.login(payload);
