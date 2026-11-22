@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, Banknote, Package, ShoppingBag, TrendingUp } from "lucide-react";
+import { AlertTriangle, Banknote, Package, TrendingUp } from "lucide-react";
 import { api } from "../api.js";
 import { formatPeso, formatQuantity, formatSmartDateTime } from "../format.js";
 import { Badge } from "../components/Badge.jsx";
@@ -113,23 +113,7 @@ export function DashboardPage(props) {
 
   return (
     <PageLayout scroll={true}>
-      <PageHeader title="Dashboard">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Button variant="secondary" size="sm" onClick={loadDashboard}>
-            Refresh
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={function openPos() {
-              props.onNavigate("pos");
-            }}
-          >
-            <ShoppingBag className="h-4 w-4" />
-            <span>Open POS</span>
-          </Button>
-        </div>
-      </PageHeader>
+      <PageHeader title="Dashboard" />
 
       {errorElement}
 
