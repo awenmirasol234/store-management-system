@@ -3,6 +3,7 @@ import React from "react";
 import { renderToString } from "react-dom/server";
 import { ShoppingBag } from "lucide-react";
 import { PosPage } from "../src/pages/PosPage.jsx";
+import { ProductThumb } from "../src/components/ProductThumb.jsx";
 
 describe("PosPage SSR test", function () {
   it("renders without throwing an error", function () {
@@ -27,5 +28,30 @@ describe("PosPage SSR test", function () {
     expect(html).toContain("Clear");
     expect(html).toContain("Clear Sale");
     expect(html).toContain("Clear all items in cart");
+  });
+
+  it("renders ProductThumb in fullBleed mode with edge-to-edge styling", function () {
+    const thumbHtml = renderToString(
+      React.createElement(ProductThumb, {
+        imageUrl: "http://example.com/test.jpg",
+        name: "Test Item",
+        fullBleed: true
+      })
+    );
+    expect(thumbHtml).toContain("object-cover");
+    expect(thumbHtml).toContain("h-full");
+    expect(thumbHtml).toContain("w-full");
+  });
+
+  it("renders ProductThumb initials fallback in fullBleed mode", function () {
+    const thumbHtml = renderToString(
+      React.createElement(ProductThumb, {
+        imageUrl: null,
+        name: "Coke Can",
+        fullBleed: true
+      })
+    );
+    expect(thumbHtml).toContain("CO");
+    expect(thumbHtml).toContain("bg-[#EEEEED]");
   });
 });

@@ -509,40 +509,50 @@ export function PosPage(props) {
           return (
             <div
               key={product.product_id}
-              className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-3 sm:p-3.5 text-left transition-all hover:border-[#151515]/30 hover:shadow-xs justify-between"
+              className="flex flex-col overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white text-left transition-all hover:border-[#151515]/30 hover:shadow-xs justify-between"
             >
-              <div
-                onClick={function onCardClick() {
-                  handleProductCardClick(product);
-                }}
-                className="cursor-pointer"
-              >
-                <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-[#EEEEED] flex items-center justify-center p-2">
-                  <div className="absolute left-2 top-2 z-10 rounded-md bg-[#171717] px-2 py-0.5 font-mono text-2xs font-medium text-white shadow-xs">
-                    Stock: {formatQuantity(product.current_stock)}
+              <div>
+                <div
+                  onClick={function onCardClick() {
+                    handleProductCardClick(product);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <div className="relative aspect-square w-full overflow-hidden bg-[#EEEEED]">
+                    <div className="absolute left-2.5 top-2.5 z-10 rounded-md bg-[#171717]/85 backdrop-blur-xs px-2 py-0.5 font-mono text-2xs font-medium text-white shadow-xs">
+                      Stock: {formatQuantity(product.current_stock)}
+                    </div>
+                    <ProductThumb
+                      imageUrl={product.image_url}
+                      name={product.product_name}
+                      fullBleed={true}
+                    />
                   </div>
-                  <ProductThumb imageUrl={product.image_url} name={product.product_name} />
-                </div>
-                <div className="mt-3 truncate text-xs font-medium text-[#151515]">
-                  {product.product_name}
-                </div>
-                <div className="mt-0.5 truncate text-2xs text-[#777777]">
-                  {categoryName}
-                </div>
-                <div className="mt-1 font-mono text-sm font-semibold text-[#151515]">
-                  {formatPeso(product.selling_price)}
+                  <div className="p-3 sm:p-3.5 pb-0 sm:pb-0">
+                    <div className="truncate text-xs font-medium text-[#151515]">
+                      {product.product_name}
+                    </div>
+                    <div className="mt-0.5 truncate text-2xs text-[#777777]">
+                      {categoryName}
+                    </div>
+                    <div className="mt-1 font-mono text-sm font-semibold text-[#151515]">
+                      {formatPeso(product.selling_price)}
+                    </div>
+                  </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={function onAddClick() {
-                  handleProductCardClick(product);
-                }}
-                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#E9E9E9] bg-white py-2 text-xs font-semibold text-[#151515] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                <span>Add to Cart</span>
-              </button>
+              <div className="p-3 sm:p-3.5 pt-3 sm:pt-3">
+                <button
+                  type="button"
+                  onClick={function onAddClick() {
+                    handleProductCardClick(product);
+                  }}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#E9E9E9] bg-white py-2 text-xs font-semibold text-[#151515] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>Add to Cart</span>
+                </button>
+              </div>
             </div>
           );
         })}
