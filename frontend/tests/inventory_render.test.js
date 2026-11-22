@@ -16,4 +16,14 @@ describe("InventoryPage SSR test", function () {
     expect(MoreVertical).toBeDefined();
     expect(typeof MoreVertical).toBe("object");
   });
+
+  it("renders with currentUser prop without error", function () {
+    const html = renderToString(
+      React.createElement(InventoryPage, {
+        currentUser: { username: "cashier1", role: "CASHIER" }
+      })
+    );
+    expect(typeof html).toBe("string");
+    expect(html).toContain("Add Product");
+  });
 });

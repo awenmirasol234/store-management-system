@@ -18,4 +18,14 @@ describe("Refactored page rendering", function () {
     expect(html).toContain("No completed sales yet.");
     expect(html).toContain("No transactions recorded yet.");
   });
+
+  it("renders TransactionsPage with currentUser prop", function () {
+    const html = renderToString(
+      React.createElement(TransactionsPage, {
+        currentUser: { username: "cashier1", role: "CASHIER" }
+      })
+    );
+    expect(html).toContain("Transactions");
+    expect(html).toContain("No completed sales yet.");
+  });
 });

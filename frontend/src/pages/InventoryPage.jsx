@@ -55,7 +55,7 @@ function getStockBadgeTone(product) {
   return "dark";
 }
 
-export function InventoryPage() {
+export function InventoryPage(props) {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);

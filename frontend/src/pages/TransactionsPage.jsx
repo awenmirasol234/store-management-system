@@ -58,7 +58,7 @@ export function filterSales(salesList, query) {
   return matches;
 }
 
-export function TransactionsPage() {
+export function TransactionsPage(props) {
   const [sales, setSales] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [errorBanner, setErrorBanner] = useState("");

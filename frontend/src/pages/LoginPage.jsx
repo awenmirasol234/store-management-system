@@ -169,17 +169,7 @@ export function LoginPage(props) {
           {/* On-screen Keypad */}
           <div className="grid grid-cols-3 gap-2 pt-1">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(function renderNumKey(num) {
-              let errorElement = null;
-  if (errorBanner) {
-    errorElement = <ErrorBanner message={errorBanner} className="mb-4" />;
-  }
-
-  let submitButtonText = "Sign In to Terminal";
-  if (submitting) {
-    submitButtonText = "Signing in...";
-  }
-
-  return (
+              return (
                 <button
                   key={num}
                   type="button"

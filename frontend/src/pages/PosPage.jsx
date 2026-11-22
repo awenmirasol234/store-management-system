@@ -27,17 +27,6 @@ import { ProductThumb } from "../components/ProductThumb.jsx";
 import { ReceiptView } from "../components/ReceiptView.jsx";
 import { PosCheckoutModal } from "../components/PosCheckoutModal.jsx";
 
-function getStockTextClass(product) {
-  const stockLevel = getStockLevel(product);
-  if (stockLevel === STOCK_LEVELS.OUT) {
-    return "text-rose-600";
-  }
-  if (stockLevel === STOCK_LEVELS.LOW) {
-    return "text-amber-600";
-  }
-  return "text-emerald-600";
-}
-
 function buildCartKey(productId, optionId, customAmount) {
   if (customAmount !== null && customAmount !== undefined) {
     return productId + ":custom:" + String(Date.now()) + ":" + String(Math.random());
