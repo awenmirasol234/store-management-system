@@ -1,147 +1,185 @@
 ---
 name: codebase-architecture-audit
-description: Fully audit an existing codebase and recommend the simplest, leanest, and most maintainable project structure without modifying files.
+description: Audit an existing codebase and recommend the simplest maintainable structure without modifying project files.
 ---
 
 # Codebase Architecture Audit
 
-## Purpose
+Audit the existing codebase and recommend the simplest structure that fits its
+actual requirements, implementation, technology, and maintenance needs.
 
-Analyze the entire codebase and recommend the best project structure based on its actual requirements, existing implementation, and complexity.
+Do not redesign the project to match a generic enterprise architecture.
+Recommend only changes supported by codebase evidence.
 
-Prioritize simplicity, maintainability, clear responsibilities, and ease of navigation. Avoid unnecessary abstractions and overengineering.
+## Strict Audit Constraints
 
-## Instructions
+- Do not modify, move, rename, delete, or create project files.
+- Do not implement the proposed structure.
+- Do not install dependencies.
+- Do not rewrite existing functionality.
+- Do not introduce architectural patterns without a demonstrated need.
+- Preserve existing behavior and established project conventions.
+- Stop after presenting the audit and wait for explicit user approval before
+  making any changes.
 
-### 1. Inspect the Codebase
+## Audit Procedure
 
-Before making recommendations, inspect:
+Follow these steps in order:
 
-- Project directory and file structure.
-- Dependencies and configuration files.
-- Existing architecture and design patterns.
-- Modules, components, services, and utilities.
-- Data flow and dependencies between modules.
-- Existing documentation and development conventions.
+1. Check the working tree and exclude unrelated changes from the audit.
+2. Map the complete project directory and file structure.
+3. Read package manifests, lockfiles, build configuration, runtime
+   configuration, and test configuration.
+4. Inspect representative source files from every application layer and
+   feature/module.
+5. Trace data flow and dependencies between modules, components, services,
+   utilities, repositories, APIs, and external systems.
+6. Read existing documentation and agent/development conventions.
+7. Identify the architecture and patterns the project actually uses.
+8. Compare the current structure with the project's size, complexity,
+   technology stack, requirements, workflow, and maintenance needs.
+9. Verify suspected problems by checking usage, imports, callers, tests,
+   exports, configuration, and runtime references.
+10. Separate confirmed problems from optional improvements and intentional
+    exceptions.
+11. Recommend the smallest safe structural improvement, or state that the
+    current structure should remain.
 
-Understand how the application works before evaluating its structure.
+## Inspect for Structural Problems
 
-### 2. Identify Structural Problems
+Check for:
 
-Look for:
-
-- Poorly organized files and directories.
+- Files or directories that do not match their responsibilities.
 - Unnecessary directory nesting.
-- Duplicated code and responsibilities.
-- Tightly coupled modules.
-- Unnecessary abstractions and design patterns.
-- Unused files, directories, and dependencies.
-- Inconsistent naming conventions.
-- Components or modules with multiple responsibilities.
-- Unnecessary complexity in the existing architecture.
+- Duplicated code or overlapping responsibilities.
+- Tightly coupled modules that should be independent.
+- Unnecessary abstractions, services, managers, providers, or design patterns.
+- Unused files, directories, dependencies, exports, and configuration.
+- Inconsistent naming or file placement.
+- Components, services, modules, or utilities with multiple responsibilities.
+- Architectural complexity that does not provide current value.
+- Documentation that conflicts with the implementation.
 
-Only report issues supported by actual codebase findings.
+Do not report a problem based only on preference. Cite the codebase evidence.
+Do not recommend removing or merging anything until its usage is verified.
 
-### 3. Evaluate the Existing Architecture
+## Evaluate the Current Architecture
 
-Determine whether the current architecture is appropriate for the project's:
+Evaluate whether the current architecture fits:
 
-- Size and complexity.
-- Technology stack.
-- Application requirements.
-- Development workflow.
-- Long-term maintenance needs.
+- The project's size and complexity.
+- The technology stack and framework conventions.
+- The application's actual requirements.
+- The current development and testing workflow.
+- The expected maintenance burden.
 
-Do not force architectural patterns simply because they are commonly recommended.
+Prefer the existing architecture when it already satisfies these needs. Do not
+force Clean Architecture, layered architecture, microservices, design
+patterns, or additional modules without evidence that they solve a real
+problem.
 
-### 4. Recommend a Lean Structure
+## Recommend a Lean Structure
 
-Propose a clean and maintainable directory structure.
+When the current structure needs improvement:
 
-Follow these principles:
-
-- Separation of concerns.
-- Single responsibility.
-- Loose coupling.
-- High cohesion.
-- Reusability where genuinely beneficial.
-- Consistent and descriptive naming.
-- Minimal directory nesting.
-- Clear ownership of files and modules.
-
-Prefer a simple structure that fits the project rather than a generic enterprise architecture.
-
-### 5. Review Existing Files
-
-Classify existing files and directories into:
-
-- Keep: Already organized appropriately.
-- Move: Belong in a different directory.
-- Rename: Have unclear or inconsistent names.
-- Merge: Duplicate or unnecessarily separated responsibilities.
-- Remove: Confirmed unused or unnecessary files.
-
-Do not recommend removing files without verifying their usage.
-
-### 6. Minimize Complexity
-
-Follow these constraints:
-
-- Prefer existing implementations over unnecessary rewrites.
+- Prefer clear ownership of files and modules.
+- Keep related behavior together.
+- Separate responsibilities only when the separation reduces coupling or
+  improves testing and navigation.
+- Prefer high cohesion and loose coupling.
 - Reuse existing utilities and conventions.
-- Avoid unnecessary services, managers, providers, and abstractions.
-- Avoid introducing additional dependencies.
-- Avoid excessive folder nesting.
+- Use descriptive, consistent names.
+- Minimize directory nesting.
 - Do not create directories for hypothetical future requirements.
+- Do not add dependencies when existing code can solve the problem.
 - Do not sacrifice readability for architectural complexity.
-- Keep documentation consistent with the actual implementation.
 
-## Expected Output
+Provide a directory tree only when it clarifies the recommendation. Keep the
+tree limited to relevant directories and explain each important entry.
 
-Produce a comprehensive audit report with the following sections:
+## Classify Existing Files
+
+Classify each affected file or directory as one of:
+
+- **Keep:** Its location and responsibility match the established structure.
+- **Move:** Its responsibility belongs in a different existing or explicitly
+  justified directory.
+- **Rename:** Its name is unclear or inconsistent with the dominant naming
+  pattern.
+- **Merge:** It duplicates or unnecessarily separates one responsibility.
+- **Remove:** Its usage is verified as absent and its removal is safe.
+
+For every `Move`, `Rename`, `Merge`, or `Remove` recommendation:
+
+- Name the exact path.
+- Explain the evidence.
+- Identify callers, imports, tests, exports, and configuration that would be
+  affected.
+- State the smallest safe correction.
+
+## Required Audit Report
+
+Use these sections in the final report:
 
 ### 1. Current Structure Assessment
-Describe the existing organization and overall architectural quality.
 
-### 2. Identified Problems
-List structural issues, unnecessary complexity, duplication, and maintainability concerns.
+Describe the current organization, dominant architecture, and overall quality.
+
+### 2. Verified Problems
+
+List confirmed structural issues. For each issue, include:
+
+- Exact file or directory.
+- Evidence from the codebase.
+- Current responsibility or pattern.
+- Why it is a structural problem.
+- Priority: high, medium, or low.
 
 ### 3. Recommended Architecture
-Explain the recommended architectural approach and why it fits the project.
+
+Explain the smallest architectural approach that fits the project and why it
+fits better than the alternatives considered.
 
 ### 4. Proposed Directory Structure
-Provide a complete directory tree with brief descriptions of important directories.
+
+Show the relevant proposed tree with brief descriptions. Do not present
+unnecessary hypothetical modules.
 
 ### 5. File Organization Recommendations
-Identify which existing files should be kept, moved, renamed, merged, or removed.
+
+Classify affected files as Keep, Move, Rename, Merge, or Remove. Verify usage
+before recommending removal.
 
 ### 6. Improvement Opportunities
-Recommend practical improvements to organization, separation of concerns, and maintainability.
+
+List practical, non-essential improvements separately from confirmed problems.
+Do not present optional cleanup as required work.
 
 ### 7. Prioritized Action Plan
-Organize recommended changes by priority:
 
-- High: Important structural or architectural problems.
-- Medium: Improvements to maintainability and consistency.
-- Low: Optional cleanup and minor organizational improvements.
+Order recommendations as:
 
-For each recommendation, explain its purpose and expected benefit.
+- **High:** Structural problems that materially affect correctness, coupling,
+  navigation, or maintenance.
+- **Medium:** Improvements that reduce maintenance cost or inconsistency.
+- **Low:** Optional cleanup with limited immediate impact.
 
-## Constraints
+For every recommendation, state its purpose, expected benefit, affected files,
+and smallest safe next step.
 
-- DO NOT modify, move, rename, delete, or create project files during the audit.
-- DO NOT implement the proposed structure.
-- DO NOT install additional dependencies.
-- DO NOT rewrite existing functionality.
-- DO NOT introduce unnecessary architectural patterns.
-- Preserve existing functionality and project conventions.
-- Base every recommendation on actual codebase inspection.
-- Clearly distinguish verified problems from optional improvements.
+## Final Verification
 
-## Approval Requirement
+Before presenting the audit:
 
-This skill is strictly for auditing and recommending.
+- Confirm every reported issue is supported by actual codebase evidence.
+- Confirm generated files, dependencies, and unrelated changes were excluded.
+- Confirm no recommendation requires an unverified assumption.
+- Confirm optional improvements are clearly separated from required fixes.
+- Review the report for broad rewrites, unnecessary abstractions, and
+  architecture imposed without evidence.
+- State unresolved conflicts and checks that could not run.
+- Do not claim a file, dependency, or module is unused without checking its
+  references.
 
-After presenting the audit report, STOP and wait for explicit user approval before making any changes.
-
-Do not automatically proceed with implementation.
+After presenting the report, stop and wait for explicit approval. Do not
+automatically implement any recommendation.
