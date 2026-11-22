@@ -837,8 +837,8 @@ export function PosPage(props) {
   }
 
   const cartFooterContent = (
-    <div className="space-y-4 pt-2">
-      <div className="space-y-2 border-t border-[#E9E9E9] pt-4">
+    <div className="space-y-4">
+      <div className="space-y-2">
         <div className="flex items-center justify-between text-xs">
           <span className="text-[#777777]">Subtotal</span>
           <span className="font-mono font-medium text-[#151515]">

@@ -54,4 +54,10 @@ describe("PosPage SSR test", function () {
     expect(thumbHtml).toContain("CO");
     expect(thumbHtml).toContain("bg-[#EEEEED]");
   });
+
+  it("renders Subtotal row without redundant border-t divider wrapper", function () {
+    const html = renderToString(React.createElement(PosPage));
+    expect(html).toContain("Subtotal");
+    expect(html).not.toContain('space-y-2 border-t border-[#E9E9E9] pt-4');
+  });
 });
