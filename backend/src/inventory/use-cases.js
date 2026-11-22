@@ -406,3 +406,9 @@ export function createCreateSupplierUseCase(dependencies) {
     return supplier;
   };
 }
+
+export function createListUnitsUseCase(dependencies) {
+  return async function execute() {
+    return dependencies.unitRepository.listAll();
+  };
+}

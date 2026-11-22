@@ -171,5 +171,10 @@ export function createInventoryRouter(dependencies) {
     response.status(201).json({ data: supplier });
   });
 
+  router.get("/units", async function listUnits(request, response) {
+    const units = await dependencies.useCases.listUnits();
+    response.json({ data: units });
+  });
+
   return router;
 }

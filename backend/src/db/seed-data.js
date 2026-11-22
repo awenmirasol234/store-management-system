@@ -1,5 +1,36 @@
 // Static demo data used by seed.js.
 
+export const BASE_UNITS = [
+  "Piece (pc)",
+  "Pack",
+  "Box",
+  "Bottle",
+  "Can",
+  "Sachet",
+  "Kilogram (kg)",
+  "Gram (g)",
+  "Liter (L)",
+  "Milliliter (mL)",
+  "Meter (m)",
+  "Roll",
+  "Dozen (doz)",
+  "Pair",
+  "Set",
+  "Bundle",
+  "Sack",
+  "Case",
+  "Carton",
+  "Tray",
+  "Gallon",
+  "Pouch",
+  "Tube",
+  "Jar",
+  "Bar",
+  "Stick",
+  "Ream",
+  "Sheet"
+];
+
 export const CATEGORIES = [
   {
     category_id: "cat_canned",

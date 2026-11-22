@@ -71,6 +71,10 @@ describe("Express REST API routes", function () {
     expect(health.status).toBe(200);
     expect(health.body.data.status).toBe("ok");
 
+    const unitsRes = await requestJson(baseUrl, "GET", "/api/units");
+    expect(unitsRes.status).toBe(200);
+    expect(Array.isArray(unitsRes.body.data)).toBe(true);
+
     // Create product
     const createRes = await requestJson(baseUrl, "POST", "/api/products", {
       product_name: "Instant Noodles",

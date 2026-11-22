@@ -342,3 +342,31 @@ export function createSqliteSupplierRepository(database) {
     }
   };
 }
+
+function mapUnitRow(row) {
+  if (!row) {
+    return null;
+  }
+  return {
+    unit_id: row.unit_id,
+    unit_name: row.unit_name,
+    is_active: fromSqliteBool(row.is_active)
+  };
+}
+
+export function createSqliteUnitRepository(database) {
+  const listAllStmt = database.prepare(
+    "SELECT unit_id, unit_name, is_active FROM product_units WHERE is_active = 1 ORDER BY rowid ASC"
+  );
+
+  return {
+    async listAll() {
+      const rows = listAllStmt.all();
+      const results = [];
+      for (let index = 0; index < rows.length; index = index + 1) {
+        results.push(mapUnitRow(rows[index]));
+      }
+      return results;
+    }
+  };
+}

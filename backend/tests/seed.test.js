@@ -26,10 +26,15 @@ describe("seedDatabase", function () {
     const databasePath = path.join(activeTempDir, "store.db");
 
     const stats = seedDatabase(databasePath, false);
+    expect(stats.units).toBe(28);
     expect(stats.products).toBe(50);
     expect(stats.sales_transactions).toBe(12);
 
     activeDatabase = openSqliteDatabase(databasePath);
+    const unitRows = activeDatabase.prepare("SELECT unit_name FROM product_units ORDER BY rowid ASC").all();
+    expect(unitRows.length).toBe(28);
+    expect(unitRows[0].unit_name).toBe("Piece (pc)");
+    expect(unitRows[27].unit_name).toBe("Sheet");
     const compactDate = createSystemClock().todayManilaCompact();
     const sequenceRow = activeDatabase
       .prepare("SELECT last_sequence FROM receipt_sequences WHERE business_date = ?")

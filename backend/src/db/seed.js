@@ -1,6 +1,7 @@
 import path from "node:path";
 import { openSqliteDatabase } from "./sqlite.js";
 import {
+  BASE_UNITS,
   CATEGORIES,
   PRODUCTS,
   SAMPLE_SALES,
@@ -34,8 +35,19 @@ export function seedDatabase(targetDbPath, shouldClean) {
       database.exec("DELETE FROM products");
       database.exec("DELETE FROM suppliers");
       database.exec("DELETE FROM product_categories");
+      database.exec("DELETE FROM product_units");
       database.exec("DELETE FROM user_sessions");
       database.exec("DELETE FROM users");
+    }
+
+    // 0. Seed Base Units
+    const insertUnitStmt = database.prepare(`
+      INSERT OR IGNORE INTO product_units (unit_id, unit_name, is_active)
+      VALUES (?, ?, 1)
+    `);
+    for (let unitIndex = 0; unitIndex < BASE_UNITS.length; unitIndex = unitIndex + 1) {
+      const unitName = BASE_UNITS[unitIndex];
+      insertUnitStmt.run("unit_" + String(unitIndex + 1), unitName);
     }
 
     // 1. Seed Categories
@@ -270,6 +282,7 @@ export function seedDatabase(targetDbPath, shouldClean) {
   `);
   receiptSequenceStmt.run(compactDate, SAMPLE_SALES.length);
 
+  const unitCountRow = database.prepare("SELECT count(*) as count FROM product_units").get();
   const prodCountRow = database.prepare("SELECT count(*) as count FROM products").get();
   const catCountRow = database.prepare("SELECT count(*) as count FROM product_categories").get();
   const supCountRow = database.prepare("SELECT count(*) as count FROM suppliers").get();
@@ -278,6 +291,7 @@ export function seedDatabase(targetDbPath, shouldClean) {
   const salesCountRow = database.prepare("SELECT count(*) as count FROM sales_transactions").get();
 
   const stats = {
+      units: unitCountRow.count,
       categories: catCountRow.count,
       suppliers: supCountRow.count,
       products: prodCountRow.count,
@@ -302,6 +316,7 @@ if (isMain) {
   console.log("Seeding store database (clean: " + shouldClean + ")...");
   const stats = seedDatabase(databasePath, shouldClean);
   console.log("Database seeded successfully!");
+  console.log("  Units:                  " + stats.units);
   console.log("  Categories:             " + stats.categories);
   console.log("  Suppliers:              " + stats.suppliers);
   console.log("  Products:               " + stats.products);

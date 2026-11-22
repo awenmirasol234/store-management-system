@@ -10,6 +10,12 @@ CREATE TABLE IF NOT EXISTS product_categories (
   is_active INTEGER NOT NULL DEFAULT 1
 );
 
+CREATE TABLE IF NOT EXISTS product_units (
+  unit_id TEXT PRIMARY KEY,
+  unit_name TEXT NOT NULL UNIQUE,
+  is_active INTEGER NOT NULL DEFAULT 1
+);
+
 CREATE TABLE IF NOT EXISTS suppliers (
   supplier_id TEXT PRIMARY KEY,
   supplier_name TEXT NOT NULL,

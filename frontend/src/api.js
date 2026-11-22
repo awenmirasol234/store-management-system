@@ -153,6 +153,9 @@ export const api = {
   createCategory(data) {
     return request("POST", "/api/categories", data);
   },
+  listUnits() {
+    return request("GET", "/api/units");
+  },
   listSuppliers() {
     return request("GET", "/api/suppliers");
   },

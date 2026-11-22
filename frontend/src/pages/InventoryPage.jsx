@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { api } from "../api.js";
 import { formatPeso, formatQuantity } from "../format.js";
-import { filterProducts, getStockLevel, STOCK_LEVELS } from "../products.js";
+import { COMMON_BASE_UNITS, filterProducts, getStockLevel, STOCK_LEVELS } from "../products.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
 import { DataTable } from "../components/DataTable.jsx";
@@ -34,7 +34,7 @@ function createEmptyProductForm() {
     product_name: "",
     barcode: "",
     category_id: "",
-    base_unit: "piece",
+    base_unit: "Piece (pc)",
     current_stock: "0",
     cost_price: "0",
     selling_price: "",
@@ -59,6 +59,7 @@ export function InventoryPage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
+  const [units, setUnits] = useState(COMMON_BASE_UNITS);
   const [searchQuery, setSearchQuery] = useState("");
   const [lowStockOnly, setLowStockOnly] = useState(false);
   const [errorBanner, setErrorBanner] = useState("");
@@ -147,11 +148,21 @@ export function InventoryPage() {
       const results = await Promise.all([
         api.listProducts(),
         api.listCategories(),
-        api.listSuppliers()
+        api.listSuppliers(),
+        api.listUnits().catch(function handleUnitsError() {
+          return null;
+        })
       ]);
       setProducts(results[0]);
       setCategories(results[1]);
       setSuppliers(results[2]);
+      if (results[3] && Array.isArray(results[3]) && results[3].length > 0) {
+        const unitNames = [];
+        for (let unitIndex = 0; unitIndex < results[3].length; unitIndex = unitIndex + 1) {
+          unitNames.push(results[3][unitIndex].unit_name);
+        }
+        setUnits(unitNames);
+      }
     } catch (error) {
       setErrorBanner(error.message);
     }
@@ -605,6 +616,14 @@ export function InventoryPage() {
     deleteProductName = deleteConfirmProduct.product_name;
   }
 
+  const unitOptions = [];
+  for (let unitIdx = 0; unitIdx < units.length; unitIdx = unitIdx + 1) {
+    unitOptions.push(units[unitIdx]);
+  }
+  if (productForm.base_unit && !unitOptions.includes(productForm.base_unit)) {
+    unitOptions.unshift(productForm.base_unit);
+  }
+
   return (
     <PageLayout>
       <div className="mb-5 sm:mb-6 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
@@ -683,65 +702,72 @@ export function InventoryPage() {
         }}
         title={productModalTitle}
       >
-        <form onSubmit={handleSaveProduct} className="space-y-5">
-          <Input
-            label="Product Name"
-            value={productForm.product_name}
-            onChange={function onChange(event) {
-              updateProductField("product_name", event.target.value);
-            }}
-            required={true}
-          />
+            <form onSubmit={handleSaveProduct} className="space-y-5">
+              <Input
+                label="Product Name"
+                value={productForm.product_name}
+                onChange={function onChange(event) {
+                  updateProductField("product_name", event.target.value);
+                }}
+                required={true}
+              />
 
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Barcode"
-              mono={true}
-              value={productForm.barcode}
-              onChange={function onChange(event) {
-                updateProductField("barcode", event.target.value);
-              }}
-              placeholder="Optional"
-            />
-            <Select
-              label="Category"
-              value={productForm.category_id}
-              onChange={function onChange(event) {
-                updateProductField("category_id", event.target.value);
-              }}
-            >
-              <option value="">Uncategorized</option>
-              {categories.map(function renderCatOption(category) {
-                return (
-                  <option key={category.category_id} value={category.category_id}>
-                    {category.category_name}
-                  </option>
-                );
-              })}
-            </Select>
-          </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Barcode"
+                  mono={true}
+                  value={productForm.barcode}
+                  onChange={function onChange(event) {
+                    updateProductField("barcode", event.target.value);
+                  }}
+                  placeholder="Optional"
+                />
+                <Select
+                  label="Category"
+                  value={productForm.category_id}
+                  onChange={function onChange(event) {
+                    updateProductField("category_id", event.target.value);
+                  }}
+                >
+                  <option value="">Uncategorized</option>
+                  {categories.map(function renderCatOption(category) {
+                    return (
+                      <option key={category.category_id} value={category.category_id}>
+                        {category.category_name}
+                      </option>
+                    );
+                  })}
+                </Select>
+              </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <Input
-              label="Base Unit"
-              value={productForm.base_unit}
-              onChange={function onChange(event) {
-                updateProductField("base_unit", event.target.value);
-              }}
-              placeholder="piece, kg, ml"
-              required={true}
-            />
-            <Input
-              label="Cost Price (₱)"
-              type="number"
-              step="0.01"
-              min="0"
-              value={productForm.cost_price}
-              onChange={function onChange(event) {
-                updateProductField("cost_price", event.target.value);
-              }}
-              required={true}
-            />
+              <div className="grid grid-cols-3 gap-4">
+                <Select
+                  label="Base Unit"
+                  value={productForm.base_unit}
+                  onChange={function onChange(event) {
+                    updateProductField("base_unit", event.target.value);
+                  }}
+                  required={true}
+                >
+                  {unitOptions.map(function renderUnitOption(unitName) {
+                    return (
+                      <option key={unitName} value={unitName}>
+                        {unitName}
+                      </option>
+                    );
+                  })}
+                </Select>
+                <Input
+                  label="Cost Price (₱)"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={productForm.cost_price}
+                  onChange={function onChange(event) {
+                    updateProductField("cost_price", event.target.value);
+                  }}
+                  required={true}
+                />
             <Input
               label="Selling Price (₱)"
               type="number"

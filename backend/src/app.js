@@ -11,7 +11,8 @@ import {
   createSqliteInventoryTransactionRepository,
   createSqliteProductRepository,
   createSqliteSellingOptionRepository,
-  createSqliteSupplierRepository
+  createSqliteSupplierRepository,
+  createSqliteUnitRepository
 } from "./inventory/sqlite-repo.js";
 import {
   createAdjustStockUseCase,
@@ -25,6 +26,7 @@ import {
   createListProductsUseCase,
   createListSellingOptionsUseCase,
   createListSuppliersUseCase,
+  createListUnitsUseCase,
   createLookupBarcodeUseCase,
   createCreateProductUseCase,
   createSaveSellingOptionUseCase,
@@ -134,6 +136,7 @@ export function createApp(options) {
   const inventoryTransactionRepository = createSqliteInventoryTransactionRepository(database);
   const categoryRepository = createSqliteCategoryRepository(database);
   const supplierRepository = createSqliteSupplierRepository(database);
+  const unitRepository = createSqliteUnitRepository(database);
   const customerRepository = createSqliteCustomerRepository(database);
   const creditTransactionRepository = createSqliteCreditTransactionRepository(database);
   const salesRepository = createSqliteSalesRepository(database);
@@ -151,6 +154,7 @@ export function createApp(options) {
     inventoryTransactionRepository: inventoryTransactionRepository,
     categoryRepository: categoryRepository,
     supplierRepository: supplierRepository,
+    unitRepository: unitRepository,
     customerRepository: customerRepository,
     creditTransactionRepository: creditTransactionRepository,
     salesRepository: salesRepository,
@@ -176,7 +180,8 @@ export function createApp(options) {
     listCategories: createListCategoriesUseCase(sharedDeps),
     createCategory: createCreateCategoryUseCase(sharedDeps),
     listSuppliers: createListSuppliersUseCase(sharedDeps),
-    createSupplier: createCreateSupplierUseCase(sharedDeps)
+    createSupplier: createCreateSupplierUseCase(sharedDeps),
+    listUnits: createListUnitsUseCase(sharedDeps)
   };
 
   const salesUseCases = {
@@ -267,6 +272,10 @@ export function createApp(options) {
       } else {
         authMiddleware.requireRole([ROLES.OWNER])(request, response, next);
       }
+    });
+
+    app.use("/api/units", function checkUnitsAuth(request, response, next) {
+      authMiddleware.requireAuth(request, response, next);
     });
   }
 
