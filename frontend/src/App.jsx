@@ -9,6 +9,7 @@ import { DashboardPage } from "./pages/DashboardPage.jsx";
 import { PosPage } from "./pages/PosPage.jsx";
 import { TransactionsPage } from "./pages/TransactionsPage.jsx";
 import { InventoryPage } from "./pages/InventoryPage.jsx";
+import { CustomersPage } from "./pages/CustomersPage.jsx";
 import { ReportsPage } from "./pages/ReportsPage.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
 import { SetupPage } from "./pages/SetupPage.jsx";
@@ -109,10 +110,12 @@ export function App() {
   let pageElement = <DashboardPage onNavigate={setActivePage} currentUser={currentUser} />;
   if (activePage === "pos") {
     pageElement = <PosPage currentUser={currentUser} />;
-  } else if (activePage === "transactions") {
-    pageElement = <TransactionsPage currentUser={currentUser} />;
   } else if (activePage === "inventory") {
     pageElement = <InventoryPage currentUser={currentUser} />;
+  } else if (activePage === "customers") {
+    pageElement = <CustomersPage currentUser={currentUser} />;
+  } else if (activePage === "transactions") {
+    pageElement = <TransactionsPage currentUser={currentUser} />;
   } else if (activePage === "reports") {
     if (currentUser.role === "OWNER") {
       pageElement = <ReportsPage currentUser={currentUser} />;

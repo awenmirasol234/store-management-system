@@ -17,6 +17,7 @@ describe("Responsive navigation & components", function () {
     expect(html).toContain("Dashboard");
     expect(html).toContain("POS");
     expect(html).toContain("Inventory");
+    expect(html).toContain("Utang");
     expect(html).toContain("History");
     expect(html).toContain("Reports");
     expect(html).toContain("md:hidden");
@@ -56,6 +57,7 @@ describe("Responsive navigation & components", function () {
 
   it("keeps page titles in the shared navigation config", function () {
     expect(getPageTitle("pos")).toBe("Point of Sale");
+    expect(getPageTitle("customers")).toBe("Customer Credit & Utang");
     expect(getPageTitle("transactions")).toBe("Transactions");
     expect(getPageTitle("unknown")).toBe("Dashboard");
   });

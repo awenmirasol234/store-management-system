@@ -241,7 +241,7 @@ export function createApp(options) {
   if (enforceAuth) {
     app.use("/api/reports", authMiddleware.requireRole([ROLES.OWNER]));
     app.use("/api/sales", authMiddleware.requireAuth);
-    app.use("/api/credit", authMiddleware.requireAuth);
+    app.use("/api/customers", authMiddleware.requireAuth);
 
     app.use("/api/products", function checkProductsAuth(request, response, next) {
       if (request.method === "GET") {

@@ -1,4 +1,4 @@
-import { BarChart3, LayoutDashboard, Package, Receipt, ShoppingBag } from "lucide-react";
+import { BarChart3, LayoutDashboard, Package, Receipt, ShoppingBag, Users } from "lucide-react";
 
 export const NAV_ITEMS = [
   {
@@ -15,6 +15,13 @@ export const NAV_ITEMS = [
     shortLabel: "Inventory",
     pageTitle: "Inventory",
     icon: Package
+  },
+  {
+    key: "customers",
+    label: "Customers",
+    shortLabel: "Utang",
+    pageTitle: "Customer Credit & Utang",
+    icon: Users
   },
   {
     key: "transactions",

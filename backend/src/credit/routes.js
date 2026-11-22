@@ -30,8 +30,13 @@ export function createCreditRouter(dependencies) {
   });
 
   router.post("/customers/:customerId/payments", async function recordPayment(request, response) {
+    let createdBy = request.body.created_by;
+    if (!createdBy && request.user && request.user.username) {
+      createdBy = request.user.username;
+    }
     const payload = Object.assign({}, request.body, {
-      customer_id: request.params.customerId
+      customer_id: request.params.customerId,
+      created_by: createdBy
     });
     const result = await dependencies.useCases.recordPayment(payload);
     response.status(201).json({ data: result });

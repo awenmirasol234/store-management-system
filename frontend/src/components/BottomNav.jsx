@@ -9,8 +9,10 @@ export function BottomNav(props) {
   let gridClass = "grid h-full w-full ";
   if (items.length === 4) {
     gridClass = gridClass + "grid-cols-4";
-  } else {
+  } else if (items.length === 5) {
     gridClass = gridClass + "grid-cols-5";
+  } else {
+    gridClass = gridClass + "grid-cols-6";
   }
 
   return (
