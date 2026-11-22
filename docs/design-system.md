@@ -327,9 +327,11 @@ Every component must be written in plain beginner-readable JavaScript following 
 **Tactical Rules:**
 - Backdrop: `fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-3 sm:p-6`.
 - Card Container: `w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col`.
+- Sizing Tokens: `sm` (`max-w-sm`), `md` (`max-w-md`), `lg` (`max-w-lg`, default), `xl` (`max-w-2xl`), `2xl` (`max-w-3xl`).
 - Header: `flex items-center justify-between border-b border-[#E9E9E9] px-6 py-4`.
 - Title: `text-base font-semibold text-[#151515]`.
 - Close Button: `h-9 w-9 rounded-lg text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] transition-colors`.
+- Checkout Cockpit Layout: `PosCheckoutModal` uses `size="xl"` (`max-w-2xl`) with a balanced 2-column layout (`grid-cols-1 md:grid-cols-2 gap-5`), symmetrical 2×3 banknote presets (`Exact`, `₱50`, `₱100`, `₱200`, `₱500`, `₱1,000`), and a lime-green accented Change Due card (`border-[#B9F36B] bg-[#B9F36B]/15`).
 
 ### 4.10 Metric Cards (`frontend/src/components/StatCard.jsx`)
 

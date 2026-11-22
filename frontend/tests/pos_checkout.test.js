@@ -45,6 +45,9 @@ describe("PosCheckoutModal rendering tests", function () {
     expect(html).toContain("Total Due");
     expect(html).toContain("Cash Tendered");
     expect(html).toContain("Change");
+    expect(html).toContain("max-w-2xl");
+    expect(html).toContain("grid-cols-1 md:grid-cols-2");
+    expect(html).toContain("₱200.00");
   });
 
   it("renders CREDIT (Utang) checkout modal with customer options and credit notice", function () {

@@ -27,8 +27,18 @@ export function Modal(props) {
   let widthClass = "max-w-lg";
   if (props.size === "sm") {
     widthClass = "max-w-sm";
+  } else if (props.size === "md") {
+    widthClass = "max-w-md";
+  } else if (props.size === "lg") {
+    widthClass = "max-w-lg";
   } else if (props.size === "xl") {
     widthClass = "max-w-2xl";
+  } else if (props.size === "2xl") {
+    widthClass = "max-w-3xl";
+  }
+
+  if (props.maxWidth) {
+    widthClass = props.maxWidth;
   }
 
   return (

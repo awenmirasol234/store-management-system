@@ -368,6 +368,7 @@ export function PosCheckoutModal(props) {
       { key: "exact", label: "Exact", amount: cashTargetAmount },
       { key: "50", label: formatPeso(50), amount: 50 },
       { key: "100", label: formatPeso(100), amount: 100 },
+      { key: "200", label: formatPeso(200), amount: 200 },
       { key: "500", label: formatPeso(500), amount: 500 },
       { key: "1000", label: formatPeso(1000), amount: 1000 }
     ];
@@ -385,7 +386,7 @@ export function PosCheckoutModal(props) {
           }}
           required={true}
         />
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {quickBills.map(function renderQuickBill(bill) {
             return (
               <Button
@@ -396,15 +397,15 @@ export function PosCheckoutModal(props) {
                 onClick={function fillBill() {
                   props.onAmountPaidChange(String(bill.amount));
                 }}
-                className="font-mono text-xs"
+                className="font-mono text-xs justify-center"
               >
                 {bill.label}
               </Button>
             );
           })}
         </div>
-        <div className="flex items-center justify-between rounded-xl border border-[#E9E9E9] bg-[#EEEEED] px-4 py-3">
-          <span className="text-xs font-semibold uppercase tracking-wide text-[#777777]">Change</span>
+        <div className="flex items-center justify-between rounded-xl border border-[#B9F36B] bg-[#B9F36B]/15 px-4 py-3">
+          <span className="text-xs font-semibold uppercase tracking-wide text-[#151515]">Change</span>
           <span className="font-mono text-xl font-bold text-[#151515]">
             {formatPeso(props.changePreview)}
           </span>
@@ -412,19 +413,66 @@ export function PosCheckoutModal(props) {
       </div>
     );
   } else {
+    let customerBalanceDisplay = "—";
+    let projectedUtangDisplay = formatPeso(props.total);
+    if (selectedCustomer) {
+      customerBalanceDisplay = formatPeso(selectedCustomer.current_balance);
+      projectedUtangDisplay = formatPeso(projectedBalance);
+    }
+
     cashTenderedSection = (
-      <div className="flex items-center justify-between rounded-xl border border-[#E9E9E9] bg-[#EEEEED] p-4">
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-wider text-[#151515]">
-            Total Charged to Utang
+      <div className="space-y-3">
+        <div className="flex items-center justify-between rounded-xl border border-[#E9E9E9] bg-[#EEEEED] p-4">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-[#151515]">
+              Total Charged to Utang
+            </div>
+            <div className="text-tiny text-[#777777] mt-0.5">
+              Will be added to customer's ledger upon confirmation
+            </div>
           </div>
-          <div className="text-tiny text-[#777777] mt-0.5">
-            Will be added to customer's ledger upon confirmation
+          <span className="font-mono text-xl font-bold text-[#151515]">
+            {formatPeso(props.total)}
+          </span>
+        </div>
+
+        <div className="rounded-xl border border-[#E9E9E9] bg-white p-4 space-y-2.5">
+          <div className="text-xs font-semibold uppercase tracking-wider text-[#151515]">
+            Utang Settlement Overview
+          </div>
+          <div className="space-y-2 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-[#777777]">Current Balance:</span>
+              <span className="font-mono font-medium text-[#151515]">
+                {customerBalanceDisplay}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[#777777]">Sale Charge:</span>
+              <span className="font-mono font-bold text-[#151515]">
+                +{formatPeso(props.total)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-[#E9E9E9]">
+              <span className="font-semibold text-[#151515]">Projected New Utang:</span>
+              <span className="font-mono text-sm font-bold text-[#151515]">
+                {projectedUtangDisplay}
+              </span>
+            </div>
           </div>
         </div>
-        <span className="font-mono text-xl font-bold text-[#151515]">
-          {formatPeso(props.total)}
-        </span>
+      </div>
+    );
+  }
+
+  let cashInfoCard = null;
+  if (props.paymentMethod === "CASH") {
+    cashInfoCard = (
+      <div className="rounded-xl border border-[#E9E9E9] bg-white p-3.5 space-y-1.5 text-xs text-[#777777]">
+        <div className="font-semibold text-[#151515]">Cash Transaction</div>
+        <div className="leading-relaxed">
+          Enter the cash amount received or select a quick banknote preset to calculate customer change.
+        </div>
       </div>
     );
   }
@@ -434,36 +482,50 @@ export function PosCheckoutModal(props) {
       open={props.open}
       onClose={props.onClose}
       title="Complete Checkout"
-      size="sm"
+      size="xl"
     >
-      <form onSubmit={props.onSubmit} className="space-y-4">
+      <form onSubmit={props.onSubmit} className="space-y-5">
         {/* Payment Method Switcher */}
         <PaymentMethodToggle
           paymentMethod={props.paymentMethod}
           onChange={props.onPaymentMethodChange}
         />
 
-        {/* Total Due Banner */}
-        <div className="flex items-center justify-between rounded-xl bg-[#F5F5F4] px-4 py-3 border border-[#E9E9E9]">
-          <span className="text-xs font-semibold uppercase tracking-wider text-[#777777]">
-            Total Due
-          </span>
-          <span className="font-mono text-xl font-bold text-[#151515]">
-            {formatPeso(props.total)}
-          </span>
+        {/* Balanced Responsive Two-Column Cockpit Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+          {/* Left Column: Transaction Summary & Customer Context */}
+          <div className="space-y-4">
+            {/* Total Due Banner */}
+            <div className="flex flex-col justify-between rounded-xl bg-[#F5F5F4] p-4 border border-[#E9E9E9] gap-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#777777]">
+                  Total Due
+                </span>
+                <span className="text-2xs font-medium text-[#777777]">Philippine Peso (PHP)</span>
+              </div>
+              <div className="font-mono text-2xl sm:text-3xl font-bold text-[#151515]">
+                {formatPeso(props.total)}
+              </div>
+            </div>
+
+            {/* Customer Utang Selection */}
+            {customerSection}
+
+            {cashInfoCard}
+          </div>
+
+          {/* Right Column: Tender & Settlement */}
+          <div className="space-y-4">
+            {/* Split Breakdown */}
+            {splitCashSection}
+
+            {/* Tendered / Change Section */}
+            {cashTenderedSection}
+          </div>
         </div>
 
-        {/* Customer Utang Selection */}
-        {customerSection}
-
-        {/* Split Breakdown */}
-        {splitCashSection}
-
-        {/* Tendered / Change Section */}
-        {cashTenderedSection}
-
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-2">
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E9E9E9]">
           <Button
             type="button"
             variant="secondary"
