@@ -72,6 +72,9 @@ Add the following tokens to `frontend/src/index.css`:
   --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "Inter", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
+  --text-3xs: 0.625rem;      /* 10px - densest badges */
+  --text-3xs--line-height: 0.875rem;
+
   --text-2xs: 0.6875rem;     /* 11px - metadata, stock badges */
   --text-2xs--line-height: 1rem;
 
@@ -95,6 +98,9 @@ Add the following tokens to `frontend/src/index.css`:
 
   --text-2xl: 1.625rem;      /* 26px - stat highlights */
   --text-2xl--line-height: 2.125rem;
+
+  --text-3xl: 1.875rem;      /* 30px - oversized emphasis */
+  --text-3xl--line-height: 2.25rem;
 
   /* Shape & Radii */
   --radius-card: 16px;
