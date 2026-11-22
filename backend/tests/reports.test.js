@@ -16,7 +16,15 @@ import {
   createGetReportsSummaryUseCase,
   createGetTopProductsUseCase
 } from "../src/reports/use-cases.js";
-import { calculateNetProfitInt, resolveReportDate } from "../src/reports/domain.js";
+import {
+  buildDailyBreakdown,
+  buildTopProducts,
+  calculateInventoryValuationInt,
+  calculateNetProfitInt,
+  calculateTotalCogsInt,
+  countLowStockProducts,
+  resolveReportDate
+} from "../src/reports/domain.js";
 import { ValidationError } from "../src/shared/errors.js";
 
 let activeDatabase = null;
@@ -114,5 +122,60 @@ describe("reports SQLite repository", function () {
     }).toThrow(ValidationError);
 
     expect(calculateNetProfitInt(10000, 6000, 1000)).toBe(3000);
+  });
+
+  it("computes report helpers from scaled integer rows", function () {
+    const itemRows = [
+      {
+        product_id: "prod-1",
+        product_name: "Rice",
+        base_unit: "kg",
+        manila_date: "2026-11-20",
+        base_quantity_int: 25000,
+        unit_cost_int: 1000,
+        subtotal_int: 5000
+      },
+      {
+        product_id: "prod-1",
+        product_name: "Rice",
+        base_unit: "kg",
+        manila_date: "2026-11-21",
+        base_quantity_int: 10000,
+        unit_cost_int: 1000,
+        subtotal_int: 2000
+      }
+    ];
+
+    expect(calculateTotalCogsInt(itemRows)).toBe(3500);
+
+    const topProducts = buildTopProducts(itemRows, 5);
+    expect(topProducts.length).toBe(1);
+    expect(topProducts[0].quantity_sold).toBe(3.5);
+    expect(topProducts[0].revenue).toBe(70);
+    expect(topProducts[0].profit).toBe(35);
+    expect(buildTopProducts(itemRows, 1).length).toBe(1);
+
+    const dailyRows = [
+      { manila_date: "2026-11-20", sale_count: 2, gross_sales_int: 5000 },
+      { manila_date: "2026-11-21", sale_count: 1, gross_sales_int: 2000 }
+    ];
+    expect(buildDailyBreakdown(dailyRows, itemRows)).toEqual([
+      { date: "2026-11-20", sale_count: 2, gross_sales: 50, profit: 25 },
+      { date: "2026-11-21", sale_count: 1, gross_sales: 20, profit: 10 }
+    ]);
+
+    expect(
+      countLowStockProducts([
+        { current_stock_int: 50000, reorder_level_int: 50000 },
+        { current_stock_int: 50001, reorder_level_int: 50000 },
+        { current_stock_int: 1000, reorder_level_int: 2000 }
+      ])
+    ).toBe(2);
+    expect(
+      calculateInventoryValuationInt([
+        { cost_price_int: 1000, current_stock_int: 25000 },
+        { cost_price_int: 500, current_stock_int: 10000 }
+      ])
+    ).toBe(3000);
   });
 });

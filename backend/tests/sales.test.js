@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { ValidationError } from "../src/shared/errors.js";
 import { createCreateProductUseCase, createSaveSellingOptionUseCase } from "../src/inventory/use-cases.js";
-import { calculateItemProfit, PAYMENT_METHODS } from "../src/sales/domain.js";
+import {
+  calculateItemProfit,
+  calculateReturnRefundSplit,
+  calculateSaleLine,
+  formatReceiptNumber,
+  PAYMENT_METHODS,
+  validatePaymentBreakdown
+} from "../src/sales/domain.js";
 import {
   createCalculateCartTotalsUseCase,
   createProcessReturnUseCase,
@@ -341,5 +348,151 @@ describe("sales domain and use cases", function () {
         created_by: "cashier-1"
       })
     ).rejects.toThrow(ValidationError);
+  });
+
+  it("validates sale lines before price and stock calculations", function () {
+    const product = {
+      product_id: "prod-1",
+      product_name: "Rice",
+      base_unit: "kg",
+      cost_price: 10,
+      selling_price: 20,
+      is_active: true,
+      deleted_at: null
+    };
+    const option = {
+      option_id: "opt-1",
+      product_id: "prod-1",
+      option_name: "3 kg pack",
+      quantity: 3,
+      price: 50,
+      is_active: true
+    };
+
+    const line = calculateSaleLine({ product: product, option: option, quantity: 2 });
+    expect(line.base_quantity).toBe(6);
+    expect(line.subtotal).toBe(100);
+
+    expect(function () {
+      calculateSaleLine({
+        product: Object.assign({}, product, { deleted_at: "2026-11-20T00:00:00.000Z" }),
+        option: option,
+        quantity: 1
+      });
+    }).toThrow(ValidationError);
+    expect(function () {
+      calculateSaleLine({
+        product: Object.assign({}, product, { is_active: false }),
+        option: option,
+        quantity: 1
+      });
+    }).toThrow(ValidationError);
+    expect(function () {
+      calculateSaleLine({
+        product: product,
+        option: Object.assign({}, option, { is_active: false }),
+        quantity: 1
+      });
+    }).toThrow(ValidationError);
+    expect(function () {
+      calculateSaleLine({
+        product: product,
+        option: Object.assign({}, option, { product_id: "other-product" }),
+        quantity: 1
+      });
+    }).toThrow(ValidationError);
+    expect(function () {
+      calculateSaleLine({ product: product, option: option, quantity: 2, discount_amount: 101 });
+    }).toThrow(ValidationError);
+    expect(function () {
+      calculateSaleLine({ product: product, custom_amount: 50 });
+    }).toThrow(ValidationError);
+  });
+
+  it("validates CASH, CREDIT, and SPLIT payment breakdowns", function () {
+    const cashSale = validatePaymentBreakdown({
+      payment_method: PAYMENT_METHODS.CASH,
+      total_amount: 100,
+      amount_paid: 120
+    });
+    expect(cashSale.change_amount).toBe(20);
+
+    expect(function () {
+      validatePaymentBreakdown({
+        payment_method: PAYMENT_METHODS.CASH,
+        total_amount: 100,
+        amount_paid: 99
+      });
+    }).toThrow(ValidationError);
+    expect(function () {
+      validatePaymentBreakdown({ payment_method: PAYMENT_METHODS.CREDIT, total_amount: 100 });
+    }).toThrow(ValidationError);
+    expect(function () {
+      validatePaymentBreakdown({
+        payment_method: PAYMENT_METHODS.SPLIT,
+        total_amount: 100,
+        customer_id: "cust-1",
+        cash_amount: 40,
+        credit_amount: 40
+      });
+    }).toThrow(ValidationError);
+    expect(function () {
+      validatePaymentBreakdown({
+        payment_method: PAYMENT_METHODS.SPLIT,
+        total_amount: 100,
+        customer_id: "cust-1",
+        cash_amount: 0,
+        credit_amount: 100
+      });
+    }).toThrow(ValidationError);
+    expect(function () {
+      validatePaymentBreakdown({
+        payment_method: PAYMENT_METHODS.SPLIT,
+        total_amount: 100,
+        cash_amount: 60,
+        credit_amount: 40
+      });
+    }).toThrow(ValidationError);
+
+    const splitSale = validatePaymentBreakdown({
+      payment_method: PAYMENT_METHODS.SPLIT,
+      total_amount: 100,
+      customer_id: "cust-1",
+      cash_amount: 60,
+      credit_amount: 40,
+      amount_paid: 75
+    });
+    expect(splitSale.change_amount).toBe(15);
+  });
+
+  it("formats receipt numbers and splits returns credit first", function () {
+    expect(formatReceiptNumber("20261120", 1)).toBe("20261120-0001");
+    expect(formatReceiptNumber("20261120", 12345)).toBe("20261120-12345");
+    expect(function () {
+      formatReceiptNumber("20261120", 0);
+    }).toThrow(ValidationError);
+    expect(function () {
+      formatReceiptNumber("20261120", 1.5);
+    }).toThrow(ValidationError);
+
+    expect(calculateReturnRefundSplit(60, 50)).toEqual({
+      credit_refund_amount: 50,
+      cash_refund_amount: 10
+    });
+    expect(calculateReturnRefundSplit(40, 50)).toEqual({
+      credit_refund_amount: 40,
+      cash_refund_amount: 0
+    });
+    expect(calculateReturnRefundSplit(30, null)).toEqual({
+      credit_refund_amount: 0,
+      cash_refund_amount: 30
+    });
+    expect(calculateReturnRefundSplit(50, -5)).toEqual({
+      credit_refund_amount: 0,
+      cash_refund_amount: 50
+    });
+    expect(function () {
+      calculateReturnRefundSplit(0, 50);
+    }).toThrow(ValidationError);
   });
 });

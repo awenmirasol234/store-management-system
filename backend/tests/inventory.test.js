@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { ConflictError, ValidationError } from "../src/shared/errors.js";
-import { INVENTORY_TRANSACTION_TYPES } from "../src/inventory/domain.js";
+import {
+  calculateStockInBaseQuantity,
+  createInventoryTransactionEntity,
+  createProductEntity,
+  createSellingOptionEntity,
+  INVENTORY_TRANSACTION_TYPES,
+  isProductLowStock
+} from "../src/inventory/domain.js";
 import {
   createAdjustStockUseCase,
   createDeleteProductUseCase,
@@ -260,5 +267,114 @@ describe("inventory domain and use cases", function () {
     const lowStock = await getLowStock();
     expect(lowStock.length).toBe(1);
     expect(lowStock[0].product_id).toBe(water.product_id);
+  });
+
+  it("validates product and selling option entities at the domain boundary", function () {
+    const productInput = {
+      product_id: "prod-1",
+      product_name: "Rice",
+      base_unit: "kg",
+      current_stock: 5,
+      cost_price: 10,
+      selling_price: 20,
+      reorder_level: 2,
+      created_at: "now",
+      updated_at: "now"
+    };
+
+    const product = createProductEntity(productInput);
+    expect(product.current_stock).toBe(5);
+    expect(product.reorder_level).toBe(2);
+
+    expect(function () {
+      createProductEntity(Object.assign({}, productInput, { current_stock: -1 }));
+    }).toThrow(ValidationError);
+    expect(function () {
+      createProductEntity(Object.assign({}, productInput, { selling_price: 0 }));
+    }).toThrow(ValidationError);
+    expect(function () {
+      createProductEntity(Object.assign({}, productInput, { reorder_level: -1 }));
+    }).toThrow(ValidationError);
+
+    const optionInput = {
+      option_id: "opt-1",
+      product_id: "prod-1",
+      option_name: "1 sack",
+      quantity: 1,
+      price: 500,
+      created_at: "now",
+      updated_at: "now"
+    };
+
+    expect(createSellingOptionEntity(optionInput).price).toBe(500);
+    expect(function () {
+      createSellingOptionEntity(Object.assign({}, optionInput, { quantity: 0 }));
+    }).toThrow(ValidationError);
+    expect(function () {
+      createSellingOptionEntity(Object.assign({}, optionInput, { price: 0 }));
+    }).toThrow(ValidationError);
+  });
+
+  it("enforces inventory transaction sign and remarks rules", function () {
+    const transactionInput = {
+      transaction_id: "tx-1",
+      product_id: "prod-1",
+      transaction_type: INVENTORY_TRANSACTION_TYPES.STOCK_IN,
+      quantity: 1,
+      created_by: "owner",
+      created_at: "now"
+    };
+
+    expect(createInventoryTransactionEntity(transactionInput).quantity).toBe(1);
+    expect(function () {
+      createInventoryTransactionEntity(Object.assign({}, transactionInput, { quantity: 0 }));
+    }).toThrow(ValidationError);
+    expect(function () {
+      createInventoryTransactionEntity(
+        Object.assign({}, transactionInput, {
+          transaction_type: INVENTORY_TRANSACTION_TYPES.SALE,
+          quantity: 1
+        })
+      );
+    }).toThrow(ValidationError);
+    expect(function () {
+      createInventoryTransactionEntity(
+        Object.assign({}, transactionInput, {
+          transaction_type: INVENTORY_TRANSACTION_TYPES.ADJUSTMENT,
+          quantity: 1,
+          remarks: ""
+        })
+      );
+    }).toThrow(ValidationError);
+    expect(function () {
+      createInventoryTransactionEntity(
+        Object.assign({}, transactionInput, { transaction_type: "UNKNOWN" })
+      );
+    }).toThrow(ValidationError);
+  });
+
+  it("converts stock-in pack quantities and evaluates low-stock flags", function () {
+    expect(calculateStockInBaseQuantity(3, 0.25)).toBe(0.75);
+    expect(calculateStockInBaseQuantity(2)).toBe(2);
+    expect(function () {
+      calculateStockInBaseQuantity(0, 1);
+    }).toThrow(ValidationError);
+    expect(function () {
+      calculateStockInBaseQuantity(1, 0);
+    }).toThrow(ValidationError);
+
+    const product = {
+      current_stock: 5,
+      reorder_level: 5,
+      is_active: true,
+      deleted_at: null
+    };
+
+    expect(isProductLowStock(product)).toBe(true);
+    expect(isProductLowStock(Object.assign({}, product, { current_stock: 5.0001 }))).toBe(false);
+    expect(isProductLowStock(Object.assign({}, product, { is_active: false }))).toBe(false);
+    expect(
+      isProductLowStock(Object.assign({}, product, { deleted_at: "2026-11-20T00:00:00.000Z" }))
+    ).toBe(false);
   });
 });

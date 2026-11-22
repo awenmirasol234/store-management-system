@@ -231,6 +231,70 @@ describe("Credit Customer Use Cases & Repositories", function () {
       });
     }).rejects.toThrow(ValidationError);
   });
+
+  it("rejects invalid customer payment attempts before changing balance", async function () {
+    const env = setupCreditTestEnv();
+
+    await expect(
+      env.useCases.recordPayment({ customer_id: "", amount: 10, created_by: "owner" })
+    ).rejects.toThrow(ValidationError);
+    await expect(
+      env.useCases.recordPayment({ customer_id: "missing", amount: 10, created_by: "owner" })
+    ).rejects.toThrow(NotFoundError);
+
+    const inactiveCustomer = await env.useCases.createCustomer({
+      full_name: "Inactive Customer",
+      credit_limit: 500,
+      is_active: false
+    });
+    await env.repositories.customerRepository.save(
+      Object.assign({}, inactiveCustomer, { current_balance: 100 })
+    );
+    await expect(
+      env.useCases.recordPayment({
+        customer_id: inactiveCustomer.customer_id,
+        amount: 10,
+        created_by: "owner"
+      })
+    ).rejects.toThrow(ValidationError);
+
+    const customer = await env.useCases.createCustomer({
+      full_name: "Active Customer",
+      credit_limit: 500
+    });
+    await env.repositories.customerRepository.save(
+      Object.assign({}, customer, { current_balance: 100 })
+    );
+
+    await expect(
+      env.useCases.recordPayment({
+        customer_id: customer.customer_id,
+        amount: 0,
+        created_by: "owner"
+      })
+    ).rejects.toThrow(ValidationError);
+    await expect(
+      env.useCases.recordPayment({
+        customer_id: customer.customer_id,
+        amount: -10,
+        created_by: "owner"
+      })
+    ).rejects.toThrow(ValidationError);
+    await expect(
+      env.useCases.recordPayment({
+        customer_id: customer.customer_id,
+        amount: 100.01,
+        created_by: "owner"
+      })
+    ).rejects.toThrow(ValidationError);
+
+    const paid = await env.useCases.recordPayment({
+      customer_id: customer.customer_id,
+      amount: 100,
+      created_by: "owner"
+    });
+    expect(paid.customer.current_balance).toBe(0);
+  });
 });
 
 describe("POS Credit Sale & Return Integration", function () {
