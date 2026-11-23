@@ -22,6 +22,7 @@ import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
 import { DataTable } from "../components/DataTable.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
+import { Modal } from "../components/Modal.jsx";
 import { PageHeader } from "../components/PageHeader.jsx";
 import { PageLayout } from "../components/PageLayout.jsx";
 import { StatCard } from "../components/StatCard.jsx";
@@ -47,6 +48,11 @@ export function ReportsPage() {
     return getManilaIsoDateOffset(0);
   });
   const [activePreset, setActivePreset] = useState("TODAY");
+
+  // Custom Range Modal state
+  const [customModalOpen, setCustomModalOpen] = useState(false);
+  const [draftFrom, setDraftFrom] = useState(fromDate);
+  const [draftTo, setDraftTo] = useState(toDate);
 
   // Filter & Search states
   const [searchTerm, setSearchTerm] = useState("");
@@ -212,77 +218,92 @@ export function ReportsPage() {
 
   return (
     <PageLayout scroll={true}>
-      <PageHeader title="Reports & Analytics">
+      <PageHeader title="Reports">
         <div className="flex flex-wrap items-center gap-2">
-          {/* Preset Buttons */}
-          <div className="flex items-center gap-1 rounded-xl border border-[#E9E9E9] bg-white p-1">
-            <Button
-              variant={activePreset === "TODAY" ? "primary" : "ghost"}
-              size="sm"
+          {/* Shortcut Chips */}
+          <div className="flex items-center gap-1 rounded-xl border border-[#E9E9E9] bg-white p-1 shadow-xs">
+            <button
+              type="button"
               onClick={function () {
                 selectPreset("TODAY");
               }}
+              className={
+                "rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors " +
+                (activePreset === "TODAY"
+                  ? "bg-[#151515] text-white"
+                  : "text-[#777777] hover:text-[#151515] hover:bg-[#EEEEED]")
+              }
             >
               Today
-            </Button>
-            <Button
-              variant={activePreset === "WEEK" ? "primary" : "ghost"}
-              size="sm"
+            </button>
+            <button
+              type="button"
               onClick={function () {
                 selectPreset("WEEK");
               }}
+              className={
+                "rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors " +
+                (activePreset === "WEEK"
+                  ? "bg-[#151515] text-white"
+                  : "text-[#777777] hover:text-[#151515] hover:bg-[#EEEEED]")
+              }
             >
-              This Week
-            </Button>
-            <Button
-              variant={activePreset === "MONTH" ? "primary" : "ghost"}
-              size="sm"
+              7 Days
+            </button>
+            <button
+              type="button"
               onClick={function () {
                 selectPreset("MONTH");
               }}
+              className={
+                "rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors " +
+                (activePreset === "MONTH"
+                  ? "bg-[#151515] text-white"
+                  : "text-[#777777] hover:text-[#151515] hover:bg-[#EEEEED]")
+              }
             >
-              This Month
+              30 Days
+            </button>
+            <button
+              type="button"
+              onClick={function () {
+                setDraftFrom(fromDate);
+                setDraftTo(toDate);
+                setCustomModalOpen(true);
+              }}
+              className={
+                "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors " +
+                (activePreset === "CUSTOM"
+                  ? "bg-[#B9F36B] text-[#151515] font-bold"
+                  : "text-[#777777] hover:text-[#151515] hover:bg-[#EEEEED]")
+              }
+            >
+              <Calendar className="h-3.5 w-3.5" />
+              <span>
+                {activePreset === "CUSTOM"
+                  ? formatSmartDate(fromDate) + " – " + formatSmartDate(toDate)
+                  : "Custom"}
+              </span>
+            </button>
+          </div>
+
+          {/* Quick Export actions */}
+          <div className="flex items-center gap-1.5">
+            <Button variant="secondary" size="sm" onClick={handleExportCsv} title="Export current report to CSV">
+              <Download className="h-3.5 w-3.5 sm:mr-1" />
+              <span className="hidden sm:inline">Export</span>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={triggerPrintReport} title="Print or Save as PDF">
+              <Printer className="h-3.5 w-3.5" />
             </Button>
           </div>
-
-          {/* Date pickers */}
-          <div className="flex items-center gap-1.5 rounded-xl border border-[#E9E9E9] bg-white px-2.5 py-1.5 font-mono text-xs">
-            <Calendar className="h-3.5 w-3.5 text-[#777777]" />
-            <input
-              type="date"
-              value={fromDate}
-              onChange={function (e) {
-                setActivePreset("CUSTOM");
-                setFromDate(e.target.value);
-              }}
-              className="bg-transparent focus:outline-none text-[#151515]"
-            />
-            <span className="text-[#777777]">to</span>
-            <input
-              type="date"
-              value={toDate}
-              onChange={function (e) {
-                setActivePreset("CUSTOM");
-                setToDate(e.target.value);
-              }}
-              className="bg-transparent focus:outline-none text-[#151515]"
-            />
-          </div>
-
-          {/* Export Buttons */}
-          <Button variant="secondary" size="sm" onClick={handleExportCsv} title="Export CSV">
-            <FileSpreadsheet className="h-3.5 w-3.5 mr-1" /> CSV
-          </Button>
-          <Button variant="secondary" size="sm" onClick={triggerPrintReport} title="Print or Save as PDF">
-            <Printer className="h-3.5 w-3.5 mr-1" /> PDF / Print
-          </Button>
         </div>
       </PageHeader>
 
       <ErrorBanner message={errorBanner} className="mb-4" />
 
-      {/* Tabs */}
-      <div className="mb-4 flex flex-wrap gap-1.5 border-b border-[#E9E9E9] pb-2">
+      {/* Clean Tab Bar */}
+      <div className="mb-4 flex items-center overflow-x-auto no-scrollbar gap-1 border-b border-[#E9E9E9] pb-2">
         {TABS.map(function (tab) {
           const isActive = activeTab === tab.id;
           return (
@@ -294,10 +315,10 @@ export function ReportsPage() {
                 setFilterType("ALL");
               }}
               className={
-                "rounded-xl px-3.5 py-2 text-xs font-semibold transition-all " +
+                "shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors " +
                 (isActive
-                  ? "bg-[#151515] text-white shadow-sm"
-                  : "bg-white text-[#777777] border border-[#E9E9E9] hover:text-[#151515] hover:bg-[#EEEEED]")
+                  ? "bg-[#151515] text-white"
+                  : "text-[#777777] hover:text-[#151515] hover:bg-[#EEEEED]")
               }
             >
               {tab.label}
@@ -639,6 +660,66 @@ export function ReportsPage() {
           </div>
         </section>
       ) : null}
+
+      {/* Custom Date Range Modal */}
+      <Modal
+        open={customModalOpen}
+        onClose={function () {
+          setCustomModalOpen(false);
+        }}
+        title="Select Date Range"
+        size="sm"
+      >
+        <div className="space-y-4 p-5">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#777777]">Start Date (From)</label>
+            <input
+              type="date"
+              value={draftFrom}
+              onChange={function (e) {
+                setDraftFrom(e.target.value);
+              }}
+              className="w-full rounded-xl border border-[#E9E9E9] bg-[#FBFBFA] px-3.5 py-2 font-mono text-sm text-[#151515] focus:border-[#151515] focus:outline-none"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#777777]">End Date (To)</label>
+            <input
+              type="date"
+              value={draftTo}
+              onChange={function (e) {
+                setDraftTo(e.target.value);
+              }}
+              className="w-full rounded-xl border border-[#E9E9E9] bg-[#FBFBFA] px-3.5 py-2 font-mono text-sm text-[#151515] focus:border-[#151515] focus:outline-none"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E9E9E9]">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={function () {
+                setCustomModalOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={function () {
+                setFromDate(draftFrom);
+                setToDate(draftTo);
+                setActivePreset("CUSTOM");
+                setCustomModalOpen(false);
+              }}
+            >
+              Apply Filter
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </PageLayout>
   );
 }
