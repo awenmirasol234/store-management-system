@@ -16,6 +16,7 @@ import { LoginPage } from "./pages/LoginPage.jsx";
 import { SetupPage } from "./pages/SetupPage.jsx";
 import { NotFoundPage } from "./pages/NotFoundPage.jsx";
 import { CashierShiftModal } from "./components/CashierShiftModal.jsx";
+import { DebugOverlay } from "./components/DebugOverlay.jsx";
 
 export function App(props) {
   let initialActivePage = "dashboard";
@@ -316,6 +317,8 @@ export function App(props) {
           }
         }}
       />
+
+      <DebugOverlay />
     </div>
   );
 }
