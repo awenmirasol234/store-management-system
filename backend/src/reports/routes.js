@@ -18,5 +18,20 @@ export function createReportsRouter(dependencies) {
     response.json({ data: rows });
   });
 
+  router.get("/reports/categories", async function getCategories(request, response) {
+    const rows = await dependencies.useCases.getCategorySales(request.query);
+    response.json({ data: rows });
+  });
+
+  router.get("/reports/stock-movements", async function getStockMovements(request, response) {
+    const rows = await dependencies.useCases.getStockMovementReport(request.query);
+    response.json({ data: rows });
+  });
+
+  router.get("/reports/transactions", async function getTransactions(request, response) {
+    const rows = await dependencies.useCases.getTransactionsReport(request.query);
+    response.json({ data: rows });
+  });
+
   return router;
 }

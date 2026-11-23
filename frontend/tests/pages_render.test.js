@@ -11,8 +11,8 @@ describe("Refactored page rendering", function () {
     expect(html).toContain("Dashboard");
     expect(html).toContain("Today&#x27;s Sales");
     expect(html).toContain("Today&#x27;s Profit");
-    expect(html).toContain("Low Stock Alerts");
-    expect(html).toContain("Inventory Value");
+    expect(html).toContain("Transactions");
+    expect(html).toContain("Items Sold");
     expect(html).toContain("text-[#151515]");
     expect(html).not.toContain("text-blue-600");
     expect(html).not.toContain("text-emerald-600");

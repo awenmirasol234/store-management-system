@@ -202,6 +202,18 @@ export const api = {
     const query = buildDateRangeQuery(fromDate, toDate);
     return request("GET", "/api/reports/daily" + query);
   },
+  getCategorySalesReport(fromDate, toDate) {
+    const query = buildDateRangeQuery(fromDate, toDate);
+    return request("GET", "/api/reports/categories" + query);
+  },
+  getStockMovementsReport(fromDate, toDate) {
+    const query = buildDateRangeQuery(fromDate, toDate);
+    return request("GET", "/api/reports/stock-movements" + query);
+  },
+  getTransactionsReport(fromDate, toDate) {
+    const query = buildDateRangeQuery(fromDate, toDate);
+    return request("GET", "/api/reports/transactions" + query);
+  },
   listCustomers(query) {
     const params = new URLSearchParams();
     if (query) {

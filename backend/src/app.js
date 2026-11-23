@@ -45,9 +45,12 @@ import {
 import { createSalesRouter } from "./sales/routes.js";
 import { createSqliteReportsRepository } from "./reports/sqlite-repo.js";
 import {
+  createGetCategorySalesUseCase,
   createGetDailyBreakdownUseCase,
   createGetReportsSummaryUseCase,
-  createGetTopProductsUseCase
+  createGetStockMovementReportUseCase,
+  createGetTopProductsUseCase,
+  createGetTransactionsReportUseCase
 } from "./reports/use-cases.js";
 import { createReportsRouter } from "./reports/routes.js";
 import {
@@ -220,7 +223,10 @@ export function createApp(options) {
   const reportsUseCases = {
     getSummary: createGetReportsSummaryUseCase(sharedDeps),
     getTopProducts: createGetTopProductsUseCase(sharedDeps),
-    getDailyBreakdown: createGetDailyBreakdownUseCase(sharedDeps)
+    getDailyBreakdown: createGetDailyBreakdownUseCase(sharedDeps),
+    getCategorySales: createGetCategorySalesUseCase(sharedDeps),
+    getStockMovementReport: createGetStockMovementReportUseCase(sharedDeps),
+    getTransactionsReport: createGetTransactionsReportUseCase(sharedDeps)
   };
 
   const creditUseCases = {

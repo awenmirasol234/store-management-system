@@ -57,11 +57,75 @@ export function countLowStockProducts(productRows) {
   let lowStockCount = 0;
   for (let index = 0; index < productRows.length; index++) {
     const row = productRows[index];
-    if (row.current_stock_int <= row.reorder_level_int) {
+    if (row.current_stock_int > 0 && row.current_stock_int <= row.reorder_level_int) {
       lowStockCount = lowStockCount + 1;
     }
   }
   return lowStockCount;
+}
+
+export function countOutOfStockProducts(productRows) {
+  let outOfStockCount = 0;
+  for (let index = 0; index < productRows.length; index++) {
+    const row = productRows[index];
+    if (row.current_stock_int <= 0) {
+      outOfStockCount = outOfStockCount + 1;
+    }
+  }
+  return outOfStockCount;
+}
+
+export function calculateTotalItemsSoldInt(itemRows) {
+  let totalItemsInt = 0;
+  for (let index = 0; index < itemRows.length; index++) {
+    const row = itemRows[index];
+    totalItemsInt = totalItemsInt + row.quantity_int;
+  }
+  return totalItemsInt;
+}
+
+export function buildCategorySales(itemRows) {
+  const grouped = new Map();
+
+  for (let index = 0; index < itemRows.length; index++) {
+    const row = itemRows[index];
+    const categoryId = row.category_id || "uncategorized";
+    const categoryName = row.category_name || "Uncategorized";
+
+    let entry = grouped.get(categoryId);
+    if (!entry) {
+      entry = {
+        category_id: categoryId,
+        category_name: categoryName,
+        total_quantity_int: 0,
+        revenue_int: 0,
+        cost_int: 0
+      };
+      grouped.set(categoryId, entry);
+    }
+    entry.total_quantity_int = entry.total_quantity_int + row.quantity_int;
+    entry.revenue_int = entry.revenue_int + row.subtotal_int;
+    entry.cost_int =
+      entry.cost_int + multiplyMoneyByQuantityInt(row.unit_cost_int, row.base_quantity_int);
+  }
+
+  const list = Array.from(grouped.values());
+  list.sort(function sortByRevenueDesc(first, second) {
+    return second.revenue_int - first.revenue_int;
+  });
+
+  const results = [];
+  for (let index = 0; index < list.length; index++) {
+    const entry = list[index];
+    results.push({
+      category_id: entry.category_id,
+      category_name: entry.category_name,
+      quantity_sold: fromQuantityInt(entry.total_quantity_int),
+      revenue: fromMoneyInt(entry.revenue_int),
+      profit: fromMoneyInt(entry.revenue_int - entry.cost_int)
+    });
+  }
+  return results;
 }
 
 export function calculateInventoryValuationInt(productRows) {

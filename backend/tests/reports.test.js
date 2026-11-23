@@ -12,17 +12,23 @@ import { PAYMENT_METHODS } from "../src/sales/domain.js";
 import { createProcessSaleUseCase } from "../src/sales/use-cases.js";
 import { createSqliteReportsRepository } from "../src/reports/sqlite-repo.js";
 import {
+  createGetCategorySalesUseCase,
   createGetDailyBreakdownUseCase,
   createGetReportsSummaryUseCase,
-  createGetTopProductsUseCase
+  createGetStockMovementReportUseCase,
+  createGetTopProductsUseCase,
+  createGetTransactionsReportUseCase
 } from "../src/reports/use-cases.js";
 import {
+  buildCategorySales,
   buildDailyBreakdown,
   buildTopProducts,
   calculateInventoryValuationInt,
   calculateNetProfitInt,
   calculateTotalCogsInt,
+  calculateTotalItemsSoldInt,
   countLowStockProducts,
+  countOutOfStockProducts,
   resolveReportDate
 } from "../src/reports/domain.js";
 import { ValidationError } from "../src/shared/errors.js";
@@ -71,6 +77,9 @@ describe("reports SQLite repository", function () {
     const getSummary = createGetReportsSummaryUseCase(reportDeps);
     const getTopProducts = createGetTopProductsUseCase(reportDeps);
     const getDailyBreakdown = createGetDailyBreakdownUseCase(reportDeps);
+    const getCategorySales = createGetCategorySalesUseCase(reportDeps);
+    const getStockMovements = createGetStockMovementReportUseCase(reportDeps);
+    const getTransactions = createGetTransactionsReportUseCase(reportDeps);
 
     const water = await createProduct({
       product_name: "Bottled Water",
@@ -90,7 +99,9 @@ describe("reports SQLite repository", function () {
 
     const summary = await getSummary({ from: "2026-11-20", to: "2026-11-20" });
     expect(summary.sale_count).toBe(1);
+    expect(summary.total_items_sold).toBe(4);
     expect(summary.gross_sales).toBe(60);
+    expect(summary.net_sales).toBe(60);
     expect(summary.cogs).toBe(40);
     expect(summary.net_profit).toBe(20);
     expect(summary.low_stock_count).toBe(1);
@@ -106,6 +117,19 @@ describe("reports SQLite repository", function () {
     expect(daily.length).toBe(1);
     expect(daily[0].date).toBe("2026-11-20");
     expect(daily[0].profit).toBe(20);
+
+    const categories = await getCategorySales({ from: "2026-11-20", to: "2026-11-20" });
+    expect(categories.length).toBe(1);
+    expect(categories[0].revenue).toBe(60);
+    expect(categories[0].profit).toBe(20);
+
+    const movements = await getStockMovements({ from: "2026-11-20", to: "2026-11-20" });
+    expect(movements.length).toBeGreaterThanOrEqual(1);
+
+    const txs = await getTransactions({ from: "2026-11-20", to: "2026-11-20" });
+    expect(txs.length).toBe(1);
+    expect(txs[0].total_amount).toBe(60);
+    expect(txs[0].payment_method).toBe(PAYMENT_METHODS.CASH);
   });
 
   it("validates report date format, calendar dates, and net profit calculations", function () {
@@ -165,12 +189,41 @@ describe("reports SQLite repository", function () {
     ]);
 
     expect(
-      countLowStockProducts([
-        { current_stock_int: 50000, reorder_level_int: 50000 },
-        { current_stock_int: 50001, reorder_level_int: 50000 },
-        { current_stock_int: 1000, reorder_level_int: 2000 }
+      countOutOfStockProducts([
+        { current_stock_int: 0 },
+        { current_stock_int: -1000 },
+        { current_stock_int: 5000 }
       ])
     ).toBe(2);
+
+    expect(calculateTotalItemsSoldInt([
+      { quantity_int: 20000 },
+      { quantity_int: 15000 }
+    ])).toBe(35000);
+
+    const categoryItemRows = [
+      {
+        category_id: "cat-1",
+        category_name: "Beverages",
+        quantity_int: 20000,
+        base_quantity_int: 20000,
+        subtotal_int: 3000,
+        unit_cost_int: 1000
+      },
+      {
+        category_id: "cat-1",
+        category_name: "Beverages",
+        quantity_int: 10000,
+        base_quantity_int: 10000,
+        subtotal_int: 1500,
+        unit_cost_int: 1000
+      }
+    ];
+    const catSales = buildCategorySales(categoryItemRows);
+    expect(catSales.length).toBe(1);
+    expect(catSales[0].quantity_sold).toBe(3);
+    expect(catSales[0].revenue).toBe(45);
+    expect(catSales[0].profit).toBe(15);
     expect(
       calculateInventoryValuationInt([
         { cost_price_int: 1000, current_stock_int: 25000 },
