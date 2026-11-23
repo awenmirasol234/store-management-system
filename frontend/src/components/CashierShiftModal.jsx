@@ -153,7 +153,7 @@ export function CashierShiftModal(props) {
         </div>
 
         <div>
-          <label className="block text-2xs font-semibold text-slate-700 mb-1.5">
+          <label className="block text-xs font-medium text-[#151515] mb-1.5">
             Starting Change Fund (₱)
           </label>
           <Input
@@ -183,7 +183,7 @@ export function CashierShiftModal(props) {
                     setOpeningCashInput(String(presetAmount));
                   }}
                   className={
-                    "rounded-lg border px-3 py-1 text-xs font-mono transition cursor-pointer " +
+                    "rounded-xl border px-3 py-1.5 text-xs font-mono transition cursor-pointer " +
                     buttonTone
                   }
                 >
@@ -195,7 +195,7 @@ export function CashierShiftModal(props) {
         </div>
 
         <div>
-          <label className="block text-2xs font-semibold text-slate-700 mb-1.5">
+          <label className="block text-xs font-medium text-[#151515] mb-1.5">
             Shift Notes (Optional)
           </label>
           <input
@@ -205,7 +205,7 @@ export function CashierShiftModal(props) {
               setOpeningNotesInput(e.target.value);
             }}
             placeholder="e.g. Morning counter shift"
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
           />
         </div>
 
@@ -237,12 +237,12 @@ export function CashierShiftModal(props) {
       <form onSubmit={handleRecordMovementSubmit} className="space-y-4">
         {errorElement}
 
-        <div className="text-xs text-slate-500">
+        <div className="text-xs text-[#777777]">
           Record cash added into or removed from the drawer during this shift.
         </div>
 
         <div>
-          <label className="block text-2xs font-semibold text-slate-700 mb-1.5">
+          <label className="block text-xs font-medium text-[#151515] mb-1.5">
             Movement Type
           </label>
           <div className="grid grid-cols-2 gap-2.5">
@@ -252,7 +252,7 @@ export function CashierShiftModal(props) {
                 setMovementType("CASH_IN");
               }}
               className={
-                "flex items-center justify-center gap-2 rounded-lg border p-2.5 text-xs transition cursor-pointer " +
+                "flex items-center justify-center gap-2 rounded-xl border p-2.5 text-xs transition cursor-pointer " +
                 inButtonClass
               }
             >
@@ -265,7 +265,7 @@ export function CashierShiftModal(props) {
                 setMovementType("CASH_OUT");
               }}
               className={
-                "flex items-center justify-center gap-2 rounded-lg border p-2.5 text-xs transition cursor-pointer " +
+                "flex items-center justify-center gap-2 rounded-xl border p-2.5 text-xs transition cursor-pointer " +
                 outButtonClass
               }
             >
@@ -276,7 +276,7 @@ export function CashierShiftModal(props) {
         </div>
 
         <div>
-          <label className="block text-2xs font-semibold text-slate-700 mb-1.5">
+          <label className="block text-xs font-medium text-[#151515] mb-1.5">
             Amount (₱)
           </label>
           <Input
@@ -293,7 +293,7 @@ export function CashierShiftModal(props) {
         </div>
 
         <div>
-          <label className="block text-2xs font-semibold text-slate-700 mb-1.5">
+          <label className="block text-xs font-medium text-[#151515] mb-1.5">
             Reason / Remarks
           </label>
           <input
@@ -303,7 +303,7 @@ export function CashierShiftModal(props) {
               setMovementRemarksInput(e.target.value);
             }}
             placeholder="e.g. Paid delivery rider, petty cash ice, change topup"
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
             required={true}
           />
         </div>
@@ -369,7 +369,7 @@ export function CashierShiftModal(props) {
         </div>
 
         <div>
-          <label className="block text-2xs font-semibold text-slate-700 mb-1.5">
+          <label className="block text-xs font-medium text-[#151515] mb-1.5">
             Actual Counted Cash in Drawer (₱)
           </label>
           <Input
@@ -388,7 +388,7 @@ export function CashierShiftModal(props) {
         {varianceElement}
 
         <div>
-          <label className="block text-2xs font-semibold text-slate-700 mb-1.5">
+          <label className="block text-xs font-medium text-[#151515] mb-1.5">
             Closing Remarks / Variance Notes (Optional)
           </label>
           <input
@@ -398,7 +398,7 @@ export function CashierShiftModal(props) {
               setClosingNotesInput(e.target.value);
             }}
             placeholder="e.g. Small coin roundoff difference"
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
           />
         </div>
 

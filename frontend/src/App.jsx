@@ -151,9 +151,9 @@ export function App(props) {
   // Initial SSR or loading check
   if (!authChecked) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[#0F111E] text-white">
+      <div className="flex h-screen w-screen items-center justify-center bg-[#F5F5F4] text-[#151515]">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#171717] text-[#B9F36B]">
             <Store className="h-5 w-5" />
           </div>
           <div className="text-base font-bold">StoreFlow</div>
@@ -243,21 +243,21 @@ export function App(props) {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-slate-100 md:flex-row">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#F5F5F4] md:flex-row">
       {/* Mobile Top Header */}
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/10 bg-[#181B2C] px-4 text-white select-none md:hidden">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#262626] bg-[#171717] px-4 text-white select-none md:hidden">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#B9F36B] text-[#151515]">
             <Store className="h-4 w-4" />
           </div>
           <div>
             <div className="text-xs font-bold leading-tight">StoreFlow</div>
-            <div className="text-2xs text-slate-400">{getPageTitle(activePage)}</div>
+            <div className="text-2xs text-[#A3A3A3]">{getPageTitle(activePage)}</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <div
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600/20 text-2xs font-semibold text-blue-300"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-2xs font-semibold text-white"
             title={currentUser.full_name + " (" + currentUser.role + ")"}
           >
             {mobileInitials}
@@ -266,7 +266,7 @@ export function App(props) {
             type="button"
             onClick={handleLogout}
             title="Sign out"
-            className="p-1.5 text-slate-400 hover:text-rose-300 cursor-pointer"
+            className="p-1.5 text-[#A3A3A3] hover:text-rose-300 cursor-pointer transition-colors"
           >
             <LogOut className="h-4 w-4" />
           </button>

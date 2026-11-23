@@ -101,7 +101,7 @@ export function CustomerLedgerModal(props) {
       <div className="overflow-x-auto rounded-xl border border-[#E9E9E9]">
         <DataTable headRow={headRow} stickyHead={true}>
           {transactions.map(function renderTxRow(tx) {
-            let badgeTone = "slate";
+            let badgeTone = "neutral";
             let badgeLabel = tx.type;
             let amountClass = "font-mono font-semibold ";
             let amountDisplay = formatPeso(tx.amount);

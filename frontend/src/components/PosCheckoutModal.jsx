@@ -259,7 +259,7 @@ export function PosCheckoutModal(props) {
 
       customerSection = (
         <div className="space-y-2">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#151515]">
             Customer (Utang Account) <span className="text-rose-500">*</span>
           </label>
           <div className="flex gap-2">
@@ -342,7 +342,7 @@ export function PosCheckoutModal(props) {
             required={true}
           />
           <div className="flex flex-col justify-end">
-            <span className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+            <span className="block text-xs font-semibold uppercase tracking-wider text-[#151515] mb-1.5">
               Utang Portion
             </span>
             <div className="flex h-11 items-center rounded-xl border border-amber-200 bg-amber-50/80 px-3.5 font-mono text-sm font-bold text-amber-800">

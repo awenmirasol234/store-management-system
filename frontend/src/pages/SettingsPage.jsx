@@ -177,12 +177,12 @@ export function SettingsPage(props) {
 
   let previewTagline = null;
   if (formData.tagline) {
-    previewTagline = <div className="text-2xs text-slate-500">{formData.tagline}</div>;
+    previewTagline = <div className="text-2xs text-[#777777]">{formData.tagline}</div>;
   }
 
   let previewAddress = null;
   if (formData.address) {
-    previewAddress = <div className="text-2xs text-slate-500">{formData.address}</div>;
+    previewAddress = <div className="text-2xs text-[#777777]">{formData.address}</div>;
   }
 
   let previewContact = null;
@@ -196,7 +196,7 @@ export function SettingsPage(props) {
       taxRow = <div>{"TIN: " + formData.tax_number}</div>;
     }
     previewContact = (
-      <div className="text-2xs text-slate-500 space-y-0.5">
+      <div className="text-2xs text-[#777777] space-y-0.5">
         {phoneRow}
         {taxRow}
       </div>
@@ -206,7 +206,7 @@ export function SettingsPage(props) {
   let previewHeaderNote = null;
   if (formData.receipt_header) {
     previewHeaderNote = (
-      <div className="text-2xs text-slate-600 italic pt-1">{formData.receipt_header}</div>
+      <div className="text-2xs text-[#151515] italic pt-1">{formData.receipt_header}</div>
     );
   }
 
@@ -216,13 +216,13 @@ export function SettingsPage(props) {
     if (currentUser && (currentUser.full_name || currentUser.username)) {
       cashierName = currentUser.full_name || currentUser.username;
     }
-    previewCashier = <div className="text-tiny text-slate-600">{"Cashier: " + cashierName}</div>;
+    previewCashier = <div className="text-tiny text-[#151515]">{"Cashier: " + cashierName}</div>;
   }
 
   let previewFooterNote = null;
   if (formData.receipt_footer) {
     previewFooterNote = (
-      <div className="text-center border-t border-dashed border-slate-300 pt-2 mt-2 text-2xs text-slate-500">
+      <div className="text-center border-t border-dashed border-[#E9E9E9] pt-2 mt-2 text-2xs text-[#777777]">
         {formData.receipt_footer}
       </div>
     );
@@ -263,7 +263,7 @@ export function SettingsPage(props) {
             <div className="rounded-2xl border border-[#E9E9E9] bg-white p-5 sm:p-6">
               <div className="mb-4 flex items-center gap-2">
                 <Store className="h-4 w-4 text-[#151515]" />
-                <h2 className="text-sm font-bold text-[#151515]">Store Profile</h2>
+                <h2 className="text-base font-semibold text-[#151515]">Store Profile</h2>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -334,7 +334,7 @@ export function SettingsPage(props) {
             <div className="rounded-2xl border border-[#E9E9E9] bg-white p-5 sm:p-6">
               <div className="mb-4 flex items-center gap-2">
                 <Sliders className="h-4 w-4 text-[#151515]" />
-                <h2 className="text-sm font-bold text-[#151515]">POS & Inventory Preferences</h2>
+                <h2 className="text-base font-semibold text-[#151515]">POS & Inventory Preferences</h2>
               </div>
 
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -366,7 +366,7 @@ export function SettingsPage(props) {
                         handleFieldChange("sound_enabled", val);
                       }}
                       disabled={loading}
-                      className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-[#B9F36B]"
+                      className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30 accent-[#151515]"
                     />
                     <span className="text-sm text-[#151515]">Play sound on checkout</span>
                   </label>
@@ -378,7 +378,7 @@ export function SettingsPage(props) {
             <div className="rounded-2xl border border-[#E9E9E9] bg-white p-5 sm:p-6">
               <div className="mb-4 flex items-center gap-2">
                 <Database className="h-4 w-4 text-[#151515]" />
-                <h2 className="text-sm font-bold text-[#151515]">Database & Disaster Recovery</h2>
+                <h2 className="text-base font-semibold text-[#151515]">Database & Disaster Recovery</h2>
               </div>
 
               <div className="flex items-center justify-between gap-4">
@@ -405,7 +405,7 @@ export function SettingsPage(props) {
             <div className="rounded-2xl border border-[#E9E9E9] bg-white p-5 sm:p-6">
               <div className="mb-4 flex items-center gap-2">
                 <Receipt className="h-4 w-4 text-[#151515]" />
-                <h2 className="text-sm font-bold text-[#151515]">Receipt & Thermal Printing</h2>
+                <h2 className="text-base font-semibold text-[#151515]">Receipt & Thermal Printing</h2>
               </div>
 
               <div className="space-y-4">
@@ -442,7 +442,7 @@ export function SettingsPage(props) {
                         handleFieldChange("show_cashier_on_receipt", val);
                       }}
                       disabled={loading}
-                      className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-[#B9F36B]"
+                      className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30 accent-[#151515]"
                     />
                     <span className="text-sm text-[#151515]">Print cashier name on receipt</span>
                   </label>
@@ -450,13 +450,13 @@ export function SettingsPage(props) {
 
                 {/* Live Mini Thermal Receipt Preview */}
                 <div className="pt-1">
-                  <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-3.5">
-                    <div className="mb-2 flex items-center justify-between text-2xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <div className="rounded-xl border border-dashed border-[#E9E9E9] bg-[#EEEEED]/40 p-3.5">
+                    <div className="mb-2 flex items-center justify-between text-2xs font-semibold text-[#777777] uppercase tracking-wider">
                       <span>Thermal Receipt Preview</span>
                       <Printer className="h-3.5 w-3.5" />
                     </div>
-                    <div className="mx-auto max-w-[240px] rounded-lg border border-slate-200 bg-white p-3 font-mono text-3xs text-slate-800 shadow-xs">
-                      <div className="border-b border-dashed border-slate-300 pb-2 text-center space-y-0.5">
+                    <div className="mx-auto max-w-[240px] rounded-lg border border-[#E9E9E9] bg-white p-3 font-mono text-3xs text-[#151515] shadow-xs">
+                      <div className="border-b border-dashed border-[#E9E9E9] pb-2 text-center space-y-0.5">
                         <div className="text-xs font-bold uppercase">
                           {formData.store_name || "STOREFLOW POS"}
                         </div>
@@ -465,11 +465,11 @@ export function SettingsPage(props) {
                         {previewContact}
                         {previewHeaderNote}
                         <div className="pt-1 font-semibold">OR #000124</div>
-                        <div className="text-slate-500">23 Nov 2026, 09:30 AM</div>
+                        <div className="text-[#777777]">23 Nov 2026, 09:30 AM</div>
                         {previewCashier}
                       </div>
 
-                      <div className="border-b border-dashed border-slate-300 py-2 space-y-1">
+                      <div className="border-b border-dashed border-[#E9E9E9] py-2 space-y-1">
                         <div className="flex justify-between">
                           <span>Lucky Me Pancit Canton</span>
                           <span>₱18.00</span>
@@ -485,7 +485,7 @@ export function SettingsPage(props) {
                           <span>TOTAL</span>
                           <span>₱38.00</span>
                         </div>
-                        <div className="flex justify-between text-slate-600">
+                        <div className="flex justify-between text-[#777777]">
                           <span>Cash</span>
                           <span>₱50.00</span>
                         </div>

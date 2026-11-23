@@ -170,7 +170,7 @@ export function TransactionsPage(props) {
         onClick={function clearSearch() {
           setSearchQuery("");
         }}
-        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
+        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#777777] hover:text-[#151515] cursor-pointer p-0.5 transition-colors"
         title="Clear search"
       >
         <X className="h-3.5 w-3.5" />
@@ -354,7 +354,7 @@ export function TransactionsPage(props) {
       <PageHeader title="Transactions" stackOnMobile={true}>
         <div className="flex items-center gap-2.5 flex-1 max-w-sm sm:justify-end">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#777777]" />
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
             <input
               type="text"
               value={searchQuery}
@@ -362,7 +362,7 @@ export function TransactionsPage(props) {
                 setSearchQuery(event.target.value);
               }}
               placeholder="Search receipt #..."
-              className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2 pl-9 pr-8 text-xs text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
+              className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2.5 pl-10 pr-9 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
             />
             {clearButton}
           </div>

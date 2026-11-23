@@ -170,7 +170,7 @@ export function CustomerModal(props) {
           onChange={function handleActiveChange(event) {
             setIsActive(event.target.checked);
           }}
-          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30 accent-[#151515]"
         />
         <label htmlFor="customer-is-active" className="text-xs font-medium text-[#151515] select-none">
           Active Customer (uncheck to disable without losing credit history)
@@ -181,7 +181,7 @@ export function CustomerModal(props) {
 
   return (
     <Modal open={props.open} onClose={props.onClose} title={title}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
         {errorElement}
 
         <Input
@@ -194,7 +194,7 @@ export function CustomerModal(props) {
           required
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
           <Input
             label="Phone Number"
             placeholder="e.g. 0917-123-4567"

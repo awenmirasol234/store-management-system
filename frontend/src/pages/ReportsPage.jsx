@@ -170,7 +170,7 @@ export function ReportsPage() {
               setActivePreset("CUSTOM");
               setFromDate(event.target.value);
             }}
-            className="rounded-xl border border-[#E9E9E9] bg-white px-3 py-2 font-mono text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
+            className="rounded-xl border border-[#E9E9E9] bg-white px-3 py-2.5 font-mono text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
           />
           <span className="text-xs text-[#777777]">to</span>
           <input
@@ -180,7 +180,7 @@ export function ReportsPage() {
               setActivePreset("CUSTOM");
               setToDate(event.target.value);
             }}
-            className="rounded-xl border border-[#E9E9E9] bg-white px-3 py-2 font-mono text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
+            className="rounded-xl border border-[#E9E9E9] bg-white px-3 py-2.5 font-mono text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
           />
         </div>
       </PageHeader>

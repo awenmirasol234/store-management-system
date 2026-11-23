@@ -22,6 +22,7 @@ import { ErrorBanner } from "../components/ErrorBanner.jsx";
 import { FormActions } from "../components/FormActions.jsx";
 import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
+import { PageHeader } from "../components/PageHeader.jsx";
 import { PageLayout } from "../components/PageLayout.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
 import { Select } from "../components/Select.jsx";
@@ -631,31 +632,7 @@ export function InventoryPage(props) {
 
   return (
     <PageLayout>
-      <div className="mb-5 sm:mb-6 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-        <div className="flex items-center gap-2 sm:gap-3.5 flex-1 min-w-56 sm:min-w-64">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={function onChange(event) {
-                setSearchQuery(event.target.value);
-              }}
-              placeholder="Search products or barcode..."
-              className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2.5 pl-10 pr-3.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-            />
-          </div>
-          <Button
-            variant={lowStockToggleVariant}
-            size="sm"
-            onClick={function toggleLowStock() {
-              setLowStockOnly(!lowStockOnly);
-            }}
-          >
-            Low Stock
-          </Button>
-        </div>
-
+      <PageHeader title="Products" stackOnMobile={true}>
         <div className="flex items-center gap-2 sm:gap-3">
           <Button
             variant="secondary"
@@ -671,6 +648,31 @@ export function InventoryPage(props) {
             <span>Add Product</span>
           </Button>
         </div>
+      </PageHeader>
+
+      {/* Search & Low Stock Filter Toolbar */}
+      <div className="mb-4 flex flex-wrap items-center gap-2.5 sm:gap-3.5">
+        <div className="relative flex-1 min-w-56 sm:min-w-64 max-w-md">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={function onChange(event) {
+              setSearchQuery(event.target.value);
+            }}
+            placeholder="Search products or barcode..."
+            className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2.5 pl-10 pr-3.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
+          />
+        </div>
+        <Button
+          variant={lowStockToggleVariant}
+          size="sm"
+          onClick={function toggleLowStock() {
+            setLowStockOnly(!lowStockOnly);
+          }}
+        >
+          Low Stock
+        </Button>
       </div>
 
       <CategoryFilterChips
@@ -887,8 +889,8 @@ export function InventoryPage(props) {
           {optionsListContent}
 
           <form onSubmit={handleAddOption} className="space-y-4 border-t border-[#E9E9E9] pt-4">
-            <div className="text-xs font-semibold text-slate-700">Add Selling Option</div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="text-xs font-semibold text-[#151515]">Add Selling Option</div>
+            <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
               <Input
                 label="Option Name"
                 value={optionName}
@@ -987,9 +989,9 @@ export function InventoryPage(props) {
         size="sm"
       >
         <div className="space-y-4">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-[#777777]">
             Are you sure you want to remove{" "}
-            <span className="font-semibold text-slate-900">{deleteProductName}</span>? This
+            <span className="font-semibold text-[#151515]">{deleteProductName}</span>? This
             product will be archived and will no longer appear on the POS screen.
           </p>
           <FormActions

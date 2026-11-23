@@ -20,7 +20,7 @@ export function InventoryStockInModal(props) {
       title={title}
       size="md"
     >
-      <form onSubmit={props.onSubmit} className="space-y-5">
+      <form onSubmit={props.onSubmit} className="space-y-4 sm:space-y-5">
         <Select
           label="Stock-In Unit"
           value={props.optionId}
@@ -38,7 +38,7 @@ export function InventoryStockInModal(props) {
           })}
         </Select>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
           <Input
             label="Quantity"
             type="number"

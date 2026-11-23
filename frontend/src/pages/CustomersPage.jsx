@@ -153,12 +153,12 @@ export function CustomersPage(props) {
 
   const tableHeadRow = (
     <tr>
-      <th className="px-4 py-3">Customer</th>
-      <th className="px-4 py-3">Contact & Address</th>
-      <th className="px-4 py-3 text-right">Current Utang</th>
-      <th className="px-4 py-3 text-right">Credit Limit</th>
-      <th className="px-4 py-3">Status</th>
-      <th className="px-4 py-3 text-right">Actions</th>
+      <th className="px-5 py-3">Customer</th>
+      <th className="px-5 py-3">Contact & Address</th>
+      <th className="px-5 py-3 text-right">Current Utang</th>
+      <th className="px-5 py-3 text-right">Credit Limit</th>
+      <th className="px-5 py-3">Status</th>
+      <th className="px-5 py-3 text-right">Actions</th>
     </tr>
   );
 
@@ -196,7 +196,7 @@ export function CustomersPage(props) {
 
       let statusBadge = null;
       if (!customer.is_active) {
-        statusBadge = <Badge tone="slate">Inactive</Badge>;
+        statusBadge = <Badge tone="neutral">Inactive</Badge>;
       } else if (isOverLimit) {
         statusBadge = <Badge tone="red">Over Limit</Badge>;
       } else if (customer.current_balance > 0) {
@@ -224,21 +224,21 @@ export function CustomersPage(props) {
 
       return (
         <tr key={customer.customer_id} className="hover:bg-[#EEEEED]/50 transition-colors">
-          <td className="px-4 py-3">
+          <td className="px-5 py-3.5">
             <div className="font-semibold text-[#151515]">{customer.full_name}</div>
           </td>
-          <td className="px-4 py-3 text-xs text-[#777777]">
+          <td className="px-5 py-3.5 text-xs text-[#777777]">
             <div>{phoneDisplay}</div>
             <div className="text-[#777777]/70 max-w-xs truncate">{addressDisplay}</div>
           </td>
-          <td className={"px-4 py-3 text-right text-sm " + balanceClass}>
+          <td className={"px-5 py-3.5 text-right text-sm " + balanceClass}>
             {formatPeso(customer.current_balance)}
           </td>
-          <td className="px-4 py-3 text-right font-mono text-xs text-[#777777]">
+          <td className="px-5 py-3.5 text-right font-mono text-xs text-[#777777]">
             {limitDisplay}
           </td>
-          <td className="px-4 py-3">{statusBadge}</td>
-          <td className="px-4 py-3 text-right">
+          <td className="px-5 py-3.5">{statusBadge}</td>
+          <td className="px-5 py-3.5 text-right">
             <div className="flex items-center justify-end gap-1.5">
               <Button
                 size="sm"
@@ -287,7 +287,7 @@ export function CustomersPage(props) {
       {errorElement}
 
       {/* Summary Stat Cards */}
-      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+      <div className="mb-6 sm:mb-7 grid grid-cols-1 gap-4 sm:gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total Outstanding Utang"
           value={formatPeso(totalUtang)}
@@ -298,13 +298,13 @@ export function CustomersPage(props) {
         <StatCard
           label="Customers with Utang"
           value={String(customersWithBalanceCount)}
-          tone="slate"
+          tone="neutral"
           icon={Banknote}
         />
         <StatCard
           label="Active Customers"
           value={String(activeCustomersCount)}
-          tone="slate"
+          tone="neutral"
           icon={Users}
         />
         <StatCard
@@ -316,7 +316,7 @@ export function CustomersPage(props) {
       </div>
 
       {/* Search Bar & Filter Tabs */}
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:w-80">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
           <input
@@ -326,7 +326,7 @@ export function CustomersPage(props) {
             onChange={function handleSearch(event) {
               setSearchQuery(event.target.value);
             }}
-            className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2 pl-10 pr-4 text-xs sm:text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
+            className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2.5 pl-10 pr-4 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
           />
         </div>
 
@@ -372,7 +372,7 @@ export function CustomersPage(props) {
       </div>
 
       {/* Main Customers Table */}
-      <div className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white shadow-xs">
+      <div className="overflow-x-auto rounded-2xl border border-[#E9E9E9] bg-white">
         <DataTable headRow={tableHeadRow} stickyHead={true}>
           {tableBodyContent}
         </DataTable>

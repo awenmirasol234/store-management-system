@@ -12,6 +12,11 @@ describe("PosPage SSR test", function () {
     expect(html.length).toBeGreaterThan(0);
   });
 
+  it("renders page header title 'Point of Sale'", function () {
+    const html = renderToString(React.createElement(PosPage));
+    expect(html).toContain("Point of Sale");
+  });
+
   it("imports ShoppingBag icon without reference error", function () {
     expect(ShoppingBag).toBeDefined();
     expect(typeof ShoppingBag).toBe("object");

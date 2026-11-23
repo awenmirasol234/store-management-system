@@ -63,12 +63,12 @@ export function ReceiptView(props) {
 
   let taglineElement = null;
   if (settings && settings.tagline) {
-    taglineElement = <div className="text-2xs text-slate-500">{settings.tagline}</div>;
+    taglineElement = <div className="text-2xs text-[#777777]">{settings.tagline}</div>;
   }
 
   let addressElement = null;
   if (settings && settings.address) {
-    addressElement = <div className="text-2xs text-slate-500">{settings.address}</div>;
+    addressElement = <div className="text-2xs text-[#777777]">{settings.address}</div>;
   }
 
   let contactElement = null;
@@ -82,7 +82,7 @@ export function ReceiptView(props) {
       taxRow = <div>{"TIN: " + settings.tax_number}</div>;
     }
     contactElement = (
-      <div className="text-2xs text-slate-500 space-y-0.5">
+      <div className="text-2xs text-[#777777] space-y-0.5">
         {phoneRow}
         {taxRow}
       </div>
@@ -92,7 +92,7 @@ export function ReceiptView(props) {
   let headerNoteElement = null;
   if (settings && settings.receipt_header) {
     headerNoteElement = (
-      <div className="text-2xs text-slate-600 italic pt-1">{settings.receipt_header}</div>
+      <div className="text-2xs text-[#151515] italic pt-1">{settings.receipt_header}</div>
     );
   }
 
@@ -108,13 +108,13 @@ export function ReceiptView(props) {
     } else if (sale.created_by) {
       cashierName = sale.created_by;
     }
-    cashierElement = <div className="text-tiny text-slate-600">{"Cashier: " + cashierName}</div>;
+    cashierElement = <div className="text-tiny text-[#151515]">{"Cashier: " + cashierName}</div>;
   }
 
   let footerNoteElement = null;
   if (settings && settings.receipt_footer) {
     footerNoteElement = (
-      <div className="text-center border-t border-dashed border-slate-300 pt-3 mt-3 text-2xs text-slate-500">
+      <div className="text-center border-t border-dashed border-[#E9E9E9] pt-3 mt-3 text-2xs text-[#777777]">
         {settings.receipt_footer}
       </div>
     );
@@ -126,18 +126,18 @@ export function ReceiptView(props) {
         id="thermal-receipt"
         className="mx-auto w-full max-w-[300px] rounded-xl border border-[#E9E9E9] bg-white p-5 font-mono text-xs text-[#151515]"
       >
-        <div className="text-center border-b border-dashed border-slate-300 pb-3 mb-3 space-y-0.5">
+        <div className="text-center border-b border-dashed border-[#E9E9E9] pb-3 mb-3 space-y-0.5">
           <div className="text-sm font-bold uppercase">{storeName}</div>
           {taglineElement}
           {addressElement}
           {contactElement}
           {headerNoteElement}
           <div className="pt-1 font-semibold">OR #{sale.receipt_number}</div>
-          <div className="text-tiny text-slate-600">{formatSmartDateTime(sale.created_at)}</div>
+          <div className="text-tiny text-[#777777]">{formatSmartDateTime(sale.created_at)}</div>
           {cashierElement}
         </div>
 
-        <div className="space-y-2 border-b border-dashed border-slate-300 pb-3 mb-3">
+        <div className="space-y-2 border-b border-dashed border-[#E9E9E9] pb-3 mb-3">
           {items && items.map(function renderItem(item) {
             return (
               <div key={item.sale_item_id}>
@@ -145,7 +145,7 @@ export function ReceiptView(props) {
                   <span className="truncate pr-2">{item.option_name_snapshot}</span>
                   <span>{formatPeso(item.subtotal)}</span>
                 </div>
-                <div className="text-tiny text-slate-500">
+                <div className="text-tiny text-[#777777]">
                   {formatQuantity(item.quantity)} x {formatPeso(item.unit_price)}
                 </div>
               </div>
@@ -159,7 +159,7 @@ export function ReceiptView(props) {
             <span>{formatPeso(sale.subtotal_amount)}</span>
           </div>
           {discountRow}
-          <div className="flex justify-between text-sm font-bold border-t border-dashed border-slate-300 pt-2">
+          <div className="flex justify-between text-sm font-bold border-t border-dashed border-[#E9E9E9] pt-2">
             <span>TOTAL</span>
             <span>{formatPeso(sale.total_amount)}</span>
           </div>

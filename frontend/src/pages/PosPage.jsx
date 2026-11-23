@@ -30,6 +30,7 @@ import { ErrorBanner } from "../components/ErrorBanner.jsx";
 import { FormActions } from "../components/FormActions.jsx";
 import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
+import { PageHeader } from "../components/PageHeader.jsx";
 import { PaymentMethodToggle } from "../components/PaymentMethodToggle.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
 import { ReceiptView } from "../components/ReceiptView.jsx";
@@ -536,7 +537,7 @@ export function PosPage(props) {
   if (totals.discount > 0) {
     discountSummaryRow = (
       <div className="flex items-center justify-between text-sm">
-        <span className="text-slate-500">Discount</span>
+        <span className="text-[#777777]">Discount</span>
         <span className="font-mono font-medium text-blue-600">
           -{formatPeso(totals.discount)}
         </span>
@@ -1053,10 +1054,28 @@ export function PosPage(props) {
   return (
     <div className="flex h-full flex-1 overflow-hidden bg-[#F5F5F4]">
       {/* Center Catalog Workspace */}
-      <div className="flex flex-1 flex-col overflow-hidden p-3.5 sm:p-5 lg:p-6">
-        {/* Top Search & Low Stock Bar */}
-        <div className="mb-5 flex items-center gap-3.5">
-          <div className="relative flex-1">
+      <div className="flex flex-1 flex-col overflow-hidden p-4 sm:p-5 lg:p-6">
+        <PageHeader title="Point of Sale" stackOnMobile={true}>
+          <div className="flex items-center gap-2 sm:gap-3">
+            {shiftButton}
+
+            <button
+              type="button"
+              onClick={function openLowStock() {
+                setLowStockModalOpen(true);
+              }}
+              className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] cursor-pointer shrink-0 transition-colors"
+              title="Low Stock Alerts"
+            >
+              <Bell className="h-4 w-4" />
+              {lowStockBadge}
+            </button>
+          </div>
+        </PageHeader>
+
+        {/* Top Search Bar */}
+        <div className="mb-4">
+          <div className="relative w-full">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
             <input
               ref={searchInputRef}
@@ -1067,26 +1086,12 @@ export function PosPage(props) {
               }}
               onKeyDown={handleSearchKeyDown}
               placeholder="Search by product or scan barcode..."
-              className="w-full rounded-xl border border-[#E9E9E9] bg-white py-3 pl-11 pr-20 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
+              className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2.5 pl-11 pr-20 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
             />
             <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 rounded border border-[#E9E9E9] bg-[#EEEEED] px-2 py-0.5 font-mono text-tiny text-[#777777]">
               Ctrl K
             </span>
           </div>
-
-          {shiftButton}
-
-          <button
-            type="button"
-            onClick={function openLowStock() {
-              setLowStockModalOpen(true);
-            }}
-            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] cursor-pointer shrink-0 transition-colors"
-            title="Low Stock Alerts"
-          >
-            <Bell className="h-4 w-4" />
-            {lowStockBadge}
-          </button>
         </div>
 
         {errorElement}

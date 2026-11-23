@@ -68,23 +68,23 @@ export function SetupPage(props) {
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-[#0F111E] px-4 py-8 select-none">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#181B2C] p-6 shadow-2xl shadow-black/60 md:p-8">
+    <div className="flex min-h-screen w-full items-center justify-center bg-[#F5F5F4] px-4 py-8 select-none">
+      <div className="w-full max-w-md rounded-2xl border border-[#E9E9E9] bg-white p-6 shadow-sm md:p-8">
         <div className="mb-6 flex flex-col items-center text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/30">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#171717] text-[#B9F36B] shadow-xs">
             <Store className="h-6 w-6" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-white">Welcome to StoreFlow</h1>
-          <p className="mt-1 text-xs text-slate-400">
+          <h1 className="text-xl font-bold tracking-tight text-[#151515]">Welcome to StoreFlow</h1>
+          <p className="mt-1 text-xs text-[#777777]">
             First-time launch: Set up your initial Store Owner account and security PIN
           </p>
         </div>
 
         {errorElement}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <div>
-            <label className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+            <label className="mb-1.5 block text-xs font-medium text-[#151515]">
               Owner Username
             </label>
             <input
@@ -94,12 +94,12 @@ export function SetupPage(props) {
                 setUsername(e.target.value);
               }}
               placeholder="e.g. owner"
-              className="w-full rounded-lg border border-white/10 bg-[#0F111E] px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+            <label className="mb-1.5 block text-xs font-medium text-[#151515]">
               Full Name
             </label>
             <input
@@ -109,13 +109,13 @@ export function SetupPage(props) {
                 setFullName(e.target.value);
               }}
               placeholder="e.g. Maria Santos"
-              className="w-full rounded-lg border border-white/10 bg-[#0F111E] px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
             <div>
-              <label className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+              <label className="mb-1.5 block text-xs font-medium text-[#151515]">
                 Security PIN (4-8 digits)
               </label>
               <input
@@ -127,11 +127,11 @@ export function SetupPage(props) {
                   setPin(e.target.value.replace(/\D/g, ""));
                 }}
                 placeholder="••••"
-                className="w-full rounded-lg border border-white/10 bg-[#0F111E] px-3.5 py-2.5 text-center text-sm font-mono tracking-widest text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-center text-sm font-mono tracking-widest text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
               />
             </div>
             <div>
-              <label className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+              <label className="mb-1.5 block text-xs font-medium text-[#151515]">
                 Confirm PIN
               </label>
               <input
@@ -143,15 +143,15 @@ export function SetupPage(props) {
                   setConfirmPin(e.target.value.replace(/\D/g, ""));
                 }}
                 placeholder="••••"
-                className="w-full rounded-lg border border-white/10 bg-[#0F111E] px-3.5 py-2.5 text-center text-sm font-mono tracking-widest text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-center text-sm font-mono tracking-widest text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
               />
             </div>
           </div>
 
-          <div className="rounded-lg bg-blue-950/40 border border-blue-800/30 p-3 text-2xs text-blue-200">
-            <div className="flex items-center gap-1.5 font-semibold text-blue-300 mb-0.5">
-              <ShieldCheck className="h-4 w-4" />
-              Owner Role Privileges
+          <div className="rounded-xl bg-[#EEEEED]/60 border border-[#E9E9E9] p-3.5 text-xs text-[#777777]">
+            <div className="flex items-center gap-1.5 font-semibold text-[#151515] mb-1">
+              <ShieldCheck className="h-4 w-4 text-[#151515]" />
+              <span>Owner Role Privileges</span>
             </div>
             Full store administrative access: manage inventory, profit reports, cashier accounts, and backups.
           </div>
@@ -159,8 +159,9 @@ export function SetupPage(props) {
           <Button
             type="submit"
             variant="primary"
+            size="lg"
             disabled={submitting}
-            className="w-full py-2.5 text-sm font-semibold"
+            className="w-full shadow-xs"
           >
             {submitButtonText}
           </Button>

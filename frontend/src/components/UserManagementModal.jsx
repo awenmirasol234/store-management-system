@@ -130,24 +130,24 @@ export function UserManagementModal(props) {
     addFormElement = (
       <form
         onSubmit={handleCreateUser}
-        className="rounded-xl border border-blue-200 bg-blue-50/50 p-4 space-y-3"
+        className="rounded-2xl border border-[#E9E9E9] bg-[#EEEEED]/40 p-4 space-y-3.5"
       >
-        <div className="flex items-center justify-between border-b border-blue-200/60 pb-2">
-          <span className="text-xs font-bold text-blue-950">Add New Staff Member</span>
+        <div className="flex items-center justify-between border-b border-[#E9E9E9] pb-2">
+          <span className="text-xs font-bold text-[#151515]">Add New Staff Member</span>
           <button
             type="button"
             onClick={function () {
               setShowAddForm(false);
             }}
-            className="text-2xs text-slate-500 hover:text-slate-800 cursor-pointer"
+            className="text-2xs text-[#777777] hover:text-[#151515] cursor-pointer transition-colors"
           >
             Cancel
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3.5">
           <div>
-            <label className="block text-2xs font-semibold text-slate-600 mb-1">
+            <label className="block text-xs font-medium text-[#151515] mb-1.5">
               Username
             </label>
             <input
@@ -157,12 +157,12 @@ export function UserManagementModal(props) {
                 setNewUsername(e.target.value);
               }}
               placeholder="e.g. cashier1"
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2 text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-2xs font-semibold text-slate-600 mb-1">
+            <label className="block text-xs font-medium text-[#151515] mb-1.5">
               Full Name
             </label>
             <input
@@ -172,18 +172,18 @@ export function UserManagementModal(props) {
                 setNewFullName(e.target.value);
               }}
               placeholder="e.g. Juan dela Cruz"
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2 text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-2xs font-semibold text-slate-600 mb-1">Role</label>
+            <label className="block text-xs font-medium text-[#151515] mb-1.5">Role</label>
             <select
               value={newRole}
               onChange={function (e) {
                 setNewRole(e.target.value);
               }}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2 text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
             >
               <option value="CASHIER">CASHIER (POS &amp; Returns)</option>
               <option value="OWNER">OWNER (Full Admin Access)</option>
@@ -191,7 +191,7 @@ export function UserManagementModal(props) {
           </div>
 
           <div>
-            <label className="block text-2xs font-semibold text-slate-600 mb-1">
+            <label className="block text-xs font-medium text-[#151515] mb-1.5">
               Security PIN (4-8 digits)
             </label>
             <input
@@ -203,7 +203,7 @@ export function UserManagementModal(props) {
                 setNewPin(e.target.value.replace(/\D/g, ""));
               }}
               placeholder="••••"
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-mono text-slate-800 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2 text-xs font-mono text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
             />
           </div>
         </div>
@@ -230,11 +230,11 @@ export function UserManagementModal(props) {
   let staffListContent = null;
   if (loading) {
     staffListContent = (
-      <div className="p-6 text-center text-xs text-slate-400">Loading staff accounts...</div>
+      <div className="p-6 text-center text-xs text-[#777777]">Loading staff accounts...</div>
     );
   } else if (users.length === 0) {
     staffListContent = (
-      <div className="p-6 text-center text-xs text-slate-400">No staff members found.</div>
+      <div className="p-6 text-center text-xs text-[#777777]">No staff members found.</div>
     );
   } else {
     staffListContent = users.map(function renderUserRow(user) {
@@ -256,7 +256,7 @@ export function UserManagementModal(props) {
       let youBadge = null;
       if (isSelf) {
         youBadge = (
-          <span className="text-3xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">
+          <span className="text-3xs bg-[#EEEEED] text-[#151515] px-1.5 py-0.5 rounded-md font-medium border border-[#E9E9E9]">
             You
           </span>
         );
@@ -270,7 +270,7 @@ export function UserManagementModal(props) {
             onClick={function () {
               handleToggleActive(user);
             }}
-            className="text-2xs font-medium text-slate-500 hover:text-slate-800 underline cursor-pointer"
+            className="text-2xs font-medium text-[#777777] hover:text-[#151515] underline cursor-pointer transition-colors"
           >
             {toggleLabel}
           </button>
@@ -280,20 +280,20 @@ export function UserManagementModal(props) {
       return (
         <div
           key={user.user_id}
-          className="flex items-center justify-between p-3.5 hover:bg-slate-50 transition"
+          className="flex items-center justify-between p-3.5 hover:bg-[#EEEEED]/50 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EEEEED] text-xs font-bold text-[#151515]">
               {user.username.slice(0, 2).toUpperCase()}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-800">
+                <span className="text-xs font-semibold text-[#151515]">
                   {user.full_name}
                 </span>
                 {youBadge}
               </div>
-              <div className="text-2xs text-slate-400">@{user.username}</div>
+              <div className="text-2xs text-[#777777]">@{user.username}</div>
             </div>
           </div>
 
@@ -318,7 +318,7 @@ export function UserManagementModal(props) {
         {errorElement}
 
         <div className="flex items-center justify-between">
-          <div className="text-xs text-slate-500">
+          <div className="text-xs text-[#777777]">
             Manage cashier and owner accounts with terminal PIN access.
           </div>
           {addCashierButton}
