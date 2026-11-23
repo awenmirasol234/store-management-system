@@ -1,93 +1,97 @@
 # Store Management System
 
-A local-first store management and point-of-sale system for small Philippine retail stores.
+Local-first point-of-sale (POS) and inventory management system for Philippine retail stores.
 
-## Current features
+- **Currency**: Philippine Peso (`₱`), stored as scaled integer centavos (`× 100`).
+- **Timezone**: `Asia/Manila` (`UTC+8`) for business-day calculations and receipt sequencing.
+- **Backend**: Node.js 24, Express, plain SQL via `node:sqlite`, Vitest.
+- **Frontend**: React 19, Vite, Tailwind CSS v4, Vitest.
+- **Deployment**: Docker Compose with Nginx reverse proxy and persistent SQLite volume.
 
-- Product, category, supplier, unit, and selling-option management.
-- Stock-in, stock adjustments, low-stock alerts, and inventory history.
-- POS checkout with base units, packs, bundles, fractional quantities, discounts, and custom peso amounts.
-- Sales returns and printable receipts.
-- Customer credit (utang), payments, and customer ledgers.
-- Cashier shifts, cash movements, and shift closing.
-- Owner and cashier accounts with PIN authentication and role-based access.
-- Daily sales, product, and inventory reports.
-- SQLite persistence with Docker Compose support.
+---
 
-Currency is Philippine peso (`₱`). Business-day calculations use `Asia/Manila` (`UTC+8`).
+## 1. Prerequisites
 
-## Stack
+- Node.js 24 or compatible
+- npm 10+
+- Docker and Docker Compose (for containerized execution)
 
-- Backend: Node.js 24, Express, ESM JavaScript, built-in `node:sqlite`, and Vitest.
-- Frontend: React 19, Vite, JavaScript/JSX, Tailwind CSS v4, and Vitest.
-- Deployment: Docker Compose with an Nginx frontend proxy and persistent SQLite/uploads volume.
+---
 
-## Requirements
+## 2. Local Development Setup
 
-- Node.js 24 or compatible.
-- npm.
-- Docker and Docker Compose for containerized use.
-
-## Local development
-
-Install dependencies:
+### Step 1: Install Dependencies
 
 ```bash
-cd backend
-npm ci
-cd ../frontend
-npm ci
+cd backend && npm ci
+cd ../frontend && npm ci
 ```
 
-The backend requires `PORT`, `DATABASE_PATH`, and `UPLOADS_DIR`. Start it from `backend/`:
+### Step 2: Start the Backend API Server
 
-PowerShell:
+The backend requires `PORT`, `DATABASE_PATH`, and `UPLOADS_DIR`. Default port is `3001`.
+
+**PowerShell (Windows):**
 
 ```powershell
+cd backend
 $env:PORT="3001"
 $env:DATABASE_PATH="./data/store.db"
 $env:UPLOADS_DIR="./uploads"
 npm start
 ```
 
-Bash:
+**Bash (Linux / macOS):**
 
 ```bash
+cd backend
 PORT=3001 DATABASE_PATH=./data/store.db UPLOADS_DIR=./uploads npm start
 ```
 
-Start the frontend in a second terminal:
+### Step 3: Start the Frontend Application
+
+In a separate terminal:
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-Open `http://localhost:5173`. Vite proxies `/api` and `/uploads` to `http://localhost:3001`.
+Open `http://localhost:5173`. Vite proxies `/api` and `/uploads` requests to `http://localhost:3001`.
 
-On the first visit, create the initial owner account. The application then requires login in the UI. Set `ENFORCE_AUTH=true` when the backend must enforce authentication and role checks for API routes. The default is `false` for local development.
+### Step 4: First-Time Setup & Authentication
 
-## Seed local data
+1. Open `http://localhost:5173` in a browser.
+2. Complete the setup wizard to create the initial `OWNER` account and PIN.
+3. Use the created PIN to sign in.
+4. Set `ENFORCE_AUTH=true` in the backend environment when route-level authentication and role checks must be enforced. Default is `false` for development ease.
 
-Run this from `backend/`:
+---
 
-```bash
-npm run seed
-```
+## 3. Database Seeding & Reset
 
-Seeding uses the configured database path (defaults to `./data/store.db`).
+Run all seed commands from `backend/`:
 
-Clean and reseed (removes products, sales, inventory, customers, credit, shifts, and users; store settings are kept):
+- **Seed Sample Catalog & Sales**:
+  ```bash
+  npm run seed
+  ```
+  Applies base units, categories, suppliers, 50 sample products, selling options, initial inventory movements, and sample sales transactions.
 
-```bash
-npm run seed -- --clean
-```
+- **Clean and Reseed Database**:
+  ```bash
+  npm run seed -- --clean
+  ```
+  > [!WARNING]
+  > `--clean` removes all products, selling options, inventory transactions, sales, returns, customer accounts, credit records, cashier shifts, and user accounts. `store_settings` are retained.
 
-Cleaning existing data removes sales and inventory history, so use clean options only when that data loss is intended.
+---
 
-## Docker
+## 4. Docker Deployment
 
-Start the full application:
+Deploy the entire stack (Nginx frontend proxy on port `8080` + private Express backend) with Docker Compose:
+
+### Start Services
 
 ```bash
 docker compose up -d --build
@@ -96,41 +100,49 @@ docker compose exec backend node src/db/seed.js
 
 Open `http://localhost:8080`.
 
-Useful commands:
+### Operational Commands
 
-```bash
-docker compose ps
-docker compose logs -f backend
-docker compose down
-```
+- **Check service status**: `docker compose ps`
+- **Follow backend logs**: `docker compose logs -f backend`
+- **Stop containers**: `docker compose down`
+- **Purge volume and data**: `docker compose down -v` *(Deletes database and image uploads)*
 
-The `store_data` volume contains the database and uploaded images. `docker compose down -v` deletes that volume and its data.
+For production image tags, updates, and rollbacks, see [docs/docker-deployment.md](docs/docker-deployment.md).
 
-See [`docs/docker-deployment.md`](docs/docker-deployment.md) for published images, updates, rollback, and service recreation.
+---
 
-## Tests and build
+## 5. Verification & Testing
 
-Backend:
+Run test suites before every commit:
 
-```bash
-cd backend
-npm test
-```
+- **Backend Tests (Unit & SQLite Integration)**:
+  ```bash
+  cd backend && npm test
+  ```
 
-Frontend:
+- **Frontend Tests (Components, Cart & POS)**:
+  ```bash
+  cd frontend && npm test
+  ```
 
-```bash
-cd frontend
-npm test
-npm run build
-```
+- **Frontend Production Build**:
+  ```bash
+  cd frontend && npm run build
+  ```
 
-## Documentation
+- **Diff & Whitespace Check**:
+  ```bash
+  git diff --check
+  ```
 
-- [`ARCHITECTURE.md`](ARCHITECTURE.md): layers, modules, dependency rules, and API boundaries.
-- [`CONTRIBUTING.md`](CONTRIBUTING.md): contribution and verification workflow.
-- [`docs/product-inventory-and-selling-options.md`](docs/product-inventory-and-selling-options.md): inventory and selling rules.
-- [`docs/store-management-system-plan.md`](docs/store-management-system-plan.md): current implementation status and roadmap.
-- [`docs/docker-deployment.md`](docs/docker-deployment.md): Docker deployment instructions.
-- [`docs/design-system.md`](docs/design-system.md): frontend visual system and remaining UI work.
-- [`AGENTS.md`](AGENTS.md): persistent instructions for coding agents.
+---
+
+## 6. Documentation Index
+
+- [ARCHITECTURE.md](ARCHITECTURE.md): Clean Architecture layers, module layout, data scaling, and API contracts.
+- [CONTRIBUTING.md](CONTRIBUTING.md): Pre-change requirements, development constraints, and verification procedures.
+- [AGENTS.md](AGENTS.md): Mandatory rules, code conventions, and execution boundaries for coding agents.
+- [docs/product-inventory-and-selling-options.md](docs/product-inventory-and-selling-options.md): Core domain specifications, selling modes, and inventory calculation formulas.
+- [docs/store-management-system-plan.md](docs/store-management-system-plan.md): Architectural roadmap and current implementation status.
+- [docs/design-system.md](docs/design-system.md): Tailwind v4 design tokens, POS cockpit layout, and UI component specifications.
+- [docs/docker-deployment.md](docs/docker-deployment.md): Container architecture, image publishing, and volume maintenance.
