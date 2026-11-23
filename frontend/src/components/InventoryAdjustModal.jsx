@@ -1,4 +1,4 @@
-import { formatQuantity } from "../format.js";
+import { formatQuantityWithUnit } from "../format.js";
 import { FormActions } from "./FormActions.jsx";
 import { Input } from "./Input.jsx";
 import { Modal } from "./Modal.jsx";
@@ -40,7 +40,7 @@ export function InventoryAdjustModal(props) {
           onChange={function onQtyChange(event) {
             props.onQtyChange(event.target.value);
           }}
-          helper={"Current stock: " + formatQuantity(product.current_stock) + " " + product.base_unit}
+          helper={"Current stock: " + formatQuantityWithUnit(product.current_stock, product.base_unit)}
           required={true}
         />
 

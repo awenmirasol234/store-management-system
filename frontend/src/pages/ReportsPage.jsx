@@ -16,7 +16,7 @@ import {
   Wallet
 } from "lucide-react";
 import { api } from "../api.js";
-import { formatPeso, formatQuantity, formatSmartDate, formatSmartDateTime, getManilaIsoDateOffset } from "../format.js";
+import { formatPeso, formatQuantity, formatQuantityWithUnit, formatSmartDate, formatSmartDateTime, getManilaIsoDateOffset } from "../format.js";
 import { exportToCsv, triggerPrintReport } from "../export.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
@@ -426,7 +426,7 @@ export function ReportsPage() {
                         </div>
                       </td>
                       <td className="px-5 py-3 font-mono text-sm text-[#777777] text-right">
-                        {formatQuantity(item.quantity_sold)} {item.base_unit}
+                        {formatQuantityWithUnit(item.quantity_sold, item.base_unit)}
                       </td>
                       <td className="px-5 py-3 font-mono text-sm font-semibold text-[#151515] text-right">{formatPeso(item.revenue)}</td>
                       <td className="px-5 py-3 font-mono text-sm font-semibold text-emerald-700 text-right">{formatPeso(item.profit)}</td>
@@ -574,7 +574,7 @@ export function ReportsPage() {
                         </Badge>
                       </td>
                       <td className={"px-5 py-3 font-mono text-sm font-semibold text-right " + (isPositive ? "text-emerald-700" : "text-[#151515]")}>
-                        {isPositive ? "+" : ""}{formatQuantity(tx.quantity)} {tx.base_unit}
+                        {isPositive ? "+" : ""}{formatQuantityWithUnit(tx.quantity, tx.base_unit)}
                       </td>
                       <td className="px-5 py-3 text-xs text-[#777777]">
                         {tx.supplier_name ? <span className="font-medium text-[#151515]">{tx.supplier_name} - </span> : null}

@@ -138,7 +138,7 @@ describe("PosPage SSR test", function () {
     expect(html).toContain('value="opt-1"');
     expect(html).toContain("1 Can (Default)");
     expect(html).toContain("1 Pack (6 pcs)");
-    expect(html).toContain("6 Can");
+    expect(html).toContain("6 Cans");
     expect(html).toContain("Add to Cart");
   });
 

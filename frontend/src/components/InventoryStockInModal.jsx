@@ -1,4 +1,4 @@
-import { formatQuantity } from "../format.js";
+import { formatQuantityWithUnit } from "../format.js";
 import { FormActions } from "./FormActions.jsx";
 import { Input } from "./Input.jsx";
 import { Modal } from "./Modal.jsx";
@@ -32,7 +32,7 @@ export function InventoryStockInModal(props) {
           {props.options.map(function renderOpt(option) {
             return (
               <option key={option.option_id} value={option.option_id}>
-                {option.option_name} ({formatQuantity(option.quantity)} {unitLabel})
+                {option.option_name} ({formatQuantityWithUnit(option.quantity, unitLabel)})
               </option>
             );
           })}

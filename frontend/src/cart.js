@@ -1,4 +1,4 @@
-import { formatQuantity } from "./format.js";
+import { formatQuantity, formatUnit } from "./format.js";
 
 export function computeLocalCartTotals(cartItems, orderDiscount) {
   let subtotal = 0;
@@ -111,7 +111,7 @@ export function canAddStockToCart(input) {
   if (currentUsageScaled + additionalScaled > stockScaled) {
     let unitLabel = "";
     if (product.base_unit) {
-      unitLabel = " " + product.base_unit;
+      unitLabel = " " + formatUnit(product.base_unit, currentStock);
     }
     return {
       allowed: false,

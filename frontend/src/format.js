@@ -49,6 +49,114 @@ export function formatQuantity(quantity) {
   return String(Number(numericValue.toFixed(4)));
 }
 
+const UNIT_PLURAL_MAP = {
+  "Piece (pc)": "Pieces (pcs)",
+  "Pack": "Packs",
+  "Box": "Boxes",
+  "Bottle": "Bottles",
+  "Can": "Cans",
+  "Sachet": "Sachets",
+  "Kilogram (kg)": "Kilograms (kg)",
+  "Gram (g)": "Grams (g)",
+  "Liter (L)": "Liters (L)",
+  "Milliliter (mL)": "Milliliters (mL)",
+  "Meter (m)": "Meters (m)",
+  "Roll": "Rolls",
+  "Dozen (doz)": "Dozens (doz)",
+  "Pair": "Pairs",
+  "Set": "Sets",
+  "Bundle": "Bundles",
+  "Sack": "Sacks",
+  "Case": "Cases",
+  "Carton": "Cartons",
+  "Tray": "Trays",
+  "Gallon": "Gallons",
+  "Pouch": "Pouches",
+  "Tube": "Tubes",
+  "Jar": "Jars",
+  "Bar": "Bars",
+  "Stick": "Sticks",
+  "Ream": "Reams",
+  "Sheet": "Sheets"
+};
+
+const COMMON_LOWER_PLURALS = {
+  piece: "pieces",
+  pc: "pcs",
+  box: "boxes",
+  pouch: "pouches",
+  bottle: "bottles",
+  can: "cans",
+  pack: "packs",
+  sachet: "sachets",
+  roll: "rolls",
+  pair: "pairs",
+  set: "sets",
+  bundle: "bundles",
+  sack: "sacks",
+  case: "cases",
+  carton: "cartons",
+  tray: "trays",
+  gallon: "gallons",
+  tube: "tubes",
+  jar: "jars",
+  bar: "bars",
+  stick: "sticks",
+  ream: "reams",
+  sheet: "sheets",
+  meter: "meters",
+  gram: "grams",
+  liter: "liters",
+  milliliter: "milliliters",
+  kilogram: "kilograms",
+  dozen: "dozens"
+};
+
+export function formatUnit(unit, quantity) {
+  if (!unit || typeof unit !== "string") {
+    return "";
+  }
+  const numericValue = Number(quantity);
+  if (Number.isFinite(numericValue) && Math.abs(numericValue) === 1) {
+    return unit;
+  }
+  const trimmed = unit.trim();
+  if (UNIT_PLURAL_MAP[trimmed]) {
+    return UNIT_PLURAL_MAP[trimmed];
+  }
+  const lower = trimmed.toLowerCase();
+  if (COMMON_LOWER_PLURALS[lower]) {
+    if (trimmed === lower) {
+      return COMMON_LOWER_PLURALS[lower];
+    }
+    const plural = COMMON_LOWER_PLURALS[lower];
+    return plural.charAt(0).toUpperCase() + plural.slice(1);
+  }
+  if (["kg", "g", "l", "ml", "m"].includes(lower)) {
+    return trimmed;
+  }
+  if (lower.endsWith("s")) {
+    return trimmed;
+  }
+  if (
+    lower.endsWith("ch") ||
+    lower.endsWith("sh") ||
+    lower.endsWith("x") ||
+    lower.endsWith("z")
+  ) {
+    return trimmed + "es";
+  }
+  return trimmed + "s";
+}
+
+export function formatQuantityWithUnit(quantity, unit) {
+  const formattedQty = formatQuantity(quantity);
+  if (!unit) {
+    return formattedQty;
+  }
+  return formattedQty + " " + formatUnit(unit, quantity);
+}
+
 export function formatManilaDateTime(isoString) {
   if (!isoString) {
     return "";

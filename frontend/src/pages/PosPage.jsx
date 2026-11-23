@@ -20,7 +20,7 @@ import {
   computeItemBaseQuantity,
   computeLocalCartTotals
 } from "../cart.js";
-import { formatPeso, formatQuantity } from "../format.js";
+import { formatPeso, formatQuantity, formatQuantityWithUnit } from "../format.js";
 import { getStockLevel, filterProducts, STOCK_LEVELS } from "../products.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
@@ -833,7 +833,7 @@ export function PosPage(props) {
                     <div>
                       <div className="text-sm font-medium text-[#151515]">{option.option_name}</div>
                       <div className="mt-0.5 font-mono text-xs text-[#777777]">
-                        {formatQuantity(option.quantity) + " " + pickerState.product.base_unit}
+                        {formatQuantityWithUnit(option.quantity, pickerState.product.base_unit)}
                       </div>
                     </div>
                   </div>
@@ -869,11 +869,11 @@ export function PosPage(props) {
               <div>
                 <div className="text-sm font-semibold text-[#151515]">{product.product_name}</div>
                 <div className="mt-0.5 font-mono text-xs text-[#777777]">
-                  Reorder at {formatQuantity(product.reorder_level)} {product.base_unit}
+                  Reorder at {formatQuantityWithUnit(product.reorder_level, product.base_unit)}
                 </div>
               </div>
               <Badge tone="amber" className="font-mono">
-                {formatQuantity(product.current_stock)} {product.base_unit}
+                {formatQuantityWithUnit(product.current_stock, product.base_unit)}
               </Badge>
             </div>
           );

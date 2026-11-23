@@ -181,7 +181,7 @@ describe("canAddStockToCart", function () {
     });
     expect(result.allowed).toBe(false);
     expect(result.message).toBe(
-      "Requested quantity exceeds available stock for Coke Can (5 Piece (pc) available)."
+      "Requested quantity exceeds available stock for Coke Can (5 Pieces (pcs) available)."
     );
   });
 
@@ -193,7 +193,7 @@ describe("canAddStockToCart", function () {
     });
     expect(result.allowed).toBe(false);
     expect(result.message).toBe(
-      "Requested quantity exceeds available stock for Coke Can (5 Piece (pc) available)."
+      "Requested quantity exceeds available stock for Coke Can (5 Pieces (pcs) available)."
     );
   });
 

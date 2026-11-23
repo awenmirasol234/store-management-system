@@ -11,7 +11,7 @@ import {
   Upload
 } from "lucide-react";
 import { api } from "../api.js";
-import { formatPeso, formatQuantity } from "../format.js";
+import { formatPeso, formatQuantity, formatQuantityWithUnit } from "../format.js";
 import { COMMON_BASE_UNITS, filterProducts, getStockLevel, STOCK_LEVELS } from "../products.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
@@ -469,7 +469,7 @@ export function InventoryPage(props) {
           </td>
           <td className="px-5 py-3.5 text-right">
             <Badge tone={getStockBadgeTone(product)} className="font-mono">
-              {formatQuantity(product.current_stock)} {product.base_unit}
+              {formatQuantityWithUnit(product.current_stock, product.base_unit)}
             </Badge>
           </td>
           <td className="px-5 py-3.5">
@@ -520,7 +520,7 @@ export function InventoryPage(props) {
               <div className="text-xs text-[#777777] font-mono mt-0.5">Barcode: {barcodeText}</div>
               <div className="mt-1 flex items-center gap-2">
                 <Badge tone={getStockBadgeTone(product)} className="font-mono text-xs">
-                  {formatQuantity(product.current_stock)} {product.base_unit}
+                  {formatQuantityWithUnit(product.current_stock, product.base_unit)}
                 </Badge>
               </div>
             </div>
@@ -599,7 +599,7 @@ export function InventoryPage(props) {
               <div>
                 <div className="text-sm font-medium text-[#151515]">{option.option_name}</div>
                 <div className="mt-0.5 font-mono text-xs text-[#777777]">
-                  {formatQuantity(option.quantity)} {optionsModalProduct.base_unit}
+                  {formatQuantityWithUnit(option.quantity, optionsModalProduct.base_unit)}
                 </div>
               </div>
               <div className="font-mono text-sm font-bold text-[#151515]">

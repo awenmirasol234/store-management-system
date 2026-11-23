@@ -8,7 +8,7 @@ import {
   Layers
 } from "lucide-react";
 import { api } from "../api.js";
-import { formatPeso, formatQuantity, formatSmartDate } from "../format.js";
+import { formatPeso, formatQuantity, formatQuantityWithUnit, formatSmartDate, formatUnit } from "../format.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
 import { EmptyState } from "../components/EmptyState.jsx";
@@ -100,11 +100,11 @@ export function DashboardPage(props) {
                   {product.product_name}
                 </div>
                 <div className="mt-0.5 font-mono text-xs text-[#777777]">
-                  Reorder at {formatQuantity(product.reorder_level)} {product.base_unit}
+                  Reorder at {formatQuantityWithUnit(product.reorder_level, product.base_unit)}
                 </div>
               </div>
               <Badge tone={isOut ? "red" : "amber"} className="font-mono shrink-0">
-                {isOut ? "OUT OF STOCK" : formatQuantity(product.current_stock) + " " + product.base_unit}
+                {isOut ? "OUT OF STOCK" : formatQuantityWithUnit(product.current_stock, product.base_unit)}
               </Badge>
             </div>
           );
@@ -127,7 +127,7 @@ export function DashboardPage(props) {
                     {item.product_name}
                   </div>
                   <div className="mt-0.5 font-mono text-xs text-[#777777]">
-                    {formatQuantity(item.quantity_sold)} {item.base_unit} sold
+                    {formatQuantity(item.quantity_sold)} {formatUnit(item.base_unit, item.quantity_sold)} sold
                   </div>
                 </div>
               </div>

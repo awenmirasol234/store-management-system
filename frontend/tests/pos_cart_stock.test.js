@@ -74,7 +74,7 @@ describe("POS cart stock quantity validation", function () {
     });
     expect(check.allowed).toBe(false);
     expect(check.message).toBe(
-      "Requested quantity exceeds available stock for Century Tuna 180g (3 Can available)."
+      "Requested quantity exceeds available stock for Century Tuna 180g (3 Cans available)."
     );
   });
 
@@ -96,7 +96,7 @@ describe("POS cart stock quantity validation", function () {
     });
     expect(check.allowed).toBe(false);
     expect(check.message).toBe(
-      "Requested quantity exceeds available stock for Century Tuna 180g (3 Can available)."
+      "Requested quantity exceeds available stock for Century Tuna 180g (3 Cans available)."
     );
   });
 
@@ -147,7 +147,7 @@ describe("POS cart stock quantity validation", function () {
     });
     expect(check.allowed).toBe(false);
     expect(check.message).toBe(
-      "Requested quantity exceeds available stock for Lucky Me Pancit Canton (10 Piece (pc) available)."
+      "Requested quantity exceeds available stock for Lucky Me Pancit Canton (10 Pieces (pcs) available)."
     );
   });
 
@@ -175,7 +175,7 @@ describe("POS cart stock quantity validation", function () {
     });
     expect(check.allowed).toBe(false);
     expect(check.message).toBe(
-      "Requested quantity exceeds available stock for Cooking Oil (0.5 Liter (L) available)."
+      "Requested quantity exceeds available stock for Cooking Oil (0.5 Liters (L) available)."
     );
 
     // ₱40 worth at ₱100/L requires 0.4 L -> fits within 0.5 L
@@ -195,9 +195,9 @@ describe("POS cart stock quantity validation", function () {
 
   it("renders ErrorBanner correctly with stock exceeded message", function () {
     const errorMsg =
-      "Requested quantity exceeds available stock for Coke Can (5 Piece (pc) available).";
+      "Requested quantity exceeds available stock for Coke Can (5 Pieces (pcs) available).";
     const html = renderToString(React.createElement(ErrorBanner, { message: errorMsg }));
-    expect(html).toContain("Requested quantity exceeds available stock for Coke Can (5 Piece (pc) available).");
+    expect(html).toContain("Requested quantity exceeds available stock for Coke Can (5 Pieces (pcs) available).");
     expect(html).toContain("text-rose-700");
   });
 });

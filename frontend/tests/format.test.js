@@ -4,8 +4,10 @@ import {
   formatManilaTime,
   formatPeso,
   formatQuantity,
+  formatQuantityWithUnit,
   formatSmartDate,
   formatSmartDateTime,
+  formatUnit,
   getManilaIsoDateOffset
 } from "../src/format.js";
 
@@ -94,6 +96,48 @@ describe("format helpers", function () {
       expect(formatSmartDate("invalid-date")).toBe("invalid-date");
       expect(formatSmartDateTime(null)).toBe("");
       expect(formatManilaTime(null)).toBe("");
+    });
+  });
+
+  describe("unit formatting & pluralization", function () {
+    it("keeps unit singular when quantity is 1 or -1", function () {
+      expect(formatUnit("Piece (pc)", 1)).toBe("Piece (pc)");
+      expect(formatUnit("Piece (pc)", -1)).toBe("Piece (pc)");
+      expect(formatUnit("Bottle", 1)).toBe("Bottle");
+      expect(formatUnit("Box", 1)).toBe("Box");
+      expect(formatQuantityWithUnit(1, "Piece (pc)")).toBe("1 Piece (pc)");
+      expect(formatQuantityWithUnit(-1, "Bottle")).toBe("-1 Bottle");
+    });
+
+    it("pluralizes units when quantity is plural (0, >1, or fractional)", function () {
+      expect(formatUnit("Piece (pc)", 0)).toBe("Pieces (pcs)");
+      expect(formatUnit("Piece (pc)", 5)).toBe("Pieces (pcs)");
+      expect(formatUnit("Piece (pc)", 0.5)).toBe("Pieces (pcs)");
+      expect(formatUnit("Box", 2)).toBe("Boxes");
+      expect(formatUnit("Pouch", 3)).toBe("Pouches");
+      expect(formatUnit("Can", 3)).toBe("Cans");
+      expect(formatUnit("Bottle", 10)).toBe("Bottles");
+      expect(formatUnit("Kilogram (kg)", 2.5)).toBe("Kilograms (kg)");
+      expect(formatUnit("Liter (L)", 0.5)).toBe("Liters (L)");
+      expect(formatUnit("Tray", 4)).toBe("Trays");
+      expect(formatQuantityWithUnit(5, "Piece (pc)")).toBe("5 Pieces (pcs)");
+      expect(formatQuantityWithUnit(0, "Can")).toBe("0 Cans");
+      expect(formatQuantityWithUnit(2.5, "Kilogram (kg)")).toBe("2.5 Kilograms (kg)");
+    });
+
+    it("supports lowercase and plain units", function () {
+      expect(formatUnit("piece", 3)).toBe("pieces");
+      expect(formatUnit("box", 2)).toBe("boxes");
+      expect(formatUnit("pouch", 4)).toBe("pouches");
+      expect(formatUnit("kg", 5)).toBe("kg");
+      expect(formatUnit("pieces", 5)).toBe("pieces");
+    });
+
+    it("handles empty or missing units gracefully", function () {
+      expect(formatUnit("", 5)).toBe("");
+      expect(formatUnit(null, 5)).toBe("");
+      expect(formatQuantityWithUnit(5, "")).toBe("5");
+      expect(formatQuantityWithUnit(5, null)).toBe("5");
     });
   });
 });
