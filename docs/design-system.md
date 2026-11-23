@@ -199,7 +199,7 @@ Every component must be written in plain beginner-readable JavaScript following 
   - `ghost`: `bg-transparent hover:bg-[#EEEEED] text-[#777777] hover:text-[#151515] border-transparent`.
   - `danger`: `bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200`.
 
-### 4.4 Category Filter Pills (`frontend/src/pages/PosPage.jsx`)
+### 4.4 Category Filter Pills (`frontend/src/components/CategoryFilterChips.jsx`, `frontend/src/pages/PosPage.jsx`)
 
 **Tactical Rules:**
 - Container: Horizontal scrolling row with smooth drag/wheel scrolling: `mb-4 flex items-center gap-2 overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing select-none`.

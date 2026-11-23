@@ -24,6 +24,7 @@ import { formatPeso, formatQuantity } from "../format.js";
 import { getStockLevel, filterProducts, STOCK_LEVELS } from "../products.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
+import { CategoryFilterChips } from "../components/CategoryFilterChips.jsx";
 import { EmptyState } from "../components/EmptyState.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
 import { FormActions } from "../components/FormActions.jsx";
@@ -46,10 +47,6 @@ function buildCartKey(productId, optionId, customAmount) {
 
 export function PosPage(props) {
   const searchInputRef = useRef(null);
-  const categoryScrollRef = useRef(null);
-  const dragStartXRef = useRef(0);
-  const dragScrollLeftRef = useRef(0);
-  const hasDraggedCategoryRef = useRef(false);
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -547,54 +544,8 @@ export function PosPage(props) {
     );
   }
 
-  function handleCategoryMouseDown(event) {
-    if (event.button !== 0 || !categoryScrollRef.current) {
-      return;
-    }
-    hasDraggedCategoryRef.current = false;
-    dragStartXRef.current = event.pageX;
-    dragScrollLeftRef.current = categoryScrollRef.current.scrollLeft;
-
-    function handleWindowMouseMove(moveEvent) {
-      if (!categoryScrollRef.current) {
-        return;
-      }
-      const distance = moveEvent.pageX - dragStartXRef.current;
-      if (Math.abs(distance) > 5) {
-        hasDraggedCategoryRef.current = true;
-      }
-      categoryScrollRef.current.scrollLeft = dragScrollLeftRef.current - distance;
-    }
-
-    function handleWindowMouseUp() {
-      window.removeEventListener("mousemove", handleWindowMouseMove);
-      window.removeEventListener("mouseup", handleWindowMouseUp);
-      setTimeout(function resetDragFlag() {
-        hasDraggedCategoryRef.current = false;
-      }, 0);
-    }
-
-    window.addEventListener("mousemove", handleWindowMouseMove);
-    window.addEventListener("mouseup", handleWindowMouseUp);
-  }
-
   function handleSelectCategory(categoryId) {
-    if (hasDraggedCategoryRef.current) {
-      return;
-    }
     setSelectedCategoryId(categoryId);
-  }
-
-  const categoryContainerClass =
-    "mb-4 flex items-center gap-2 overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing select-none";
-
-  let allCategoryClass =
-    "shrink-0 rounded-full px-4 py-2 text-xs font-medium cursor-pointer transition-colors ";
-  if (selectedCategoryId === "ALL") {
-    allCategoryClass = allCategoryClass + "bg-[#151515] font-semibold text-white shadow-xs";
-  } else {
-    allCategoryClass =
-      allCategoryClass + "bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#151515]";
   }
 
   let productGridContent = null;
@@ -1141,49 +1092,11 @@ export function PosPage(props) {
         {errorElement}
 
         {/* Category Filter Pills */}
-        <div
-          ref={categoryScrollRef}
-          onMouseDown={handleCategoryMouseDown}
-          onWheel={function handleCategoryWheel(event) {
-            if (event.deltaY !== 0) {
-              event.currentTarget.scrollLeft = event.currentTarget.scrollLeft + event.deltaY;
-            }
-          }}
-          className={categoryContainerClass}
-        >
-          <button
-            type="button"
-            onClick={function selectAll() {
-              handleSelectCategory("ALL");
-            }}
-            className={allCategoryClass}
-          >
-            All
-          </button>
-          {categories.map(function renderCategory(category) {
-            const isSelected = selectedCategoryId === category.category_id;
-            let pillClass =
-              "shrink-0 rounded-full px-4 py-2 text-xs font-medium cursor-pointer transition-colors ";
-            if (isSelected) {
-              pillClass = pillClass + "bg-[#151515] font-semibold text-white shadow-xs";
-            } else {
-              pillClass =
-                pillClass + "bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#151515]";
-            }
-            return (
-              <button
-                key={category.category_id}
-                type="button"
-                onClick={function selectCat() {
-                  handleSelectCategory(category.category_id);
-                }}
-                className={pillClass}
-              >
-                {category.category_name}
-              </button>
-            );
-          })}
-        </div>
+        <CategoryFilterChips
+          categories={categories}
+          selectedCategoryId={selectedCategoryId}
+          onSelectCategory={handleSelectCategory}
+        />
 
         {/* 4-Column Product Grid */}
         <div className="flex-1 overflow-y-auto pr-1">{productGridContent}</div>

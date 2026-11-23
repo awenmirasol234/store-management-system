@@ -31,46 +31,172 @@ export const BASE_UNITS = [
   "Sheet"
 ];
 
+export const PRODUCT_CATEGORIES = [
+  "All",
+  "Beverages",
+  "Snacks",
+  "Biscuits & Crackers",
+  "Candies & Chocolates",
+  "Canned Goods",
+  "Instant Food",
+  "Rice & Grains",
+  "Condiments & Seasonings",
+  "Cooking Essentials",
+  "Dairy & Breakfast",
+  "Bread & Bakery",
+  "Frozen Goods",
+  "Meat & Processed Foods",
+  "Personal Care",
+  "Laundry & Cleaning",
+  "Household Supplies",
+  "Kitchen Supplies",
+  "Baby Products",
+  "Health & Hygiene",
+  "School & Office Supplies",
+  "Pet Supplies",
+  "Cigarettes & Tobacco",
+  "Mobile & Electronics Accessories",
+  "Load & E-Wallet Services",
+  "Party & Gift Supplies",
+  "Agricultural Supplies",
+  "Other"
+];
+
 export const CATEGORIES = [
+  {
+    category_id: "cat_beverages",
+    category_name: "Beverages",
+    description: "Soft drinks, bottled water, juices, and drinks"
+  },
+  {
+    category_id: "cat_snacks",
+    category_name: "Snacks",
+    description: "Chips, crisps, and savory snacks"
+  },
+  {
+    category_id: "cat_biscuits_crackers",
+    category_name: "Biscuits & Crackers",
+    description: "Crackers, cookies, and biscuits"
+  },
+  {
+    category_id: "cat_candies_chocolates",
+    category_name: "Candies & Chocolates",
+    description: "Sweets, candies, gums, and chocolates"
+  },
   {
     category_id: "cat_canned",
     category_name: "Canned Goods",
     description: "Canned meat, fish, and instant meals"
   },
   {
-    category_id: "cat_noodles",
-    category_name: "Instant Noodles & Pasta",
-    description: "Pancit canton, ramen, mami, and pasta"
+    category_id: "cat_instant_food",
+    category_name: "Instant Food",
+    description: "Instant noodles, soup pouches, and ready meals"
   },
   {
-    category_id: "cat_beverages",
-    category_name: "Beverages & Drinks",
-    description: "Soft drinks, bottled water, juices, and beer"
+    category_id: "cat_rice_grains",
+    category_name: "Rice & Grains",
+    description: "Grains, rice varieties, oats, and cereals"
   },
   {
-    category_id: "cat_coffee_milk",
-    category_name: "Coffee, Milk & Breakfast",
-    description: "3-in-1 coffee, powdered milk, chocolate drink, cereal"
+    category_id: "cat_condiments_seasonings",
+    category_name: "Condiments & Seasonings",
+    description: "Soy sauce, vinegar, fish sauce, and seasonings"
   },
   {
-    category_id: "cat_snacks",
-    category_name: "Snacks & Biscuits",
-    description: "Crackers, chips, cookies, and nuts"
+    category_id: "cat_cooking_essentials",
+    category_name: "Cooking Essentials",
+    description: "Cooking oil, sugar, salt, and baking needs"
   },
   {
-    category_id: "cat_rice_cooking",
-    category_name: "Rice, Oil & Condiments",
-    description: "Grains, soy sauce, vinegar, cooking oil, seasonings"
+    category_id: "cat_dairy_breakfast",
+    category_name: "Dairy & Breakfast",
+    description: "Coffee, powdered milk, chocolate drinks, and spreads"
+  },
+  {
+    category_id: "cat_bread_bakery",
+    category_name: "Bread & Bakery",
+    description: "Loaf bread, buns, and baked pastries"
+  },
+  {
+    category_id: "cat_frozen_goods",
+    category_name: "Frozen Goods",
+    description: "Ice cream, ice pops, and frozen goods"
+  },
+  {
+    category_id: "cat_meat_processed_foods",
+    category_name: "Meat & Processed Foods",
+    description: "Hotdogs, sausages, and processed meats"
   },
   {
     category_id: "cat_personal_care",
-    category_name: "Personal Care & Toiletries",
-    description: "Bath soap, shampoo sachets, toothpaste, deodorant"
+    category_name: "Personal Care",
+    description: "Bath soap, shampoo sachets, deodorant, and lotion"
   },
   {
-    category_id: "cat_laundry_home",
-    category_name: "Laundry & Household",
-    description: "Detergent powder, fabric conditioner, dishwashing soap"
+    category_id: "cat_laundry_cleaning",
+    category_name: "Laundry & Cleaning",
+    description: "Detergent powder, fabric conditioner, and bleach"
+  },
+  {
+    category_id: "cat_household_supplies",
+    category_name: "Household Supplies",
+    description: "Batteries, insect spray, candles, and matches"
+  },
+  {
+    category_id: "cat_kitchen_supplies",
+    category_name: "Kitchen Supplies",
+    description: "Dishwashing liquid, sponges, foils, and trash bags"
+  },
+  {
+    category_id: "cat_baby_products",
+    category_name: "Baby Products",
+    description: "Diapers, baby wipes, and infant products"
+  },
+  {
+    category_id: "cat_health_hygiene",
+    category_name: "Health & Hygiene",
+    description: "Toothpaste, toothbrushes, and hygiene supplies"
+  },
+  {
+    category_id: "cat_school_office_supplies",
+    category_name: "School & Office Supplies",
+    description: "Paper, notebooks, pens, and school supplies"
+  },
+  {
+    category_id: "cat_pet_supplies",
+    category_name: "Pet Supplies",
+    description: "Pet food and pet care supplies"
+  },
+  {
+    category_id: "cat_cigarettes_tobacco",
+    category_name: "Cigarettes & Tobacco",
+    description: "Cigarettes, tobacco, and lighters"
+  },
+  {
+    category_id: "cat_mobile_electronics",
+    category_name: "Mobile & Electronics Accessories",
+    description: "Charging cables, adaptors, and earphones"
+  },
+  {
+    category_id: "cat_load_ewallet",
+    category_name: "Load & E-Wallet Services",
+    description: "Prepaid mobile load and e-wallet top-ups"
+  },
+  {
+    category_id: "cat_party_gift_supplies",
+    category_name: "Party & Gift Supplies",
+    description: "Paper plates, cups, balloons, and party goods"
+  },
+  {
+    category_id: "cat_agricultural_supplies",
+    category_name: "Agricultural Supplies",
+    description: "Feeds, seeds, and farm essentials"
+  },
+  {
+    category_id: "cat_other",
+    category_name: "Other",
+    description: "General merchandise and miscellaneous items"
   }
 ];
 
@@ -206,10 +332,10 @@ export const PRODUCTS = [
     supplier_id: "sup_urc"
   },
 
-  // Instant Noodles & Pasta (7)
+  // Instant Food (7)
   {
     id: "prod_08",
-    category_id: "cat_noodles",
+    category_id: "cat_instant_food",
     name: "Lucky Me! Pancit Canton Kalamansi 80g",
     barcode: "4807770270014",
     unit: "piece",
@@ -229,7 +355,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_09",
-    category_id: "cat_noodles",
+    category_id: "cat_instant_food",
     name: "Lucky Me! Pancit Canton Original 80g",
     barcode: "4807770270021",
     unit: "piece",
@@ -249,7 +375,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_10",
-    category_id: "cat_noodles",
+    category_id: "cat_instant_food",
     name: "Lucky Me! Pancit Canton Chili Mansi 80g",
     barcode: "4807770270038",
     unit: "piece",
@@ -269,7 +395,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_11",
-    category_id: "cat_noodles",
+    category_id: "cat_instant_food",
     name: "Lucky Me! Pancit Canton Sweet & Spicy 80g",
     barcode: "4807770270045",
     unit: "piece",
@@ -289,7 +415,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_12",
-    category_id: "cat_noodles",
+    category_id: "cat_instant_food",
     name: "Lucky Me! Supreme Instant Mami Beef 65g",
     barcode: "4807770270052",
     unit: "piece",
@@ -301,7 +427,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_13",
-    category_id: "cat_noodles",
+    category_id: "cat_instant_food",
     name: "Lucky Me! Supreme Instant Mami Chicken 65g",
     barcode: "4807770270069",
     unit: "piece",
@@ -313,7 +439,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_14",
-    category_id: "cat_noodles",
+    category_id: "cat_instant_food",
     name: "Payless Xtra Big Pancit Canton Sweet Spicy 130g",
     barcode: "4807770270076",
     unit: "piece",
@@ -418,10 +544,10 @@ export const PRODUCTS = [
     supplier_id: "sup_smb"
   },
 
-  // Coffee, Milk & Breakfast (6)
+  // Dairy & Breakfast (6)
   {
     id: "prod_22",
-    category_id: "cat_coffee_milk",
+    category_id: "cat_dairy_breakfast",
     name: "Nescafé Classic Sachet 2g",
     barcode: "4800361234011",
     unit: "sachet",
@@ -441,7 +567,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_23",
-    category_id: "cat_coffee_milk",
+    category_id: "cat_dairy_breakfast",
     name: "Great Taste White Twin Pack 50g",
     barcode: "4800016333018",
     unit: "pack",
@@ -453,7 +579,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_24",
-    category_id: "cat_coffee_milk",
+    category_id: "cat_dairy_breakfast",
     name: "Kopiko Blanca Twin Pack 52g",
     barcode: "4800016444014",
     unit: "pack",
@@ -465,7 +591,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_25",
-    category_id: "cat_coffee_milk",
+    category_id: "cat_dairy_breakfast",
     name: "Bear Brand Fortified Powdered Milk 33g",
     barcode: "4800361555018",
     unit: "sachet",
@@ -477,7 +603,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_26",
-    category_id: "cat_coffee_milk",
+    category_id: "cat_dairy_breakfast",
     name: "Milo Chocolate Powdered Drink 24g",
     barcode: "4800361666014",
     unit: "sachet",
@@ -497,7 +623,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_27",
-    category_id: "cat_coffee_milk",
+    category_id: "cat_dairy_breakfast",
     name: "Energen Champion Chocolate Cereal 40g",
     barcode: "4800016778899",
     unit: "sachet",
@@ -508,10 +634,10 @@ export const PRODUCTS = [
     supplier_id: "sup_urc"
   },
 
-  // Snacks & Biscuits (6)
+  // Biscuits & Snacks (6)
   {
     id: "prod_28",
-    category_id: "cat_snacks",
+    category_id: "cat_biscuits_crackers",
     name: "SkyFlakes Crackers Single Pack 25g",
     barcode: "4800016111019",
     unit: "piece",
@@ -531,7 +657,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_29",
-    category_id: "cat_snacks",
+    category_id: "cat_biscuits_crackers",
     name: "Fita Biscuits Single Pack 30g",
     barcode: "4800016111026",
     unit: "piece",
@@ -593,7 +719,7 @@ export const PRODUCTS = [
   // Rice, Cooking Oil & Condiments (6)
   {
     id: "prod_34",
-    category_id: "cat_rice_cooking",
+    category_id: "cat_rice_grains",
     name: "Dinorado Special Fragrant Rice",
     barcode: "4800016900011",
     unit: "kg",
@@ -619,7 +745,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_35",
-    category_id: "cat_rice_cooking",
+    category_id: "cat_rice_grains",
     name: "Sinandomeng Well-Milled Rice",
     barcode: "4800016900028",
     unit: "kg",
@@ -645,7 +771,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_36",
-    category_id: "cat_rice_cooking",
+    category_id: "cat_condiments_seasonings",
     name: "Silver Swan Soy Sauce 385ml Bottle",
     barcode: "4800016911017",
     unit: "bottle",
@@ -657,7 +783,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_37",
-    category_id: "cat_rice_cooking",
+    category_id: "cat_condiments_seasonings",
     name: "Datu Puti Cane Vinegar 385ml Bottle",
     barcode: "4800016911024",
     unit: "bottle",
@@ -669,7 +795,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_38",
-    category_id: "cat_rice_cooking",
+    category_id: "cat_condiments_seasonings",
     name: "UFC Tamis Anghang Banana Ketchup 320g",
     barcode: "4800016911031",
     unit: "bottle",
@@ -681,7 +807,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_39",
-    category_id: "cat_rice_cooking",
+    category_id: "cat_cooking_essentials",
     name: "Golden Fiesta Palm Oil 1L Bottle",
     barcode: "4800016911048",
     unit: "bottle",
@@ -693,7 +819,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_40",
-    category_id: "cat_rice_cooking",
+    category_id: "cat_condiments_seasonings",
     name: "Maggi Magic Sarap Seasoning 8g",
     barcode: "4800361999011",
     unit: "sachet",
@@ -759,7 +885,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_44",
-    category_id: "cat_personal_care",
+    category_id: "cat_health_hygiene",
     name: "Colgate Great Regular Flavor Toothpaste 50ml",
     barcode: "4800016800044",
     unit: "tube",
@@ -797,7 +923,7 @@ export const PRODUCTS = [
   // Laundry & Household Cleaning (4)
   {
     id: "prod_47",
-    category_id: "cat_laundry_home",
+    category_id: "cat_laundry_cleaning",
     name: "Surf Cherry Blossom Detergent Powder 65g",
     barcode: "4800016700016",
     unit: "sachet",
@@ -817,7 +943,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_48",
-    category_id: "cat_laundry_home",
+    category_id: "cat_laundry_cleaning",
     name: "Ariel Sunrise Fresh Detergent Powder 66g",
     barcode: "4800016700023",
     unit: "sachet",
@@ -829,7 +955,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_49",
-    category_id: "cat_laundry_home",
+    category_id: "cat_laundry_cleaning",
     name: "Downy Mystique Fabric Conditioner 20ml",
     barcode: "4800016700030",
     unit: "sachet",
@@ -849,7 +975,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_50",
-    category_id: "cat_laundry_home",
+    category_id: "cat_kitchen_supplies",
     name: "Joy Dishwashing Liquid Lemon 200ml",
     barcode: "4800016700047",
     unit: "bottle",
@@ -887,7 +1013,7 @@ export function getMockProductImageUrl(item) {
     return "https://images.unsplash.com/photo-1584727638096-042c45049ebe?w=400&auto=format&fit=crop&q=80";
   }
 
-  if (categoryId === "cat_noodles") {
+  if (categoryId === "cat_noodles" || categoryId === "cat_instant_food") {
     if (name.includes("pancit") || name.includes("canton")) {
       return "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=400&auto=format&fit=crop&q=80";
     }
@@ -922,7 +1048,7 @@ export function getMockProductImageUrl(item) {
     return "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&auto=format&fit=crop&q=80";
   }
 
-  if (categoryId === "cat_coffee_milk") {
+  if (categoryId === "cat_coffee_milk" || categoryId === "cat_dairy_breakfast") {
     if (name.includes("milo") || name.includes("choco") || name.includes("ovaltine")) {
       return "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?w=400&auto=format&fit=crop&q=80";
     }
@@ -938,7 +1064,7 @@ export function getMockProductImageUrl(item) {
     return "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&auto=format&fit=crop&q=80";
   }
 
-  if (categoryId === "cat_snacks") {
+  if (categoryId === "cat_snacks" || categoryId === "cat_biscuits_crackers") {
     if (
       name.includes("skyflakes") ||
       name.includes("fita") ||
@@ -967,7 +1093,12 @@ export function getMockProductImageUrl(item) {
     return "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&auto=format&fit=crop&q=80";
   }
 
-  if (categoryId === "cat_rice_cooking") {
+  if (
+    categoryId === "cat_rice_cooking" ||
+    categoryId === "cat_rice_grains" ||
+    categoryId === "cat_cooking_essentials" ||
+    categoryId === "cat_condiments_seasonings"
+  ) {
     if (name.includes("rice")) {
       return "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&auto=format&fit=crop&q=80";
     }
@@ -989,7 +1120,7 @@ export function getMockProductImageUrl(item) {
     return "https://images.unsplash.com/photo-1589135233689-d562f4b46c9a?w=400&auto=format&fit=crop&q=80";
   }
 
-  if (categoryId === "cat_personal_care") {
+  if (categoryId === "cat_personal_care" || categoryId === "cat_health_hygiene") {
     if (name.includes("soap") || name.includes("safeguard")) {
       return "https://images.unsplash.com/photo-1607006314640-1a6c0c2bc42c?w=400&auto=format&fit=crop&q=80";
     }
@@ -1005,7 +1136,11 @@ export function getMockProductImageUrl(item) {
     return "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=80";
   }
 
-  if (categoryId === "cat_laundry_home") {
+  if (
+    categoryId === "cat_laundry_home" ||
+    categoryId === "cat_laundry_cleaning" ||
+    categoryId === "cat_kitchen_supplies"
+  ) {
     if (
       name.includes("powder") ||
       name.includes("detergent") ||

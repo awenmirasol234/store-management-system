@@ -53,13 +53,25 @@ export function seedDatabase(targetDbPath, shouldClean) {
 
     // 1. Seed Categories
     const insertCatStmt = database.prepare(`
-      INSERT OR IGNORE INTO product_categories (category_id, category_name, description, is_active)
+      INSERT INTO product_categories (category_id, category_name, description, is_active)
       VALUES (?, ?, ?, 1)
+      ON CONFLICT(category_id) DO UPDATE SET
+        category_name = excluded.category_name,
+        description = excluded.description,
+        is_active = excluded.is_active
     `);
     for (let categoryIndex = 0; categoryIndex < CATEGORIES.length; categoryIndex = categoryIndex + 1) {
       const categoryItem = CATEGORIES[categoryIndex];
       insertCatStmt.run(categoryItem.category_id, categoryItem.category_name, categoryItem.description);
     }
+
+    database.exec(`
+      UPDATE products SET category_id = 'cat_instant_food' WHERE category_id = 'cat_noodles';
+      UPDATE products SET category_id = 'cat_dairy_breakfast' WHERE category_id = 'cat_coffee_milk';
+      UPDATE products SET category_id = 'cat_rice_grains' WHERE category_id = 'cat_rice_cooking';
+      UPDATE products SET category_id = 'cat_laundry_cleaning' WHERE category_id = 'cat_laundry_home';
+      DELETE FROM product_categories WHERE category_id IN ('cat_noodles', 'cat_coffee_milk', 'cat_rice_cooking', 'cat_laundry_home');
+    `);
 
     // 2. Seed Suppliers
     const insertSupStmt = database.prepare(`

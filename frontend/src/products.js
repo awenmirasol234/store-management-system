@@ -29,6 +29,37 @@ export const COMMON_BASE_UNITS = [
   "Sheet"
 ];
 
+export const PRODUCT_CATEGORIES = [
+  "All",
+  "Beverages",
+  "Snacks",
+  "Biscuits & Crackers",
+  "Candies & Chocolates",
+  "Canned Goods",
+  "Instant Food",
+  "Rice & Grains",
+  "Condiments & Seasonings",
+  "Cooking Essentials",
+  "Dairy & Breakfast",
+  "Bread & Bakery",
+  "Frozen Goods",
+  "Meat & Processed Foods",
+  "Personal Care",
+  "Laundry & Cleaning",
+  "Household Supplies",
+  "Kitchen Supplies",
+  "Baby Products",
+  "Health & Hygiene",
+  "School & Office Supplies",
+  "Pet Supplies",
+  "Cigarettes & Tobacco",
+  "Mobile & Electronics Accessories",
+  "Load & E-Wallet Services",
+  "Party & Gift Supplies",
+  "Agricultural Supplies",
+  "Other"
+];
+
 export const STOCK_LEVELS = {
   OUT: "OUT",
   LOW: "LOW",

@@ -27,10 +27,23 @@ describe("seedDatabase", function () {
 
     const stats = seedDatabase(databasePath, false);
     expect(stats.units).toBe(28);
+    expect(stats.categories).toBe(27);
     expect(stats.products).toBe(50);
     expect(stats.sales_transactions).toBe(12);
 
     activeDatabase = openSqliteDatabase(databasePath);
+    const catRows = activeDatabase
+      .prepare("SELECT category_name FROM product_categories ORDER BY category_name ASC")
+      .all();
+    expect(catRows.length).toBe(27);
+    const catNames = catRows.map(function (row) {
+      return row.category_name;
+    });
+    expect(catNames.includes("Beverages")).toBe(true);
+    expect(catNames.includes("Biscuits & Crackers")).toBe(true);
+    expect(catNames.includes("Instant Food")).toBe(true);
+    expect(catNames.includes("Agricultural Supplies")).toBe(true);
+    expect(catNames.includes("Other")).toBe(true);
     const unitRows = activeDatabase.prepare("SELECT unit_name FROM product_units ORDER BY rowid ASC").all();
     expect(unitRows.length).toBe(28);
     expect(unitRows[0].unit_name).toBe("Piece (pc)");

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterProducts, getStockLevel, STOCK_LEVELS } from "../src/products.js";
+import { filterProducts, getStockLevel, PRODUCT_CATEGORIES, STOCK_LEVELS } from "../src/products.js";
 
 describe("stock levels", function () {
   it("marks out of stock when current stock is zero or negative", function () {
@@ -59,5 +59,17 @@ describe("filter products", function () {
     const results = filterProducts(numericBarcodeProducts, "480");
     expect(results.length).toBe(1);
     expect(results[0].product_id).toBe("p1");
+  });
+});
+
+describe("PRODUCT_CATEGORIES", function () {
+  it("exports 28 categories starting with 'All'", function () {
+    expect(Array.isArray(PRODUCT_CATEGORIES)).toBe(true);
+    expect(PRODUCT_CATEGORIES.length).toBe(28);
+    expect(PRODUCT_CATEGORIES[0]).toBe("All");
+    expect(PRODUCT_CATEGORIES[1]).toBe("Beverages");
+    expect(PRODUCT_CATEGORIES[2]).toBe("Snacks");
+    expect(PRODUCT_CATEGORIES[3]).toBe("Biscuits & Crackers");
+    expect(PRODUCT_CATEGORIES[27]).toBe("Other");
   });
 });

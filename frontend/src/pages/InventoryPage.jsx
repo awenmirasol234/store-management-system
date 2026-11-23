@@ -15,6 +15,7 @@ import { formatPeso, formatQuantity } from "../format.js";
 import { COMMON_BASE_UNITS, filterProducts, getStockLevel, STOCK_LEVELS } from "../products.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
+import { CategoryFilterChips } from "../components/CategoryFilterChips.jsx";
 import { DataTable } from "../components/DataTable.jsx";
 import { EmptyState } from "../components/EmptyState.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
@@ -60,6 +61,7 @@ export function InventoryPage(props) {
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [units, setUnits] = useState(COMMON_BASE_UNITS);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [lowStockOnly, setLowStockOnly] = useState(false);
   const [errorBanner, setErrorBanner] = useState("");
@@ -423,6 +425,9 @@ export function InventoryPage(props) {
     if (lowStockOnly && getStockLevel(product) === STOCK_LEVELS.HEALTHY) {
       continue;
     }
+    if (selectedCategoryId !== "ALL" && product.category_id !== selectedCategoryId) {
+      continue;
+    }
     stockFilteredProducts.push(product);
   }
   const filteredProducts = filterProducts(stockFilteredProducts, searchQuery);
@@ -667,6 +672,12 @@ export function InventoryPage(props) {
           </Button>
         </div>
       </div>
+
+      <CategoryFilterChips
+        categories={categories}
+        selectedCategoryId={selectedCategoryId}
+        onSelectCategory={setSelectedCategoryId}
+      />
 
       {errorElement}
 
