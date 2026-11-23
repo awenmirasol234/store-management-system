@@ -9,7 +9,7 @@ import {
   Layers
 } from "lucide-react";
 import { api } from "../api.js";
-import { formatPeso, formatQuantity, formatSmartDate, formatSmartDateTime } from "../format.js";
+import { formatPeso, formatQuantity, formatSmartDate } from "../format.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
 import { EmptyState } from "../components/EmptyState.jsx";
@@ -22,7 +22,6 @@ import { TrendBarChart } from "../components/TrendBarChart.jsx";
 export function DashboardPage(props) {
   const [summary, setSummary] = useState(null);
   const [lowStock, setLowStock] = useState([]);
-  const [recentSales, setRecentSales] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
   const [dailySales, setDailySales] = useState([]);
   const [errorBanner, setErrorBanner] = useState("");
@@ -36,25 +35,21 @@ export function DashboardPage(props) {
       if (isCashier) {
         const results = await Promise.all([
           api.listLowStockProducts(),
-          api.listSales(6),
           api.getTopProducts(null, null, 5)
         ]);
         setLowStock(results[0]);
-        setRecentSales(results[1]);
-        setTopProducts(results[2]);
+        setTopProducts(results[1]);
       } else {
         const results = await Promise.all([
           api.getReportsSummary(),
           api.listLowStockProducts(),
-          api.listSales(6),
           api.getTopProducts(null, null, 5),
           api.getDailyReport()
         ]);
         setSummary(results[0]);
         setLowStock(results[1]);
-        setRecentSales(results[2]);
-        setTopProducts(results[3]);
-        setDailySales(results[4]);
+        setTopProducts(results[2]);
+        setDailySales(results[3]);
       }
     } catch (error) {
       setErrorBanner(error.message);
@@ -143,36 +138,6 @@ export function DashboardPage(props) {
     );
   }
 
-  let recentSalesList = <EmptyState message="No sales recorded yet." padding="md" />;
-  if (recentSales.length > 0) {
-    recentSalesList = (
-      <div className="divide-y divide-[#E9E9E9]">
-        {recentSales.map(function renderSale(sale) {
-          return (
-            <div key={sale.sale_id} className="flex items-center justify-between py-3">
-              <div>
-                <div className="font-mono text-sm font-semibold text-[#151515]">
-                  #{sale.receipt_number}
-                </div>
-                <div className="mt-0.5 font-mono text-xs text-[#777777]">
-                  {formatSmartDateTime(sale.created_at)}
-                </div>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Badge tone={sale.payment_method === "CREDIT" ? "amber" : "blue"}>
-                  {sale.payment_method}
-                </Badge>
-                <span className="font-mono text-sm font-bold text-[#151515]">
-                  {formatPeso(sale.total_amount)}
-                </span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
   return (
     <PageLayout scroll={true}>
       <PageHeader title="Dashboard" />
@@ -238,8 +203,8 @@ export function DashboardPage(props) {
         </section>
       ) : null}
 
-      {/* 3. Operational Sections: Top Selling, Inventory Alerts, Recent Transactions */}
-      <div className="grid grid-cols-1 gap-3.5 sm:gap-4 lg:grid-cols-3">
+      {/* 3. Operational Sections: Top Selling, Inventory Alerts */}
+      <div className="grid grid-cols-1 gap-3.5 sm:gap-4 lg:grid-cols-2">
         {/* Top-Selling Products */}
         <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between">
@@ -264,23 +229,6 @@ export function DashboardPage(props) {
             </Button>
           </div>
           {lowStockList}
-        </section>
-
-        {/* Recent Transactions */}
-        <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-[#151515]">Recent Transactions</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={function goTransactions() {
-                props.onNavigate("transactions");
-              }}
-            >
-              View All
-            </Button>
-          </div>
-          {recentSalesList}
         </section>
       </div>
     </PageLayout>

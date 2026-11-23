@@ -17,6 +17,7 @@ describe("Refactored page rendering", function () {
     expect(html).not.toContain("text-blue-600");
     expect(html).not.toContain("text-emerald-600");
     expect(html).not.toContain("text-amber-600");
+    expect(html).not.toContain("Recent Transactions");
   });
 
   it("renders ReportsPage with shared page and table components", function () {
