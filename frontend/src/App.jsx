@@ -11,6 +11,7 @@ import { TransactionsPage } from "./pages/TransactionsPage.jsx";
 import { InventoryPage } from "./pages/InventoryPage.jsx";
 import { CustomersPage } from "./pages/CustomersPage.jsx";
 import { ReportsPage } from "./pages/ReportsPage.jsx";
+import { SettingsPage } from "./pages/SettingsPage.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
 import { SetupPage } from "./pages/SetupPage.jsx";
 import { NotFoundPage } from "./pages/NotFoundPage.jsx";
@@ -202,6 +203,18 @@ export function App(props) {
           onNavigate={handleNavigate}
           currentUser={currentUser}
           requestedPath="reports"
+        />
+      );
+    }
+  } else if (activePage === "settings") {
+    if (currentUser.role === "OWNER") {
+      pageElement = <SettingsPage currentUser={currentUser} />;
+    } else {
+      pageElement = (
+        <NotFoundPage
+          onNavigate={handleNavigate}
+          currentUser={currentUser}
+          requestedPath="settings"
         />
       );
     }

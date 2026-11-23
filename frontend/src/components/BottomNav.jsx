@@ -11,8 +11,12 @@ export function BottomNav(props) {
     gridClass = gridClass + "grid-cols-4";
   } else if (items.length === 5) {
     gridClass = gridClass + "grid-cols-5";
-  } else {
+  } else if (items.length === 6) {
     gridClass = gridClass + "grid-cols-6";
+  } else if (items.length === 7) {
+    gridClass = gridClass + "grid-cols-7";
+  } else {
+    gridClass = gridClass + "grid-flow-col auto-cols-fr";
   }
 
   return (

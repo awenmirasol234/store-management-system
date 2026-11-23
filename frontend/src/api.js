@@ -294,6 +294,53 @@ export const api = {
       }
     }
     return request("GET", "/api/shifts" + buildQuery(params));
+  },
+  getSettings() {
+    return request("GET", "/api/settings");
+  },
+  updateSettings(data) {
+    return request("PATCH", "/api/settings", data);
+  },
+  async downloadBackup() {
+    const token = getAuthToken();
+    const headers = {};
+    if (token) {
+      headers["Authorization"] = "Bearer " + token;
+    }
+    const response = await fetch(API_BASE + "/api/settings/backup", {
+      method: "GET",
+      headers: headers
+    });
+    if (!response.ok) {
+      let message = "Failed to download database backup";
+      try {
+        const errorJson = await response.json();
+        if (errorJson && errorJson.error && errorJson.error.message) {
+          message = errorJson.error.message;
+        }
+      } catch (e) {
+        // ignore parse error
+      }
+      throw new Error(message);
+    }
+    const blob = await response.blob();
+    const disposition = response.headers.get("content-disposition");
+    let filename = "storeflow-backup.db";
+    if (disposition) {
+      const match = disposition.match(/filename="?([^";]+)"?/);
+      if (match && match[1]) {
+        filename = match[1];
+      }
+    }
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+    return true;
   }
 };
 

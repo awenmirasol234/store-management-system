@@ -100,6 +100,12 @@ import {
   createRecordCashMovementUseCase
 } from "./shifts/use-cases.js";
 import { createShiftsRouter } from "./shifts/routes.js";
+import { createSqliteSettingsRepository } from "./settings/sqlite-repo.js";
+import {
+  createGetSettingsUseCase,
+  createUpdateSettingsUseCase
+} from "./settings/use-cases.js";
+import { createSettingsRouter } from "./settings/routes.js";
 
 function createErrorHandler() {
   return function handleError(error, request, response, next) {
@@ -158,6 +164,7 @@ export function createApp(options) {
   const sessionRepository = createSqliteSessionRepository(database);
   const shiftRepository = createSqliteShiftRepository(database);
   const cashMovementRepository = createSqliteCashMovementRepository(database);
+  const settingsRepository = createSqliteSettingsRepository(database);
   const rateLimiter = createInMemoryRateLimiter();
 
   const sharedDeps = {
@@ -178,6 +185,7 @@ export function createApp(options) {
     sessionRepository: sessionRepository,
     shiftRepository: shiftRepository,
     cashMovementRepository: cashMovementRepository,
+    settingsRepository: settingsRepository,
     rateLimiter: rateLimiter
   };
 
@@ -245,6 +253,11 @@ export function createApp(options) {
     changePin: createChangePinUseCase(sharedDeps)
   };
 
+  const settingsUseCases = {
+    getSettings: createGetSettingsUseCase(sharedDeps),
+    updateSettings: createUpdateSettingsUseCase(sharedDeps)
+  };
+
   const authMiddleware = createAuthMiddleware(authUseCases);
   const enforceAuth = Boolean(config.enforceAuth || process.env.ENFORCE_AUTH === "true");
 
@@ -287,6 +300,8 @@ export function createApp(options) {
     app.use("/api/suppliers", requireAuthOrOwnerForWrite);
     app.use("/api/units", authMiddleware.requireAuth);
     app.use("/api/shifts", authMiddleware.requireAuth);
+    app.use("/api/settings/backup", authMiddleware.requireRole([ROLES.OWNER]));
+    app.use("/api/settings", requireAuthOrOwnerForWrite);
   }
 
   app.use(
@@ -325,6 +340,14 @@ export function createApp(options) {
     })
   );
 
+  app.use(
+    "/api",
+    createSettingsRouter({
+      databasePath: config.databasePath,
+      useCases: settingsUseCases
+    })
+  );
+
   app.use(function handleNotFound(request, response) {
     response.status(404).json({
       error: {
@@ -352,7 +375,8 @@ export function createApp(options) {
       userRepository: userRepository,
       sessionRepository: sessionRepository,
       shiftRepository: shiftRepository,
-      cashMovementRepository: cashMovementRepository
+      cashMovementRepository: cashMovementRepository,
+      settingsRepository: settingsRepository
     },
     useCases: {
       inventory: inventoryUseCases,
@@ -360,7 +384,8 @@ export function createApp(options) {
       reports: reportsUseCases,
       credit: creditUseCases,
       auth: authUseCases,
-      shifts: shiftsUseCases
+      shifts: shiftsUseCases,
+      settings: settingsUseCases
     }
   };
 }

@@ -259,6 +259,21 @@ CREATE TABLE IF NOT EXISTS cash_movements (
 
 CREATE INDEX IF NOT EXISTS idx_cash_movements_shift_id
   ON cash_movements(shift_id);
+
+CREATE TABLE IF NOT EXISTS store_settings (
+  id TEXT PRIMARY KEY DEFAULT 'default',
+  store_name TEXT NOT NULL,
+  tagline TEXT,
+  address TEXT,
+  phone TEXT,
+  tax_number TEXT,
+  receipt_header TEXT,
+  receipt_footer TEXT,
+  default_low_stock_threshold INTEGER NOT NULL DEFAULT 5,
+  sound_enabled INTEGER NOT NULL DEFAULT 1,
+  show_cashier_on_receipt INTEGER NOT NULL DEFAULT 1,
+  updated_at TEXT NOT NULL
+);
 `;
 
 export function openSqliteDatabase(databasePath) {

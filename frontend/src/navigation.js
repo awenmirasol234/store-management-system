@@ -1,4 +1,4 @@
-import { BarChart3, LayoutDashboard, Package, Receipt, ShoppingBag, Users } from "lucide-react";
+import { BarChart3, LayoutDashboard, Package, Receipt, Settings, ShoppingBag, Users } from "lucide-react";
 
 export const NAV_ITEMS = [
   {
@@ -36,6 +36,14 @@ export const NAV_ITEMS = [
     shortLabel: "Reports",
     pageTitle: "Reports",
     icon: BarChart3,
+    roles: ["OWNER"]
+  },
+  {
+    key: "settings",
+    label: "Settings",
+    shortLabel: "Settings",
+    pageTitle: "Store Settings",
+    icon: Settings,
     roles: ["OWNER"]
   }
 ];
