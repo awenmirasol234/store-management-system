@@ -104,4 +104,72 @@ describe("PosPage SSR test", function () {
     expect(html).toContain("md:hidden");
     expect(html).not.toContain("backdrop-blur lg:hidden");
   });
+
+  it("renders radio buttons and Add to Cart button for selling options in picker modal", function () {
+    const dummyProduct = {
+      product_id: "prod-1",
+      product_name: "Century Tuna 180g",
+      base_unit: "Can",
+      current_stock: 10,
+      selling_price: 45
+    };
+    const dummyOptions = [
+      {
+        option_id: "opt-1",
+        option_name: "1 Pack (6 pcs)",
+        quantity: 6,
+        price: 250,
+        is_active: true
+      }
+    ];
+
+    const html = renderToString(
+      React.createElement(PosPage, {
+        initialPickerState: {
+          product: dummyProduct,
+          options: dummyOptions
+        }
+      })
+    );
+
+    expect(html).toContain('type="radio"');
+    expect(html).toContain('name="pos-selling-option"');
+    expect(html).toContain('value="base"');
+    expect(html).toContain('value="opt-1"');
+    expect(html).toContain("1 Can (Default)");
+    expect(html).toContain("1 Pack (6 pcs)");
+    expect(html).toContain("6 Can");
+    expect(html).toContain("Add to Cart");
+  });
+
+  it("highlights selected selling option card when initialSelectedOptionId is provided", function () {
+    const dummyProduct = {
+      product_id: "prod-1",
+      product_name: "Century Tuna 180g",
+      base_unit: "Can",
+      current_stock: 10,
+      selling_price: 45
+    };
+    const dummyOptions = [
+      {
+        option_id: "opt-1",
+        option_name: "1 Pack (6 pcs)",
+        quantity: 6,
+        price: 250,
+        is_active: true
+      }
+    ];
+
+    const html = renderToString(
+      React.createElement(PosPage, {
+        initialPickerState: {
+          product: dummyProduct,
+          options: dummyOptions
+        },
+        initialSelectedOptionId: "opt-1"
+      })
+    );
+
+    expect(html).toContain("border-[#151515] bg-[#EEEEED]/40");
+  });
 });

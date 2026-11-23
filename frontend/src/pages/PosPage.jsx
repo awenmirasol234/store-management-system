@@ -65,7 +65,16 @@ export function PosPage(props) {
   const [orderDiscount, setOrderDiscount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("CASH");
 
-  const [pickerState, setPickerState] = useState(null);
+  let initialPicker = null;
+  if (props && props.initialPickerState) {
+    initialPicker = props.initialPickerState;
+  }
+  const [pickerState, setPickerState] = useState(initialPicker);
+  let initialSelectedOption = "base";
+  if (props && props.initialSelectedOptionId) {
+    initialSelectedOption = props.initialSelectedOptionId;
+  }
+  const [selectedOptionId, setSelectedOptionId] = useState(initialSelectedOption);
   const [customPesoInput, setCustomPesoInput] = useState("");
 
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
@@ -254,6 +263,7 @@ export function PosPage(props) {
 
       if (activeOptions.length > 0 || product.allow_custom_amount) {
         setCustomPesoInput("");
+        setSelectedOptionId("base");
         setPickerState({
           product: product,
           options: activeOptions
@@ -729,53 +739,120 @@ export function PosPage(props) {
       );
     }
 
+    function handleConfirmOption() {
+      let chosenOption = null;
+      if (selectedOptionId !== "base") {
+        for (let i = 0; i < pickerState.options.length; i++) {
+          if (pickerState.options[i].option_id === selectedOptionId) {
+            chosenOption = pickerState.options[i];
+            break;
+          }
+        }
+      }
+      const added = addItemToCart(pickerState.product, chosenOption, null);
+      if (added) {
+        setPickerState(null);
+      }
+    }
+
+    const isBaseSelected = selectedOptionId === "base";
+    let baseCardClass =
+      "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors cursor-pointer ";
+    if (isBaseSelected) {
+      baseCardClass = baseCardClass + "border-[#151515] bg-[#EEEEED]/40 shadow-2xs";
+    } else {
+      baseCardClass = baseCardClass + "border-[#E9E9E9] hover:border-[#151515] hover:bg-[#EEEEED]";
+    }
+
     pickerBody = (
       <div className="space-y-5">
         {pickerErrorBanner}
-        <div className="space-y-2.5">
-          <button
-            type="button"
-            onClick={function pickBase() {
-              const added = addItemToCart(pickerState.product, null, null);
-              if (added) {
-                setPickerState(null);
-              }
-            }}
-            className="flex w-full items-center justify-between rounded-xl border border-[#E9E9E9] px-4 py-3 text-left hover:border-[#151515] hover:bg-[#EEEEED] transition-colors cursor-pointer"
-          >
-            <span className="text-sm font-medium text-[#151515]">
-              1 {pickerState.product.base_unit} (Default)
-            </span>
-            <span className="font-mono text-sm font-bold text-[#151515]">
-              {formatPeso(pickerState.product.selling_price)}
-            </span>
-          </button>
-
-          {pickerState.options.map(function renderOption(option) {
-            return (
-              <button
-                key={option.option_id}
-                type="button"
-                onClick={function pickOption() {
-                  const added = addItemToCart(pickerState.product, option, null);
-                  if (added) {
-                    setPickerState(null);
-                  }
-                }}
-                className="flex w-full items-center justify-between rounded-xl border border-[#E9E9E9] px-4 py-3 text-left hover:border-[#151515] hover:bg-[#EEEEED] transition-colors cursor-pointer"
-              >
-                <div>
-                  <div className="text-sm font-medium text-[#151515]">{option.option_name}</div>
-                  <div className="mt-0.5 font-mono text-xs text-[#777777]">
-                    {formatQuantity(option.quantity)} {pickerState.product.base_unit}
-                  </div>
-                </div>
-                <span className="font-mono text-sm font-bold text-[#151515]">
-                  {formatPeso(option.price)}
+        <div className="space-y-3">
+          <div className="space-y-2.5">
+            <label
+              className={baseCardClass}
+              onDoubleClick={function directPickBase() {
+                const added = addItemToCart(pickerState.product, null, null);
+                if (added) {
+                  setPickerState(null);
+                }
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <input
+                  type="radio"
+                  name="pos-selling-option"
+                  value="base"
+                  checked={isBaseSelected}
+                  onChange={function onSelectBase() {
+                    setSelectedOptionId("base");
+                  }}
+                  className="h-4 w-4 accent-[#151515] cursor-pointer"
+                />
+                <span className="text-sm font-medium text-[#151515]">
+                  {"1 " + pickerState.product.base_unit + " (Default)"}
                 </span>
-              </button>
-            );
-          })}
+              </div>
+              <span className="font-mono text-sm font-bold text-[#151515]">
+                {formatPeso(pickerState.product.selling_price)}
+              </span>
+            </label>
+
+            {pickerState.options.map(function renderOption(option) {
+              const isOptionSelected = selectedOptionId === option.option_id;
+              let optionCardClass =
+                "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors cursor-pointer ";
+              if (isOptionSelected) {
+                optionCardClass = optionCardClass + "border-[#151515] bg-[#EEEEED]/40 shadow-2xs";
+              } else {
+                optionCardClass = optionCardClass + "border-[#E9E9E9] hover:border-[#151515] hover:bg-[#EEEEED]";
+              }
+
+              return (
+                <label
+                  key={option.option_id}
+                  className={optionCardClass}
+                  onDoubleClick={function directPickOption() {
+                    const added = addItemToCart(pickerState.product, option, null);
+                    if (added) {
+                      setPickerState(null);
+                    }
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="pos-selling-option"
+                      value={option.option_id}
+                      checked={isOptionSelected}
+                      onChange={function onSelectOption() {
+                        setSelectedOptionId(option.option_id);
+                      }}
+                      className="h-4 w-4 accent-[#151515] cursor-pointer"
+                    />
+                    <div>
+                      <div className="text-sm font-medium text-[#151515]">{option.option_name}</div>
+                      <div className="mt-0.5 font-mono text-xs text-[#777777]">
+                        {formatQuantity(option.quantity) + " " + pickerState.product.base_unit}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="font-mono text-sm font-bold text-[#151515]">
+                    {formatPeso(option.price)}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+
+          <Button
+            type="button"
+            variant="primary"
+            className="w-full"
+            onClick={handleConfirmOption}
+          >
+            Add to Cart
+          </Button>
         </div>
         {tingiForm}
       </div>
