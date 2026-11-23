@@ -22,6 +22,13 @@ describe("Frontend Auth & Security Component Rendering", function () {
     expect(html).toContain("1");
     expect(html).toContain("9");
     expect(html).toContain("Clear");
+
+    // POS cockpit theme styles
+    expect(html).toContain("bg-[#F5F5F4]");
+    expect(html).toContain("border-[#E9E9E9]");
+    expect(html).toContain("bg-[#171717]");
+    expect(html).toContain("bg-[#B9F36B]");
+    expect(html).toContain("text-[#151515]");
   });
 
   it("renders SetupPage for first-time Store Owner setup", function () {

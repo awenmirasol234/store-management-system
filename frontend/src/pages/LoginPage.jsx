@@ -103,9 +103,9 @@ export function LoginPage(props) {
     const isFilled = index < pin.length;
     let dotClass = "h-3.5 w-3.5 rounded-full transition-all ";
     if (isFilled) {
-      dotClass = dotClass + "bg-blue-500 scale-110 shadow-sm shadow-blue-500/50";
+      dotClass = dotClass + "bg-[#151515] scale-110 shadow-xs";
     } else {
-      dotClass = dotClass + "border-2 border-slate-600 bg-transparent";
+      dotClass = dotClass + "border-2 border-[#E9E9E9] bg-white";
     }
     pinDots.push(<div key={index} className={dotClass} />);
   }
@@ -121,26 +121,26 @@ export function LoginPage(props) {
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-[#0F111E] px-4 py-8 select-none">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#181B2C] p-6 shadow-2xl shadow-black/60 md:p-8">
+    <div className="flex min-h-screen w-full items-center justify-center bg-[#F5F5F4] px-4 py-8 select-none">
+      <div className="w-full max-w-sm rounded-2xl border border-[#E9E9E9] bg-white p-6 shadow-sm md:p-8">
         {/* Branding header */}
         <div className="mb-6 flex flex-col items-center text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/30">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#171717] text-[#B9F36B] shadow-xs">
             <Store className="h-6 w-6" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-white">StoreFlow</h1>
-          <p className="mt-1 text-xs text-slate-400">Sign in with your staff account and PIN</p>
+          <h1 className="text-xl font-bold tracking-tight text-[#151515]">StoreFlow</h1>
+          <p className="mt-1 text-xs text-[#777777]">Sign in with your staff account and PIN</p>
         </div>
 
         {errorElement}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
+            <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-[#777777]">
               Staff Username
             </label>
             <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#777777]">
                 <User className="h-4 w-4" />
               </div>
               <input
@@ -150,18 +150,21 @@ export function LoginPage(props) {
                   setUsername(e.target.value);
                 }}
                 placeholder="Enter username"
-                className="w-full rounded-lg border border-white/10 bg-[#0F111E] py-2.5 pl-9 pr-3 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2.5 pl-10 pr-3.5 text-sm font-medium text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
                 autoComplete="username"
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-1 block text-2xs font-semibold uppercase tracking-wider text-slate-400">
-              Security PIN
-            </label>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="block text-2xs font-semibold uppercase tracking-wider text-[#777777]">
+                Security PIN
+              </label>
+              <span className="font-mono text-3xs text-[#777777]">4–8 digits</span>
+            </div>
             {/* PIN Dots visualizer */}
-            <div className="flex h-11 items-center justify-center gap-3 rounded-lg border border-white/10 bg-[#0F111E] px-4">
+            <div className="flex h-12 items-center justify-center gap-3 rounded-xl border border-[#E9E9E9] bg-[#F5F5F4] px-4">
               {pinDots}
             </div>
           </div>
@@ -176,7 +179,7 @@ export function LoginPage(props) {
                   onClick={function () {
                     handleKeypadPress(num);
                   }}
-                  className="flex h-12 items-center justify-center rounded-xl bg-white/5 text-lg font-bold text-white transition hover:bg-white/10 active:scale-95 active:bg-blue-600 cursor-pointer"
+                  className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white font-mono text-xl font-bold text-[#151515] shadow-xs hover:border-[#151515] hover:bg-[#EEEEED] active:scale-95 active:bg-[#151515] active:text-white transition-all cursor-pointer select-none"
                 >
                   {num}
                 </button>
@@ -185,7 +188,7 @@ export function LoginPage(props) {
             <button
               type="button"
               onClick={handleClear}
-              className="flex h-12 items-center justify-center rounded-xl bg-white/5 text-xs font-semibold text-slate-400 transition hover:bg-rose-500/20 hover:text-rose-300 active:scale-95 cursor-pointer"
+              className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-xs font-semibold text-[#777777] hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 active:scale-95 transition-all cursor-pointer select-none"
               title="Clear PIN"
             >
               Clear
@@ -195,14 +198,14 @@ export function LoginPage(props) {
               onClick={function () {
                 handleKeypadPress(0);
               }}
-              className="flex h-12 items-center justify-center rounded-xl bg-white/5 text-lg font-bold text-white transition hover:bg-white/10 active:scale-95 active:bg-blue-600 cursor-pointer"
+              className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white font-mono text-xl font-bold text-[#151515] shadow-xs hover:border-[#151515] hover:bg-[#EEEEED] active:scale-95 active:bg-[#151515] active:text-white transition-all cursor-pointer select-none"
             >
               0
             </button>
             <button
               type="button"
               onClick={handleBackspace}
-              className="flex h-12 items-center justify-center rounded-xl bg-white/5 text-slate-300 transition hover:bg-white/10 active:scale-95 cursor-pointer"
+              className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:border-[#151515] hover:bg-[#EEEEED] hover:text-[#151515] active:scale-95 transition-all cursor-pointer select-none"
               title="Backspace"
             >
               <Delete className="h-5 w-5" />
@@ -212,11 +215,16 @@ export function LoginPage(props) {
           <Button
             type="submit"
             variant="primary"
+            size="lg"
             disabled={submitting}
-            className="w-full py-2.5 text-sm font-semibold mt-2"
+            className="w-full mt-2 font-bold shadow-xs"
           >
             {submitButtonText}
           </Button>
+
+          <p className="pt-2 text-center font-mono text-3xs text-[#777777]">
+            Press Enter to sign in • Esc to clear
+          </p>
         </form>
       </div>
     </div>
