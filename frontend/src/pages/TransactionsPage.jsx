@@ -366,10 +366,6 @@ export function TransactionsPage(props) {
             />
             {clearButton}
           </div>
-
-          <Button variant="secondary" size="sm" onClick={loadSales}>
-            Refresh
-          </Button>
         </div>
       </PageHeader>
 
