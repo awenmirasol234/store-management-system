@@ -43,6 +43,8 @@ describe("Settings Page & Navigation Integration", function () {
     expect(html).toContain("Database &amp; Disaster Recovery");
     expect(html).toContain("Download Backup");
     expect(html).toContain("Save Settings");
+    const matches = html.match(/Save Settings/g) || [];
+    expect(matches.length).toBe(1);
     expect(html).toContain("Thermal Receipt Preview");
   });
 

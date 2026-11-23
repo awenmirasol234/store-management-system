@@ -503,19 +503,6 @@ export function SettingsPage(props) {
             </div>
           </div>
         </div>
-
-        {/* Bottom Form Actions */}
-        <div className="flex items-center justify-end gap-3 pt-2 pb-6">
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={loading || saving}
-            className="px-6 py-2.5 font-semibold"
-          >
-            <Save className="h-4 w-4" />
-            <span>{saveButtonText}</span>
-          </Button>
-        </div>
       </form>
     </PageLayout>
   );
