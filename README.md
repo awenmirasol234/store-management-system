@@ -75,7 +75,15 @@ Run this from `backend/`:
 npm run seed
 ```
 
-Seeding uses the configured database path. Cleaning existing data removes sales and inventory history, so use clean options only when that data loss is intended.
+Seeding uses the configured database path (defaults to `./data/store.db`).
+
+Clean and reseed (removes all data):
+
+```bash
+npm run seed -- --clean
+```
+
+Cleaning existing data removes sales and inventory history, so use clean options only when that data loss is intended.
 
 ## Docker
 

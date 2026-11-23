@@ -60,7 +60,7 @@ The repository separates the standalone **Express backend** (`backend/`) from th
 backend/
 ├── src/
 │   ├── shared/                      # decimal.js, errors.js, ports.js, validation, and security helpers
-│   ├── db/                          # sqlite.js (connection, schema DDL, UnitOfWork)
+│   ├── db/                          # schema.sql, sqlite.js (connection, UnitOfWork)
 │   ├── inventory/                   # domain.js, use-cases.js, sqlite-repo.js, routes.js
 │   ├── sales/                       # domain.js, use-cases.js, sqlite-repo.js, routes.js
 │   ├── credit/                      # domain.js, use-cases.js, sqlite-repo.js, routes.js
