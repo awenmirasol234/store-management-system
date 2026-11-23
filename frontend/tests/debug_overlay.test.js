@@ -40,4 +40,9 @@ describe("DebugOverlay Component", function () {
     const html = renderToString(React.createElement(DebugOverlay, { defaultVisible: false }));
     expect(html).toBe("");
   });
+
+  it("defaults to hidden (false) when defaultVisible is omitted", function () {
+    const html = renderToString(React.createElement(DebugOverlay));
+    expect(html).toBe("");
+  });
 });

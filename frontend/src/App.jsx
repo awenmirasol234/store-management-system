@@ -318,7 +318,7 @@ export function App(props) {
         }}
       />
 
-      <DebugOverlay />
+      <DebugOverlay defaultVisible={false} />
     </div>
   );
 }

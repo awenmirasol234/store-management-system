@@ -49,11 +49,10 @@ export function DebugOverlay(props) {
       return props.defaultVisible;
     }
     if (typeof window !== "undefined") {
-      const isDev = Boolean(import.meta.env && import.meta.env.DEV);
       const hasQuery = window.location.search.includes("debug=1");
-      return isDev || hasQuery;
+      return hasQuery;
     }
-    return true;
+    return false;
   });
 
   useEffect(function initWindowListeners() {
