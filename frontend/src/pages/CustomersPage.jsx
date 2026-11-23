@@ -287,7 +287,7 @@ export function CustomersPage(props) {
       {errorElement}
 
       {/* Summary Stat Cards */}
-      <div className="mb-6 sm:mb-7 grid grid-cols-1 gap-4 sm:gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total Outstanding Utang"
           value={formatPeso(totalUtang)}

@@ -122,7 +122,7 @@ export function DashboardPage(props) {
 
       {errorElement}
 
-      <div className="mb-6 sm:mb-7 grid grid-cols-1 gap-4 sm:gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Today's Sales"
           value={todaySales}
@@ -147,9 +147,9 @@ export function DashboardPage(props) {
         />
       </div>
 
-      <div className="grid flex-1 grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
-        <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-5 sm:p-6">
-          <div className="mb-4 flex items-center justify-between">
+      <div className="grid flex-1 grid-cols-1 gap-3.5 sm:gap-4 lg:grid-cols-2">
+        <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+          <div className="mb-3.5 flex items-center justify-between">
             <h2 className="text-base font-semibold text-[#151515]">Low Stock</h2>
             <Button
               variant="ghost"
@@ -164,8 +164,8 @@ export function DashboardPage(props) {
           {lowStockList}
         </section>
 
-        <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-5 sm:p-6">
-          <div className="mb-4 flex items-center justify-between">
+        <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+          <div className="mb-3.5 flex items-center justify-between">
             <h2 className="text-base font-semibold text-[#151515]">Recent Sales</h2>
             <Button
               variant="ghost"

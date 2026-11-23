@@ -28,8 +28,8 @@ export function StatCard(props) {
   }
 
   return (
-    <div className="rounded-2xl border border-[#E9E9E9] bg-white p-5 sm:p-6">
-      <div className="flex items-start justify-between gap-4">
+    <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-3 sm:gap-4">
         <div>
           <div className="text-xs font-semibold text-[#777777]">
             {props.label}
