@@ -112,6 +112,7 @@ describe("reports SQLite repository", function () {
     expect(topProducts[0].quantity_sold).toBe(4);
     expect(topProducts[0].revenue).toBe(60);
     expect(topProducts[0].profit).toBe(20);
+    expect(topProducts[0].image_url).toBe(null);
 
     const daily = await getDailyBreakdown({ from: "2026-11-20", to: "2026-11-20" });
     expect(daily.length).toBe(1);
@@ -153,6 +154,7 @@ describe("reports SQLite repository", function () {
       {
         product_id: "prod-1",
         product_name: "Rice",
+        image_url: "/uploads/rice.png",
         base_unit: "kg",
         manila_date: "2026-11-20",
         base_quantity_int: 25000,
@@ -177,6 +179,7 @@ describe("reports SQLite repository", function () {
     expect(topProducts[0].quantity_sold).toBe(3.5);
     expect(topProducts[0].revenue).toBe(70);
     expect(topProducts[0].profit).toBe(35);
+    expect(topProducts[0].image_url).toBe("/uploads/rice.png");
     expect(buildTopProducts(itemRows, 1).length).toBe(1);
 
     const dailyRows = [

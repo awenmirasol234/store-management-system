@@ -29,6 +29,7 @@ export function createSqliteReportsRepository(database) {
     SELECT
       si.product_id,
       p.product_name,
+      p.image_url,
       p.base_unit,
       p.category_id,
       pc.category_name,

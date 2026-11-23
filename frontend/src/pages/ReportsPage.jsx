@@ -23,6 +23,7 @@ import { Button } from "../components/Button.jsx";
 import { DataTable } from "../components/DataTable.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
 import { Modal } from "../components/Modal.jsx";
+import { ProductThumb } from "../components/ProductThumb.jsx";
 import { PageHeader } from "../components/PageHeader.jsx";
 import { PageLayout } from "../components/PageLayout.jsx";
 import { StatCard } from "../components/StatCard.jsx";
@@ -418,7 +419,12 @@ export function ReportsPage() {
                 .map(function (item) {
                   return (
                     <tr key={item.product_id} className="hover:bg-[#EEEEED]/40 transition-colors">
-                      <td className="px-5 py-3 text-sm font-medium text-[#151515]">{item.product_name}</td>
+                      <td className="px-5 py-3 text-sm font-medium text-[#151515]">
+                        <div className="flex items-center gap-3">
+                          <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
+                          <span className="truncate">{item.product_name}</span>
+                        </div>
+                      </td>
                       <td className="px-5 py-3 font-mono text-sm text-[#777777] text-right">
                         {formatQuantity(item.quantity_sold)} {item.base_unit}
                       </td>

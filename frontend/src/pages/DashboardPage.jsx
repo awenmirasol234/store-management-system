@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   Banknote,
   ChevronRight,
-  Package,
   ShoppingCart,
   TrendingUp,
   Layers
@@ -16,6 +15,7 @@ import { EmptyState } from "../components/EmptyState.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
 import { PageHeader } from "../components/PageHeader.jsx";
 import { PageLayout } from "../components/PageLayout.jsx";
+import { ProductThumb } from "../components/ProductThumb.jsx";
 import { StatCard } from "../components/StatCard.jsx";
 import { TrendBarChart } from "../components/TrendBarChart.jsx";
 
@@ -120,12 +120,15 @@ export function DashboardPage(props) {
         {topProducts.slice(0, 6).map(function renderTop(item, idx) {
           return (
             <div key={item.product_id || idx} className="flex items-center justify-between py-3">
-              <div className="min-w-0 pr-3">
-                <div className="truncate text-sm font-medium text-[#151515]">
-                  {item.product_name}
-                </div>
-                <div className="mt-0.5 font-mono text-xs text-[#777777]">
-                  {formatQuantity(item.quantity_sold)} {item.base_unit} sold
+              <div className="flex items-center gap-3 min-w-0 pr-3">
+                <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium text-[#151515]">
+                    {item.product_name}
+                  </div>
+                  <div className="mt-0.5 font-mono text-xs text-[#777777]">
+                    {formatQuantity(item.quantity_sold)} {item.base_unit} sold
+                  </div>
                 </div>
               </div>
               <div className="font-mono text-sm font-semibold text-[#151515] shrink-0">
@@ -208,7 +211,7 @@ export function DashboardPage(props) {
         {/* Top-Selling Products */}
         <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-[#151515]">Top-Selling Products</h2>
+            <h2 className="text-base font-semibold text-[#151515]">Top Selling Products</h2>
             <span className="font-mono text-xs text-[#777777]">Top 5</span>
           </div>
           {topProductsList}

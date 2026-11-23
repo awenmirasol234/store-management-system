@@ -148,6 +148,7 @@ export function buildTopProducts(itemRows, limitCount) {
       entry = {
         product_id: row.product_id,
         product_name: row.product_name,
+        image_url: row.image_url || null,
         base_unit: row.base_unit,
         total_base_qty_int: 0,
         revenue_int: 0,
@@ -173,6 +174,7 @@ export function buildTopProducts(itemRows, limitCount) {
     results.push({
       product_id: entry.product_id,
       product_name: entry.product_name,
+      image_url: entry.image_url,
       base_unit: entry.base_unit,
       quantity_sold: fromQuantityInt(entry.total_base_qty_int),
       revenue: fromMoneyInt(entry.revenue_int),
