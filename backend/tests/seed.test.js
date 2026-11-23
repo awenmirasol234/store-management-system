@@ -21,11 +21,11 @@ afterEach(function cleanup() {
 });
 
 describe("seedDatabase", function () {
-  it("leaves receipt numbering after the seeded sales", function () {
+  it("leaves receipt numbering after the seeded sales", async function () {
     activeTempDir = fs.mkdtempSync(path.join(os.tmpdir(), "store-seed-test-"));
     const databasePath = path.join(activeTempDir, "store.db");
 
-    const stats = seedDatabase(databasePath, false);
+    const stats = await seedDatabase(databasePath, false);
     expect(stats.units).toBe(28);
     expect(stats.categories).toBe(27);
     expect(stats.products).toBe(50);
@@ -56,11 +56,11 @@ describe("seedDatabase", function () {
     expect(sequenceRow.last_sequence).toBe(12);
   });
 
-  it("is idempotent and preserves foreign keys and inventory counts when re-seeded over existing sales", function () {
+  it("is idempotent and preserves foreign keys and inventory counts when re-seeded over existing sales", async function () {
     activeTempDir = fs.mkdtempSync(path.join(os.tmpdir(), "store-seed-test-"));
     const databasePath = path.join(activeTempDir, "store.db");
 
-    const firstStats = seedDatabase(databasePath, false);
+    const firstStats = await seedDatabase(databasePath, false);
     expect(firstStats.products).toBe(50);
     expect(firstStats.selling_options).toBe(16);
     expect(firstStats.inventory_transactions).toBe(48);
@@ -95,7 +95,7 @@ describe("seedDatabase", function () {
     activeDatabase = null;
 
     // Re-seed should not crash with foreign key constraint failure or duplicate transactions
-    const secondStats = seedDatabase(databasePath, false);
+    const secondStats = await seedDatabase(databasePath, false);
     expect(secondStats.products).toBe(50);
     expect(secondStats.selling_options).toBe(16);
     expect(secondStats.inventory_transactions).toBe(48);
@@ -105,5 +105,70 @@ describe("seedDatabase", function () {
       .prepare("SELECT option_id FROM product_selling_options WHERE option_id = ?")
       .get(sampleOption.option_id);
     expect(preservedOption.option_id).toBe(sampleOption.option_id);
+  });
+
+  it("cleans rows that reference users, customers, and sales without foreign key failures", async function () {
+    activeTempDir = fs.mkdtempSync(path.join(os.tmpdir(), "store-seed-test-"));
+    const databasePath = path.join(activeTempDir, "store.db");
+
+    await seedDatabase(databasePath, false);
+
+    activeDatabase = openSqliteDatabase(databasePath);
+    const sampleSale = activeDatabase
+      .prepare("SELECT sale_id FROM sales_transactions LIMIT 1")
+      .get();
+    activeDatabase
+      .prepare(`
+        INSERT INTO users (user_id, username, full_name, role, pin_hash, pin_salt, is_active, created_at, updated_at)
+        VALUES ('test-user-1', 'test-user', 'Test User', 'CASHIER', 'hash', 'salt', 1, '2026-11-20T00:00:00.000Z', '2026-11-20T00:00:00.000Z')
+      `)
+      .run();
+    activeDatabase
+      .prepare(`
+        INSERT INTO cashier_shifts (shift_id, user_id, opened_at, opening_cash_int, status)
+        VALUES ('test-shift-1', 'test-user-1', '2026-11-20T00:00:00.000Z', 0, 'OPEN')
+      `)
+      .run();
+    activeDatabase
+      .prepare(`
+        INSERT INTO cash_movements (movement_id, shift_id, type, amount_int, remarks, created_by, created_at)
+        VALUES ('test-movement-1', 'test-shift-1', 'CASH_IN', 100, 'Test', 'test-user-1', '2026-11-20T00:00:00.000Z')
+      `)
+      .run();
+    activeDatabase
+      .prepare(`
+        INSERT INTO customers (customer_id, full_name, current_balance_int, is_active, created_at, updated_at)
+        VALUES ('test-customer-1', 'Test Customer', 100, 1, '2026-11-20T00:00:00.000Z', '2026-11-20T00:00:00.000Z')
+      `)
+      .run();
+    activeDatabase
+      .prepare(`
+        INSERT INTO credit_transactions (credit_tx_id, customer_id, sale_id, type, amount_int, created_by, created_at)
+        VALUES ('test-credit-1', 'test-customer-1', ?, 'CREDIT', 100, 'test-user-1', '2026-11-20T00:00:00.000Z')
+      `)
+      .run(sampleSale.sale_id);
+    activeDatabase.close();
+    activeDatabase = null;
+
+    const stats = await seedDatabase(databasePath, true);
+    expect(stats.products).toBe(50);
+    expect(stats.sales_transactions).toBe(12);
+
+    activeDatabase = openSqliteDatabase(databasePath);
+    const cleanedTables = [
+      "sales_return_items",
+      "sales_returns",
+      "credit_transactions",
+      "cash_movements",
+      "cashier_shifts",
+      "customers",
+      "user_sessions",
+      "users"
+    ];
+    for (let tableIndex = 0; tableIndex < cleanedTables.length; tableIndex = tableIndex + 1) {
+      const tableName = cleanedTables[tableIndex];
+      const countRow = activeDatabase.prepare("SELECT count(*) AS count FROM " + tableName).get();
+      expect(countRow.count).toBe(0);
+    }
   });
 });

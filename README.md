@@ -77,7 +77,7 @@ npm run seed
 
 Seeding uses the configured database path (defaults to `./data/store.db`).
 
-Clean and reseed (removes all data):
+Clean and reseed (removes products, sales, inventory, customers, credit, shifts, and users; store settings are kept):
 
 ```bash
 npm run seed -- --clean

@@ -1,6 +1,6 @@
 import "dotenv/config";
 import path from "node:path";
-import { openSqliteDatabase } from "./sqlite.js";
+import { createSqliteUnitOfWork, openSqliteDatabase } from "./sqlite.js";
 import {
   BASE_UNITS,
   CATEGORIES,
@@ -13,7 +13,7 @@ import { toMoneyInt, toQuantityInt } from "../shared/decimal.js";
 import { createDefaultIdGenerator, createSystemClock } from "../shared/ports.js";
 import { formatReceiptNumber } from "../sales/domain.js";
 
-export function seedDatabase(targetDbPath, shouldClean) {
+export async function seedDatabase(targetDbPath, shouldClean) {
   let resolvedPath = targetDbPath;
   if (!resolvedPath) {
     resolvedPath = path.resolve(import.meta.dirname, "../../data/store.db");
@@ -26,19 +26,26 @@ export function seedDatabase(targetDbPath, shouldClean) {
 
   try {
     if (shouldClean) {
-      database.exec("DELETE FROM sales_return_items");
-      database.exec("DELETE FROM sales_returns");
-      database.exec("DELETE FROM sales_items");
-      database.exec("DELETE FROM sales_transactions");
-      database.exec("DELETE FROM receipt_sequences");
-      database.exec("DELETE FROM inventory_transactions");
-      database.exec("DELETE FROM product_selling_options");
-      database.exec("DELETE FROM products");
-      database.exec("DELETE FROM suppliers");
-      database.exec("DELETE FROM product_categories");
-      database.exec("DELETE FROM product_units");
-      database.exec("DELETE FROM user_sessions");
-      database.exec("DELETE FROM users");
+      const unitOfWork = createSqliteUnitOfWork(database);
+      await unitOfWork.run(async function runClean() {
+        database.exec("DELETE FROM sales_return_items");
+        database.exec("DELETE FROM sales_returns");
+        database.exec("DELETE FROM credit_transactions");
+        database.exec("DELETE FROM cash_movements");
+        database.exec("DELETE FROM sales_items");
+        database.exec("DELETE FROM sales_transactions");
+        database.exec("DELETE FROM cashier_shifts");
+        database.exec("DELETE FROM receipt_sequences");
+        database.exec("DELETE FROM inventory_transactions");
+        database.exec("DELETE FROM product_selling_options");
+        database.exec("DELETE FROM products");
+        database.exec("DELETE FROM suppliers");
+        database.exec("DELETE FROM product_categories");
+        database.exec("DELETE FROM product_units");
+        database.exec("DELETE FROM customers");
+        database.exec("DELETE FROM user_sessions");
+        database.exec("DELETE FROM users");
+      });
     }
 
     // 0. Seed Base Units
@@ -322,12 +329,9 @@ export function seedDatabase(targetDbPath, shouldClean) {
 const isMain = process.argv[1] && process.argv[1].endsWith("seed.js");
 if (isMain) {
   const databasePath = process.env.DATABASE_PATH;
-  if (!databasePath) {
-    throw new Error("Missing required environment variable: DATABASE_PATH");
-  }
   const shouldClean = process.argv.includes("--clean");
   console.log("Seeding store database (clean: " + shouldClean + ")...");
-  const stats = seedDatabase(databasePath, shouldClean);
+  const stats = await seedDatabase(databasePath, shouldClean);
   console.log("Database seeded successfully!");
   console.log("  Units:                  " + stats.units);
   console.log("  Categories:             " + stats.categories);

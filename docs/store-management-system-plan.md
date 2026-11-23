@@ -167,7 +167,7 @@ Phases 1–4 are substantially complete in the current repository. They remain b
 - Verify all business rules, stock deductions, and profit calculations using Vitest + in-memory repository fakes (no DB required).
 
 ### Completed Phase 2: Local SQLite Persistence & Express REST API
-- Define SQLite schema and `UnitOfWork` in `backend/src/db/sqlite.js` (scaled integers for `DECIMAL(12, 2)` and `DECIMAL(12, 4)` with `PRAGMA foreign_keys = ON`) and plain SQL `node:sqlite` adapters in `backend/src/<module>/sqlite-repo.js`.
+- Define SQLite schema in `backend/src/db/schema.sql` and the `UnitOfWork` in `backend/src/db/sqlite.js` (scaled integers for `DECIMAL(12, 2)` and `DECIMAL(12, 4)` with `PRAGMA foreign_keys = ON`) and plain SQL `node:sqlite` adapters in `backend/src/<module>/sqlite-repo.js`.
 - Add repository and transaction rollback integration tests in `backend/tests/`.
 - Wire Express routers, CORS, and centralized error handling in `backend/src/<module>/routes.js`, `backend/src/app.js`, and `backend/src/server.js`.
 
