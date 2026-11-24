@@ -157,7 +157,7 @@ export function SettingsPage(props) {
     errorBanner = (
       <ErrorBanner
         message={errorMessage}
-        className="mb-5 sm:mb-6"
+        className="mb-4 sm:mb-5"
         onDismiss={function () {
           setErrorMessage("");
         }}
@@ -168,7 +168,7 @@ export function SettingsPage(props) {
   let successBanner = null;
   if (successMessage) {
     successBanner = (
-      <div className="mb-5 sm:mb-6 flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+      <div className="mb-4 sm:mb-5 flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
         <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
         <span>{successMessage}</span>
       </div>
@@ -337,7 +337,7 @@ export function SettingsPage(props) {
                 <h2 className="text-base font-semibold text-[#151515]">POS & Inventory Preferences</h2>
               </div>
 
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <Input
                     label="Low Stock Threshold"

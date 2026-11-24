@@ -433,7 +433,7 @@ export function InventoryPage(props) {
   }
   const filteredProducts = filterProducts(stockFilteredProducts, searchQuery);
 
-  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-6" />;
+  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-4 sm:mb-5" />;
 
   let lowStockToggleVariant = "secondary";
   if (lowStockOnly) {
@@ -651,7 +651,7 @@ export function InventoryPage(props) {
       </PageHeader>
 
       {/* Search & Low Stock Filter Toolbar */}
-      <div className="mb-4 flex flex-wrap items-center gap-2.5 sm:gap-3.5">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-56 sm:min-w-64 max-w-md">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
           <input

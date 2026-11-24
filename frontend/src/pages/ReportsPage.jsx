@@ -301,10 +301,10 @@ export function ReportsPage() {
         </div>
       </PageHeader>
 
-      <ErrorBanner message={errorBanner} className="mb-4" />
+      <ErrorBanner message={errorBanner} className="mb-4 sm:mb-5" />
 
       {/* Clean Tab Bar */}
-      <div className="mb-4 flex items-center overflow-x-auto no-scrollbar gap-1 border-b border-[#E9E9E9] pb-2">
+      <div className="mb-4 sm:mb-5 flex items-center overflow-x-auto no-scrollbar gap-1 border-b border-[#E9E9E9] pb-2">
         {TABS.map(function (tab) {
           const isActive = activeTab === tab.id;
           return (
@@ -330,8 +330,8 @@ export function ReportsPage() {
 
       {/* TAB 1: SALES REPORT */}
       {activeTab === "SALES" ? (
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="flex flex-col gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard label="Gross Sales" value={grossSales} meta={totalOrders + " orders"} icon={Banknote} />
             <StatCard label="Discounts" value={totalDiscounts} meta="Total markdown" icon={ArrowDownRight} />
             <StatCard label="Refunds / Returns" value={totalRefunds} meta="Processed refunds" icon={ArrowUpRight} />
@@ -349,7 +349,7 @@ export function ReportsPage() {
 
           {/* Daily Table */}
           <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
-            <div className="border-b border-[#E9E9E9] px-4 py-3 text-sm font-semibold text-[#151515]">
+            <div className="border-b border-[#E9E9E9] px-5 py-3.5 text-sm font-semibold text-[#151515]">
               Daily Sales Breakdown
             </div>
             <div className="overflow-x-auto">
@@ -369,10 +369,10 @@ export function ReportsPage() {
                   dailyRows.map(function (row) {
                     return (
                       <tr key={row.date} className="hover:bg-[#EEEEED]/40 transition-colors">
-                        <td className="px-5 py-3 font-mono text-sm font-medium text-[#151515]">{formatSmartDate(row.date)}</td>
-                        <td className="px-5 py-3 font-mono text-sm text-[#777777] text-right">{row.sale_count}</td>
-                        <td className="px-5 py-3 font-mono text-sm font-semibold text-[#151515] text-right">{formatPeso(row.gross_sales)}</td>
-                        <td className="px-5 py-3 font-mono text-sm font-semibold text-emerald-700 text-right">{formatPeso(row.profit)}</td>
+                        <td className="px-5 py-3.5 font-mono text-sm font-medium text-[#151515]">{formatSmartDate(row.date)}</td>
+                        <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{row.sale_count}</td>
+                        <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right">{formatPeso(row.gross_sales)}</td>
+                        <td className="px-5 py-3.5 font-mono text-sm font-semibold text-emerald-700 text-right">{formatPeso(row.profit)}</td>
                       </tr>
                     );
                   })
@@ -386,7 +386,7 @@ export function ReportsPage() {
       {/* TAB 2: PRODUCT SALES */}
       {activeTab === "PRODUCTS" ? (
         <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
-          <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-4 py-3 gap-2">
+          <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 gap-2">
             <div className="text-sm font-semibold text-[#151515]">Product Performance</div>
             <div className="relative">
               <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#777777]" />
@@ -419,17 +419,17 @@ export function ReportsPage() {
                 .map(function (item) {
                   return (
                     <tr key={item.product_id} className="hover:bg-[#EEEEED]/40 transition-colors">
-                      <td className="px-5 py-3 text-sm font-medium text-[#151515]">
+                      <td className="px-5 py-3.5 text-sm font-medium text-[#151515]">
                         <div className="flex items-center gap-3">
                           <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
                           <span className="truncate">{item.product_name}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-3 font-mono text-sm text-[#777777] text-right">
+                      <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">
                         {formatQuantityWithUnit(item.quantity_sold, item.base_unit)}
                       </td>
-                      <td className="px-5 py-3 font-mono text-sm font-semibold text-[#151515] text-right">{formatPeso(item.revenue)}</td>
-                      <td className="px-5 py-3 font-mono text-sm font-semibold text-emerald-700 text-right">{formatPeso(item.profit)}</td>
+                      <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right">{formatPeso(item.revenue)}</td>
+                      <td className="px-5 py-3.5 font-mono text-sm font-semibold text-emerald-700 text-right">{formatPeso(item.profit)}</td>
                     </tr>
                   );
                 })}
@@ -441,7 +441,7 @@ export function ReportsPage() {
       {/* TAB 3: CATEGORY SALES */}
       {activeTab === "CATEGORIES" ? (
         <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
-          <div className="border-b border-[#E9E9E9] px-4 py-3 text-sm font-semibold text-[#151515]">
+          <div className="border-b border-[#E9E9E9] px-5 py-3.5 text-sm font-semibold text-[#151515]">
             Sales by Category
           </div>
           <div className="overflow-x-auto">
@@ -461,10 +461,10 @@ export function ReportsPage() {
                 categorySales.map(function (cat) {
                   return (
                     <tr key={cat.category_id} className="hover:bg-[#EEEEED]/40 transition-colors">
-                      <td className="px-5 py-3 text-sm font-medium text-[#151515]">{cat.category_name}</td>
-                      <td className="px-5 py-3 font-mono text-sm text-[#777777] text-right">{formatQuantity(cat.quantity_sold)}</td>
-                      <td className="px-5 py-3 font-mono text-sm font-semibold text-[#151515] text-right">{formatPeso(cat.revenue)}</td>
-                      <td className="px-5 py-3 font-mono text-sm font-semibold text-emerald-700 text-right">{formatPeso(cat.profit)}</td>
+                      <td className="px-5 py-3.5 text-sm font-medium text-[#151515]">{cat.category_name}</td>
+                      <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{formatQuantity(cat.quantity_sold)}</td>
+                      <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right">{formatPeso(cat.revenue)}</td>
+                      <td className="px-5 py-3.5 font-mono text-sm font-semibold text-emerald-700 text-right">{formatPeso(cat.profit)}</td>
                     </tr>
                   );
                 })
@@ -476,8 +476,8 @@ export function ReportsPage() {
 
       {/* TAB 4: PROFIT REPORT */}
       {activeTab === "PROFIT" ? (
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="flex flex-col gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-3">
             <StatCard label="Gross Sales" value={grossSales} meta="Total sales revenue" icon={Banknote} />
             <StatCard label="Cost of Goods Sold (COGS)" value={cogs} meta="Cost of sold inventory" tone="amber" icon={Package} />
             <StatCard label="Net Profit" value={netProfit} meta="Sales - COGS - Refunds" tone="green" icon={TrendingUp} />
@@ -495,8 +495,8 @@ export function ReportsPage() {
 
       {/* TAB 5: INVENTORY REPORT */}
       {activeTab === "INVENTORY" ? (
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="flex flex-col gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard label="Inventory Valuation" value={inventoryValue} meta="Current stock × cost price" icon={Package} />
             <StatCard label="Active Products" value={summary ? String(summary.active_product_count) : "0"} meta="Catalog products" icon={BarChart2} />
             <StatCard label="Low Stock Items" value={lowStockCount} meta="Below reorder level" tone="amber" icon={ArrowDownRight} />
@@ -508,7 +508,7 @@ export function ReportsPage() {
       {/* TAB 6: STOCK MOVEMENTS */}
       {activeTab === "MOVEMENTS" ? (
         <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
-          <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-4 py-3 gap-2">
+          <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 gap-2">
             <div className="text-sm font-semibold text-[#151515]">Inventory Movements</div>
             <div className="flex items-center gap-2">
               <select
@@ -566,21 +566,21 @@ export function ReportsPage() {
                   const isPositive = Number(tx.quantity) > 0;
                   return (
                     <tr key={tx.transaction_id} className="hover:bg-[#EEEEED]/40 transition-colors">
-                      <td className="px-5 py-3 font-mono text-xs text-[#777777]">{formatSmartDateTime(tx.created_at)}</td>
-                      <td className="px-5 py-3 text-sm font-medium text-[#151515]">{tx.product_name}</td>
-                      <td className="px-5 py-3">
+                      <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{formatSmartDateTime(tx.created_at)}</td>
+                      <td className="px-5 py-3.5 text-sm font-medium text-[#151515]">{tx.product_name}</td>
+                      <td className="px-5 py-3.5">
                         <Badge tone={tx.transaction_type === "STOCK_IN" ? "green" : tx.transaction_type === "SALE" ? "blue" : "amber"}>
                           {tx.transaction_type}
                         </Badge>
                       </td>
-                      <td className={"px-5 py-3 font-mono text-sm font-semibold text-right " + (isPositive ? "text-emerald-700" : "text-[#151515]")}>
+                      <td className={"px-5 py-3.5 font-mono text-sm font-semibold text-right " + (isPositive ? "text-emerald-700" : "text-[#151515]")}>
                         {isPositive ? "+" : ""}{formatQuantityWithUnit(tx.quantity, tx.base_unit)}
                       </td>
-                      <td className="px-5 py-3 text-xs text-[#777777]">
+                      <td className="px-5 py-3.5 text-xs text-[#777777]">
                         {tx.supplier_name ? <span className="font-medium text-[#151515]">{tx.supplier_name} - </span> : null}
                         {tx.remarks || tx.reference_number || "—"}
                       </td>
-                      <td className="px-5 py-3 font-mono text-xs text-[#777777]">{tx.created_by}</td>
+                      <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{tx.created_by}</td>
                     </tr>
                   );
                 })}
@@ -592,7 +592,7 @@ export function ReportsPage() {
       {/* TAB 7: TRANSACTIONS REPORT */}
       {activeTab === "TRANSACTIONS" ? (
         <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
-          <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-4 py-3 gap-2">
+          <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 gap-2">
             <div className="text-sm font-semibold text-[#151515]">Completed Transactions</div>
             <div className="flex items-center gap-2">
               <select
@@ -647,18 +647,18 @@ export function ReportsPage() {
                 .map(function (sale) {
                   return (
                     <tr key={sale.sale_id} className="hover:bg-[#EEEEED]/40 transition-colors">
-                      <td className="px-5 py-3 font-mono text-sm font-semibold text-[#151515]">#{sale.receipt_number}</td>
-                      <td className="px-5 py-3 font-mono text-xs text-[#777777]">{formatSmartDateTime(sale.created_at)}</td>
-                      <td className="px-5 py-3">
+                      <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515]">#{sale.receipt_number}</td>
+                      <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{formatSmartDateTime(sale.created_at)}</td>
+                      <td className="px-5 py-3.5">
                         <Badge tone={sale.payment_method === "CREDIT" ? "amber" : "blue"}>
                           {sale.payment_method}
                         </Badge>
                       </td>
-                      <td className="px-5 py-3 font-mono text-sm text-[#777777] text-right">{sale.items_count}</td>
-                      <td className="px-5 py-3 font-mono text-sm text-[#777777] text-right">{formatPeso(sale.subtotal_amount)}</td>
-                      <td className="px-5 py-3 font-mono text-sm text-amber-700 text-right">{formatPeso(sale.discount_amount)}</td>
-                      <td className="px-5 py-3 font-mono text-sm font-bold text-[#151515] text-right">{formatPeso(sale.total_amount)}</td>
-                      <td className="px-5 py-3 font-mono text-xs text-[#777777]">{sale.created_by}</td>
+                      <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{sale.items_count}</td>
+                      <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{formatPeso(sale.subtotal_amount)}</td>
+                      <td className="px-5 py-3.5 font-mono text-sm text-amber-700 text-right">{formatPeso(sale.discount_amount)}</td>
+                      <td className="px-5 py-3.5 font-mono text-sm font-bold text-[#151515] text-right">{formatPeso(sale.total_amount)}</td>
+                      <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{sale.created_by}</td>
                     </tr>
                   );
                 })}
@@ -676,7 +676,7 @@ export function ReportsPage() {
         title="Select Date Range"
         size="sm"
       >
-        <div className="space-y-4 p-5">
+        <div className="space-y-4">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-[#777777]">Start Date (From)</label>
             <input

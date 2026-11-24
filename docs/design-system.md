@@ -107,6 +107,16 @@ Design tokens are declared in `frontend/src/index.css` inside the `@theme` block
 - `amber`: `bg-amber-50 text-amber-700 border border-amber-200`.
 - `red`: `bg-rose-50 text-rose-700 border border-rose-200`.
 
+### 4.6 Standard Spacing Rhythm
+All application pages share a uniform spacing scale:
+- **Outer Page Padding**: `p-4 sm:p-6 lg:p-7` (`PageLayout` and `PosPage` catalog workspace).
+- **Page Header Margin**: `mb-5 sm:mb-6` (`PageHeader`).
+- **Page Banners / Toolbars / Tab Bars**: `mb-4 sm:mb-5`.
+- **Stat Card Grids**: `gap-3 sm:gap-4`.
+- **Multi-Column Section Grids**: `gap-4 sm:gap-5`.
+- **Card Padding**: `p-4 sm:p-5`.
+- **Data Table Cells**: Headers `px-5 py-3`, body cells `px-5 py-3.5`, table section headers `px-5 py-3.5`.
+
 ---
 
 ## 5. Coding Agent Guardrails

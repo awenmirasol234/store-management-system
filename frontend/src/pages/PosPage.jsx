@@ -532,7 +532,7 @@ export function PosPage(props) {
     changePreview = Math.round((tenderedValue - cashDueForChange) * 100) / 100;
   }
 
-  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-4" />;
+  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-4 sm:mb-5" />;
 
   let lowStockBadge = null;
   if (lowStockProducts.length > 0) {
@@ -1131,7 +1131,7 @@ export function PosPage(props) {
   return (
     <div className="flex h-full flex-1 overflow-hidden bg-[#F5F5F4]">
       {/* Center Catalog Workspace */}
-      <div className="flex flex-1 flex-col overflow-hidden p-4 sm:p-5 lg:p-6">
+      <div className="flex flex-1 flex-col overflow-hidden p-4 sm:p-6 lg:p-7">
         <PageHeader title="Point of Sale" stackOnMobile={true}>
           <div className="flex items-center gap-2 sm:gap-3">
             {shiftButton}

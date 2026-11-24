@@ -55,7 +55,7 @@ export function DashboardPage(props) {
     loadDashboard();
   }, []);
 
-  let errorElement = <ErrorBanner message={errorBanner} className="mb-6" />;
+  let errorElement = <ErrorBanner message={errorBanner} className="mb-4 sm:mb-5" />;
 
   let todaySales = "₱0.00";
   let transactionCount = "0";
@@ -130,7 +130,7 @@ export function DashboardPage(props) {
       {errorElement}
 
       {/* 1. Summary Cards */}
-      <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Today's Sales"
           value={todaySales}
@@ -167,7 +167,7 @@ export function DashboardPage(props) {
       </div>
 
       {/* 2. Operational Sections: Top Selling, Inventory Alerts */}
-      <div className="grid grid-cols-1 gap-3.5 sm:gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
         {/* Top-Selling Products */}
         <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between">

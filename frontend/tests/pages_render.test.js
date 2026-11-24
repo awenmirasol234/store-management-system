@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import { DashboardPage } from "../src/pages/DashboardPage.jsx";
+import { PosPage } from "../src/pages/PosPage.jsx";
 import { ReportsPage } from "../src/pages/ReportsPage.jsx";
 import { TransactionsPage } from "../src/pages/TransactionsPage.jsx";
 
@@ -49,5 +50,16 @@ describe("Refactored page rendering", function () {
     );
     expect(html).toContain("Transactions");
     expect(html).toContain("No completed sales yet.");
+  });
+
+  it("uses consistent outer page padding across PageLayout pages and PosPage", function () {
+    const dashboardHtml = renderToString(React.createElement(DashboardPage));
+    const posHtml = renderToString(React.createElement(PosPage));
+    const reportsHtml = renderToString(React.createElement(ReportsPage));
+
+    expect(dashboardHtml).toContain("p-4 sm:p-6 lg:p-7");
+    expect(posHtml).toContain("p-4 sm:p-6 lg:p-7");
+    expect(reportsHtml).toContain("p-4 sm:p-6 lg:p-7");
+    expect(reportsHtml).not.toContain("space-y-4 p-5");
   });
 });

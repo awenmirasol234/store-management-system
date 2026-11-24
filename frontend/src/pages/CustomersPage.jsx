@@ -148,7 +148,7 @@ export function CustomersPage(props) {
 
   let errorElement = null;
   if (errorBanner) {
-    errorElement = <ErrorBanner message={errorBanner} className="mb-4" />;
+    errorElement = <ErrorBanner message={errorBanner} className="mb-4 sm:mb-5" />;
   }
 
   const tableHeadRow = (
@@ -287,7 +287,7 @@ export function CustomersPage(props) {
       {errorElement}
 
       {/* Summary Stat Cards */}
-      <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total Outstanding Utang"
           value={formatPeso(totalUtang)}
@@ -316,7 +316,7 @@ export function CustomersPage(props) {
       </div>
 
       {/* Search Bar & Filter Tabs */}
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 sm:mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:w-80">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
           <input

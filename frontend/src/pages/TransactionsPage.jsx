@@ -178,7 +178,7 @@ export function TransactionsPage(props) {
     );
   }
 
-  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-6" />;
+  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-4 sm:mb-5" />;
 
   let tableBody = <TableEmptyRow colSpan="6" message="No completed sales yet." />;
   if (sales.length > 0 && filteredSales.length === 0) {
