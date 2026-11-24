@@ -111,6 +111,6 @@ All financial and inventory metrics are stored in SQLite as scaled integers to a
 ### Authentication & RBAC Rules
 
 1. Route-level security is enforced when `ENFORCE_AUTH=true`.
-2. `OWNER` role is required for user administration, inventory cost manipulation, stock adjustments, and financial reports.
-3. `CASHIER` role allows POS checkout, recording customer utang payments, and opening/closing own shifts.
+2. `OWNER` role is required for user administration, product and catalog changes, manual stock changes, and financial reports.
+3. `CASHIER` role allows POS checkout, inventory browsing, recording customer utang payments, and opening/closing own shifts. The cashier dashboard shows inventory alerts.
 4. Internal stack traces, SQL syntax errors, database file paths, and PIN hashes must never leak in API response payloads.

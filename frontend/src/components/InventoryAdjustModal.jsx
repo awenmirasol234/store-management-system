@@ -1,4 +1,5 @@
 import { formatQuantityWithUnit } from "../format.js";
+import { ErrorBanner } from "./ErrorBanner.jsx";
 import { FormActions } from "./FormActions.jsx";
 import { Input } from "./Input.jsx";
 import { Modal } from "./Modal.jsx";
@@ -16,10 +17,12 @@ export function InventoryAdjustModal(props) {
     <Modal
       open={true}
       onClose={props.onClose}
+      dismissDisabled={props.saving}
       title={title}
       size="md"
     >
       <form onSubmit={props.onSubmit} className="space-y-4 sm:space-y-5">
+        <ErrorBanner message={props.errorMessage} />
         <Select
           label="Type"
           value={props.adjustType}
@@ -58,6 +61,8 @@ export function InventoryAdjustModal(props) {
           onCancel={props.onClose}
           confirmLabel="Save Adjustment"
           confirmVariant="danger"
+          disabled={props.saving}
+          cancelDisabled={props.saving}
         />
       </form>
     </Modal>

@@ -25,17 +25,28 @@ describe("Refactored page rendering", function () {
     expect(html).not.toContain("Most Day Active");
   });
 
-  it("renders ReportsPage with shared page and table components", function () {
+  it("renders loading feedback while awaiting the first report", function () {
     const html = renderToString(React.createElement(ReportsPage));
     expect(html).toContain("Reports");
-    expect(html).toContain("Daily Sales");
-    expect(html).toContain("No sales in this date range.");
+    expect(html).toContain("Loading reports");
+    expect(html).not.toContain("No sales in this date range.");
     expect(html).toContain('role="tablist"');
     expect(html).toContain('role="tab"');
     expect(html).toContain("text-[#151515]");
     expect(html).not.toContain("text-blue-600");
     expect(html).not.toContain("text-emerald-600");
     expect(html).not.toContain("text-amber-600");
+  });
+
+  it("shows cashiers inventory alerts without owner report cards", function () {
+    const html = renderToString(React.createElement(DashboardPage, {
+      currentUser: { role: "CASHIER" }
+    }));
+    expect(html).toContain("Inventory Alerts");
+    expect(html).toContain("View Inventory");
+    expect(html).not.toContain("Items Sold");
+    expect(html).not.toContain("Top Selling Products");
+    expect(html).not.toContain("Today&#x27;s Sales");
   });
 
   it("renders TransactionsPage with shared page, payment filter pills, and empty-state components", function () {

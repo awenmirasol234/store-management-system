@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowDownToLine,
   Layers,
@@ -59,6 +59,9 @@ function getStockBadgeTone(product) {
 }
 
 export function InventoryPage(props) {
+  const canWrite = !props.currentUser || props.currentUser.role === "OWNER";
+  const pendingWrite = useRef(false);
+  const savedProductForm = useRef(null);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -67,12 +70,14 @@ export function InventoryPage(props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [lowStockOnly, setLowStockOnly] = useState(false);
   const [errorBanner, setErrorBanner] = useState("");
+  const [modalError, setModalError] = useState("");
 
   // Add / Edit product modal
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [productForm, setProductForm] = useState(createEmptyProductForm());
   const [imageFile, setImageFile] = useState(null);
   const [savingProduct, setSavingProduct] = useState(false);
+  const [savingStock, setSavingStock] = useState(false);
 
   // Category modal
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
@@ -186,6 +191,8 @@ export function InventoryPage(props) {
 
   function openCreateProduct() {
     setErrorBanner("");
+    setModalError("");
+    savedProductForm.current = null;
     setProductForm(createEmptyProductForm());
     setImageFile(null);
     setProductModalOpen(true);
@@ -193,6 +200,8 @@ export function InventoryPage(props) {
 
   function openEditProduct(product) {
     setErrorBanner("");
+    setModalError("");
+    savedProductForm.current = null;
     let categoryIdValue = "";
     if (product.category_id) {
       categoryIdValue = product.category_id;
@@ -220,8 +229,12 @@ export function InventoryPage(props) {
 
   async function handleSaveProduct(event) {
     event.preventDefault();
+    if (pendingWrite.current) {
+      return;
+    }
+    pendingWrite.current = true;
     setSavingProduct(true);
-    setErrorBanner("");
+    setModalError("");
 
     try {
       let categoryId = null;
@@ -245,23 +258,37 @@ export function InventoryPage(props) {
         is_active: productForm.is_active
       };
 
-      let savedProduct = null;
-      if (productForm.product_id) {
-        savedProduct = await api.updateProduct(productForm.product_id, payload);
-      } else {
-        payload.current_stock = Number(productForm.current_stock);
-        savedProduct = await api.createProduct(payload);
+      let productId = productForm.product_id;
+      if (productForm !== savedProductForm.current) {
+        if (productId) {
+          await api.updateProduct(productId, payload);
+          savedProductForm.current = productForm;
+        } else {
+          payload.current_stock = Number(productForm.current_stock);
+          const savedProduct = await api.createProduct(payload);
+          productId = savedProduct.product_id;
+          const savedForm = Object.assign({}, productForm, { product_id: productId });
+          savedProductForm.current = savedForm;
+          setProductForm(savedForm);
+        }
       }
 
       if (imageFile) {
-        await api.uploadProductImage(savedProduct.product_id, imageFile);
+        try {
+          await api.uploadProductImage(productId, imageFile);
+        } catch (error) {
+          setModalError("Product saved. Image upload failed: " + error.message);
+          await loadAll();
+          return;
+        }
       }
 
       setProductModalOpen(false);
       await loadAll();
     } catch (error) {
-      setErrorBanner(error.message);
+      setModalError(error.message);
     } finally {
+      pendingWrite.current = false;
       setSavingProduct(false);
     }
   }
@@ -278,19 +305,20 @@ export function InventoryPage(props) {
 
   async function handleCreateCategory(event) {
     event.preventDefault();
-    setErrorBanner("");
+    setModalError("");
     try {
       await api.createCategory({ category_name: categoryNameInput });
       setCategoryNameInput("");
       setCategoryModalOpen(false);
       await loadAll();
     } catch (error) {
-      setErrorBanner(error.message);
+      setModalError(error.message);
     }
   }
 
   async function openOptionsModal(product) {
     setErrorBanner("");
+    setModalError("");
     setOptionName("");
     setOptionBarcode("");
     setOptionQty("");
@@ -309,7 +337,7 @@ export function InventoryPage(props) {
     if (!optionsModalProduct) {
       return;
     }
-    setErrorBanner("");
+    setModalError("");
     try {
       let barcode = null;
       if (optionBarcode.trim().length > 0) {
@@ -328,12 +356,13 @@ export function InventoryPage(props) {
       setOptionQty("");
       setOptionPrice("");
     } catch (error) {
-      setErrorBanner(error.message);
+      setModalError(error.message);
     }
   }
 
   async function openStockInModal(product) {
     setErrorBanner("");
+    setModalError("");
     setStockInOptionId("");
     setStockInSupplierId("");
     setStockInQty("1");
@@ -348,13 +377,31 @@ export function InventoryPage(props) {
     }
   }
 
+  async function saveStock(write, close) {
+    if (pendingWrite.current) {
+      return;
+    }
+    pendingWrite.current = true;
+    setSavingStock(true);
+    setModalError("");
+    try {
+      await write();
+      close();
+      await loadAll();
+    } catch (error) {
+      setModalError(error.message);
+    } finally {
+      pendingWrite.current = false;
+      setSavingStock(false);
+    }
+  }
+
   async function handleStockIn(event) {
     event.preventDefault();
     if (!stockInProduct) {
       return;
     }
-    setErrorBanner("");
-    try {
+    await saveStock(async function writeStockIn() {
       let createdBy = "owner";
       if (props && props.currentUser && props.currentUser.username) {
         createdBy = props.currentUser.username;
@@ -376,15 +423,14 @@ export function InventoryPage(props) {
         payload.reference_number = stockInRef.trim();
       }
       await api.stockIn(payload);
+    }, function closeStockIn() {
       setStockInProduct(null);
-      await loadAll();
-    } catch (error) {
-      setErrorBanner(error.message);
-    }
+    });
   }
 
   function openAdjustModal(product) {
     setErrorBanner("");
+    setModalError("");
     setAdjustType("DAMAGED");
     setAdjustQty("");
     setAdjustRemarks("");
@@ -396,8 +442,7 @@ export function InventoryPage(props) {
     if (!adjustProduct) {
       return;
     }
-    setErrorBanner("");
-    try {
+    await saveStock(async function writeAdjustment() {
       let qtyValue = Number(adjustQty);
       if ((adjustType === "DAMAGED" || adjustType === "EXPIRED") && qtyValue > 0) {
         qtyValue = -qtyValue;
@@ -414,18 +459,16 @@ export function InventoryPage(props) {
         remarks: adjustRemarks,
         created_by: createdBy
       });
+    }, function closeAdjustment() {
       setAdjustProduct(null);
-      await loadAll();
-    } catch (error) {
-      setErrorBanner(error.message);
-    }
+    });
   }
 
   async function handleToggleOptionActive(option) {
     if (!optionsModalProduct) {
       return;
     }
-    setErrorBanner("");
+    setModalError("");
     try {
       await api.updateSellingOption(optionsModalProduct.product_id, option.option_id, {
         is_active: !option.is_active
@@ -433,7 +476,7 @@ export function InventoryPage(props) {
       const updatedList = await api.listSellingOptions(optionsModalProduct.product_id);
       setProductOptions(updatedList);
     } catch (error) {
-      setErrorBanner(error.message);
+      setModalError(error.message);
     }
   }
 
@@ -455,11 +498,15 @@ export function InventoryPage(props) {
   }
   const filteredProducts = filterProducts(stockFilteredProducts, searchQuery);
 
-  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-4 sm:mb-5" />;
+  const errorElement = <ErrorBanner message={errorBanner} className="mb-4 sm:mb-5" />;
 
-  let productTableBody = (
-    <TableEmptyRow colSpan="6" message="No products yet. Click Add Product to start." />
-  );
+  let emptyProductsMessage = "No products yet.";
+  let productColumnCount = 5;
+  if (canWrite) {
+    emptyProductsMessage = "No products yet. Use Add Product to start.";
+    productColumnCount = 6;
+  }
+  let productTableBody = <TableEmptyRow colSpan={productColumnCount} message={emptyProductsMessage} />;
   if (filteredProducts.length > 0) {
     productTableBody = filteredProducts.map(function renderRow(product) {
       let barcodeText = "—";
@@ -489,7 +536,7 @@ export function InventoryPage(props) {
               {formatQuantityWithUnit(product.current_stock, product.base_unit)}
             </Badge>
           </td>
-          <td className="px-5 py-3.5 text-right whitespace-nowrap">
+          {canWrite && <td className="px-5 py-3.5 text-right whitespace-nowrap">
             <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
               <Button
                 variant="soft"
@@ -517,13 +564,13 @@ export function InventoryPage(props) {
                 <MoreVertical className="h-4 w-4" />
               </button>
             </div>
-          </td>
+          </td>}
         </tr>
       );
     });
   }
 
-  let mobileCardsContent = <EmptyState message="No products yet. Tap Add Product to start." />;
+  let mobileCardsContent = <EmptyState message={emptyProductsMessage} />;
   if (filteredProducts.length > 0) {
     mobileCardsContent = filteredProducts.map(function renderProductCard(product) {
       let barcodeText = "—";
@@ -556,7 +603,7 @@ export function InventoryPage(props) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 pt-2 border-t border-[#E9E9E9]">
+          {canWrite && <div className="flex items-center gap-2 pt-2 border-t border-[#E9E9E9]">
             <Button
               variant="soft"
               size="sm"
@@ -583,7 +630,7 @@ export function InventoryPage(props) {
             >
               <MoreVertical className="h-4 w-4" />
             </button>
-          </div>
+          </div>}
         </div>
       );
     });
@@ -704,10 +751,11 @@ export function InventoryPage(props) {
   return (
     <PageLayout>
       <PageHeader title="Inventory" stackOnMobile={true}>
-        <div className="flex items-center gap-2 sm:gap-3">
+        {canWrite && <div className="flex items-center gap-2 sm:gap-3">
           <Button
             variant="secondary"
             onClick={function openCat() {
+              setModalError("");
               setCategoryModalOpen(true);
             }}
           >
@@ -718,7 +766,7 @@ export function InventoryPage(props) {
             <Plus className="h-4 w-4" />
             <span>Add Product</span>
           </Button>
-        </div>
+        </div>}
       </PageHeader>
 
       {/* Search & Low Stock Filter Toolbar */}
@@ -763,7 +811,7 @@ export function InventoryPage(props) {
               <th className="px-5 py-3 text-right whitespace-nowrap">Cost</th>
               <th className="px-5 py-3 text-right whitespace-nowrap">Price</th>
               <th className="px-5 py-3 text-right whitespace-nowrap">Stock</th>
-              <th className="px-5 py-3 text-right whitespace-nowrap">Actions</th>
+              {canWrite && <th className="px-5 py-3 text-right whitespace-nowrap">Actions</th>}
             </tr>
           }
         >
@@ -774,143 +822,147 @@ export function InventoryPage(props) {
       {/* Add / Edit Product Modal */}
       <Modal
         open={productModalOpen}
+        dismissDisabled={savingProduct}
         onClose={function close() {
           setProductModalOpen(false);
         }}
         title={productModalTitle}
       >
-            <form onSubmit={handleSaveProduct} className="space-y-5">
-              <Input
-                label="Product Name"
-                value={productForm.product_name}
-                onChange={function onChange(event) {
-                  updateProductField("product_name", event.target.value);
-                }}
-                required={true}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="Barcode"
-                  mono={true}
-                  value={productForm.barcode}
-                  onChange={function onChange(event) {
-                    updateProductField("barcode", event.target.value);
-                  }}
-                  placeholder="Optional"
-                />
-                <Select
-                  label="Category"
-                  value={productForm.category_id}
-                  onChange={function onChange(event) {
-                    updateProductField("category_id", event.target.value);
-                  }}
-                >
-                  <option value="">Uncategorized</option>
-                  {categories.map(function renderCatOption(category) {
-                    return (
-                      <option key={category.category_id} value={category.category_id}>
-                        {category.category_name}
-                      </option>
-                    );
-                  })}
-                </Select>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <Select
-                  label="Base Unit"
-                  value={productForm.base_unit}
-                  onChange={function onChange(event) {
-                    updateProductField("base_unit", event.target.value);
-                  }}
-                  required={true}
-                >
-                  {unitOptions.map(function renderUnitOption(unitName) {
-                    return (
-                      <option key={unitName} value={unitName}>
-                        {unitName}
-                      </option>
-                    );
-                  })}
-                </Select>
-                <Input
-                  label="Cost Price (₱)"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={productForm.cost_price}
-                  onChange={function onChange(event) {
-                    updateProductField("cost_price", event.target.value);
-                  }}
-                  required={true}
-                />
+        <form onSubmit={handleSaveProduct}>
+          <ErrorBanner message={modalError} className="mb-4" />
+          <fieldset disabled={savingProduct} className="space-y-5">
             <Input
-              label="Selling Price (₱)"
-              type="number"
-              step="0.01"
-              min="0.01"
-              value={productForm.selling_price}
+              label="Product Name"
+              value={productForm.product_name}
               onChange={function onChange(event) {
-                updateProductField("selling_price", event.target.value);
+                updateProductField("product_name", event.target.value);
               }}
               required={true}
             />
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {initialStockField}
-            <Input
-              label="Reorder Level"
-              type="number"
-              step="0.0001"
-              min="0"
-              value={productForm.reorder_level}
-              onChange={function onChange(event) {
-                updateProductField("reorder_level", event.target.value);
-              }}
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-[#151515]">Product Image</label>
-            <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-dashed border-[#E9E9E9] bg-[#EEEEED]/40 px-4 py-3 text-xs text-[#151515] hover:border-[#151515] transition-colors">
-              <Upload className="h-4 w-4 text-[#777777]" />
-              <span>{imageUploadLabel}</span>
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={function onFile(event) {
-                  if (event.target.files && event.target.files[0]) {
-                    setImageFile(event.target.files[0]);
-                  }
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="Barcode"
+                mono={true}
+                value={productForm.barcode}
+                onChange={function onChange(event) {
+                  updateProductField("barcode", event.target.value);
                 }}
-                className="hidden"
+                placeholder="Optional"
               />
+              <Select
+                label="Category"
+                value={productForm.category_id}
+                onChange={function onChange(event) {
+                  updateProductField("category_id", event.target.value);
+                }}
+              >
+                <option value="">Uncategorized</option>
+                {categories.map(function renderCatOption(category) {
+                  return (
+                    <option key={category.category_id} value={category.category_id}>
+                      {category.category_name}
+                    </option>
+                  );
+                })}
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <Select
+                label="Base Unit"
+                value={productForm.base_unit}
+                onChange={function onChange(event) {
+                  updateProductField("base_unit", event.target.value);
+                }}
+                required={true}
+              >
+                {unitOptions.map(function renderUnitOption(unitName) {
+                  return (
+                    <option key={unitName} value={unitName}>
+                      {unitName}
+                    </option>
+                  );
+                })}
+              </Select>
+              <Input
+                label="Cost Price (₱)"
+                type="number"
+                step="0.01"
+                min="0"
+                value={productForm.cost_price}
+                onChange={function onChange(event) {
+                  updateProductField("cost_price", event.target.value);
+                }}
+                required={true}
+              />
+              <Input
+                label="Selling Price (₱)"
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={productForm.selling_price}
+                onChange={function onChange(event) {
+                  updateProductField("selling_price", event.target.value);
+                }}
+                required={true}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {initialStockField}
+              <Input
+                label="Reorder Level"
+                type="number"
+                step="0.0001"
+                min="0"
+                value={productForm.reorder_level}
+                onChange={function onChange(event) {
+                  updateProductField("reorder_level", event.target.value);
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-[#151515]">Product Image</label>
+              <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-dashed border-[#E9E9E9] bg-[#EEEEED]/40 px-4 py-3 text-xs text-[#151515] hover:border-[#151515] transition-colors">
+                <Upload className="h-4 w-4 text-[#777777]" />
+                <span>{imageUploadLabel}</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={function onFile(event) {
+                    if (event.target.files && event.target.files[0]) {
+                      setImageFile(event.target.files[0]);
+                    }
+                  }}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            <label className="flex items-center gap-2.5 py-1 text-xs font-medium text-[#151515] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={productForm.allow_custom_amount}
+                onChange={function onCheck(event) {
+                  updateProductField("allow_custom_amount", event.target.checked);
+                }}
+                className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30 accent-[#151515]"
+              />
+              <span>Allow custom peso amount ("Tingi")</span>
             </label>
-          </div>
 
-          <label className="flex items-center gap-2.5 py-1 text-xs font-medium text-[#151515] cursor-pointer">
-            <input
-              type="checkbox"
-              checked={productForm.allow_custom_amount}
-              onChange={function onCheck(event) {
-                updateProductField("allow_custom_amount", event.target.checked);
+            {activeProductToggle}
+
+            <FormActions
+              onCancel={function cancel() {
+                setProductModalOpen(false);
               }}
-              className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30 accent-[#151515]"
+              confirmLabel="Save Product"
+              disabled={savingProduct}
             />
-            <span>Allow custom peso amount ("Tingi")</span>
-          </label>
-
-          {activeProductToggle}
-
-          <FormActions
-            onCancel={function cancel() {
-              setProductModalOpen(false);
-            }}
-            confirmLabel="Save Product"
-            disabled={savingProduct}
-          />
+          </fieldset>
         </form>
       </Modal>
 
@@ -924,6 +976,7 @@ export function InventoryPage(props) {
         size="sm"
       >
         <form onSubmit={handleCreateCategory} className="space-y-5">
+          <ErrorBanner message={modalError} />
           <Input
             label="Category Name"
             value={categoryNameInput}
@@ -952,6 +1005,7 @@ export function InventoryPage(props) {
         title={optionsTitle}
       >
         <div className="space-y-5">
+          <ErrorBanner message={modalError} />
           {optionsListContent}
 
           <form onSubmit={handleAddOption} className="space-y-4 border-t border-[#E9E9E9] pt-4">
@@ -1012,6 +1066,8 @@ export function InventoryPage(props) {
       {/* Stock In Modal */}
       <InventoryStockInModal
         product={stockInProduct}
+        saving={savingStock}
+        errorMessage={modalError}
         options={stockInOptions}
         suppliers={suppliers}
         optionId={stockInOptionId}
@@ -1033,6 +1089,8 @@ export function InventoryPage(props) {
       {/* Adjust Stock Modal */}
       <InventoryAdjustModal
         product={adjustProduct}
+        saving={savingStock}
+        errorMessage={modalError}
         adjustType={adjustType}
         onAdjustTypeChange={setAdjustType}
         qty={adjustQty}

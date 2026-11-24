@@ -41,12 +41,11 @@ const TABS = [
 
 export function ReportsPage() {
   const [activeTab, setActiveTab] = useState("SALES");
-  const [fromDate, setFromDate] = useState(function initFrom() {
-    return getManilaIsoDateOffset(0);
+  const [range, setRange] = useState(function initRange() {
+    const today = getManilaIsoDateOffset(0);
+    return { fromDate: today, toDate: today };
   });
-  const [toDate, setToDate] = useState(function initTo() {
-    return getManilaIsoDateOffset(0);
-  });
+  const { fromDate, toDate } = range;
   const [activePreset, setActivePreset] = useState("TODAY");
 
   // Custom Range Modal state
@@ -58,43 +57,61 @@ export function ReportsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("ALL");
 
-  // Report Data
-  const [summary, setSummary] = useState(null);
-  const [dailyRows, setDailyRows] = useState([]);
-  const [topProducts, setTopProducts] = useState([]);
-  const [categorySales, setCategorySales] = useState([]);
-  const [stockMovements, setStockMovements] = useState([]);
-  const [transactions, setTransactions] = useState([]);
-  const [errorBanner, setErrorBanner] = useState("");
-
-  async function loadAllReports(start, end) {
-    setErrorBanner("");
-    try {
-      const results = await Promise.all([
-        api.getReportsSummary(start, end),
-        api.getDailyReport(start, end),
-        api.getTopProducts(start, end, 50),
-        api.getCategorySalesReport(start, end),
-        api.getStockMovementsReport(start, end),
-        api.getTransactionsReport(start, end)
-      ]);
-      setSummary(results[0]);
-      setDailyRows(results[1] || []);
-      setTopProducts(results[2] || []);
-      setCategorySales(results[3] || []);
-      setStockMovements(results[4] || []);
-      setTransactions(results[5] || []);
-    } catch (error) {
-      setErrorBanner(error.message);
-    }
-  }
+  const [report, setReport] = useState(null);
 
   useEffect(
     function fetchOnDateChange() {
-      loadAllReports(fromDate, toDate);
+      let isCancelled = false;
+
+      async function loadReports() {
+        const { fromDate: start, toDate: end } = range;
+        try {
+          const results = await Promise.all([
+            api.getReportsSummary(start, end),
+            api.getDailyReport(start, end),
+            api.getTopProducts(start, end, 50),
+            api.getCategorySalesReport(start, end),
+            api.getStockMovementsReport(start, end),
+            api.getTransactionsReport(start, end)
+          ]);
+          if (!isCancelled) {
+            setReport({ range: range, results: results });
+          }
+        } catch (error) {
+          if (!isCancelled) {
+            setReport({ range: range, error: error.message || "Could not load reports." });
+          }
+        }
+      }
+
+      loadReports();
+      return function cleanup() {
+        isCancelled = true;
+      };
     },
-    [fromDate, toDate]
+    [range]
   );
+
+  let results = [];
+  let errorBanner = "";
+  const hasCurrentReport = Boolean(report && report.range === range);
+  if (hasCurrentReport) {
+    results = report.results || [];
+    errorBanner = report.error || "";
+  }
+  const reportReady = hasCurrentReport && !errorBanner;
+  const summary = results[0];
+  const dailyRows = results[1] || [];
+  const topProducts = results[2] || [];
+  const categorySales = results[3] || [];
+  const stockMovements = results[4] || [];
+  const transactions = results[5] || [];
+
+  function selectRange(start, end) {
+    if (start !== fromDate || end !== toDate || errorBanner) {
+      setRange({ fromDate: start, toDate: end });
+    }
+  }
 
   function selectPreset(presetKey) {
     setActivePreset(presetKey);
@@ -108,12 +125,14 @@ export function ReportsPage() {
     } else if (presetKey === "MONTH") {
       start = getManilaIsoDateOffset(-29);
     }
-    setFromDate(start);
-    setToDate(end);
+    selectRange(start, end);
   }
 
   // Export handlers
   function handleExportCsv() {
+    if (!reportReady) {
+      return;
+    }
     let filenameDate = fromDate;
     if (fromDate !== toDate) {
       filenameDate = fromDate + "_to_" + toDate;
@@ -694,11 +713,23 @@ export function ReportsPage() {
 
           {/* Quick Export actions */}
           <div className="flex items-center gap-1.5">
-            <Button variant="secondary" size="sm" onClick={handleExportCsv} title="Export current report to CSV">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleExportCsv}
+              disabled={!reportReady}
+              ariaLabel="Export CSV"
+            >
               <Download className="h-3.5 w-3.5 sm:mr-1" />
               <span className="hidden sm:inline">Export</span>
             </Button>
-            <Button variant="ghost" size="sm" onClick={triggerPrintReport} title="Print or Save as PDF">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={triggerPrintReport}
+              disabled={!reportReady}
+              ariaLabel="Print or Save as PDF"
+            >
               <Printer className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -706,6 +737,7 @@ export function ReportsPage() {
       </PageHeader>
 
       <ErrorBanner message={errorBanner} className="mb-4 sm:mb-5" />
+      {!hasCurrentReport && <p role="status" className="mb-4 text-sm text-[#777777]">Loading reports…</p>}
 
       {/* Clean Tab Bar */}
       <div
@@ -733,7 +765,7 @@ export function ReportsPage() {
         })}
       </div>
 
-      {activeTabContent}
+      {reportReady && activeTabContent}
 
       {/* Custom Date Range Modal */}
       <Modal
@@ -770,8 +802,7 @@ export function ReportsPage() {
               setCustomModalOpen(false);
             }}
             onConfirm={function () {
-              setFromDate(draftFrom);
-              setToDate(draftTo);
+              selectRange(draftFrom, draftTo);
               setActivePreset("CUSTOM");
               setCustomModalOpen(false);
             }}

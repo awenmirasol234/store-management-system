@@ -485,6 +485,7 @@ export function PosCheckoutModal(props) {
       size="xl"
     >
       <form onSubmit={props.onSubmit} className="space-y-5">
+        <ErrorBanner message={props.errorMessage} />
         {/* Payment Method Switcher */}
         <PaymentMethodToggle
           paymentMethod={props.paymentMethod}

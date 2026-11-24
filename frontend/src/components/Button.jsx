@@ -50,6 +50,7 @@ export function Button(props) {
       type={buttonType}
       onClick={props.onClick}
       disabled={props.disabled}
+      aria-label={props.ariaLabel}
       className={classes}
     >
       {props.children}

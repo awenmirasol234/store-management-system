@@ -18,7 +18,7 @@ export function FormActions(props) {
 
   return (
     <div className={containerClass}>
-      <Button variant="secondary" onClick={props.onCancel}>
+      <Button variant="secondary" onClick={props.onCancel} disabled={props.cancelDisabled}>
         Cancel
       </Button>
       <Button

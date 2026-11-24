@@ -1,6 +1,14 @@
 const API_BASE = import.meta.env.VITE_API_BASE || "";
 const TOKEN_KEY = "storeflow_auth_token";
+const authEvents = new EventTarget();
 let inMemoryToken = null;
+
+export function subscribeToSessionExpiry(listener) {
+  authEvents.addEventListener("expired", listener);
+  return function unsubscribe() {
+    authEvents.removeEventListener("expired", listener);
+  };
+}
 
 export function getAuthToken() {
   try {
@@ -40,17 +48,13 @@ export function setAuthToken(token) {
 }
 
 export function clearAuthToken() {
-  inMemoryToken = null;
-  try {
-    if (
-      typeof window !== "undefined" &&
-      window.localStorage &&
-      typeof window.localStorage.removeItem === "function"
-    ) {
-      window.localStorage.removeItem(TOKEN_KEY);
-    }
-  } catch (error) {
-    // ignore storage error
+  setAuthToken(null);
+}
+
+function expireSession(response, token) {
+  if (response.status === 401 && token && getAuthToken() === token) {
+    clearAuthToken();
+    authEvents.dispatchEvent(new Event("expired"));
   }
 }
 
@@ -72,18 +76,23 @@ async function request(method, path, body) {
   }
 
   const response = await fetch(API_BASE + path, options);
-  const payload = await response.json();
-
   if (!response.ok) {
-    if (response.status === 401 && path !== "/api/auth/login" && path !== "/api/auth/setup") {
-      clearAuthToken();
-    }
     let message = "Request failed";
-    if (payload && payload.error && payload.error.message) {
-      message = payload.error.message;
+    try {
+      const payload = await response.json();
+      if (payload && payload.error && payload.error.message) {
+        message = payload.error.message;
+      }
+    } catch {
+      // The proxy may return a non-JSON error.
+    }
+    if (path !== "/api/auth/login" && path !== "/api/auth/setup" &&
+        !(path === "/api/auth/change-pin" && message === "Current PIN is incorrect")) {
+      expireSession(response, token);
     }
     throw new Error(message);
   }
+  const payload = await response.json();
   return payload.data;
 }
 
@@ -324,6 +333,7 @@ export const api = {
       headers: headers
     });
     if (!response.ok) {
+      expireSession(response, token);
       let message = "Failed to download database backup";
       try {
         const errorJson = await response.json();

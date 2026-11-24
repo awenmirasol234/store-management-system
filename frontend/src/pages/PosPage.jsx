@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   Bell,
   ChevronLeft,
@@ -74,15 +74,28 @@ export function PosPage(props) {
     cartItems = props.cartItems;
   }
 
+  const latestCart = useRef(cartItems);
+  const isMounted = useRef(false);
+  useLayoutEffect(function trackCart() {
+    latestCart.current = cartItems;
+  }, [cartItems]);
+  useLayoutEffect(function trackMount() {
+    isMounted.current = true;
+    return function cleanup() {
+      isMounted.current = false;
+    };
+  }, []);
+
   function setCartItems(updater) {
+    let nextCart = updater;
+    if (typeof updater === "function") {
+      nextCart = updater(latestCart.current);
+    }
+    latestCart.current = nextCart;
     if (props && typeof props.onCartChange === "function") {
-      if (typeof updater === "function") {
-        props.onCartChange(updater(cartItems));
-      } else {
-        props.onCartChange(updater);
-      }
+      props.onCartChange(nextCart);
     } else {
-      setLocalCartItems(updater);
+      setLocalCartItems(nextCart);
     }
   }
 
@@ -348,7 +361,7 @@ export function PosPage(props) {
     });
 
     const stockCheck = canAddStockToCart({
-      cartItems: cartItems,
+      cartItems: latestCart.current,
       product: product,
       additionalBaseQuantity: baseQuantityPerUnit
     });
@@ -431,6 +444,9 @@ export function PosPage(props) {
 
     try {
       const options = await api.listSellingOptions(product.product_id);
+      if (!isMounted.current) {
+        return;
+      }
       const activeOptions = [];
       for (let index = 0; index < options.length; index++) {
         if (options[index].is_active) {
@@ -467,13 +483,21 @@ export function PosPage(props) {
     event.preventDefault();
     try {
       const match = await api.lookupBarcode(trimmed);
+      if (!isMounted.current) {
+        return;
+      }
       let searchRect = null;
       if (searchInputRef.current && typeof searchInputRef.current.getBoundingClientRect === "function") {
         searchRect = searchInputRef.current.getBoundingClientRect();
       }
       const added = addItemToCart(match.product, match.option, null, searchRect);
       if (added) {
-        setSearchQuery("");
+        setSearchQuery(function clearScannedQuery(currentQuery) {
+          if (currentQuery.trim() === trimmed) {
+            return "";
+          }
+          return currentQuery;
+        });
       }
     } catch (error) {
       setErrorBanner(error.message);
@@ -482,15 +506,16 @@ export function PosPage(props) {
 
   function setCartItemQty(itemKey, targetQuantity) {
     setErrorBanner("");
+    const currentCart = latestCart.current;
     const parsedQty = Math.floor(Number(targetQuantity));
     if (!Number.isFinite(parsedQty) || parsedQty <= 0) {
       return false;
     }
 
     let targetItem = null;
-    for (let index = 0; index < cartItems.length; index++) {
-      if (cartItems[index].key === itemKey) {
-        targetItem = cartItems[index];
+    for (let index = 0; index < currentCart.length; index++) {
+      if (currentCart[index].key === itemKey) {
+        targetItem = currentCart[index];
         break;
       }
     }
@@ -525,7 +550,7 @@ export function PosPage(props) {
       const additionalBaseQuantity = perUnit * delta;
 
       const stockCheck = canAddStockToCart({
-        cartItems: cartItems,
+        cartItems: currentCart,
         product: targetProduct,
         additionalBaseQuantity: additionalBaseQuantity
       });
@@ -552,10 +577,11 @@ export function PosPage(props) {
   }
 
   function changeCartItemQty(itemKey, delta) {
+    const currentCart = latestCart.current;
     let currentQty = 1;
-    for (let index = 0; index < cartItems.length; index++) {
-      if (cartItems[index].key === itemKey) {
-        currentQty = cartItems[index].quantity;
+    for (let index = 0; index < currentCart.length; index++) {
+      if (currentCart[index].key === itemKey) {
+        currentQty = currentCart[index].quantity;
         break;
       }
     }
@@ -734,7 +760,7 @@ export function PosPage(props) {
   }
 
   let errorElement = null;
-  if (errorBanner && pickerState === null && !mobileCartOpen) {
+  if (errorBanner && pickerState === null && !mobileCartOpen && !checkoutModalOpen && !discountModalOpen) {
     errorElement = (
       <ErrorBanner
         message={errorBanner}
@@ -1515,6 +1541,7 @@ export function PosPage(props) {
           }}
           className="space-y-5"
         >
+          <ErrorBanner message={errorBanner} />
           <Input
             label="Discount Amount (₱)"
             type="number"
@@ -1564,6 +1591,7 @@ export function PosPage(props) {
         onCashPartChange={setCashPartInput}
         changePreview={changePreview}
         submitting={submittingSale}
+        errorMessage={errorBanner}
         onSubmit={handleCompleteSale}
         customers={customers}
         onCustomerCreated={function handleCustomerCreated(newCustomer) {

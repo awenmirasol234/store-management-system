@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  AlertTriangle,
   Banknote,
   ShoppingCart,
   TrendingUp,
@@ -11,8 +10,7 @@ import {
   formatPeso,
   formatQuantity,
   formatQuantityWithUnit,
-  formatUnit,
-  getManilaIsoDateOffset
+  formatUnit
 } from "../format.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
@@ -34,62 +32,19 @@ export function DashboardPage(props) {
   async function loadDashboard() {
     setErrorBanner("");
     try {
-      const isCashier = props && props.currentUser && props.currentUser.role === "CASHIER";
-      if (isCashier) {
-        const results = await Promise.all([
-          api.listLowStockProducts(),
-          api.getReportsSummary().catch(function ignoreSummaryError() {
-            return null;
-          }),
-          api.listSales(100).catch(function ignoreSalesError() {
-            return [];
-          }),
-          api.getTopProducts(null, null, 5).catch(function ignoreTopError() {
-            return [];
-          })
-        ]);
-        setLowStock(results[0] || []);
-        if (results[1]) {
-          setSummary(results[1]);
-        } else {
-          const salesList = results[2] || [];
-          const todayIso = getManilaIsoDateOffset(0);
-          let cashierSalesTotal = 0;
-          let cashierSaleCount = 0;
-          for (let i = 0; i < salesList.length; i = i + 1) {
-            const sale = salesList[i];
-            if (sale && sale.created_at) {
-              const saleDate = new Date(sale.created_at);
-              if (!Number.isNaN(saleDate.getTime())) {
-                const shifted = new Date(saleDate.getTime() + 8 * 60 * 60 * 1000);
-                const year = String(shifted.getUTCFullYear());
-                const month = String(shifted.getUTCMonth() + 1).padStart(2, "0");
-                const day = String(shifted.getUTCDate()).padStart(2, "0");
-                if (year + "-" + month + "-" + day === todayIso) {
-                  cashierSalesTotal = cashierSalesTotal + Number(sale.total_amount || 0);
-                  cashierSaleCount = cashierSaleCount + 1;
-                }
-              }
-            }
-          }
-          setSummary({
-            gross_sales: Math.round(cashierSalesTotal * 100) / 100,
-            sale_count: cashierSaleCount,
-            total_items_sold: cashierSaleCount,
-            net_profit: 0
-          });
-        }
-        setTopProducts(results[3] || []);
-      } else {
-        const results = await Promise.all([
-          api.getReportsSummary(),
-          api.listLowStockProducts(),
-          api.getTopProducts(null, null, 5)
-        ]);
-        setSummary(results[0]);
-        setLowStock(results[1]);
-        setTopProducts(results[2]);
+      if (!isOwner) {
+        const products = await api.listLowStockProducts();
+        setLowStock(products || []);
+        return;
       }
+      const results = await Promise.all([
+        api.getReportsSummary(),
+        api.listLowStockProducts(),
+        api.getTopProducts(null, null, 5)
+      ]);
+      setSummary(results[0]);
+      setLowStock(results[1]);
+      setTopProducts(results[2]);
     } catch (error) {
       setErrorBanner(error.message);
     }
@@ -173,23 +128,11 @@ export function DashboardPage(props) {
     );
   }
 
-  let fourthSummaryCard = (
-    <StatCard
-      label="Inventory Alerts"
-      value={String(lowStock.length)}
-      meta="Items needing reorder"
-      icon={AlertTriangle}
-    />
-  );
+  let inventoryAction = "View Inventory";
+  let sectionsClass = "grid grid-cols-1 gap-4 sm:gap-5";
   if (isOwner) {
-    fourthSummaryCard = (
-      <StatCard
-        label="Today's Profit"
-        value={grossProfit}
-        meta="Gross profit today"
-        icon={TrendingUp}
-      />
-    );
+    inventoryAction = "Restock";
+    sectionsClass += " lg:grid-cols-2";
   }
 
   let reportsButton = null;
@@ -214,7 +157,7 @@ export function DashboardPage(props) {
       {errorElement}
 
       {/* 1. Summary Cards */}
-      <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {isOwner && <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Today's Sales"
           value={todaySales}
@@ -233,13 +176,18 @@ export function DashboardPage(props) {
           meta="Units moved today"
           icon={Layers}
         />
-        {fourthSummaryCard}
-      </div>
+        <StatCard
+          label="Today's Profit"
+          value={grossProfit}
+          meta="Gross profit today"
+          icon={TrendingUp}
+        />
+      </div>}
 
       {/* 2. Operational Sections: Top Selling, Inventory Alerts */}
-      <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
+      <div className={sectionsClass}>
         {/* Top-Selling Products */}
-        <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+        {isOwner && <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold text-[#151515]">Top Selling Products</h2>
             <div className="flex items-center gap-2">
@@ -248,7 +196,7 @@ export function DashboardPage(props) {
             </div>
           </div>
           {topProductsList}
-        </section>
+        </section>}
 
         {/* Inventory Alerts */}
         <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
@@ -261,7 +209,7 @@ export function DashboardPage(props) {
                 props.onNavigate("inventory");
               }}
             >
-              Restock
+            {inventoryAction}
             </Button>
           </div>
           {lowStockList}

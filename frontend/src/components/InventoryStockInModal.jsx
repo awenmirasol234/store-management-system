@@ -1,4 +1,5 @@
 import { formatQuantityWithUnit } from "../format.js";
+import { ErrorBanner } from "./ErrorBanner.jsx";
 import { FormActions } from "./FormActions.jsx";
 import { Input } from "./Input.jsx";
 import { Modal } from "./Modal.jsx";
@@ -17,10 +18,12 @@ export function InventoryStockInModal(props) {
     <Modal
       open={true}
       onClose={props.onClose}
+      dismissDisabled={props.saving}
       title={title}
       size="md"
     >
       <form onSubmit={props.onSubmit} className="space-y-4 sm:space-y-5">
+        <ErrorBanner message={props.errorMessage} />
         <Select
           label="Stock-In Unit"
           value={props.optionId}
@@ -90,7 +93,12 @@ export function InventoryStockInModal(props) {
           placeholder="Optional"
         />
 
-        <FormActions onCancel={props.onClose} confirmLabel="Add Stock" />
+        <FormActions
+          onCancel={props.onClose}
+          confirmLabel="Add Stock"
+          disabled={props.saving}
+          cancelDisabled={props.saving}
+        />
       </form>
     </Modal>
   );

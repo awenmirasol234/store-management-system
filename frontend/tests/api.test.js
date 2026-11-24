@@ -4,7 +4,8 @@ import {
   clearAuthToken,
   getAuthToken,
   resolveImageUrl,
-  setAuthToken
+  setAuthToken,
+  subscribeToSessionExpiry
 } from "../src/api.js";
 
 function stubFetchSuccess(data) {
@@ -21,6 +22,7 @@ function stubFetchSuccess(data) {
 }
 
 afterEach(function cleanup() {
+  clearAuthToken();
   vi.unstubAllGlobals();
 });
 
@@ -208,5 +210,52 @@ describe("api client", function () {
 
     await expect(api.listProducts()).rejects.toThrow("Session expired");
     expect(getAuthToken()).toBeNull();
+  });
+
+  it("keeps a newer token when an older request returns 401", async function () {
+    setAuthToken("old-token");
+    let respond;
+    vi.stubGlobal("fetch", function () {
+      return new Promise(function (resolve) {
+        respond = resolve;
+      });
+    });
+    const listener = vi.fn();
+    const unsubscribe = subscribeToSessionExpiry(listener);
+    try {
+      const request = api.listProducts();
+      setAuthToken("new-token");
+      respond(new Response(null, { status: 401 }));
+      await expect(request).rejects.toThrow("Request failed");
+      expect(getAuthToken()).toBe("new-token");
+      expect(listener).not.toHaveBeenCalled();
+    } finally {
+      unsubscribe();
+    }
+  });
+
+  it("notifies once when the current token expires during a backup download", async function () {
+    setAuthToken("expired-token");
+    vi.stubGlobal("fetch", async function () {
+      return new Response(null, { status: 401 });
+    });
+    const listener = vi.fn();
+    const unsubscribe = subscribeToSessionExpiry(listener);
+    try {
+      await expect(api.downloadBackup()).rejects.toThrow("Failed to download database backup");
+      expect(getAuthToken()).toBeNull();
+      expect(listener).toHaveBeenCalledTimes(1);
+    } finally {
+      unsubscribe();
+    }
+  });
+
+  it("preserves the session when the current PIN is incorrect", async function () {
+    setAuthToken("valid-token");
+    vi.stubGlobal("fetch", async function () {
+      return Response.json({ error: { message: "Current PIN is incorrect" } }, { status: 401 });
+    });
+    await expect(api.changePin({})).rejects.toThrow("Current PIN is incorrect");
+    expect(getAuthToken()).toBe("valid-token");
   });
 });

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { LogOut, Store, Wallet } from "lucide-react";
-import { api, clearAuthToken, getAuthToken } from "./api.js";
+import { api, clearAuthToken, getAuthToken, subscribeToSessionExpiry } from "./api.js";
 import { Sidebar } from "./components/Sidebar.jsx";
 import { BottomNav } from "./components/BottomNav.jsx";
 import { UserManagementModal } from "./components/UserManagementModal.jsx";
@@ -97,16 +97,26 @@ export function App(props) {
     [posOrderDiscount]
   );
 
-  async function loadActiveShift(userId) {
+  const sessionToken = getAuthToken();
+
+  async function loadActiveShift(userId, token) {
+    if (!token || token !== getAuthToken()) {
+      return;
+    }
     try {
       const result = await api.getActiveShift(userId);
+      if (token !== getAuthToken()) {
+        return;
+      }
       if (result && result.shift) {
         setActiveShift(Object.assign({}, result.shift, { summary: result.summary }));
       } else {
         setActiveShift(null);
       }
     } catch (error) {
-      setActiveShift(null);
+      if (token === getAuthToken()) {
+        setActiveShift(null);
+      }
     }
   }
 
@@ -144,8 +154,20 @@ export function App(props) {
     }
   }, []);
 
+  function clearSignedInState() {
+    setCurrentUser(null);
+    setActiveShift(null);
+    setShiftModalOpen(false);
+    setUserModalOpen(false);
+  }
+
+  useEffect(function watchSession() {
+    return subscribeToSessionExpiry(clearSignedInState);
+  }, []);
+
   useEffect(function initAuth() {
     let isCancelled = false;
+    const initialToken = getAuthToken();
 
     async function checkAuth() {
       try {
@@ -162,19 +184,21 @@ export function App(props) {
         const token = getAuthToken();
         if (token) {
           const user = await api.getMe();
-          if (isCancelled) {
+          if (isCancelled || token !== getAuthToken()) {
             return;
           }
           if (user) {
             setCurrentUser(user);
-            loadActiveShift(user.user_id);
+            loadActiveShift(user.user_id, token);
             if (initialActivePage === "dashboard" && user.role === "CASHIER") {
               setActivePage("pos");
             }
           }
         }
       } catch (error) {
-        clearAuthToken();
+        if (!isCancelled && initialToken === getAuthToken()) {
+          clearAuthToken();
+        }
       } finally {
         if (!isCancelled) {
           setAuthChecked(true);
@@ -191,7 +215,7 @@ export function App(props) {
   function handleAuthSuccess(user, token) {
     setCurrentUser(user);
     setIsSetupRequired(false);
-    loadActiveShift(user.user_id);
+    loadActiveShift(user.user_id, token);
     if (activePage === "dashboard" && user.role === "CASHIER") {
       handleNavigate("pos");
     } else if (activePage !== "not-found") {
@@ -204,8 +228,7 @@ export function App(props) {
       // ignore network error on logout
     });
     clearAuthToken();
-    setCurrentUser(null);
-    setActiveShift(null);
+    clearSignedInState();
     setPosCartItems([]);
     setPosOrderDiscount(0);
     if (typeof window !== "undefined" && window.localStorage) {
@@ -252,13 +275,21 @@ export function App(props) {
         }}
         onShiftChange={function () {
           if (currentUser) {
-            loadActiveShift(currentUser.user_id);
+            loadActiveShift(currentUser.user_id, sessionToken);
           }
         }}
         cartItems={posCartItems}
-        onCartChange={setPosCartItems}
+        onCartChange={function changeCart(items) {
+          if (sessionToken === getAuthToken()) {
+            setPosCartItems(items);
+          }
+        }}
         orderDiscount={posOrderDiscount}
-        onDiscountChange={setPosOrderDiscount}
+        onDiscountChange={function changeDiscount(discount) {
+          if (sessionToken === getAuthToken()) {
+            setPosOrderDiscount(discount);
+          }
+        }}
       />
     );
   } else if (activePage === "inventory") {
@@ -416,7 +447,7 @@ export function App(props) {
         activeShift={activeShift}
         onShiftChange={function () {
           if (currentUser) {
-            return loadActiveShift(currentUser.user_id);
+            return loadActiveShift(currentUser.user_id, sessionToken);
           }
         }}
       />
