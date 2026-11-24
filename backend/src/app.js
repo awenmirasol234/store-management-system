@@ -374,6 +374,7 @@ export function createApp(options) {
       inventoryTransactionRepository: inventoryTransactionRepository,
       categoryRepository: categoryRepository,
       supplierRepository: supplierRepository,
+      unitRepository: unitRepository,
       customerRepository: customerRepository,
       creditTransactionRepository: creditTransactionRepository,
       salesRepository: salesRepository,
