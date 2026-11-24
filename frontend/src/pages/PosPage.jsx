@@ -35,6 +35,7 @@ import { ProductThumb } from "../components/ProductThumb.jsx";
 import { QuantitySelector } from "../components/QuantitySelector.jsx";
 import { ReceiptView } from "../components/ReceiptView.jsx";
 import { PosCheckoutModal } from "../components/PosCheckoutModal.jsx";
+import { FlyToCartOverlay } from "../components/FlyToCartOverlay.jsx";
 
 function buildCartKey(productId, optionId, customAmount) {
   if (customAmount !== null && customAmount !== undefined) {
@@ -125,12 +126,13 @@ export function PosPage(props) {
 
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
-  const [cartCollapsed, setCartCollapsed] = useState(function initCartState() {
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      return true;
-    }
-    return false;
-  });
+  let defaultCollapsed = false;
+  if (props && props.initialCartCollapsed !== undefined) {
+    defaultCollapsed = props.initialCartCollapsed;
+  } else if (typeof window !== "undefined" && window.innerWidth < 1024) {
+    defaultCollapsed = true;
+  }
+  const [cartCollapsed, setCartCollapsed] = useState(defaultCollapsed);
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const [amountPaidInput, setAmountPaidInput] = useState("");
   const [cashPartInput, setCashPartInput] = useState("");
@@ -138,6 +140,132 @@ export function PosPage(props) {
   const [submittingSale, setSubmittingSale] = useState(false);
 
   const [completedReceipt, setCompletedReceipt] = useState(null);
+
+  const [animationQueue, setAnimationQueue] = useState([]);
+  const [activeFlyer, setActiveFlyer] = useState(null);
+  const [cartBadgeBumping, setCartBadgeBumping] = useState(false);
+  const [pendingSourceRect, setPendingSourceRect] = useState(null);
+
+  function triggerFlyAnimation(product, sourceElementOrRect) {
+    if (!product || typeof window === "undefined") {
+      return;
+    }
+    let fromRect = null;
+    if (sourceElementOrRect) {
+      if (typeof sourceElementOrRect.getBoundingClientRect === "function") {
+        fromRect = sourceElementOrRect.getBoundingClientRect();
+      } else if (sourceElementOrRect.left !== undefined) {
+        fromRect = sourceElementOrRect;
+      }
+    }
+    if (!fromRect) {
+      fromRect = {
+        left: window.innerWidth / 2 - 22,
+        top: window.innerHeight / 2 - 22,
+        width: 44,
+        height: 44
+      };
+    }
+
+    const newItem = {
+      id: "flyer-" + String(Date.now()) + "-" + String(Math.random()),
+      product: product,
+      fromRect: {
+        left: fromRect.left,
+        top: fromRect.top,
+        width: fromRect.width,
+        height: fromRect.height
+      }
+    };
+
+    setAnimationQueue(function enqueue(previous) {
+      const next = [];
+      for (let i = 0; i < previous.length; i++) {
+        next.push(previous[i]);
+      }
+      next.push(newItem);
+      return next;
+    });
+  }
+
+  useEffect(
+    function processQueue() {
+      if (activeFlyer !== null || animationQueue.length === 0) {
+        return;
+      }
+
+      const nextItem = animationQueue[0];
+      const remaining = [];
+      for (let i = 1; i < animationQueue.length; i++) {
+        remaining.push(animationQueue[i]);
+      }
+      setAnimationQueue(remaining);
+
+      let toRect = null;
+      if (typeof document !== "undefined") {
+        const mobileTarget = document.querySelector('[data-cart-target="mobile-bar"]');
+        if (mobileTarget && window.innerWidth < 768) {
+          const rect = mobileTarget.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            toRect = rect;
+          }
+        }
+        if (!toRect && cartCollapsed) {
+          const collapsedTarget = document.querySelector('[data-cart-target="desktop-collapsed"]');
+          if (collapsedTarget) {
+            const rect = collapsedTarget.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+              toRect = rect;
+            }
+          }
+        }
+        if (!toRect) {
+          const expandedTarget = document.querySelector('[data-cart-target="desktop-expanded"]');
+          if (expandedTarget) {
+            const rect = expandedTarget.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+              toRect = rect;
+            }
+          }
+        }
+      }
+
+      if (!toRect && typeof window !== "undefined") {
+        toRect = {
+          left: window.innerWidth - 80,
+          top: 60,
+          width: 44,
+          height: 44
+        };
+      }
+
+      let duration = 650;
+      if (animationQueue.length > 3) {
+        duration = 360;
+      } else if (animationQueue.length > 1) {
+        duration = 480;
+      }
+
+      setActiveFlyer({
+        id: nextItem.id,
+        product: nextItem.product,
+        fromRect: nextItem.fromRect,
+        toRect: toRect,
+        duration: duration
+      });
+    },
+    [activeFlyer, animationQueue, cartCollapsed]
+  );
+
+  function handleFlyerComplete() {
+    setActiveFlyer(null);
+    setCartBadgeBumping(true);
+    if (typeof window !== "undefined") {
+      window.setTimeout(function resetBump() {
+        setCartBadgeBumping(false);
+      }, 200);
+    }
+  }
 
   async function loadCatalog() {
     setErrorBanner("");
@@ -200,7 +328,7 @@ export function PosPage(props) {
     };
   }, []);
 
-  function addItemToCart(product, option, customAmount) {
+  function addItemToCart(product, option, customAmount, sourceElementOrRect) {
     setErrorBanner("");
     if (!product) {
       return false;
@@ -283,14 +411,20 @@ export function PosPage(props) {
       }
       return next;
     });
+    triggerFlyAnimation(product, sourceElementOrRect);
     return true;
   }
 
-  async function handleProductCardClick(product) {
+  async function handleProductCardClick(product, event) {
     setErrorBanner("");
     if (product.current_stock <= 0) {
       setErrorBanner(product.product_name + " is out of stock");
       return;
+    }
+
+    let sourceRect = null;
+    if (event && event.currentTarget && typeof event.currentTarget.getBoundingClientRect === "function") {
+      sourceRect = event.currentTarget.getBoundingClientRect();
     }
 
     try {
@@ -305,6 +439,7 @@ export function PosPage(props) {
       if (activeOptions.length > 0 || product.allow_custom_amount) {
         setCustomPesoInput("");
         setSelectedOptionId("base");
+        setPendingSourceRect(sourceRect);
         setPickerState({
           product: product,
           options: activeOptions
@@ -312,7 +447,7 @@ export function PosPage(props) {
         return;
       }
 
-      addItemToCart(product, null, null);
+      addItemToCart(product, null, null, sourceRect);
     } catch (error) {
       setErrorBanner(error.message);
     }
@@ -329,7 +464,11 @@ export function PosPage(props) {
     event.preventDefault();
     try {
       const match = await api.lookupBarcode(trimmed);
-      const added = addItemToCart(match.product, match.option, null);
+      let searchRect = null;
+      if (searchInputRef.current && typeof searchInputRef.current.getBoundingClientRect === "function") {
+        searchRect = searchInputRef.current.getBoundingClientRect();
+      }
+      const added = addItemToCart(match.product, match.option, null, searchRect);
       if (added) {
         setSearchQuery("");
       }
@@ -640,8 +779,8 @@ export function PosPage(props) {
             >
               <div>
                 <div
-                  onClick={function onCardClick() {
-                    handleProductCardClick(product);
+                  onClick={function onCardClick(event) {
+                    handleProductCardClick(product, event);
                   }}
                   className="cursor-pointer"
                 >
@@ -671,8 +810,8 @@ export function PosPage(props) {
               <div className="p-2.5 sm:p-3 pt-2.5 sm:pt-2.5">
                 <button
                   type="button"
-                  onClick={function onAddClick() {
-                    handleProductCardClick(product);
+                  onClick={function onAddClick(event) {
+                    handleProductCardClick(product, event);
                   }}
                   className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1.5 text-xs font-semibold text-[#151515] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
                 >
@@ -763,7 +902,11 @@ export function PosPage(props) {
             if (!Number.isFinite(parsed) || parsed <= 0) {
               return;
             }
-            const added = addItemToCart(pickerState.product, null, parsed);
+            let sourceRect = pendingSourceRect;
+            if (event && event.target && typeof event.target.getBoundingClientRect === "function") {
+              sourceRect = event.target.getBoundingClientRect();
+            }
+            const added = addItemToCart(pickerState.product, null, parsed, sourceRect);
             if (added) {
               setPickerState(null);
             }
@@ -798,7 +941,7 @@ export function PosPage(props) {
           }
         }
       }
-      const added = addItemToCart(pickerState.product, chosenOption, null);
+      const added = addItemToCart(pickerState.product, chosenOption, null, pendingSourceRect);
       if (added) {
         setPickerState(null);
       }
@@ -820,8 +963,12 @@ export function PosPage(props) {
           <div className="space-y-2.5">
             <label
               className={baseCardClass}
-              onDoubleClick={function directPickBase() {
-                const added = addItemToCart(pickerState.product, null, null);
+              onDoubleClick={function directPickBase(event) {
+                let sourceRect = pendingSourceRect;
+                if (event && event.currentTarget && typeof event.currentTarget.getBoundingClientRect === "function") {
+                  sourceRect = event.currentTarget.getBoundingClientRect();
+                }
+                const added = addItemToCart(pickerState.product, null, null, sourceRect);
                 if (added) {
                   setPickerState(null);
                 }
@@ -861,8 +1008,12 @@ export function PosPage(props) {
                 <label
                   key={option.option_id}
                   className={optionCardClass}
-                  onDoubleClick={function directPickOption() {
-                    const added = addItemToCart(pickerState.product, option, null);
+                  onDoubleClick={function directPickOption(event) {
+                    let sourceRect = pendingSourceRect;
+                    if (event && event.currentTarget && typeof event.currentTarget.getBoundingClientRect === "function") {
+                      sourceRect = event.currentTarget.getBoundingClientRect();
+                    }
+                    const added = addItemToCart(pickerState.product, option, null, sourceRect);
                     if (added) {
                       setPickerState(null);
                     }
@@ -979,14 +1130,21 @@ export function PosPage(props) {
 
   let mobileCartBar = null;
   if (cartItems.length > 0) {
+    let mobileButtonClass =
+      "flex w-full items-center justify-between rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] px-4 py-3 font-semibold text-[#151515] shadow-xs active:scale-[0.99] cursor-pointer transition-all";
+    if (cartBadgeBumping) {
+      mobileButtonClass = mobileButtonClass + " scale-[1.03]";
+    }
+
     mobileCartBar = (
       <div className="fixed bottom-16 left-0 right-0 z-30 border-t border-[#E9E9E9] bg-white/95 p-3 backdrop-blur md:hidden">
         <button
+          data-cart-target="mobile-bar"
           type="button"
           onClick={function openMobileCart() {
             setMobileCartOpen(true);
           }}
-          className="flex w-full items-center justify-between rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] px-4 py-3 font-semibold text-[#151515] shadow-xs active:scale-[0.99] cursor-pointer transition-all"
+          className={mobileButtonClass}
         >
           <div className="flex items-center gap-2">
             <ShoppingBag className="h-5 w-5" />
@@ -1073,6 +1231,12 @@ export function PosPage(props) {
       );
     }
 
+    let collapsedBadgeClass =
+      "relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-[#EEEEED] text-[#151515] hover:bg-[#E2E2E1] transition-all";
+    if (cartBadgeBumping) {
+      collapsedBadgeClass = collapsedBadgeClass + " scale-110 ring-2 ring-[#B9F36B]";
+    }
+
     rightSideCartPanel = (
       <aside
         className="hidden md:flex w-16 sm:w-20 shrink-0 flex-col justify-between border-l border-[#E9E9E9] bg-white py-4 transition-all duration-200 ease-in-out select-none"
@@ -1092,10 +1256,11 @@ export function PosPage(props) {
             <ChevronLeft className="h-4 w-4" />
           </button>
           <div
+            data-cart-target="desktop-collapsed"
             onClick={function expandOnBadgeClick() {
               setCartCollapsed(false);
             }}
-            className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-[#EEEEED] text-[#151515] hover:bg-[#E2E2E1] transition-colors"
+            className={collapsedBadgeClass}
             title={String(cartItems.length) + " item(s) in cart"}
           >
             <ShoppingBag className="h-5 w-5" />
@@ -1135,6 +1300,11 @@ export function PosPage(props) {
       </aside>
     );
   } else {
+    let expandedTitleClass = "text-base font-semibold text-[#151515] transition-transform duration-200";
+    if (cartBadgeBumping) {
+      expandedTitleClass = expandedTitleClass + " scale-105";
+    }
+
     rightSideCartPanel = (
       <aside className="hidden md:flex w-80 xl:w-96 shrink-0 flex-col border-l border-[#E9E9E9] bg-white transition-all duration-200 ease-in-out">
         <div className="flex items-center justify-between border-b border-[#E9E9E9] px-4 py-3.5 sm:px-5 sm:py-4">
@@ -1150,7 +1320,10 @@ export function PosPage(props) {
             >
               <ChevronRight className="h-4 w-4" />
             </button>
-            <h2 className="text-base font-semibold text-[#151515]">
+            <h2
+              data-cart-target="desktop-expanded"
+              className={expandedTitleClass}
+            >
               Current Sale (<span className="font-mono">{cartItems.length}</span>)
             </h2>
           </div>
@@ -1415,6 +1588,9 @@ export function PosPage(props) {
       >
         {receiptBody}
       </Modal>
+
+      {/* Fly-to-Cart Animation Overlay */}
+      <FlyToCartOverlay activeFlyer={activeFlyer} onComplete={handleFlyerComplete} />
     </div>
   );
 }
