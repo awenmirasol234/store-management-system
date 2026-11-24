@@ -666,8 +666,8 @@ export function ReportsPage() {
 
   return (
     <PageLayout scroll={true}>
-      <PageHeader title="Reports">
-        <div className="flex flex-wrap items-center gap-2">
+      <PageHeader title="Reports" className="shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           {/* Shortcut Chips */}
           <div className="flex items-center gap-1 rounded-xl border border-[#E9E9E9] bg-white p-1 shadow-xs">
             <button
@@ -743,7 +743,7 @@ export function ReportsPage() {
       <div
         role="tablist"
         aria-label="Report categories"
-        className="mb-4 sm:mb-5 flex items-center overflow-x-auto no-scrollbar gap-1 border-b border-[#E9E9E9] pb-2"
+        className="mb-4 sm:mb-5 flex shrink-0 items-center overflow-x-auto no-scrollbar gap-1 border-b border-[#E9E9E9] pb-2"
       >
         {TABS.map(function (tab) {
           return (

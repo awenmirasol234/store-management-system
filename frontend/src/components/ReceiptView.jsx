@@ -18,8 +18,12 @@ export function ReceiptView(props) {
     let isMounted = true;
     api.getSettings()
       .then(function (result) {
-        if (isMounted && result && result.data) {
-          setInternalSettings(result.data);
+        let data = result;
+        if (result && result.data) {
+          data = result.data;
+        }
+        if (isMounted && data) {
+          setInternalSettings(data);
         }
       })
       .catch(function () {
@@ -185,7 +189,9 @@ export function ReceiptView(props) {
         <Button
           variant="primary"
           onClick={function printReceipt() {
-            window.print();
+            if (typeof window !== "undefined" && typeof window.print === "function") {
+              window.print();
+            }
           }}
         >
           <Printer className="h-4 w-4" />

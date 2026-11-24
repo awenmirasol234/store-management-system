@@ -41,6 +41,7 @@ describe("Refactored page rendering", function () {
     expect(html).toContain("Loading reports");
     expect(html).not.toContain("No sales in this date range.");
     expect(html).toContain('role="tablist"');
+    expect(html).toContain('shrink-0 items-center overflow-x-auto');
     expect(html).toContain('role="tab"');
     expect(html).toContain("text-[#151515]");
     expect(html).not.toContain("text-blue-600");

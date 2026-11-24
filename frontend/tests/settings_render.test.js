@@ -1,10 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import { SettingsPage } from "../src/pages/SettingsPage.jsx";
 import { ReceiptView } from "../src/components/ReceiptView.jsx";
 import { getFilteredNavItems, getPageFromPath, getPageTitle } from "../src/navigation.js";
 import { App } from "../src/App.jsx";
+import { api } from "../src/api.js";
 
 describe("Settings Page & Navigation Integration", function () {
   it("filters settings navigation item by role", function () {
@@ -130,5 +131,30 @@ describe("Settings Page & Navigation Integration", function () {
     );
 
     expect(html).not.toContain("Cashier:");
+  });
+
+  it("ReceiptView fetches settings when storeSettings prop is omitted", async function () {
+    const getSettingsSpy = vi.spyOn(api, "getSettings").mockResolvedValue({
+      store_name: "Tindahan Ni Aling Nena"
+    });
+    const mockSale = {
+      sale_id: "s1",
+      receipt_number: "00099",
+      created_at: "2026-11-23T10:00:00Z",
+      cashier_name: "Ate Lorna",
+      subtotal_amount: 50,
+      total_amount: 50,
+      payment_method: "CASH",
+      amount_paid: 50,
+      change_amount: 0
+    };
+    const html = renderToString(
+      React.createElement(ReceiptView, {
+        sale: mockSale,
+        items: []
+      })
+    );
+    expect(html).toContain("STOREFLOW POS");
+    getSettingsSpy.mockRestore();
   });
 });

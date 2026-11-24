@@ -48,8 +48,11 @@ export function SettingsPage(props) {
         if (!isMounted) {
           return;
         }
+        let data = result;
         if (result && result.data) {
-          const data = result.data;
+          data = result.data;
+        }
+        if (data) {
           setFormData({
             store_name: data.store_name || "",
             tagline: data.tagline || "",
@@ -117,8 +120,11 @@ export function SettingsPage(props) {
       };
 
       const result = await api.updateSettings(payload);
+      let saved = result;
       if (result && result.data) {
-        const saved = result.data;
+        saved = result.data;
+      }
+      if (saved) {
         setFormData({
           store_name: saved.store_name || "",
           tagline: saved.tagline || "",
