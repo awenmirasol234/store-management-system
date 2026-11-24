@@ -247,4 +247,56 @@ describe("PosPage SSR test", function () {
     );
     expect(expandedHtml).toContain("₱1,400.00");
   });
+
+  it("renders error banner only inside picker modal without duplicating on catalog page", function () {
+    const dummyProduct = {
+      product_id: "prod-1",
+      product_name: "Dinorado Special Fragrant Rice",
+      base_unit: "kg",
+      current_stock: 5,
+      selling_price: 58
+    };
+    const dummyOptions = [
+      {
+        option_id: "opt-25kg",
+        option_name: "25kg Sack",
+        quantity: 25,
+        price: 1400,
+        is_active: true
+      }
+    ];
+
+    const stockErrorMessage = "Requested quantity exceeds available stock for Dinorado Special Fragrant Rice (5 kg available).";
+
+    const modalOpenHtml = renderToString(
+      React.createElement(PosPage, {
+        initialPickerState: {
+          product: dummyProduct,
+          options: dummyOptions
+        },
+        initialErrorBanner: stockErrorMessage
+      })
+    );
+
+    // Should appear exactly once in HTML (inside the modal), not duplicated on the background page
+    const firstIndex = modalOpenHtml.indexOf(stockErrorMessage);
+    const lastIndex = modalOpenHtml.lastIndexOf(stockErrorMessage);
+    expect(firstIndex).toBeGreaterThan(-1);
+    expect(firstIndex).toBe(lastIndex);
+  });
+
+  it("renders error banner on catalog page when no modal is open", function () {
+    const pageErrorMessage = "Product is out of stock";
+    const pageHtml = renderToString(
+      React.createElement(PosPage, {
+        initialErrorBanner: pageErrorMessage
+      })
+    );
+
+    expect(pageHtml).toContain(pageErrorMessage);
+    const firstIndex = pageHtml.indexOf(pageErrorMessage);
+    const lastIndex = pageHtml.lastIndexOf(pageErrorMessage);
+    expect(firstIndex).toBeGreaterThan(-1);
+    expect(firstIndex).toBe(lastIndex);
+  });
 });

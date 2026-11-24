@@ -58,7 +58,11 @@ export function PosPage(props) {
   const [customers, setCustomers] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
-  const [errorBanner, setErrorBanner] = useState("");
+  let initialError = "";
+  if (props && props.initialErrorBanner) {
+    initialError = props.initialErrorBanner;
+  }
+  const [errorBanner, setErrorBanner] = useState(initialError);
 
   let initialCart = [];
   if (props && props.initialCartItems) {
@@ -435,6 +439,7 @@ export function PosPage(props) {
       }
 
       if (activeOptions.length > 0 || product.allow_custom_amount) {
+        setErrorBanner("");
         setCustomPesoInput("");
         setSelectedOptionId("base");
         setPendingSourceRect(sourceRect);
@@ -728,7 +733,18 @@ export function PosPage(props) {
     changePreview = Math.round((tenderedValue - cashDueForChange) * 100) / 100;
   }
 
-  let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-4 sm:mb-5" />;
+  let errorElement = null;
+  if (errorBanner && pickerState === null && !mobileCartOpen) {
+    errorElement = (
+      <ErrorBanner
+        message={errorBanner}
+        onDismiss={function dismissError() {
+          setErrorBanner("");
+        }}
+        className="relative z-[60] mb-4 sm:mb-5"
+      />
+    );
+  }
 
   let lowStockBadge = null;
   if (lowStockProducts.length > 0) {
@@ -913,7 +929,15 @@ export function PosPage(props) {
 
     let pickerErrorBanner = null;
     if (errorBanner) {
-      pickerErrorBanner = <ErrorBanner message={errorBanner} className="mb-4" />;
+      pickerErrorBanner = (
+        <ErrorBanner
+          message={errorBanner}
+          onDismiss={function dismissPickerError() {
+            setErrorBanner("");
+          }}
+          className="mb-4"
+        />
+      );
     }
 
     let tingiForm = null;
@@ -945,6 +969,9 @@ export function PosPage(props) {
             value={customPesoInput}
             onChange={function onChange(event) {
               setCustomPesoInput(event.target.value);
+              if (errorBanner) {
+                setErrorBanner("");
+              }
             }}
             placeholder="e.g. 10.00"
           />
@@ -1006,6 +1033,9 @@ export function PosPage(props) {
                   checked={isBaseSelected}
                   onChange={function onSelectBase() {
                     setSelectedOptionId("base");
+                    if (errorBanner) {
+                      setErrorBanner("");
+                    }
                   }}
                   className="h-4 w-4 accent-[#151515] cursor-pointer"
                 />
@@ -1051,6 +1081,9 @@ export function PosPage(props) {
                       checked={isOptionSelected}
                       onChange={function onSelectOption() {
                         setSelectedOptionId(option.option_id);
+                        if (errorBanner) {
+                          setErrorBanner("");
+                        }
                       }}
                       className="h-4 w-4 accent-[#151515] cursor-pointer"
                     />
@@ -1189,7 +1222,15 @@ export function PosPage(props) {
 
   let cartErrorBanner = null;
   if (errorBanner) {
-    cartErrorBanner = <ErrorBanner message={errorBanner} className="mb-2" />;
+    cartErrorBanner = (
+      <ErrorBanner
+        message={errorBanner}
+        onDismiss={function dismissCartError() {
+          setErrorBanner("");
+        }}
+        className="mb-2"
+      />
+    );
   }
 
   let mobileCartModal = (
@@ -1197,6 +1238,7 @@ export function PosPage(props) {
       open={mobileCartOpen}
       onClose={function closeMobileCart() {
         setMobileCartOpen(false);
+        setErrorBanner("");
       }}
       title={"Current Sale (" + String(cartItems.length) + ")"}
       size="sm"
@@ -1443,6 +1485,7 @@ export function PosPage(props) {
         open={pickerState !== null}
         onClose={function closePicker() {
           setPickerState(null);
+          setErrorBanner("");
         }}
         title={pickerTitle}
         size="sm"
