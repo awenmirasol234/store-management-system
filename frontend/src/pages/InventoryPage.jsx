@@ -460,20 +460,20 @@ export function InventoryPage(props) {
               </div>
             </div>
           </td>
-          <td className="px-5 py-3.5 text-xs text-[#777777]">{product.base_unit}</td>
-          <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">
+          <td className="px-5 py-3.5 text-xs text-[#777777] whitespace-nowrap">{product.base_unit}</td>
+          <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right whitespace-nowrap">
             {formatPeso(product.cost_price)}
           </td>
-          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right">
+          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right whitespace-nowrap">
             {formatPeso(product.selling_price)}
           </td>
-          <td className="px-5 py-3.5 text-right">
+          <td className="px-5 py-3.5 text-right whitespace-nowrap">
             <Badge tone={getStockBadgeTone(product)} className="font-mono">
               {formatQuantityWithUnit(product.current_stock, product.base_unit)}
             </Badge>
           </td>
-          <td className="px-5 py-3.5">
-            <div className="flex items-center justify-end gap-1.5">
+          <td className="px-5 py-3.5 text-right whitespace-nowrap">
+            <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
               <Button
                 variant="soft"
                 size="sm"
@@ -481,7 +481,7 @@ export function InventoryPage(props) {
                   openStockInModal(product);
                 }}
               >
-                <ArrowDownToLine className="h-3.5 w-3.5" />
+                <ArrowDownToLine className="h-3.5 w-3.5 shrink-0" />
                 <span>Stock In</span>
               </Button>
               <button
@@ -489,7 +489,7 @@ export function InventoryPage(props) {
                 onClick={function openMenu(event) {
                   toggleActionMenu(event, product);
                 }}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E9E9E9] bg-white text-[#777777] hover:border-[#151515] hover:bg-[#EEEEED] hover:text-[#151515] transition-colors cursor-pointer"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E9E9E9] bg-white text-[#777777] hover:border-[#151515] hover:bg-[#EEEEED] hover:text-[#151515] transition-colors cursor-pointer"
                 title="More actions"
               >
                 <MoreVertical className="h-4 w-4" />
@@ -695,11 +695,11 @@ export function InventoryPage(props) {
           headRow={
             <tr>
               <th className="px-5 py-3">Product</th>
-              <th className="px-5 py-3">Unit</th>
-              <th className="px-5 py-3 text-right">Cost</th>
-              <th className="px-5 py-3 text-right">Price</th>
-              <th className="px-5 py-3 text-right">Stock</th>
-              <th className="px-5 py-3 text-right">Actions</th>
+              <th className="px-5 py-3 whitespace-nowrap">Unit</th>
+              <th className="px-5 py-3 text-right whitespace-nowrap">Cost</th>
+              <th className="px-5 py-3 text-right whitespace-nowrap">Price</th>
+              <th className="px-5 py-3 text-right whitespace-nowrap">Stock</th>
+              <th className="px-5 py-3 text-right whitespace-nowrap">Actions</th>
             </tr>
           }
         >

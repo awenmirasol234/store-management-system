@@ -39,7 +39,7 @@ export function Button(props) {
   }
 
   const classes =
-    "inline-flex items-center justify-center gap-2 rounded-xl border font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed " +
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl border font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed " +
     getVariantClasses(props.variant) +
     " " +
     getSizeClasses(props.size) +
