@@ -5,10 +5,10 @@ export function PageHeader(props) {
   }
 
   let containerClass =
-    "mb-5 flex flex-col justify-between gap-3 sm:mb-6 sm:flex-row sm:items-center sm:gap-4";
+    "mb-3 flex flex-col justify-between gap-3 sm:mb-4 sm:flex-row sm:items-center sm:gap-4";
   if (!stackOnMobile) {
     containerClass =
-      "mb-5 flex flex-wrap items-center justify-between gap-3 sm:mb-6 sm:gap-4";
+      "mb-3 flex flex-wrap items-center justify-between gap-3 sm:mb-4 sm:gap-4";
   }
   if (props.className) {
     containerClass = containerClass + " " + props.className;

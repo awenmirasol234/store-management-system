@@ -9,7 +9,7 @@ describe("PageHeader component test", function () {
   it("renders with title and default mobile-stacked classes", function () {
     const html = renderToString(React.createElement(PageHeader, { title: "Dashboard" }));
     expect(html).toContain("Dashboard");
-    expect(html).toContain("flex flex-col justify-between gap-3 sm:mb-6 sm:flex-row sm:items-center sm:gap-4");
+    expect(html).toContain("flex flex-col justify-between gap-3 sm:mb-4 sm:flex-row sm:items-center sm:gap-4");
   });
 
   it("supports explicit stackOnMobile=false to disable mobile stacking", function () {
