@@ -24,7 +24,7 @@ StoreFlow is a local-first retail point-of-sale (POS) and inventory management s
 | **Persistence** | SQLite (`node:sqlite`) | Synchronous WAL-mode database with scaled integer storage (`PRAGMA foreign_keys = ON`) |
 | **Frontend UI** | React 19, Vite, Tailwind v4 | Desktop POS cockpit, admin management screens, responsive mobile layout |
 | **Frontend State** | React built-in (`useState`) | Component state; no external state management libraries |
-| **Containerization** | Docker Compose + Nginx | Reverse proxy (`:8080`) routing to private backend (`:3001`) with persistent volume |
+| **Containerization** | Docker Compose + Caddy | Local HTTPS reverse proxy (`:443`) routing to private backend (`:3001`) with persistent volumes |
 | **Testing** | Vitest | In-memory unit tests, SQLite integration tests, route contract tests |
 
 ---

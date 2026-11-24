@@ -6,7 +6,7 @@ Local-first point-of-sale (POS) and inventory management system for Philippine r
 - **Timezone**: `Asia/Manila` (`UTC+8`) for business-day calculations and receipt sequencing.
 - **Backend**: Node.js 24, Express, plain SQL via `node:sqlite`, Vitest.
 - **Frontend**: React 19, Vite, Tailwind CSS v4, Vitest.
-- **Deployment**: Docker Compose with Nginx reverse proxy and persistent SQLite volume.
+- **Deployment**: Docker Compose with Caddy HTTPS reverse proxy and persistent SQLite volume.
 
 ---
 
@@ -89,7 +89,7 @@ Run all seed commands from `backend/`:
 
 ## 4. Docker Deployment
 
-Deploy the entire stack (Nginx frontend proxy on port `8080` + private Express backend) with Docker Compose:
+Deploy the entire stack (Caddy HTTPS frontend proxy + private Express backend) with Docker Compose:
 
 ### Start Services
 
@@ -98,7 +98,9 @@ docker compose up -d --build
 docker compose exec backend node src/db/seed.js
 ```
 
-Open `http://localhost:8080`.
+Add `store.home.arpa` to local DNS or the hosts file, then open `https://store.home.arpa`.
+
+The first browser visit requires trusting Caddy's local root certificate. Caddy stores its certificate data in the `caddy_data` volume.
 
 ### Operational Commands
 

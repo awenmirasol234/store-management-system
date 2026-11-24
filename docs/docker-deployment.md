@@ -6,20 +6,21 @@ Tactical deployment instructions for containerized execution with Docker Compose
 
 ## 1. Architecture & Port Mapping
 
-Docker Compose orchestrates two container services and one persistent volume:
+Docker Compose orchestrates two container services and two persistent volumes:
 
 ```
-[ Host: Port 8080 ]
-        ↓
-  [ nginx (Frontend Static Assets & Reverse Proxy) ]
+ [ Host: Ports 80 and 443 ]
+         ↓
+   [ caddy (HTTPS, Frontend Static Assets & Reverse Proxy) ]
         ↓ (Private Compose Network: backend:3001)
   [ backend (Node.js Express API) ]
         ↓
   [ store_data Volume: /data/store.db & /data/uploads ]
 ```
 
-- **`nginx`**: Serves the Vite production build and proxies `/api` and `/uploads` to `backend:3001`. Publicly exposed on host port `8080`.
+- **`caddy`**: Provides local HTTPS for `store.home.arpa`, serves the Vite production build, and proxies `/api` and `/uploads` to `backend:3001`. Caddy uses its internal CA and persists certificates in `caddy_data`.
 - **`backend`**: Node.js Express API listening on private port `3001`. Does not expose ports directly to the host.
+- **`caddy_data`**: Named volume mounted to Caddy's `/data` directory for local CA and certificate data.
 - **`store_data`**: Named volume mounted to `/data` across containers, storing `store.db` and uploaded images in `/data/uploads`.
 
 ---
@@ -48,7 +49,7 @@ docker compose exec backend node src/db/seed.js
 docker compose ps
 ```
 
-Both containers must report `healthy` status. Open `http://localhost:8080` in a browser.
+Both containers must report `healthy` status. Resolve `store.home.arpa` to the Docker host, trust Caddy's local root certificate, and open `https://store.home.arpa` in a browser.
 
 ---
 
@@ -84,11 +85,11 @@ IMAGE_TAG=sha-previous docker compose up -d
 
 ## 4. Recreating Services & Upstream Resolution
 
-Nginx resolves `backend:3001` at container startup. When recreating only the backend container, always restart Nginx to refresh DNS resolution:
+Caddy resolves `backend:3001` through the Compose network. When recreating only the backend container, recreate Caddy if it does not recover the upstream connection:
 
 ```bash
 docker compose up -d --force-recreate backend
-docker compose restart nginx
+docker compose restart caddy
 ```
 
 ---
@@ -99,9 +100,9 @@ docker compose restart nginx
   ```bash
   docker compose logs -f backend
   ```
-- **Stream Nginx Proxy Logs**:
+- **Stream Caddy Proxy Logs**:
   ```bash
-  docker compose logs -f nginx
+  docker compose logs -f caddy
   ```
 - **Stop Services (Preserve Data)**:
   ```bash

@@ -1,0 +1,21 @@
+https://store.home.arpa {
+    tls internal
+    root * /usr/share/caddy
+
+    request_body {
+        max_size 3MB
+    }
+
+    handle /api/* {
+        reverse_proxy backend:3001
+    }
+
+    handle /uploads/* {
+        reverse_proxy backend:3001
+    }
+
+    handle {
+        try_files {path} /index.html
+        file_server
+    }
+}
