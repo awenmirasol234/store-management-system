@@ -102,6 +102,11 @@ Design tokens are declared in `frontend/src/index.css` inside the `@theme` block
 - Card Container: `w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col` (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`).
 - **Padding Rule**: `Modal.jsx` owns all content padding (`p-4 sm:p-6`). Modal children must never introduce conflicting outer padding.
 - Sizes: `sm` (`max-w-sm`), `md` (`max-w-md`), `lg` (`max-w-lg`, default), `xl` (`max-w-2xl` for checkout cockpit).
+- **Animations**:
+  - **Entrance**: Smooth scale-up from 95% to 100% (`scale(0.95)` to `scale(1)`) and fade-in (`opacity 0` to `1`) with subtle backdrop fade over 200ms ease-out (`cubic-bezier(0, 0, 0.2, 1)`).
+  - **Exit**: Smooth scale-down (`scale(1)` to `scale(0.95)`) and fade-out with backdrop fade over 150ms ease-out before unmounting.
+  - **Interaction & Centering**: Keeps modal centered with `transform-origin: center`; all inputs and actions remain immediately responsive without delay.
+  - **Accessibility**: Automatically falls back to instant transitions when `prefers-reduced-motion: reduce` is detected.
 
 ### 4.5 Status Badges (`frontend/src/components/Badge.jsx`)
 - `neutral`: `bg-[#EEEEED] text-[#777777] border border-[#E9E9E9]`.

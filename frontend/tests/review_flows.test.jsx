@@ -88,7 +88,7 @@ async function click(label, scope) {
 }
 
 function openDialog() {
-  return container.querySelector("dialog[open]");
+  return container.querySelector("dialog[open]:not(.pointer-events-none)");
 }
 
 function changeInput(input, value) {

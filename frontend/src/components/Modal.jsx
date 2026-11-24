@@ -1,19 +1,92 @@
-import { useId, useLayoutEffect, useRef } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 
 export function Modal(props) {
-  if (!props.open) {
+  const [shouldRender, setShouldRender] = useState(props.open);
+  const [isClosing, setIsClosing] = useState(false);
+  const wasOpenRef = useRef(props.open);
+  const closeTimerRef = useRef(null);
+  const lastContentRef = useRef({
+    title: props.title,
+    children: props.children
+  });
+
+  if (props.open) {
+    lastContentRef.current = {
+      title: props.title,
+      children: props.children
+    };
+  }
+
+  useEffect(
+    function handleOpenChange() {
+      if (props.open) {
+        wasOpenRef.current = true;
+        if (closeTimerRef.current) {
+          clearTimeout(closeTimerRef.current);
+          closeTimerRef.current = null;
+        }
+        setIsClosing(false);
+        setShouldRender(true);
+      } else if (wasOpenRef.current) {
+        wasOpenRef.current = false;
+        if (closeTimerRef.current) {
+          clearTimeout(closeTimerRef.current);
+          closeTimerRef.current = null;
+        }
+
+        let duration = 150;
+        if (typeof window !== "undefined" && window.matchMedia) {
+          const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+          if (reducedMotionQuery.matches) {
+            duration = 0;
+          }
+        }
+
+        if (duration === 0) {
+          setShouldRender(false);
+          setIsClosing(false);
+        } else {
+          setIsClosing(true);
+          closeTimerRef.current = setTimeout(function finishClosing() {
+            setShouldRender(false);
+            setIsClosing(false);
+            closeTimerRef.current = null;
+          }, duration);
+        }
+      }
+
+      return function cleanup() {
+        if (closeTimerRef.current) {
+          clearTimeout(closeTimerRef.current);
+          closeTimerRef.current = null;
+        }
+      };
+    },
+    [props.open]
+  );
+
+  if (!shouldRender) {
     return null;
   }
+
+  let renderTitle = props.title;
+  let renderChildren = props.children;
+  if (isClosing) {
+    renderTitle = lastContentRef.current.title;
+    renderChildren = lastContentRef.current.children;
+  }
+
   return (
     <OpenModal
-      title={props.title}
+      title={renderTitle}
       size={props.size}
       maxWidth={props.maxWidth}
       onClose={props.onClose}
       dismissDisabled={props.dismissDisabled}
+      isClosing={isClosing}
     >
-      {props.children}
+      {renderChildren}
     </OpenModal>
   );
 }
@@ -21,6 +94,7 @@ export function Modal(props) {
 function OpenModal(props) {
   const titleId = useId();
   const dialogRef = useRef(null);
+  const backdropRef = useRef(null);
 
   useLayoutEffect(
     function openDialog() {
@@ -34,20 +108,24 @@ function OpenModal(props) {
   );
 
   function handleBackdropClick(event) {
-    if (event.target === event.currentTarget && !props.dismissDisabled) {
+    if (props.dismissDisabled || props.isClosing) {
+      return;
+    }
+    if (event.target === event.currentTarget || event.target === backdropRef.current) {
+      event.stopPropagation();
       props.onClose();
     }
   }
 
   function handleCancel(event) {
     event.preventDefault();
-    if (!props.dismissDisabled) {
+    if (!props.dismissDisabled && !props.isClosing) {
       props.onClose();
     }
   }
 
   function keepTabInside(event) {
-    if (event.key !== "Tab" || event.defaultPrevented) {
+    if (event.key !== "Tab" || event.defaultPrevented || props.isClosing) {
       return;
     }
     const controls = dialogRef.current.querySelectorAll(
@@ -90,6 +168,15 @@ function OpenModal(props) {
     widthClass = props.maxWidth;
   }
 
+  let backdropAnimClass = "modal-backdrop-animate-in";
+  let panelAnimClass = "modal-panel-animate-in";
+  let dialogPointerClass = "";
+  if (props.isClosing) {
+    backdropAnimClass = "modal-backdrop-animate-out";
+    panelAnimClass = "modal-panel-animate-out";
+    dialogPointerClass = " pointer-events-none select-none";
+  }
+
   return (
     <dialog
       ref={dialogRef}
@@ -99,12 +186,26 @@ function OpenModal(props) {
       onCancel={handleCancel}
       onKeyDown={keepTabInside}
       onClick={handleBackdropClick}
-      className="fixed inset-0 m-0 h-full w-full max-h-none max-w-none bg-[#171717]/40 backdrop-blur-[2px] p-3 open:flex items-center justify-center sm:p-6 backdrop:bg-transparent"
+      className={
+        "fixed inset-0 m-0 h-full w-full max-h-none max-w-none bg-transparent p-3 open:flex items-center justify-center sm:p-6 backdrop:bg-transparent" +
+        dialogPointerClass
+      }
     >
       <div
+        ref={backdropRef}
+        aria-hidden="true"
+        onClick={handleBackdropClick}
         className={
-          "w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col " +
-          widthClass
+          "fixed inset-0 bg-[#171717]/40 backdrop-blur-[2px] " +
+          backdropAnimClass
+        }
+      />
+      <div
+        className={
+          "relative z-10 w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col " +
+          widthClass +
+          " " +
+          panelAnimClass
         }
       >
         <div className="flex items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 sm:px-6 sm:py-4">
@@ -114,7 +215,7 @@ function OpenModal(props) {
           <button
             type="button"
             onClick={props.onClose}
-            disabled={props.dismissDisabled}
+            disabled={props.dismissDisabled || props.isClosing}
             title="Close"
             aria-label="Close modal"
             className="flex h-9 w-9 items-center justify-center rounded-lg text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] cursor-pointer transition-colors"
