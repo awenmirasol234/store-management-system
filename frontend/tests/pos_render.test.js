@@ -172,4 +172,21 @@ describe("PosPage SSR test", function () {
 
     expect(html).toContain("border-[#151515] bg-[#EEEEED]/40");
   });
+
+  it("renders product catalog grid with 3 columns on md breakpoint", function () {
+    const dummyProduct = {
+      product_id: "prod-1",
+      product_name: "Century Tuna 180g",
+      base_unit: "Can",
+      current_stock: 10,
+      selling_price: 45
+    };
+    const html = renderToString(
+      React.createElement(PosPage, {
+        initialProducts: [dummyProduct]
+      })
+    );
+    expect(html).toContain("md:grid-cols-3");
+    expect(html).not.toContain("md:grid-cols-4");
+  });
 });

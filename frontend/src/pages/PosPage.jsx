@@ -49,7 +49,11 @@ function buildCartKey(productId, optionId, customAmount) {
 export function PosPage(props) {
   const searchInputRef = useRef(null);
 
-  const [products, setProducts] = useState([]);
+  let initialProductsList = [];
+  if (props && props.initialProducts) {
+    initialProductsList = props.initialProducts;
+  }
+  const [products, setProducts] = useState(initialProductsList);
   const [categories, setCategories] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -623,7 +627,7 @@ export function PosPage(props) {
     );
   } else {
     productGridContent = (
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
         {filteredProducts.map(function renderCard(product) {
           let categoryName = product.base_unit;
           if (product.category_name) {
