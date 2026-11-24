@@ -37,6 +37,66 @@ export function App(props) {
   const [activeShift, setActiveShift] = useState(null);
   const [shiftModalOpen, setShiftModalOpen] = useState(false);
 
+  const [posCartItems, setPosCartItems] = useState(function initPosCart() {
+    if (typeof window !== "undefined" && window.localStorage) {
+      try {
+        const saved = window.localStorage.getItem("storeflow_pos_cart");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            return parsed;
+          }
+        }
+      } catch (e) {}
+    }
+    return [];
+  });
+
+  const [posOrderDiscount, setPosOrderDiscount] = useState(function initPosDiscount() {
+    if (typeof window !== "undefined" && window.localStorage) {
+      try {
+        const saved = window.localStorage.getItem("storeflow_pos_discount");
+        if (saved) {
+          const num = Number(saved);
+          if (Number.isFinite(num) && num >= 0) {
+            return num;
+          }
+        }
+      } catch (e) {}
+    }
+    return 0;
+  });
+
+  useEffect(
+    function persistCart() {
+      if (typeof window !== "undefined" && window.localStorage) {
+        try {
+          if (posCartItems.length > 0) {
+            window.localStorage.setItem("storeflow_pos_cart", JSON.stringify(posCartItems));
+          } else {
+            window.localStorage.removeItem("storeflow_pos_cart");
+          }
+        } catch (e) {}
+      }
+    },
+    [posCartItems]
+  );
+
+  useEffect(
+    function persistDiscount() {
+      if (typeof window !== "undefined" && window.localStorage) {
+        try {
+          if (posOrderDiscount > 0) {
+            window.localStorage.setItem("storeflow_pos_discount", String(posOrderDiscount));
+          } else {
+            window.localStorage.removeItem("storeflow_pos_discount");
+          }
+        } catch (e) {}
+      }
+    },
+    [posOrderDiscount]
+  );
+
   async function loadActiveShift(userId) {
     try {
       const result = await api.getActiveShift(userId);
@@ -146,6 +206,14 @@ export function App(props) {
     clearAuthToken();
     setCurrentUser(null);
     setActiveShift(null);
+    setPosCartItems([]);
+    setPosOrderDiscount(0);
+    if (typeof window !== "undefined" && window.localStorage) {
+      try {
+        window.localStorage.removeItem("storeflow_pos_cart");
+        window.localStorage.removeItem("storeflow_pos_discount");
+      } catch (e) {}
+    }
     handleNavigate("pos");
   }
 
@@ -187,6 +255,10 @@ export function App(props) {
             loadActiveShift(currentUser.user_id);
           }
         }}
+        cartItems={posCartItems}
+        onCartChange={setPosCartItems}
+        orderDiscount={posOrderDiscount}
+        onDiscountChange={setPosOrderDiscount}
       />
     );
   } else if (activePage === "inventory") {

@@ -61,8 +61,39 @@ export function PosPage(props) {
   if (props && props.initialCartItems) {
     initialCart = props.initialCartItems;
   }
-  const [cartItems, setCartItems] = useState(initialCart);
-  const [orderDiscount, setOrderDiscount] = useState(0);
+  const [localCartItems, setLocalCartItems] = useState(initialCart);
+  const cartItems = props && props.cartItems !== undefined ? props.cartItems : localCartItems;
+
+  function setCartItems(updater) {
+    if (props && typeof props.onCartChange === "function") {
+      if (typeof updater === "function") {
+        props.onCartChange(updater(cartItems));
+      } else {
+        props.onCartChange(updater);
+      }
+    } else {
+      setLocalCartItems(updater);
+    }
+  }
+
+  let initialDiscount = 0;
+  if (props && props.initialOrderDiscount !== undefined) {
+    initialDiscount = props.initialOrderDiscount;
+  }
+  const [localOrderDiscount, setLocalOrderDiscount] = useState(initialDiscount);
+  const orderDiscount = props && props.orderDiscount !== undefined ? props.orderDiscount : localOrderDiscount;
+
+  function setOrderDiscount(updater) {
+    if (props && typeof props.onDiscountChange === "function") {
+      if (typeof updater === "function") {
+        props.onDiscountChange(updater(orderDiscount));
+      } else {
+        props.onDiscountChange(updater);
+      }
+    } else {
+      setLocalOrderDiscount(updater);
+    }
+  }
   const [paymentMethod, setPaymentMethod] = useState("CASH");
 
   let initialPicker = null;
