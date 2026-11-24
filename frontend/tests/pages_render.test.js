@@ -25,6 +25,16 @@ describe("Refactored page rendering", function () {
     expect(html).not.toContain("Most Day Active");
   });
 
+  it("does not render a reports button in the top selling products section", function () {
+    const html = renderToString(React.createElement(DashboardPage, {
+      currentUser: { role: "OWNER" },
+      onNavigate: function () {}
+    }));
+    expect(html).toContain("Top Selling Products");
+    expect(html).toContain("Top 5");
+    expect(html).not.toContain("Reports");
+  });
+
   it("renders loading feedback while awaiting the first report", function () {
     const html = renderToString(React.createElement(ReportsPage));
     expect(html).toContain("Reports");

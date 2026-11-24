@@ -135,21 +135,6 @@ export function DashboardPage(props) {
     sectionsClass += " lg:grid-cols-2";
   }
 
-  let reportsButton = null;
-  if (isOwner && typeof props.onNavigate === "function") {
-    reportsButton = (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={function goReports() {
-          props.onNavigate("reports");
-        }}
-      >
-        Reports
-      </Button>
-    );
-  }
-
   return (
     <PageLayout scroll={true}>
       <PageHeader title="Dashboard" />
@@ -190,10 +175,7 @@ export function DashboardPage(props) {
         {isOwner && <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold text-[#151515]">Top Selling Products</h2>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs text-[#777777]">Top 5</span>
-              {reportsButton}
-            </div>
+            <span className="font-mono text-xs text-[#777777]">Top 5</span>
           </div>
           {topProductsList}
         </section>}
