@@ -22,17 +22,40 @@ describe("PosPage SSR test", function () {
     expect(typeof ShoppingBag).toBe("object");
   });
 
-  it("renders Cash and Utang payment options", function () {
+  it("renders Cash, Utang, and Split payment options", function () {
     const html = renderToString(React.createElement(PosPage));
     expect(html).toContain("Cash");
     expect(html).toContain("Utang");
+    expect(html).toContain("Split");
   });
 
-  it("renders Clear Cart action in cart header and quick actions bar", function () {
+  it("renders Clear Cart action in cart header and inline Discount control in cart footer", function () {
     const html = renderToString(React.createElement(PosPage));
     expect(html).toContain("Clear");
-    expect(html).toContain("Clear Sale");
     expect(html).toContain("Clear all items in cart");
+    expect(html).toContain("+ Add Discount");
+    expect(html).not.toContain("Scan Barcode");
+    expect(html).not.toContain("Clear Sale");
+
+    const discountedHtml = renderToString(
+      React.createElement(PosPage, {
+        initialCartItems: [
+          {
+            key: "prod-1:base",
+            product_id: "prod-1",
+            product_name: "Rice 1kg",
+            unit_price: 60,
+            selling_price: 60,
+            quantity: 2,
+            base_quantity_per_unit: 1
+          }
+        ],
+        initialOrderDiscount: 20
+      })
+    );
+    expect(discountedHtml).toContain("Discount (Edit)");
+    expect(discountedHtml).toContain("-₱20.00");
+    expect(discountedHtml).not.toContain("text-blue-600");
   });
 
   it("renders ProductThumb in fullBleed mode with edge-to-edge styling", function () {

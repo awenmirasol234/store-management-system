@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { Delete, KeyRound, Lock, Store, User } from "lucide-react";
+import { Delete, Store, User } from "lucide-react";
 import { api, setAuthToken } from "../api.js";
 import { Button } from "../components/Button.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
-import { Input } from "../components/Input.jsx";
 
 export function LoginPage(props) {
   const [username, setUsername] = useState("owner");
@@ -136,7 +135,10 @@ export function LoginPage(props) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-[#777777]">
+            <label
+              htmlFor="login-staff-username"
+              className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-[#777777]"
+            >
               Staff Username
             </label>
             <div className="relative">
@@ -144,6 +146,7 @@ export function LoginPage(props) {
                 <User className="h-4 w-4" />
               </div>
               <input
+                id="login-staff-username"
                 type="text"
                 value={username}
                 onChange={function (e) {
@@ -158,13 +161,17 @@ export function LoginPage(props) {
 
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <label className="block text-2xs font-semibold uppercase tracking-wider text-[#777777]">
+              <span className="block text-2xs font-semibold uppercase tracking-wider text-[#777777]">
                 Security PIN
-              </label>
+              </span>
               <span className="font-mono text-3xs text-[#777777]">4–8 digits</span>
             </div>
             {/* PIN Dots visualizer */}
-            <div className="flex h-12 items-center justify-center gap-3 rounded-xl border border-[#E9E9E9] bg-[#F5F5F4] px-4">
+            <div
+              role="status"
+              aria-label={"Security PIN: " + String(pin.length) + " digits entered"}
+              className="flex h-12 items-center justify-center gap-3 rounded-xl border border-[#E9E9E9] bg-[#F5F5F4] px-4"
+            >
               {pinDots}
             </div>
           </div>
@@ -207,6 +214,7 @@ export function LoginPage(props) {
               onClick={handleBackspace}
               className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:border-[#151515] hover:bg-[#EEEEED] hover:text-[#151515] active:scale-95 transition-all cursor-pointer select-none"
               title="Backspace"
+              aria-label="Backspace"
             >
               <Delete className="h-5 w-5" />
             </button>

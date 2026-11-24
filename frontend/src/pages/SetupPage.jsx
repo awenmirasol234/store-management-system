@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, ShieldCheck, Store, User } from "lucide-react";
+import { ShieldCheck, Store } from "lucide-react";
 import { api, setAuthToken } from "../api.js";
 import { Button } from "../components/Button.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
@@ -83,69 +83,57 @@ export function SetupPage(props) {
         {errorElement}
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-[#151515]">
-              Owner Username
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={function (e) {
-                setUsername(e.target.value);
-              }}
-              placeholder="e.g. owner"
-              className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-            />
-          </div>
+          <Input
+            label="Owner Username"
+            value={username}
+            onChange={function (e) {
+              setUsername(e.target.value);
+            }}
+            placeholder="e.g. owner"
+            autoComplete="username"
+            required={true}
+          />
 
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-[#151515]">
-              Full Name
-            </label>
-            <input
-              type="text"
-              value={fullName}
-              onChange={function (e) {
-                setFullName(e.target.value);
-              }}
-              placeholder="e.g. Maria Santos"
-              className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-            />
-          </div>
+          <Input
+            label="Full Name"
+            value={fullName}
+            onChange={function (e) {
+              setFullName(e.target.value);
+            }}
+            placeholder="e.g. Maria Santos"
+            autoComplete="name"
+            required={true}
+          />
 
           <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-[#151515]">
-                Security PIN (4-8 digits)
-              </label>
-              <input
-                type="password"
-                inputMode="numeric"
-                maxLength={8}
-                value={pin}
-                onChange={function (e) {
-                  setPin(e.target.value.replace(/\D/g, ""));
-                }}
-                placeholder="••••"
-                className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-center text-sm font-mono tracking-widest text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-[#151515]">
-                Confirm PIN
-              </label>
-              <input
-                type="password"
-                inputMode="numeric"
-                maxLength={8}
-                value={confirmPin}
-                onChange={function (e) {
-                  setConfirmPin(e.target.value.replace(/\D/g, ""));
-                }}
-                placeholder="••••"
-                className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-center text-sm font-mono tracking-widest text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-              />
-            </div>
+            <Input
+              label="Security PIN (4-8 digits)"
+              type="password"
+              inputMode="numeric"
+              maxLength={8}
+              mono={true}
+              inputClassName="text-center tracking-widest"
+              value={pin}
+              onChange={function (e) {
+                setPin(e.target.value.replace(/\D/g, ""));
+              }}
+              placeholder="••••"
+              required={true}
+            />
+            <Input
+              label="Confirm PIN"
+              type="password"
+              inputMode="numeric"
+              maxLength={8}
+              mono={true}
+              inputClassName="text-center tracking-widest"
+              value={confirmPin}
+              onChange={function (e) {
+                setConfirmPin(e.target.value.replace(/\D/g, ""));
+              }}
+              placeholder="••••"
+              required={true}
+            />
           </div>
 
           <div className="rounded-xl bg-[#EEEEED]/60 border border-[#E9E9E9] p-3.5 text-xs text-[#777777]">

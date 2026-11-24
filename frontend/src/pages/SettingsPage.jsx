@@ -7,7 +7,8 @@ import {
   Receipt,
   Save,
   Sliders,
-  Store
+  Store,
+  Users
 } from "lucide-react";
 import { api } from "../api.js";
 import { Button } from "../components/Button.jsx";
@@ -168,7 +169,10 @@ export function SettingsPage(props) {
   let successBanner = null;
   if (successMessage) {
     successBanner = (
-      <div className="mb-4 sm:mb-5 flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+      <div
+        role="status"
+        className="mb-4 sm:mb-5 flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+      >
         <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
         <span>{successMessage}</span>
       </div>
@@ -374,15 +378,44 @@ export function SettingsPage(props) {
               </div>
             </div>
 
-            {/* Section 3: Database & Disaster Recovery */}
+            {/* Section 3: Staff & Access */}
+            <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+              <div className="mb-3.5 flex items-center gap-2">
+                <Users className="h-4 w-4 text-[#151515]" />
+                <h2 className="text-base font-semibold text-[#151515]">Staff & Access</h2>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <span className="text-sm text-[#777777]">
+                  Manage cashier and owner accounts with terminal PIN access
+                </span>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={function openStaff() {
+                    if (typeof props.onOpenUserModal === "function") {
+                      props.onOpenUserModal();
+                    }
+                  }}
+                  className="shrink-0"
+                >
+                  <Users className="h-4 w-4" />
+                  <span>Manage Staff</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Section 4: Database & Disaster Recovery */}
             <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
               <div className="mb-3.5 flex items-center gap-2">
                 <Database className="h-4 w-4 text-[#151515]" />
                 <h2 className="text-base font-semibold text-[#151515]">Database & Disaster Recovery</h2>
               </div>
 
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-sm text-[#737373]">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <span className="text-sm text-[#777777]">
                   Download a copy of the SQLite database (.db)
                 </span>
 

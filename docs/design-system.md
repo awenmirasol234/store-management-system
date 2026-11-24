@@ -88,15 +88,15 @@ Design tokens are declared in `frontend/src/index.css` inside the `@theme` block
 - Stock Badge: `absolute left-2 top-2 rounded-md bg-[#171717] px-2 py-0.5 font-mono text-2xs text-white`.
 - Action: Full-width button `py-2 rounded-xl border border-[#E9E9E9] text-xs font-semibold`.
 
-### 4.3 Category Filter Pills (`frontend/src/components/CategoryFilterChips.jsx`)
-- Pill Shape: `rounded-full`.
-- Selected: `bg-[#151515] text-white px-4 py-2 text-xs font-medium`.
-- Inactive: `bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] px-4 py-2 text-xs`.
+### 4.3 Category & Status Filter Pills (`frontend/src/components/CategoryFilterChips.jsx`, `frontend/src/components/FilterPill.jsx`)
+- Pill Shape: `rounded-full` with `aria-pressed` state on toggle pills.
+- Selected: `bg-[#151515] text-white` (`px-4 py-2` for category chips, `px-3.5 py-1.5` for status/method pills).
+- Inactive: `bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#151515]`.
 - Pill Count Badge: `bg-[#B9F36B] text-[#151515]` when active; `bg-[#EEEEED] text-[#777777]` when inactive.
 
 ### 4.4 Modals (`frontend/src/components/Modal.jsx`)
-- Backdrop: `fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-3 sm:p-6`.
-- Card Container: `w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col`.
+- Backdrop: `fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-3 sm:p-6` (supports Escape key and backdrop click-to-close).
+- Card Container: `w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col` (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`).
 - **Padding Rule**: `Modal.jsx` owns all content padding (`p-4 sm:p-6`). Modal children must never introduce conflicting outer padding.
 - Sizes: `sm` (`max-w-sm`), `md` (`max-w-md`), `lg` (`max-w-lg`, default), `xl` (`max-w-2xl` for checkout cockpit).
 
@@ -110,7 +110,7 @@ Design tokens are declared in `frontend/src/index.css` inside the `@theme` block
 ### 4.6 Standard Spacing Rhythm
 All application pages share a uniform spacing scale:
 - **Outer Page Padding**: `p-4 sm:p-6 lg:p-7` (`PageLayout` and `PosPage` catalog workspace).
-- **Page Header Margin**: `mb-5 sm:mb-6` (`PageHeader`).
+- **Page Header Margin**: `mb-3 sm:mb-4` (`PageHeader`).
 - **Page Banners / Toolbars / Tab Bars**: `mb-4 sm:mb-5`.
 - **Stat Card Grids**: `gap-3 sm:gap-4`.
 - **Multi-Column Section Grids**: `gap-4 sm:gap-5`.

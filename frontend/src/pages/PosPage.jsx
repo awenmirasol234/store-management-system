@@ -4,13 +4,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
-  ScanBarcode,
-  Search,
   ShoppingBag,
   Tag,
   Trash2,
-  Wallet,
-  XCircle
+  Wallet
 } from "lucide-react";
 import { api } from "../api.js";
 import {
@@ -34,6 +31,7 @@ import { PaymentMethodToggle } from "../components/PaymentMethodToggle.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
 import { QuantitySelector } from "../components/QuantitySelector.jsx";
 import { ReceiptView } from "../components/ReceiptView.jsx";
+import { SearchInput } from "../components/SearchInput.jsx";
 import { PosCheckoutModal } from "../components/PosCheckoutModal.jsx";
 import { FlyToCartOverlay } from "../components/FlyToCartOverlay.jsx";
 
@@ -741,13 +739,37 @@ export function PosPage(props) {
     );
   }
 
-  let discountSummaryRow = null;
+  function openDiscountModal() {
+    setDiscountDraft(String(orderDiscount));
+    setDiscountModalOpen(true);
+  }
+
+  let discountSummaryRow = (
+    <div className="flex items-center justify-between text-xs">
+      <span className="text-[#777777]">Discount</span>
+      <button
+        type="button"
+        onClick={openDiscountModal}
+        className="inline-flex items-center gap-1 font-medium text-[#777777] hover:text-[#151515] cursor-pointer transition-colors"
+      >
+        <Tag className="h-3 w-3" />
+        <span>+ Add Discount</span>
+      </button>
+    </div>
+  );
   if (totals.discount > 0) {
     discountSummaryRow = (
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-[#777777]">Discount</span>
-        <span className="font-mono font-medium text-blue-600">
-          -{formatPeso(totals.discount)}
+      <div className="flex items-center justify-between text-xs">
+        <button
+          type="button"
+          onClick={openDiscountModal}
+          className="inline-flex items-center gap-1 font-medium text-[#777777] hover:text-[#151515] underline cursor-pointer transition-colors"
+        >
+          <Tag className="h-3 w-3" />
+          <span>Discount (Edit)</span>
+        </button>
+        <span className="font-mono font-medium text-[#151515]">
+          {"-" + formatPeso(totals.discount)}
         </span>
       </div>
     );
@@ -761,7 +783,7 @@ export function PosPage(props) {
   if (filteredProducts.length === 0) {
     productGridContent = (
       <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-[#E9E9E9] bg-white text-sm text-[#777777]">
-        No products found. Add items in Products.
+        No products found. Add items in Inventory.
       </div>
     );
   } else {
@@ -869,6 +891,8 @@ export function PosPage(props) {
               onClick={function remove() {
                 removeCartItem(item.key);
               }}
+              title={"Remove " + item.product_name}
+              aria-label={"Remove " + item.product_name}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-[#777777] hover:bg-rose-50 hover:text-rose-600 cursor-pointer transition-colors"
             >
               <Trash2 className="h-4 w-4" />
@@ -1064,6 +1088,13 @@ export function PosPage(props) {
     lowStockBody = (
       <div className="divide-y divide-[#E9E9E9]">
         {lowStockProducts.map(function renderLowStock(product) {
+          const isOut = Number(product.current_stock) <= 0;
+          let stockTone = "amber";
+          let stockLabel = formatQuantityWithUnit(product.current_stock, product.base_unit);
+          if (isOut) {
+            stockTone = "red";
+            stockLabel = "OUT OF STOCK";
+          }
           return (
             <div key={product.product_id} className="flex items-center justify-between py-3.5">
               <div>
@@ -1072,8 +1103,8 @@ export function PosPage(props) {
                   Reorder at {formatQuantityWithUnit(product.reorder_level, product.base_unit)}
                 </div>
               </div>
-              <Badge tone="amber" className="font-mono">
-                {formatQuantityWithUnit(product.current_stock, product.base_unit)}
+              <Badge tone={stockTone} className="font-mono shrink-0">
+                {stockLabel}
               </Badge>
             </div>
           );
@@ -1368,6 +1399,7 @@ export function PosPage(props) {
               }}
               className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] cursor-pointer shrink-0 transition-colors"
               title="Low Stock Alerts"
+              aria-label="Low Stock Alerts"
             >
               <Bell className="h-4 w-4" />
               {lowStockBadge}
@@ -1377,23 +1409,14 @@ export function PosPage(props) {
 
         {/* Top Search Bar */}
         <div className="mb-4">
-          <div className="relative w-full">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={function onChange(event) {
-                setSearchQuery(event.target.value);
-              }}
-              onKeyDown={handleSearchKeyDown}
-              placeholder="Search by product or scan barcode..."
-              className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2.5 pl-11 pr-20 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-            />
-            <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 rounded border border-[#E9E9E9] bg-[#EEEEED] px-2 py-0.5 font-mono text-tiny text-[#777777]">
-              Ctrl K
-            </span>
-          </div>
+          <SearchInput
+            inputRef={searchInputRef}
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onKeyDown={handleSearchKeyDown}
+            placeholder="Search by product or scan barcode..."
+            shortcutHint="Ctrl K"
+          />
         </div>
 
         {errorElement}
@@ -1405,47 +1428,8 @@ export function PosPage(props) {
           onSelectCategory={handleSelectCategory}
         />
 
-        {/* 4-Column Product Grid */}
+        {/* Product Grid */}
         <div className="flex-1 overflow-y-auto pr-1">{productGridContent}</div>
-
-        {/* Bottom Quick Action Bar */}
-        <div className="mt-4 sm:mt-5 grid grid-cols-3 gap-2 sm:gap-4 pt-2">
-          <Button
-            variant="soft"
-            size="lg"
-            onClick={function focusBarcode() {
-              if (searchInputRef.current) {
-                searchInputRef.current.focus();
-              }
-            }}
-            className="text-xs sm:text-sm px-2 sm:px-4"
-          >
-            <ScanBarcode className="h-4 w-4 shrink-0" />
-            <span className="truncate">Scan Barcode</span>
-          </Button>
-          <Button
-            variant="secondary"
-            size="lg"
-            onClick={function openDiscount() {
-              setDiscountDraft(String(orderDiscount));
-              setDiscountModalOpen(true);
-            }}
-            className="text-xs sm:text-sm px-2 sm:px-4"
-          >
-            <Tag className="h-4 w-4 shrink-0" />
-            <span className="truncate">Discount</span>
-          </Button>
-          <Button
-            variant="secondary"
-            size="lg"
-            disabled={cartItems.length === 0}
-            onClick={handleRequestClearCart}
-            className="text-xs sm:text-sm px-2 sm:px-4"
-          >
-            <XCircle className="h-4 w-4 shrink-0" />
-            <span className="truncate">Clear Sale</span>
-          </Button>
-        </div>
       </div>
 
       {/* Right Current Sale Cart Panel (Desktop & Tablet Collapsible) */}

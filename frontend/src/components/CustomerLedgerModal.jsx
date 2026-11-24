@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Receipt, History, AlertCircle } from "lucide-react";
 import { api } from "../api.js";
 import { formatPeso, formatSmartDateTime } from "../format.js";
 import { Badge } from "./Badge.jsx";
@@ -8,7 +7,6 @@ import { DataTable } from "./DataTable.jsx";
 import { EmptyState } from "./EmptyState.jsx";
 import { ErrorBanner } from "./ErrorBanner.jsx";
 import { Modal } from "./Modal.jsx";
-import { TableEmptyRow } from "./TableEmptyRow.jsx";
 
 export function CustomerLedgerModal(props) {
   const [transactions, setTransactions] = useState([]);
@@ -81,9 +79,8 @@ export function CustomerLedgerModal(props) {
   } else if (transactions.length === 0) {
     contentElement = (
       <EmptyState
-        icon={History}
-        title="No transactions yet"
-        description="No charges or payments have been recorded for this customer."
+        message="No charges or payments have been recorded for this customer."
+        padding="sm"
       />
     );
   } else {
@@ -160,6 +157,11 @@ export function CustomerLedgerModal(props) {
     );
   }
 
+  let balanceValueClass = "font-mono text-base font-bold text-[#151515]";
+  if (currentBalance > 0) {
+    balanceValueClass = "font-mono text-base font-bold text-rose-600";
+  }
+
   return (
     <Modal open={props.open} onClose={props.onClose} title="Customer Credit Ledger" size="xl">
       <div className="space-y-4">
@@ -176,7 +178,7 @@ export function CustomerLedgerModal(props) {
             </div>
             <div>
               <div className="text-xs font-semibold text-[#777777]">Current Utang</div>
-              <div className="font-mono text-base font-bold text-rose-600">
+              <div className={balanceValueClass}>
                 {formatPeso(currentBalance)}
               </div>
             </div>

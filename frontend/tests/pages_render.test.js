@@ -30,17 +30,22 @@ describe("Refactored page rendering", function () {
     expect(html).toContain("Reports");
     expect(html).toContain("Daily Sales");
     expect(html).toContain("No sales in this date range.");
+    expect(html).toContain('role="tablist"');
+    expect(html).toContain('role="tab"');
     expect(html).toContain("text-[#151515]");
     expect(html).not.toContain("text-blue-600");
     expect(html).not.toContain("text-emerald-600");
     expect(html).not.toContain("text-amber-600");
   });
 
-  it("renders TransactionsPage with shared page and empty-state components", function () {
+  it("renders TransactionsPage with shared page, payment filter pills, and empty-state components", function () {
     const html = renderToString(React.createElement(TransactionsPage));
     expect(html).toContain("Transactions");
     expect(html).toContain("No completed sales yet.");
     expect(html).toContain("No transactions recorded yet.");
+    expect(html).toContain("Cash");
+    expect(html).toContain("Utang");
+    expect(html).toContain("Split");
   });
 
   it("renders TransactionsPage with currentUser prop", function () {

@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import {
-  AlertCircle,
   ArrowDownRight,
   ArrowUpRight,
-  Banknote,
-  CheckCircle2,
   Clock,
   Plus,
   Wallet
@@ -153,10 +150,8 @@ export function CashierShiftModal(props) {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-[#151515] mb-1.5">
-            Starting Change Fund (₱)
-          </label>
           <Input
+            label="Starting Change Fund (₱)"
             type="number"
             step="0.01"
             min="0"
@@ -179,6 +174,7 @@ export function CashierShiftModal(props) {
                 <button
                   key={presetAmount}
                   type="button"
+                  aria-pressed={isSelected}
                   onClick={function () {
                     setOpeningCashInput(String(presetAmount));
                   }}
@@ -194,20 +190,14 @@ export function CashierShiftModal(props) {
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-[#151515] mb-1.5">
-            Shift Notes (Optional)
-          </label>
-          <input
-            type="text"
-            value={openingNotesInput}
-            onChange={function (e) {
-              setOpeningNotesInput(e.target.value);
-            }}
-            placeholder="e.g. Morning counter shift"
-            className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-          />
-        </div>
+        <Input
+          label="Shift Notes (Optional)"
+          value={openingNotesInput}
+          onChange={function (e) {
+            setOpeningNotesInput(e.target.value);
+          }}
+          placeholder="e.g. Morning counter shift"
+        />
 
         <div className="flex justify-end gap-2.5 pt-2">
           <Button type="button" variant="secondary" onClick={props.onClose}>
@@ -242,12 +232,13 @@ export function CashierShiftModal(props) {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-[#151515] mb-1.5">
+          <span className="block text-xs font-medium text-[#151515] mb-1.5">
             Movement Type
-          </label>
-          <div className="grid grid-cols-2 gap-2.5">
+          </span>
+          <div role="group" aria-label="Movement Type" className="grid grid-cols-2 gap-2.5">
             <button
               type="button"
+              aria-pressed={cashInSelected}
               onClick={function () {
                 setMovementType("CASH_IN");
               }}
@@ -261,6 +252,7 @@ export function CashierShiftModal(props) {
             </button>
             <button
               type="button"
+              aria-pressed={!cashInSelected}
               onClick={function () {
                 setMovementType("CASH_OUT");
               }}
@@ -275,38 +267,28 @@ export function CashierShiftModal(props) {
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-[#151515] mb-1.5">
-            Amount (₱)
-          </label>
-          <Input
-            type="number"
-            step="0.01"
-            min="0.01"
-            value={movementAmountInput}
-            onChange={function (e) {
-              setMovementAmountInput(e.target.value);
-            }}
-            placeholder="e.g. 500.00"
-            required={true}
-          />
-        </div>
+        <Input
+          label="Amount (₱)"
+          type="number"
+          step="0.01"
+          min="0.01"
+          value={movementAmountInput}
+          onChange={function (e) {
+            setMovementAmountInput(e.target.value);
+          }}
+          placeholder="e.g. 500.00"
+          required={true}
+        />
 
-        <div>
-          <label className="block text-xs font-medium text-[#151515] mb-1.5">
-            Reason / Remarks
-          </label>
-          <input
-            type="text"
-            value={movementRemarksInput}
-            onChange={function (e) {
-              setMovementRemarksInput(e.target.value);
-            }}
-            placeholder="e.g. Paid delivery rider, petty cash ice, change topup"
-            className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-            required={true}
-          />
-        </div>
+        <Input
+          label="Reason / Remarks"
+          value={movementRemarksInput}
+          onChange={function (e) {
+            setMovementRemarksInput(e.target.value);
+          }}
+          placeholder="e.g. Paid delivery rider, petty cash ice, change topup"
+          required={true}
+        />
 
         <div className="flex justify-end gap-2.5 pt-2">
           <Button
@@ -368,39 +350,29 @@ export function CashierShiftModal(props) {
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-[#151515] mb-1.5">
-            Actual Counted Cash in Drawer (₱)
-          </label>
-          <Input
-            type="number"
-            step="0.01"
-            min="0"
-            value={actualCashInput}
-            onChange={function (e) {
-              setActualCashInput(e.target.value);
-            }}
-            placeholder="Count all banknotes and coins"
-            required={true}
-          />
-        </div>
+        <Input
+          label="Actual Counted Cash in Drawer (₱)"
+          type="number"
+          step="0.01"
+          min="0"
+          value={actualCashInput}
+          onChange={function (e) {
+            setActualCashInput(e.target.value);
+          }}
+          placeholder="Count all banknotes and coins"
+          required={true}
+        />
 
         {varianceElement}
 
-        <div>
-          <label className="block text-xs font-medium text-[#151515] mb-1.5">
-            Closing Remarks / Variance Notes (Optional)
-          </label>
-          <input
-            type="text"
-            value={closingNotesInput}
-            onChange={function (e) {
-              setClosingNotesInput(e.target.value);
-            }}
-            placeholder="e.g. Small coin roundoff difference"
-            className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-          />
-        </div>
+        <Input
+          label="Closing Remarks / Variance Notes (Optional)"
+          value={closingNotesInput}
+          onChange={function (e) {
+            setClosingNotesInput(e.target.value);
+          }}
+          placeholder="e.g. Small coin roundoff difference"
+        />
 
         <div className="flex justify-end gap-2.5 pt-2">
           <Button

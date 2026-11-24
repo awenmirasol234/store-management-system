@@ -5,7 +5,6 @@ import {
   MoreVertical,
   Pencil,
   Plus,
-  Search,
   SlidersHorizontal,
   Trash2,
   Upload
@@ -19,12 +18,14 @@ import { CategoryFilterChips } from "../components/CategoryFilterChips.jsx";
 import { DataTable } from "../components/DataTable.jsx";
 import { EmptyState } from "../components/EmptyState.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
+import { FilterPill } from "../components/FilterPill.jsx";
 import { FormActions } from "../components/FormActions.jsx";
 import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
 import { PageHeader } from "../components/PageHeader.jsx";
 import { PageLayout } from "../components/PageLayout.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
+import { SearchInput } from "../components/SearchInput.jsx";
 import { Select } from "../components/Select.jsx";
 import { TableEmptyRow } from "../components/TableEmptyRow.jsx";
 import { InventoryStockInModal } from "../components/InventoryStockInModal.jsx";
@@ -420,10 +421,31 @@ export function InventoryPage(props) {
     }
   }
 
+  async function handleToggleOptionActive(option) {
+    if (!optionsModalProduct) {
+      return;
+    }
+    setErrorBanner("");
+    try {
+      await api.updateSellingOption(optionsModalProduct.product_id, option.option_id, {
+        is_active: !option.is_active
+      });
+      const updatedList = await api.listSellingOptions(optionsModalProduct.product_id);
+      setProductOptions(updatedList);
+    } catch (error) {
+      setErrorBanner(error.message);
+    }
+  }
+
+  let lowStockCount = 0;
   const stockFilteredProducts = [];
   for (let index = 0; index < products.length; index++) {
     const product = products[index];
-    if (lowStockOnly && getStockLevel(product) === STOCK_LEVELS.HEALTHY) {
+    const isLowOrOut = getStockLevel(product) !== STOCK_LEVELS.HEALTHY;
+    if (isLowOrOut) {
+      lowStockCount = lowStockCount + 1;
+    }
+    if (lowStockOnly && !isLowOrOut) {
       continue;
     }
     if (selectedCategoryId !== "ALL" && product.category_id !== selectedCategoryId) {
@@ -434,11 +456,6 @@ export function InventoryPage(props) {
   const filteredProducts = filterProducts(stockFilteredProducts, searchQuery);
 
   let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-4 sm:mb-5" />;
-
-  let lowStockToggleVariant = "secondary";
-  if (lowStockOnly) {
-    lowStockToggleVariant = "primary";
-  }
 
   let productTableBody = (
     <TableEmptyRow colSpan="6" message="No products yet. Click Add Product to start." />
@@ -486,6 +503,11 @@ export function InventoryPage(props) {
               </Button>
               <button
                 type="button"
+                aria-haspopup="menu"
+                aria-expanded={Boolean(
+                  actionMenu && actionMenu.product.product_id === product.product_id
+                )}
+                aria-label={"More actions for " + product.product_name}
                 onClick={function openMenu(event) {
                   toggleActionMenu(event, product);
                 }}
@@ -548,6 +570,11 @@ export function InventoryPage(props) {
             </Button>
             <button
               type="button"
+              aria-haspopup="menu"
+              aria-expanded={Boolean(
+                actionMenu && actionMenu.product.product_id === product.product_id
+              )}
+              aria-label={"More actions for " + product.product_name}
               onClick={function openMenu(event) {
                 toggleActionMenu(event, product);
               }}
@@ -594,16 +621,43 @@ export function InventoryPage(props) {
     optionsListContent = (
       <div className="divide-y divide-[#E9E9E9] rounded-xl border border-[#E9E9E9]">
         {productOptions.map(function renderOpt(option) {
+          let inactiveBadge = null;
+          let toggleActionLabel = "Disable";
+          let rowTextClass = "text-sm font-medium text-[#151515]";
+          if (option.is_active === false) {
+            inactiveBadge = <Badge tone="neutral">Inactive</Badge>;
+            toggleActionLabel = "Enable";
+            rowTextClass = "text-sm font-medium text-[#777777]";
+          }
+          let barcodeSuffix = "";
+          if (option.barcode) {
+            barcodeSuffix = " · " + option.barcode;
+          }
           return (
-            <div key={option.option_id} className="flex items-center justify-between px-4 py-3">
-              <div>
-                <div className="text-sm font-medium text-[#151515]">{option.option_name}</div>
+            <div key={option.option_id} className="flex items-center justify-between gap-3 px-4 py-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className={rowTextClass}>{option.option_name}</span>
+                  {inactiveBadge}
+                </div>
                 <div className="mt-0.5 font-mono text-xs text-[#777777]">
                   {formatQuantityWithUnit(option.quantity, optionsModalProduct.base_unit)}
+                  {barcodeSuffix}
                 </div>
               </div>
-              <div className="font-mono text-sm font-bold text-[#151515]">
-                {formatPeso(option.price)}
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="font-mono text-sm font-bold text-[#151515]">
+                  {formatPeso(option.price)}
+                </div>
+                <button
+                  type="button"
+                  onClick={function toggleOpt() {
+                    handleToggleOptionActive(option);
+                  }}
+                  className="text-2xs font-medium text-[#777777] hover:text-[#151515] underline cursor-pointer transition-colors"
+                >
+                  {toggleActionLabel}
+                </button>
               </div>
             </div>
           );
@@ -630,9 +684,26 @@ export function InventoryPage(props) {
     unitOptions.unshift(productForm.base_unit);
   }
 
+  let activeProductToggle = null;
+  if (productForm.product_id) {
+    activeProductToggle = (
+      <label className="flex items-center gap-2.5 py-1 text-xs font-medium text-[#151515] cursor-pointer">
+        <input
+          type="checkbox"
+          checked={Boolean(productForm.is_active)}
+          onChange={function onActiveCheck(event) {
+            updateProductField("is_active", event.target.checked);
+          }}
+          className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30 accent-[#151515]"
+        />
+        <span>Active product (available on POS screen)</span>
+      </label>
+    );
+  }
+
   return (
     <PageLayout>
-      <PageHeader title="Products" stackOnMobile={true}>
+      <PageHeader title="Inventory" stackOnMobile={true}>
         <div className="flex items-center gap-2 sm:gap-3">
           <Button
             variant="secondary"
@@ -652,27 +723,20 @@ export function InventoryPage(props) {
 
       {/* Search & Low Stock Filter Toolbar */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-56 sm:min-w-64 max-w-md">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={function onChange(event) {
-              setSearchQuery(event.target.value);
-            }}
-            placeholder="Search products or barcode..."
-            className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2.5 pl-10 pr-3.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-          />
-        </div>
-        <Button
-          variant={lowStockToggleVariant}
-          size="sm"
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search products or barcode..."
+          className="flex-1 min-w-56 sm:min-w-64 max-w-md"
+        />
+        <FilterPill
+          label="Low Stock"
+          count={lowStockCount}
+          active={lowStockOnly}
           onClick={function toggleLowStock() {
             setLowStockOnly(!lowStockOnly);
           }}
-        >
-          Low Stock
-        </Button>
+        />
       </div>
 
       <CategoryFilterChips
@@ -833,10 +897,12 @@ export function InventoryPage(props) {
               onChange={function onCheck(event) {
                 updateProductField("allow_custom_amount", event.target.checked);
               }}
-              className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30"
+              className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30 accent-[#151515]"
             />
             <span>Allow custom peso amount ("Tingi")</span>
           </label>
+
+          {activeProductToggle}
 
           <FormActions
             onCancel={function cancel() {
@@ -1018,6 +1084,7 @@ export function InventoryPage(props) {
           }}
         >
           <div
+            role="menu"
             style={{ top: actionMenu.top, right: actionMenu.right }}
             className="fixed w-44 rounded-xl border border-[#E9E9E9] bg-white p-1 shadow-lg"
             onClick={function stopPropagation(event) {
@@ -1026,6 +1093,7 @@ export function InventoryPage(props) {
           >
             <button
               type="button"
+              role="menuitem"
               onClick={function handleEdit() {
                 const targetProduct = actionMenu.product;
                 setActionMenu(null);
@@ -1039,6 +1107,7 @@ export function InventoryPage(props) {
 
             <button
               type="button"
+              role="menuitem"
               onClick={function handleOptions() {
                 const targetProduct = actionMenu.product;
                 setActionMenu(null);
@@ -1052,6 +1121,7 @@ export function InventoryPage(props) {
 
             <button
               type="button"
+              role="menuitem"
               onClick={function handleAdjust() {
                 const targetProduct = actionMenu.product;
                 setActionMenu(null);
@@ -1067,6 +1137,7 @@ export function InventoryPage(props) {
 
             <button
               type="button"
+              role="menuitem"
               onClick={function handleDelete() {
                 const targetProduct = actionMenu.product;
                 setActionMenu(null);

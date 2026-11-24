@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Plus, Shield, UserCheck, UserX, Users } from "lucide-react";
+import { Plus } from "lucide-react";
 import { api } from "../api.js";
 import { Badge } from "./Badge.jsx";
 import { Button } from "./Button.jsx";
 import { ErrorBanner } from "./ErrorBanner.jsx";
+import { Input } from "./Input.jsx";
 import { Modal } from "./Modal.jsx";
+import { Select } from "./Select.jsx";
 
 export function UserManagementModal(props) {
   const [users, setUsers] = useState([]);
@@ -145,67 +147,51 @@ export function UserManagementModal(props) {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-3.5">
-          <div>
-            <label className="block text-xs font-medium text-[#151515] mb-1.5">
-              Username
-            </label>
-            <input
-              type="text"
-              value={newUsername}
-              onChange={function (e) {
-                setNewUsername(e.target.value);
-              }}
-              placeholder="e.g. cashier1"
-              className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2 text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-            />
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <Input
+            label="Username"
+            value={newUsername}
+            onChange={function (e) {
+              setNewUsername(e.target.value);
+            }}
+            placeholder="e.g. cashier1"
+            required={true}
+          />
 
-          <div>
-            <label className="block text-xs font-medium text-[#151515] mb-1.5">
-              Full Name
-            </label>
-            <input
-              type="text"
-              value={newFullName}
-              onChange={function (e) {
-                setNewFullName(e.target.value);
-              }}
-              placeholder="e.g. Juan dela Cruz"
-              className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2 text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-            />
-          </div>
+          <Input
+            label="Full Name"
+            value={newFullName}
+            onChange={function (e) {
+              setNewFullName(e.target.value);
+            }}
+            placeholder="e.g. Juan dela Cruz"
+            required={true}
+          />
 
-          <div>
-            <label className="block text-xs font-medium text-[#151515] mb-1.5">Role</label>
-            <select
-              value={newRole}
-              onChange={function (e) {
-                setNewRole(e.target.value);
-              }}
-              className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2 text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-            >
-              <option value="CASHIER">CASHIER (POS &amp; Returns)</option>
-              <option value="OWNER">OWNER (Full Admin Access)</option>
-            </select>
-          </div>
+          <Select
+            label="Role"
+            value={newRole}
+            onChange={function (e) {
+              setNewRole(e.target.value);
+            }}
+          >
+            <option value="CASHIER">CASHIER (POS &amp; Returns)</option>
+            <option value="OWNER">OWNER (Full Admin Access)</option>
+          </Select>
 
-          <div>
-            <label className="block text-xs font-medium text-[#151515] mb-1.5">
-              Security PIN (4-8 digits)
-            </label>
-            <input
-              type="password"
-              inputMode="numeric"
-              maxLength={8}
-              value={newPin}
-              onChange={function (e) {
-                setNewPin(e.target.value.replace(/\D/g, ""));
-              }}
-              placeholder="••••"
-              className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2 text-xs font-mono text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-            />
-          </div>
+          <Input
+            label="Security PIN (4-8 digits)"
+            type="password"
+            inputMode="numeric"
+            maxLength={8}
+            mono={true}
+            value={newPin}
+            onChange={function (e) {
+              setNewPin(e.target.value.replace(/\D/g, ""));
+            }}
+            placeholder="••••"
+            required={true}
+          />
         </div>
 
         <div className="flex justify-end gap-2 pt-1">

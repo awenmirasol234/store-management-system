@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { RotateCcw, Receipt, Search, X } from "lucide-react";
+import { RotateCcw, Receipt } from "lucide-react";
 import { api } from "../api.js";
 import { formatPeso, formatQuantity, formatSmartDateTime } from "../format.js";
 import { Badge } from "../components/Badge.jsx";
@@ -7,11 +7,13 @@ import { Button } from "../components/Button.jsx";
 import { DataTable } from "../components/DataTable.jsx";
 import { EmptyState } from "../components/EmptyState.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
+import { FilterPill } from "../components/FilterPill.jsx";
 import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
 import { PageHeader } from "../components/PageHeader.jsx";
 import { PageLayout } from "../components/PageLayout.jsx";
 import { ReceiptView } from "../components/ReceiptView.jsx";
+import { SearchInput } from "../components/SearchInput.jsx";
 import { TableEmptyRow } from "../components/TableEmptyRow.jsx";
 
 function getPaymentTone(method) {
@@ -61,6 +63,7 @@ export function filterSales(salesList, query) {
 export function TransactionsPage(props) {
   const [sales, setSales] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [paymentFilter, setPaymentFilter] = useState("ALL");
   const [errorBanner, setErrorBanner] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [returnQuantities, setReturnQuantities] = useState({});
@@ -160,34 +163,41 @@ export function TransactionsPage(props) {
     }
   }
 
-  const filteredSales = filterSales(sales, searchQuery);
+  let cashCount = 0;
+  let creditCount = 0;
+  let splitCount = 0;
+  for (let i = 0; i < sales.length; i = i + 1) {
+    const s = sales[i];
+    if (s) {
+      if (s.payment_method === "CASH") {
+        cashCount = cashCount + 1;
+      } else if (s.payment_method === "CREDIT") {
+        creditCount = creditCount + 1;
+      } else if (s.payment_method === "SPLIT") {
+        splitCount = splitCount + 1;
+      }
+    }
+  }
 
-  let clearButton = null;
-  if (searchQuery.trim().length > 0) {
-    clearButton = (
-      <button
-        type="button"
-        onClick={function clearSearch() {
-          setSearchQuery("");
-        }}
-        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#777777] hover:text-[#151515] cursor-pointer p-0.5 transition-colors"
-        title="Clear search"
-      >
-        <X className="h-3.5 w-3.5" />
-      </button>
-    );
+  const searchFilteredSales = filterSales(sales, searchQuery);
+  const filteredSales = [];
+  for (let i = 0; i < searchFilteredSales.length; i = i + 1) {
+    const item = searchFilteredSales[i];
+    if (paymentFilter === "ALL" || item.payment_method === paymentFilter) {
+      filteredSales.push(item);
+    }
   }
 
   let errorElement = <ErrorBanner message={errorBanner} className="relative z-[60] mb-4 sm:mb-5" />;
 
+  let emptyFilterMessage = "No matching transactions found.";
+  if (searchQuery.trim().length > 0) {
+    emptyFilterMessage = 'No transactions matching "' + searchQuery + '".';
+  }
+
   let tableBody = <TableEmptyRow colSpan="6" message="No completed sales yet." />;
   if (sales.length > 0 && filteredSales.length === 0) {
-    tableBody = (
-      <TableEmptyRow
-        colSpan="6"
-        message={'No transactions matching "' + searchQuery + '".'}
-      />
-    );
+    tableBody = <TableEmptyRow colSpan="6" message={emptyFilterMessage} />;
   } else if (filteredSales.length > 0) {
     tableBody = filteredSales.map(function renderSaleRow(sale) {
       return (
@@ -226,9 +236,7 @@ export function TransactionsPage(props) {
 
   let mobileSalesList = <EmptyState message="No transactions recorded yet." />;
   if (sales.length > 0 && filteredSales.length === 0) {
-    mobileSalesList = (
-      <EmptyState message={'No transactions matching "' + searchQuery + '".'} />
-    );
+    mobileSalesList = <EmptyState message={emptyFilterMessage} />;
   } else if (filteredSales.length > 0) {
     mobileSalesList = filteredSales.map(function renderSaleCard(sale) {
       return (
@@ -320,6 +328,7 @@ export function TransactionsPage(props) {
                     min="0"
                     max={item.quantity}
                     value={value}
+                    aria-label={"Return quantity for " + item.option_name_snapshot}
                     onChange={function onChange(event) {
                       updateReturnQty(item.sale_item_id, event.target.value);
                     }}
@@ -351,23 +360,51 @@ export function TransactionsPage(props) {
 
   return (
     <PageLayout>
-      <PageHeader title="Transactions" stackOnMobile={true}>
-        <div className="flex items-center gap-2.5 flex-1 max-w-sm sm:justify-end">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={function onSearch(event) {
-                setSearchQuery(event.target.value);
-              }}
-              placeholder="Search receipt #..."
-              className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2.5 pl-10 pr-9 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-            />
-            {clearButton}
-          </div>
+      <PageHeader title="Transactions" stackOnMobile={true} />
+
+      {/* Search & Payment Method Filter Toolbar */}
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search receipt #..."
+          className="w-full sm:w-72"
+        />
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+          <FilterPill
+            label="All"
+            count={sales.length}
+            active={paymentFilter === "ALL"}
+            onClick={function selectAll() {
+              setPaymentFilter("ALL");
+            }}
+          />
+          <FilterPill
+            label="Cash"
+            count={cashCount}
+            active={paymentFilter === "CASH"}
+            onClick={function selectCash() {
+              setPaymentFilter("CASH");
+            }}
+          />
+          <FilterPill
+            label="Utang"
+            count={creditCount}
+            active={paymentFilter === "CREDIT"}
+            onClick={function selectCredit() {
+              setPaymentFilter("CREDIT");
+            }}
+          />
+          <FilterPill
+            label="Split"
+            count={splitCount}
+            active={paymentFilter === "SPLIT"}
+            onClick={function selectSplit() {
+              setPaymentFilter("SPLIT");
+            }}
+          />
         </div>
-      </PageHeader>
+      </div>
 
       {errorElement}
 

@@ -40,6 +40,8 @@ describe("Settings Page & Navigation Integration", function () {
     expect(html).toContain("Store Profile");
     expect(html).toContain("Receipt &amp; Thermal Printing");
     expect(html).toContain("POS &amp; Inventory Preferences");
+    expect(html).toContain("Staff &amp; Access");
+    expect(html).toContain("Manage Staff");
     expect(html).toContain("Database &amp; Disaster Recovery");
     expect(html).toContain("Download Backup");
     expect(html).toContain("Save Settings");

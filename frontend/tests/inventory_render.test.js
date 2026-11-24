@@ -11,7 +11,9 @@ describe("InventoryPage SSR test", function () {
     const html = renderToString(React.createElement(InventoryPage));
     expect(typeof html).toBe("string");
     expect(html.length).toBeGreaterThan(0);
+    expect(html).toContain("Inventory");
     expect(html).toContain("Add Product");
+    expect(html).toContain("Low Stock");
   });
 
   it("imports MoreVertical icon without reference error", function () {

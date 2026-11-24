@@ -1,7 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import { X } from "lucide-react";
 
 export function Modal(props) {
+  const titleId = useId();
+
   useEffect(
     function bindEscapeKey() {
       if (!props.open) {
@@ -24,6 +26,12 @@ export function Modal(props) {
     return null;
   }
 
+  function handleBackdropClick(event) {
+    if (event.target === event.currentTarget && typeof props.onClose === "function") {
+      props.onClose();
+    }
+  }
+
   let widthClass = "max-w-lg";
   if (props.size === "sm") {
     widthClass = "max-w-sm";
@@ -42,18 +50,28 @@ export function Modal(props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-3 sm:p-6">
+    <div
+      onClick={handleBackdropClick}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-3 sm:p-6"
+    >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         className={
           "w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col " +
           widthClass
         }
       >
         <div className="flex items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 sm:px-6 sm:py-4">
-          <h2 className="text-base font-semibold text-[#151515]">{props.title}</h2>
+          <h2 id={titleId} className="text-base font-semibold text-[#151515]">
+            {props.title}
+          </h2>
           <button
             type="button"
             onClick={props.onClose}
+            title="Close"
+            aria-label="Close modal"
             className="flex h-9 w-9 items-center justify-center rounded-lg text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] cursor-pointer transition-colors"
           >
             <X className="h-4 w-4" />

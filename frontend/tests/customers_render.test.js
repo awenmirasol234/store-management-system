@@ -21,6 +21,8 @@ describe("Customers & Utang UI components", function () {
     expect(html).toContain("Over Credit Limit");
     expect(html).toContain("New Customer");
     expect(html).toContain("Search name, phone, address...");
+    expect(html).toContain("md:hidden");
+    expect(html).toContain('aria-pressed="true"');
   });
 
   it("renders CustomerModal in create mode", function () {
@@ -109,6 +111,7 @@ describe("Customers & Utang UI components", function () {
     expect(html).toContain("Maria Dela Cruz");
     expect(html).toContain("₱120.00");
     expect(html).toContain("₱500.00");
+    expect(html).toContain("No charges or payments have been recorded for this customer.");
     expect(html).toContain("Close");
   });
 

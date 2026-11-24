@@ -20,21 +20,26 @@ export function BottomNav(props) {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 border-t border-[#262626] bg-[#171717] select-none md:hidden">
+    <nav
+      aria-label="Mobile navigation"
+      className="fixed bottom-0 left-0 right-0 z-40 flex h-16 border-t border-[#262626] bg-[#171717] select-none md:hidden"
+    >
       <div className={gridClass}>
         {items.map(function renderBottomItem(item) {
           const IconComponent = item.icon;
           const isActive = props.activePage === item.key;
 
+          let ariaCurrent = undefined;
           let buttonClass =
-            "flex flex-col items-center justify-center gap-1 py-1 text-tiny font-medium transition-colors cursor-pointer ";
+            "flex min-w-0 flex-col items-center justify-center gap-1 py-1 font-medium transition-colors cursor-pointer ";
           if (isActive) {
+            ariaCurrent = "page";
             buttonClass = buttonClass + "text-white font-semibold";
           } else {
             buttonClass = buttonClass + "text-[#A3A3A3] hover:text-white";
           }
 
-          let iconClass = "h-5 w-5 ";
+          let iconClass = "h-5 w-5 shrink-0 ";
           if (isActive) {
             iconClass = iconClass + "text-[#B9F36B]";
           } else {
@@ -45,13 +50,16 @@ export function BottomNav(props) {
             <button
               key={item.key}
               type="button"
+              aria-current={ariaCurrent}
               onClick={function selectPage() {
                 props.onNavigate(item.key);
               }}
               className={buttonClass}
             >
               <IconComponent className={iconClass} />
-              <span>{item.shortLabel}</span>
+              <span className="max-w-full truncate px-0.5 text-3xs sm:text-tiny">
+                {item.shortLabel}
+              </span>
             </button>
           );
         })}

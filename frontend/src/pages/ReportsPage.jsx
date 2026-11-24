@@ -8,7 +8,6 @@ import {
   Download,
   Package,
   Printer,
-  Search,
   TrendingUp
 } from "lucide-react";
 import { api } from "../api.js";
@@ -18,10 +17,14 @@ import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
 import { DataTable } from "../components/DataTable.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
+import { FormActions } from "../components/FormActions.jsx";
+import { Input } from "../components/Input.jsx";
 import { Modal } from "../components/Modal.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
 import { PageHeader } from "../components/PageHeader.jsx";
 import { PageLayout } from "../components/PageLayout.jsx";
+import { SearchInput } from "../components/SearchInput.jsx";
+import { Select } from "../components/Select.jsx";
 import { StatCard } from "../components/StatCard.jsx";
 import { TableEmptyRow } from "../components/TableEmptyRow.jsx";
 import { MultiTrendBarChart } from "../components/TrendBarChart.jsx";
@@ -228,16 +231,14 @@ export function ReportsPage() {
     });
 
   function getPresetButtonClass(presetKey) {
-    if (activePreset === presetKey) {
-      if (presetKey === "CUSTOM") {
-        return "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold bg-[#B9F36B] text-[#151515] cursor-pointer transition-colors";
-      }
-      return "rounded-lg px-3 py-1.5 text-xs font-semibold bg-[#151515] text-white cursor-pointer transition-colors";
-    }
+    let basePresetClass = "rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors ";
     if (presetKey === "CUSTOM") {
-      return "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-[#777777] hover:text-[#151515] hover:bg-[#EEEEED] cursor-pointer transition-colors";
+      basePresetClass = "flex items-center gap-1.5 " + basePresetClass;
     }
-    return "rounded-lg px-3 py-1.5 text-xs font-semibold text-[#777777] hover:text-[#151515] hover:bg-[#EEEEED] cursor-pointer transition-colors";
+    if (activePreset === presetKey) {
+      return basePresetClass + "bg-[#151515] text-white";
+    }
+    return basePresetClass + "text-[#777777] hover:text-[#151515] hover:bg-[#EEEEED]";
   }
 
   let customPresetLabel = "Custom";
@@ -310,22 +311,50 @@ export function ReportsPage() {
       </div>
     );
   } else if (activeTab === "PRODUCTS") {
+    const filteredTopProducts = topProducts.filter(function (p) {
+      return p.product_name.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+
+    let productRowsContent = null;
+    if (filteredTopProducts.length === 0) {
+      productRowsContent = (
+        <TableEmptyRow colSpan="4" message="No product sales match this date range or search." />
+      );
+    } else {
+      productRowsContent = filteredTopProducts.map(function (item) {
+        return (
+          <tr key={item.product_id} className="hover:bg-[#EEEEED]/40 transition-colors">
+            <td className="px-5 py-3.5 text-sm font-medium text-[#151515]">
+              <div className="flex items-center gap-3">
+                <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
+                <span className="truncate">{item.product_name}</span>
+              </div>
+            </td>
+            <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">
+              {formatQuantityWithUnit(item.quantity_sold, item.base_unit)}
+            </td>
+            <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right">
+              {formatPeso(item.revenue)}
+            </td>
+            <td className="px-5 py-3.5 font-mono text-sm font-semibold text-emerald-700 text-right">
+              {formatPeso(item.profit)}
+            </td>
+          </tr>
+        );
+      });
+    }
+
     activeTabContent = (
       <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
         <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 gap-2">
           <div className="text-sm font-semibold text-[#151515]">Product Performance</div>
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#777777]" />
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={function (e) {
-                setSearchTerm(e.target.value);
-              }}
-              className="rounded-xl border border-[#E9E9E9] bg-[#FBFBFA] pl-8 pr-3 py-1.5 font-mono text-xs text-[#151515] focus:outline-none focus:border-[#151515]"
-            />
-          </div>
+          <SearchInput
+            size="sm"
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={setSearchTerm}
+            className="w-48 sm:w-60"
+          />
         </div>
         <div className="overflow-x-auto">
           <DataTable
@@ -338,27 +367,7 @@ export function ReportsPage() {
               </tr>
             }
           >
-            {topProducts
-              .filter(function (p) {
-                return p.product_name.toLowerCase().includes(searchTerm.toLowerCase());
-              })
-              .map(function (item) {
-                return (
-                  <tr key={item.product_id} className="hover:bg-[#EEEEED]/40 transition-colors">
-                    <td className="px-5 py-3.5 text-sm font-medium text-[#151515]">
-                      <div className="flex items-center gap-3">
-                        <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
-                        <span className="truncate">{item.product_name}</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">
-                      {formatQuantityWithUnit(item.quantity_sold, item.base_unit)}
-                    </td>
-                    <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right">{formatPeso(item.revenue)}</td>
-                    <td className="px-5 py-3.5 font-mono text-sm font-semibold text-emerald-700 text-right">{formatPeso(item.profit)}</td>
-                  </tr>
-                );
-              })}
+            {productRowsContent}
           </DataTable>
         </div>
       </section>
@@ -431,17 +440,84 @@ export function ReportsPage() {
       </div>
     );
   } else if (activeTab === "MOVEMENTS") {
+    const filteredMovements = stockMovements.filter(function (m) {
+      const matchType = filterType === "ALL" || m.transaction_type === filterType;
+      const matchSearch =
+        searchTerm.length === 0 ||
+        m.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (m.remarks && m.remarks.toLowerCase().includes(searchTerm.toLowerCase()));
+      return matchType && matchSearch;
+    });
+
+    let movementsRowsContent = null;
+    if (filteredMovements.length === 0) {
+      movementsRowsContent = (
+        <TableEmptyRow colSpan="6" message="No stock movements match this date range or filter." />
+      );
+    } else {
+      movementsRowsContent = filteredMovements.map(function (tx) {
+        let badgeTone = "amber";
+        if (tx.transaction_type === "STOCK_IN") {
+          badgeTone = "green";
+        } else if (tx.transaction_type === "SALE") {
+          badgeTone = "blue";
+        } else if (tx.transaction_type === "DAMAGED" || tx.transaction_type === "EXPIRED") {
+          badgeTone = "red";
+        }
+
+        let quantityClass = "px-5 py-3.5 font-mono text-sm font-semibold text-right text-[#151515]";
+        let quantityPrefix = "";
+        if (Number(tx.quantity) > 0) {
+          quantityClass = "px-5 py-3.5 font-mono text-sm font-semibold text-right text-emerald-700";
+          quantityPrefix = "+";
+        }
+
+        let supplierPrefix = null;
+        if (tx.supplier_name) {
+          supplierPrefix = <span className="font-medium text-[#151515]">{tx.supplier_name} - </span>;
+        }
+
+        let remarksDisplay = "—";
+        if (tx.remarks) {
+          remarksDisplay = tx.remarks;
+        } else if (tx.reference_number) {
+          remarksDisplay = tx.reference_number;
+        }
+
+        return (
+          <tr key={tx.transaction_id} className="hover:bg-[#EEEEED]/40 transition-colors">
+            <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{formatSmartDateTime(tx.created_at)}</td>
+            <td className="px-5 py-3.5 text-sm font-medium text-[#151515]">{tx.product_name}</td>
+            <td className="px-5 py-3.5">
+              <Badge tone={badgeTone}>
+                {tx.transaction_type}
+              </Badge>
+            </td>
+            <td className={quantityClass}>
+              {quantityPrefix}{formatQuantityWithUnit(tx.quantity, tx.base_unit)}
+            </td>
+            <td className="px-5 py-3.5 text-xs text-[#777777]">
+              {supplierPrefix}
+              {remarksDisplay}
+            </td>
+            <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{tx.created_by}</td>
+          </tr>
+        );
+      });
+    }
+
     activeTabContent = (
       <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
         <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 gap-2">
           <div className="text-sm font-semibold text-[#151515]">Inventory Movements</div>
-          <div className="flex items-center gap-2">
-            <select
+          <div className="flex flex-wrap items-center gap-2">
+            <Select
+              size="sm"
+              ariaLabel="Filter movement type"
               value={filterType}
               onChange={function (e) {
                 setFilterType(e.target.value);
               }}
-              className="rounded-xl border border-[#E9E9E9] bg-white px-3 py-1.5 font-mono text-xs text-[#151515] focus:outline-none"
             >
               <option value="ALL">All Types</option>
               <option value="STOCK_IN">Stock In</option>
@@ -450,19 +526,14 @@ export function ReportsPage() {
               <option value="ADJUSTMENT">Adjustment</option>
               <option value="DAMAGED">Damaged</option>
               <option value="EXPIRED">Expired</option>
-            </select>
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#777777]" />
-              <input
-                type="text"
-                placeholder="Search item..."
-                value={searchTerm}
-                onChange={function (e) {
-                  setSearchTerm(e.target.value);
-                }}
-                className="rounded-xl border border-[#E9E9E9] bg-[#FBFBFA] pl-8 pr-3 py-1.5 font-mono text-xs text-[#151515] focus:outline-none focus:border-[#151515]"
-              />
-            </div>
+            </Select>
+            <SearchInput
+              size="sm"
+              placeholder="Search item..."
+              value={searchTerm}
+              onChange={setSearchTerm}
+              className="w-44 sm:w-56"
+            />
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -478,96 +549,78 @@ export function ReportsPage() {
               </tr>
             }
           >
-            {stockMovements
-              .filter(function (m) {
-                const matchType = filterType === "ALL" || m.transaction_type === filterType;
-                const matchSearch =
-                  searchTerm.length === 0 ||
-                  m.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  (m.remarks && m.remarks.toLowerCase().includes(searchTerm.toLowerCase()));
-                return matchType && matchSearch;
-              })
-              .map(function (tx) {
-                let badgeTone = "amber";
-                if (tx.transaction_type === "STOCK_IN") {
-                  badgeTone = "green";
-                } else if (tx.transaction_type === "SALE") {
-                  badgeTone = "blue";
-                }
-
-                let quantityClass = "px-5 py-3.5 font-mono text-sm font-semibold text-right text-[#151515]";
-                let quantityPrefix = "";
-                if (Number(tx.quantity) > 0) {
-                  quantityClass = "px-5 py-3.5 font-mono text-sm font-semibold text-right text-emerald-700";
-                  quantityPrefix = "+";
-                }
-
-                let supplierPrefix = null;
-                if (tx.supplier_name) {
-                  supplierPrefix = <span className="font-medium text-[#151515]">{tx.supplier_name} - </span>;
-                }
-
-                let remarksDisplay = "—";
-                if (tx.remarks) {
-                  remarksDisplay = tx.remarks;
-                } else if (tx.reference_number) {
-                  remarksDisplay = tx.reference_number;
-                }
-
-                return (
-                  <tr key={tx.transaction_id} className="hover:bg-[#EEEEED]/40 transition-colors">
-                    <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{formatSmartDateTime(tx.created_at)}</td>
-                    <td className="px-5 py-3.5 text-sm font-medium text-[#151515]">{tx.product_name}</td>
-                    <td className="px-5 py-3.5">
-                      <Badge tone={badgeTone}>
-                        {tx.transaction_type}
-                      </Badge>
-                    </td>
-                    <td className={quantityClass}>
-                      {quantityPrefix}{formatQuantityWithUnit(tx.quantity, tx.base_unit)}
-                    </td>
-                    <td className="px-5 py-3.5 text-xs text-[#777777]">
-                      {supplierPrefix}
-                      {remarksDisplay}
-                    </td>
-                    <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{tx.created_by}</td>
-                  </tr>
-                );
-              })}
+            {movementsRowsContent}
           </DataTable>
         </div>
       </section>
     );
   } else if (activeTab === "TRANSACTIONS") {
+    const filteredTransactions = transactions.filter(function (t) {
+      const matchMethod = filterType === "ALL" || t.payment_method === filterType;
+      const matchSearch =
+        searchTerm.length === 0 ||
+        t.receipt_number.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchMethod && matchSearch;
+    });
+
+    let transactionRowsContent = null;
+    if (filteredTransactions.length === 0) {
+      transactionRowsContent = (
+        <TableEmptyRow colSpan="8" message="No completed transactions in this date range." />
+      );
+    } else {
+      transactionRowsContent = filteredTransactions.map(function (sale) {
+        let paymentBadgeTone = "blue";
+        if (sale.payment_method === "CASH") {
+          paymentBadgeTone = "green";
+        } else if (sale.payment_method === "CREDIT") {
+          paymentBadgeTone = "amber";
+        }
+
+        return (
+          <tr key={sale.sale_id} className="hover:bg-[#EEEEED]/40 transition-colors">
+            <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515]">#{sale.receipt_number}</td>
+            <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{formatSmartDateTime(sale.created_at)}</td>
+            <td className="px-5 py-3.5">
+              <Badge tone={paymentBadgeTone}>
+                {sale.payment_method}
+              </Badge>
+            </td>
+            <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{sale.items_count}</td>
+            <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{formatPeso(sale.subtotal_amount)}</td>
+            <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{formatPeso(sale.discount_amount)}</td>
+            <td className="px-5 py-3.5 font-mono text-sm font-bold text-[#151515] text-right">{formatPeso(sale.total_amount)}</td>
+            <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{sale.created_by}</td>
+          </tr>
+        );
+      });
+    }
+
     activeTabContent = (
       <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
         <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 gap-2">
           <div className="text-sm font-semibold text-[#151515]">Completed Transactions</div>
-          <div className="flex items-center gap-2">
-            <select
+          <div className="flex flex-wrap items-center gap-2">
+            <Select
+              size="sm"
+              ariaLabel="Filter payment method"
               value={filterType}
               onChange={function (e) {
                 setFilterType(e.target.value);
               }}
-              className="rounded-xl border border-[#E9E9E9] bg-white px-3 py-1.5 font-mono text-xs text-[#151515] focus:outline-none"
             >
               <option value="ALL">All Methods</option>
               <option value="CASH">CASH</option>
               <option value="CREDIT">CREDIT</option>
               <option value="SPLIT">SPLIT</option>
-            </select>
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#777777]" />
-              <input
-                type="text"
-                placeholder="Receipt #..."
-                value={searchTerm}
-                onChange={function (e) {
-                  setSearchTerm(e.target.value);
-                }}
-                className="rounded-xl border border-[#E9E9E9] bg-[#FBFBFA] pl-8 pr-3 py-1.5 font-mono text-xs text-[#151515] focus:outline-none focus:border-[#151515]"
-              />
-            </div>
+            </Select>
+            <SearchInput
+              size="sm"
+              placeholder="Receipt #..."
+              value={searchTerm}
+              onChange={setSearchTerm}
+              className="w-40 sm:w-52"
+            />
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -585,37 +638,7 @@ export function ReportsPage() {
               </tr>
             }
           >
-            {transactions
-              .filter(function (t) {
-                const matchMethod = filterType === "ALL" || t.payment_method === filterType;
-                const matchSearch =
-                  searchTerm.length === 0 ||
-                  t.receipt_number.toLowerCase().includes(searchTerm.toLowerCase());
-                return matchMethod && matchSearch;
-              })
-              .map(function (sale) {
-                let paymentBadgeTone = "blue";
-                if (sale.payment_method === "CREDIT") {
-                  paymentBadgeTone = "amber";
-                }
-
-                return (
-                  <tr key={sale.sale_id} className="hover:bg-[#EEEEED]/40 transition-colors">
-                    <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515]">#{sale.receipt_number}</td>
-                    <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{formatSmartDateTime(sale.created_at)}</td>
-                    <td className="px-5 py-3.5">
-                      <Badge tone={paymentBadgeTone}>
-                        {sale.payment_method}
-                      </Badge>
-                    </td>
-                    <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{sale.items_count}</td>
-                    <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{formatPeso(sale.subtotal_amount)}</td>
-                    <td className="px-5 py-3.5 font-mono text-sm text-amber-700 text-right">{formatPeso(sale.discount_amount)}</td>
-                    <td className="px-5 py-3.5 font-mono text-sm font-bold text-[#151515] text-right">{formatPeso(sale.total_amount)}</td>
-                    <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{sale.created_by}</td>
-                  </tr>
-                );
-              })}
+            {transactionRowsContent}
           </DataTable>
         </div>
       </section>
@@ -685,11 +708,18 @@ export function ReportsPage() {
       <ErrorBanner message={errorBanner} className="mb-4 sm:mb-5" />
 
       {/* Clean Tab Bar */}
-      <div className="mb-4 sm:mb-5 flex items-center overflow-x-auto no-scrollbar gap-1 border-b border-[#E9E9E9] pb-2">
+      <div
+        role="tablist"
+        aria-label="Report categories"
+        className="mb-4 sm:mb-5 flex items-center overflow-x-auto no-scrollbar gap-1 border-b border-[#E9E9E9] pb-2"
+      >
         {TABS.map(function (tab) {
           return (
             <button
               key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
               onClick={function () {
                 setActiveTab(tab.id);
                 setSearchTerm("");
@@ -715,53 +745,38 @@ export function ReportsPage() {
         size="sm"
       >
         <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[#777777]">Start Date (From)</label>
-            <input
-              type="date"
-              value={draftFrom}
-              onChange={function (e) {
-                setDraftFrom(e.target.value);
-              }}
-              className="w-full rounded-xl border border-[#E9E9E9] bg-[#FBFBFA] px-3.5 py-2 font-mono text-sm text-[#151515] focus:border-[#151515] focus:outline-none"
-            />
-          </div>
+          <Input
+            label="Start Date (From)"
+            type="date"
+            value={draftFrom}
+            onChange={function (e) {
+              setDraftFrom(e.target.value);
+            }}
+          />
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[#777777]">End Date (To)</label>
-            <input
-              type="date"
-              value={draftTo}
-              onChange={function (e) {
-                setDraftTo(e.target.value);
-              }}
-              className="w-full rounded-xl border border-[#E9E9E9] bg-[#FBFBFA] px-3.5 py-2 font-mono text-sm text-[#151515] focus:border-[#151515] focus:outline-none"
-            />
-          </div>
+          <Input
+            label="End Date (To)"
+            type="date"
+            value={draftTo}
+            onChange={function (e) {
+              setDraftTo(e.target.value);
+            }}
+          />
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E9E9E9]">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={function () {
-                setCustomModalOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={function () {
-                setFromDate(draftFrom);
-                setToDate(draftTo);
-                setActivePreset("CUSTOM");
-                setCustomModalOpen(false);
-              }}
-            >
-              Apply Filter
-            </Button>
-          </div>
+          <FormActions
+            confirmType="button"
+            confirmLabel="Apply Filter"
+            onCancel={function () {
+              setCustomModalOpen(false);
+            }}
+            onConfirm={function () {
+              setFromDate(draftFrom);
+              setToDate(draftTo);
+              setActivePreset("CUSTOM");
+              setCustomModalOpen(false);
+            }}
+            className="pt-2 border-t border-[#E9E9E9]"
+          />
         </div>
       </Modal>
     </PageLayout>

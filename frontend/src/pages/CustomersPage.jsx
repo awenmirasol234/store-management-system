@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, Banknote, History, Plus, Search, UserCheck, Users, Wallet } from "lucide-react";
+import { AlertCircle, Banknote, Plus, Users, Wallet } from "lucide-react";
 import { api } from "../api.js";
-import { formatPeso, formatSmartDateTime } from "../format.js";
+import { formatPeso } from "../format.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
 import { CustomerLedgerModal } from "../components/CustomerLedgerModal.jsx";
@@ -9,22 +9,13 @@ import { CustomerModal } from "../components/CustomerModal.jsx";
 import { DataTable } from "../components/DataTable.jsx";
 import { EmptyState } from "../components/EmptyState.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
-import { Input } from "../components/Input.jsx";
+import { FilterPill } from "../components/FilterPill.jsx";
 import { PageHeader } from "../components/PageHeader.jsx";
 import { PageLayout } from "../components/PageLayout.jsx";
 import { RecordPaymentModal } from "../components/RecordPaymentModal.jsx";
+import { SearchInput } from "../components/SearchInput.jsx";
 import { StatCard } from "../components/StatCard.jsx";
 import { TableEmptyRow } from "../components/TableEmptyRow.jsx";
-
-function getFilterButtonClass(filterKey, currentFilter) {
-  let buttonClass = "rounded-full px-3.5 py-1.5 text-xs font-semibold cursor-pointer transition-colors ";
-  if (filterKey === currentFilter) {
-    buttonClass = buttonClass + "bg-[#151515] text-white shadow-xs";
-  } else {
-    buttonClass = buttonClass + "border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515]";
-  }
-  return buttonClass;
-}
 
 export function CustomersPage(props) {
   const [customers, setCustomers] = useState([]);
@@ -66,6 +57,7 @@ export function CustomersPage(props) {
   let totalUtang = 0;
   let customersWithBalanceCount = 0;
   let activeCustomersCount = 0;
+  let inactiveCustomersCount = 0;
   let overLimitCount = 0;
 
   for (let index = 0; index < customers.length; index++) {
@@ -79,6 +71,8 @@ export function CustomersPage(props) {
       if (cust.credit_limit !== null && cust.credit_limit !== undefined && cust.current_balance > cust.credit_limit) {
         overLimitCount = overLimitCount + 1;
       }
+    } else {
+      inactiveCustomersCount = inactiveCustomersCount + 1;
     }
   }
   totalUtang = Math.round(totalUtang * 100) / 100;
@@ -152,11 +146,31 @@ export function CustomersPage(props) {
     </tr>
   );
 
+  function getCustomerStatusBadge(customer) {
+    const isOverLimit = Boolean(
+      customer.credit_limit !== null &&
+      customer.credit_limit !== undefined &&
+      customer.current_balance > customer.credit_limit
+    );
+    if (!customer.is_active) {
+      return <Badge tone="neutral">Inactive</Badge>;
+    }
+    if (isOverLimit) {
+      return <Badge tone="red">Over Limit</Badge>;
+    }
+    if (customer.current_balance > 0) {
+      return <Badge tone="amber">Has Utang</Badge>;
+    }
+    return <Badge tone="green">Cleared</Badge>;
+  }
+
   let tableBodyContent = null;
+  let mobileCardsContent = null;
   if (loading && customers.length === 0) {
     tableBodyContent = (
       <TableEmptyRow colSpan={6} message="Loading customers..." />
     );
+    mobileCardsContent = <EmptyState message="Loading customers..." />;
   } else if (filteredCustomers.length === 0) {
     tableBodyContent = (
       <TableEmptyRow
@@ -164,13 +178,14 @@ export function CustomersPage(props) {
         message="No customers match the current filter or search criteria."
       />
     );
+    mobileCardsContent = (
+      <EmptyState message="No customers match the current filter or search criteria." />
+    );
   } else {
     tableBodyContent = filteredCustomers.map(function renderCustomerRow(customer) {
-      let balanceClass = "font-mono font-bold ";
+      let balanceClass = "font-mono font-bold text-[#151515]";
       if (customer.current_balance > 0) {
-        balanceClass = balanceClass + "text-rose-600";
-      } else {
-        balanceClass = balanceClass + "text-emerald-600";
+        balanceClass = "font-mono font-bold text-rose-600";
       }
 
       let limitDisplay = "No limit";
@@ -178,22 +193,7 @@ export function CustomersPage(props) {
         limitDisplay = formatPeso(customer.credit_limit);
       }
 
-      const isOverLimit = Boolean(
-        customer.credit_limit !== null &&
-        customer.credit_limit !== undefined &&
-        customer.current_balance > customer.credit_limit
-      );
-
-      let statusBadge = null;
-      if (!customer.is_active) {
-        statusBadge = <Badge tone="neutral">Inactive</Badge>;
-      } else if (isOverLimit) {
-        statusBadge = <Badge tone="red">Over Limit</Badge>;
-      } else if (customer.current_balance > 0) {
-        statusBadge = <Badge tone="amber">Has Utang</Badge>;
-      } else {
-        statusBadge = <Badge tone="green">Cleared</Badge>;
-      }
+      const statusBadge = getCustomerStatusBadge(customer);
 
       let phoneDisplay = "-";
       if (customer.phone) {
@@ -263,6 +263,94 @@ export function CustomersPage(props) {
         </tr>
       );
     });
+
+    mobileCardsContent = filteredCustomers.map(function renderCustomerCard(customer) {
+      let balanceClass = "font-mono text-base font-bold text-[#151515]";
+      if (customer.current_balance > 0) {
+        balanceClass = "font-mono text-base font-bold text-rose-600";
+      }
+
+      let limitDisplay = "No limit";
+      if (customer.credit_limit !== null && customer.credit_limit !== undefined) {
+        limitDisplay = formatPeso(customer.credit_limit);
+      }
+
+      const statusBadge = getCustomerStatusBadge(customer);
+
+      let contactLine = "No contact info";
+      if (customer.phone && customer.address) {
+        contactLine = customer.phone + " · " + customer.address;
+      } else if (customer.phone) {
+        contactLine = customer.phone;
+      } else if (customer.address) {
+        contactLine = customer.address;
+      }
+
+      const canPay = Boolean(customer.is_active && customer.current_balance > 0);
+      let payVariant = "secondary";
+      if (canPay) {
+        payVariant = "primary";
+      }
+
+      return (
+        <div
+          key={customer.customer_id}
+          className="rounded-2xl border border-[#E9E9E9] bg-white p-4 space-y-3"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="truncate font-semibold text-[#151515]">{customer.full_name}</div>
+              <div className="mt-0.5 truncate text-xs text-[#777777]">{contactLine}</div>
+            </div>
+            {statusBadge}
+          </div>
+
+          <div className="flex items-center justify-between border-t border-[#E9E9E9] pt-2.5">
+            <div>
+              <div className="text-tiny text-[#777777]">Current Utang</div>
+              <div className={balanceClass}>{formatPeso(customer.current_balance)}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-tiny text-[#777777]">Credit Limit</div>
+              <div className="font-mono text-xs font-medium text-[#151515]">{limitDisplay}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 border-t border-[#E9E9E9] pt-2.5">
+            <Button
+              size="sm"
+              variant={payVariant}
+              disabled={!canPay}
+              onClick={function openMobilePay() {
+                handleOpenPayment(customer);
+              }}
+              className="flex-1 justify-center"
+            >
+              Pay
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={function openMobileLedger() {
+                handleOpenLedger(customer);
+              }}
+              className="flex-1 justify-center"
+            >
+              Ledger
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={function openMobileEdit() {
+                handleOpenEditCustomer(customer);
+              }}
+            >
+              Edit
+            </Button>
+          </div>
+        </div>
+      );
+    });
   }
 
   return (
@@ -301,64 +389,58 @@ export function CustomersPage(props) {
         />
       </div>
 
-      {/* Search Bar & Filter Tabs */}
+      {/* Search Bar & Filter Pills */}
       <div className="mb-4 sm:mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:w-80">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777777]" />
-          <input
-            type="text"
-            placeholder="Search name, phone, address..."
-            value={searchQuery}
-            onChange={function handleSearch(event) {
-              setSearchQuery(event.target.value);
-            }}
-            className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2.5 pl-10 pr-4 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search name, phone, address..."
+          className="w-full sm:w-80"
+        />
 
-        {/* Filter Pills */}
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
-          <button
-            type="button"
+          <FilterPill
+            label="All"
+            count={customers.length}
+            active={activeFilter === "ALL"}
             onClick={function setAll() {
               setActiveFilter("ALL");
             }}
-            className={getFilterButtonClass("ALL", activeFilter)}
-          >
-            All ({customers.length})
-          </button>
-          <button
-            type="button"
+          />
+          <FilterPill
+            label="With Utang"
+            count={customersWithBalanceCount}
+            active={activeFilter === "WITH_UTANG"}
             onClick={function setWithUtang() {
               setActiveFilter("WITH_UTANG");
             }}
-            className={getFilterButtonClass("WITH_UTANG", activeFilter)}
-          >
-            With Utang ({customersWithBalanceCount})
-          </button>
-          <button
-            type="button"
+          />
+          <FilterPill
+            label="Over Limit"
+            count={overLimitCount}
+            active={activeFilter === "OVER_LIMIT"}
             onClick={function setOverLimit() {
               setActiveFilter("OVER_LIMIT");
             }}
-            className={getFilterButtonClass("OVER_LIMIT", activeFilter)}
-          >
-            Over Limit ({overLimitCount})
-          </button>
-          <button
-            type="button"
+          />
+          <FilterPill
+            label="Inactive"
+            count={inactiveCustomersCount}
+            active={activeFilter === "INACTIVE"}
             onClick={function setInactive() {
               setActiveFilter("INACTIVE");
             }}
-            className={getFilterButtonClass("INACTIVE", activeFilter)}
-          >
-            Inactive
-          </button>
+          />
         </div>
       </div>
 
-      {/* Main Customers Table */}
-      <div className="overflow-x-auto rounded-2xl border border-[#E9E9E9] bg-white">
+      {/* Mobile Customer Card List (< md) */}
+      <div className="space-y-3 md:hidden">
+        {mobileCardsContent}
+      </div>
+
+      {/* Desktop Customers Table (>= md) */}
+      <div className="hidden md:block overflow-x-auto rounded-2xl border border-[#E9E9E9] bg-white">
         <DataTable headRow={tableHeadRow} stickyHead={true}>
           {tableBodyContent}
         </DataTable>

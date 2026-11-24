@@ -1,13 +1,14 @@
-import { Banknote, CreditCard } from "lucide-react";
+import { ArrowLeftRight, Banknote, CreditCard } from "lucide-react";
 
 const PAYMENT_METHODS = [
   { key: "CASH", label: "Cash", icon: Banknote },
-  { key: "CREDIT", label: "Utang", icon: CreditCard }
+  { key: "CREDIT", label: "Utang", icon: CreditCard },
+  { key: "SPLIT", label: "Split", icon: ArrowLeftRight }
 ];
 
 export function PaymentMethodToggle(props) {
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div role="group" aria-label="Payment method" className="grid grid-cols-3 gap-2">
       {PAYMENT_METHODS.map(function renderMethod(method) {
         const IconComponent = method.icon;
         const isSelected = props.paymentMethod === method.key;
@@ -22,6 +23,7 @@ export function PaymentMethodToggle(props) {
           <button
             key={method.key}
             type="button"
+            aria-pressed={isSelected}
             onClick={function selectMethod() {
               props.onChange(method.key);
             }}

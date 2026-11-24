@@ -115,6 +115,11 @@ export function RecordPaymentModal(props) {
     balanceStatusElement = <span className="text-[#777777]">Enter amount above</span>;
   }
 
+  let currentBalanceClass = "font-mono text-base font-bold text-[#151515]";
+  if (currentBalance > 0) {
+    currentBalanceClass = "font-mono text-base font-bold text-rose-600";
+  }
+
   return (
     <Modal open={props.open} onClose={props.onClose} title="Record Utang Payment">
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -126,7 +131,7 @@ export function RecordPaymentModal(props) {
           <div className="text-base font-bold text-[#151515]">{customerName}</div>
           <div className="mt-3 flex items-center justify-between border-t border-[#E9E9E9] pt-3">
             <span className="text-xs text-[#777777]">Current Utang Balance:</span>
-            <span className="font-mono text-base font-bold text-rose-600">
+            <span className={currentBalanceClass}>
               {formatPeso(currentBalance)}
             </span>
           </div>

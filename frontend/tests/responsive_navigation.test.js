@@ -23,7 +23,7 @@ describe("Responsive navigation & components", function () {
     expect(html).toContain("md:hidden");
   });
 
-  it("highlights active tab in BottomNav", function () {
+  it("highlights active tab in BottomNav with aria-current", function () {
     const html = renderToString(
       React.createElement(BottomNav, {
         activePage: "inventory",
@@ -32,6 +32,7 @@ describe("Responsive navigation & components", function () {
     );
     expect(html).toContain("text-white font-semibold");
     expect(html).toContain("text-[#B9F36B]");
+    expect(html).toContain('aria-current="page"');
   });
 
   it("renders PosCheckoutModal with ₱1,000 banknote preset and change section", function () {

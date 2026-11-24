@@ -74,6 +74,7 @@ export function Sidebar(props) {
           onClick={handleToggle}
           className="rounded-lg p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white cursor-pointer transition-colors"
           title="Expand sidebar"
+          aria-label="Expand sidebar"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
@@ -96,6 +97,7 @@ export function Sidebar(props) {
           onClick={handleToggle}
           className="rounded-lg p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white cursor-pointer transition-colors"
           title="Collapse sidebar"
+          aria-label="Collapse sidebar"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -110,6 +112,7 @@ export function Sidebar(props) {
         type="button"
         onClick={props.onLogout}
         title="Sign out"
+        aria-label="Sign out"
         className="p-1.5 text-[#A3A3A3] hover:bg-rose-500/20 hover:text-rose-300 rounded-lg cursor-pointer transition-colors"
       >
         <LogOut className="h-4 w-4" />
@@ -118,6 +121,7 @@ export function Sidebar(props) {
   }
 
   let manageStaffButton = null;
+  let collapsedStaffButton = null;
   if (isOwner && props.onOpenUserModal) {
     manageStaffButton = (
       <button
@@ -129,15 +133,29 @@ export function Sidebar(props) {
         <span>Manage Staff</span>
       </button>
     );
+    collapsedStaffButton = (
+      <button
+        type="button"
+        onClick={props.onOpenUserModal}
+        title="Manage Staff"
+        aria-label="Manage Staff"
+        className="p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white rounded-lg cursor-pointer transition-colors"
+      >
+        <Users className="h-4 w-4" />
+      </button>
+    );
   }
 
   let cashDrawerButton = null;
+  let collapsedDrawerButton = null;
   if (props.onOpenShiftModal) {
     let dotTone = "bg-amber-400";
     let statusLabel = "No Shift";
+    let drawerTitle = "Cash Drawer (No Shift)";
     if (props.activeShift) {
       dotTone = "bg-[#B9F36B]";
       statusLabel = "Shift Open";
+      drawerTitle = "Cash Drawer (Shift Open)";
     }
     cashDrawerButton = (
       <button
@@ -156,22 +174,16 @@ export function Sidebar(props) {
         </div>
       </button>
     );
-  }
-
-  let collapsedDrawerButton = null;
-  if (props.onOpenShiftModal) {
-    let drawerTitle = "Cash Drawer (No Shift)";
-    if (props.activeShift) {
-      drawerTitle = "Cash Drawer (Shift Open)";
-    }
     collapsedDrawerButton = (
       <button
         type="button"
         onClick={props.onOpenShiftModal}
         title={drawerTitle}
-        className="p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white rounded-lg cursor-pointer transition-colors"
+        aria-label={drawerTitle}
+        className="relative p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white rounded-lg cursor-pointer transition-colors"
       >
         <Wallet className="h-4 w-4" />
+        <span className={"absolute right-1 top-1 h-1.5 w-1.5 rounded-full " + dotTone} />
       </button>
     );
   }
@@ -187,6 +199,7 @@ export function Sidebar(props) {
           {initials}
         </div>
         {collapsedDrawerButton}
+        {collapsedStaffButton}
         {logoutButton}
       </div>
     );
@@ -215,7 +228,7 @@ export function Sidebar(props) {
     <aside className={asideClass}>
       {headerElement}
 
-      <nav className="flex-1 space-y-1.5 px-3 py-3">
+      <nav aria-label="Main navigation" className="flex-1 space-y-1.5 px-3 py-3">
         {navItems.map(function renderNavItem(item) {
           const IconComponent = item.icon;
           const isActive = props.activePage === item.key;
@@ -227,7 +240,9 @@ export function Sidebar(props) {
             itemClass = itemClass + "gap-3.5 px-4 py-3 ";
           }
 
+          let ariaCurrent = undefined;
           if (isActive) {
+            ariaCurrent = "page";
             itemClass = itemClass + "bg-[#B9F36B] text-[#151515] font-semibold shadow-xs";
           } else {
             itemClass = itemClass + "text-[#A3A3A3] hover:bg-white/5 hover:text-white";
@@ -242,6 +257,7 @@ export function Sidebar(props) {
             <button
               key={item.key}
               type="button"
+              aria-current={ariaCurrent}
               onClick={function selectPage() {
                 props.onNavigate(item.key);
               }}

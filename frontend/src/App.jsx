@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LogOut, Store } from "lucide-react";
+import { LogOut, Store, Wallet } from "lucide-react";
 import { api, clearAuthToken, getAuthToken } from "./api.js";
 import { Sidebar } from "./components/Sidebar.jsx";
 import { BottomNav } from "./components/BottomNav.jsx";
@@ -281,7 +281,14 @@ export function App(props) {
     }
   } else if (activePage === "settings") {
     if (currentUser.role === "OWNER") {
-      pageElement = <SettingsPage currentUser={currentUser} />;
+      pageElement = (
+        <SettingsPage
+          currentUser={currentUser}
+          onOpenUserModal={function () {
+            setUserModalOpen(true);
+          }}
+        />
+      );
     } else {
       pageElement = (
         <NotFoundPage
@@ -315,6 +322,13 @@ export function App(props) {
     }
   }
 
+  let mobileShiftDotClass = "bg-amber-400";
+  let mobileShiftTitle = "Cash Drawer (No Shift)";
+  if (activeShift) {
+    mobileShiftDotClass = "bg-[#B9F36B]";
+    mobileShiftTitle = "Cash Drawer (Shift Open)";
+  }
+
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#F5F5F4] md:flex-row">
       {/* Mobile Top Header */}
@@ -329,6 +343,22 @@ export function App(props) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={function openMobileShift() {
+              setShiftModalOpen(true);
+            }}
+            title={mobileShiftTitle}
+            aria-label={mobileShiftTitle}
+            className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-[#A3A3A3] hover:bg-white/10 hover:text-white cursor-pointer transition-colors"
+          >
+            <Wallet className="h-4 w-4" />
+            <span
+              className={
+                "absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full " + mobileShiftDotClass
+              }
+            />
+          </button>
           <div
             className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-2xs font-semibold text-white"
             title={currentUser.full_name + " (" + currentUser.role + ")"}
@@ -339,6 +369,7 @@ export function App(props) {
             type="button"
             onClick={handleLogout}
             title="Sign out"
+            aria-label="Sign out"
             className="p-1.5 text-[#A3A3A3] hover:text-rose-300 cursor-pointer transition-colors"
           >
             <LogOut className="h-4 w-4" />
