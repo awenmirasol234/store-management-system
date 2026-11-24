@@ -200,4 +200,40 @@ describe("POS cart stock quantity validation", function () {
     expect(html).toContain("Requested quantity exceeds available stock for Coke Can (5 Pieces (pcs) available).");
     expect(html).toContain("text-rose-700");
   });
+
+  it("validates direct custom quantity changes against available stock", function () {
+    const product = {
+      product_id: "prod-direct",
+      product_name: "Instant Noodles",
+      base_unit: "Pack",
+      current_stock: 5,
+      selling_price: 15
+    };
+
+    // Item already has quantity 2 in cart
+    const cart = [
+      {
+        product_id: product.product_id,
+        quantity: 2,
+        base_quantity_per_unit: 1
+      }
+    ];
+
+    // Changing directly to 5 requires delta of 3 (2 + 3 = 5 <= 5 stock) -> allowed
+    let check = canAddStockToCart({
+      cartItems: cart,
+      product: product,
+      additionalBaseQuantity: 3
+    });
+    expect(check.allowed).toBe(true);
+
+    // Changing directly to 6 requires delta of 4 (2 + 4 = 6 > 5 stock) -> rejected
+    check = canAddStockToCart({
+      cartItems: cart,
+      product: product,
+      additionalBaseQuantity: 4
+    });
+    expect(check.allowed).toBe(false);
+    expect(check.message).toContain("Requested quantity exceeds available stock");
+  });
 });

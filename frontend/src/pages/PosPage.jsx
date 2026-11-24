@@ -3,7 +3,6 @@ import {
   Bell,
   ChevronLeft,
   ChevronRight,
-  Minus,
   Plus,
   ScanBarcode,
   Search,
@@ -33,6 +32,7 @@ import { Modal } from "../components/Modal.jsx";
 import { PageHeader } from "../components/PageHeader.jsx";
 import { PaymentMethodToggle } from "../components/PaymentMethodToggle.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
+import { QuantitySelector } from "../components/QuantitySelector.jsx";
 import { ReceiptView } from "../components/ReceiptView.jsx";
 import { PosCheckoutModal } from "../components/PosCheckoutModal.jsx";
 
@@ -297,21 +297,27 @@ export function PosPage(props) {
     }
   }
 
-  function changeCartItemQty(itemKey, delta) {
+  function setCartItemQty(itemKey, targetQuantity) {
     setErrorBanner("");
+    const parsedQty = Math.floor(Number(targetQuantity));
+    if (!Number.isFinite(parsedQty) || parsedQty <= 0) {
+      return false;
+    }
+
+    let targetItem = null;
+    for (let index = 0; index < cartItems.length; index++) {
+      if (cartItems[index].key === itemKey) {
+        targetItem = cartItems[index];
+        break;
+      }
+    }
+
+    if (!targetItem) {
+      return false;
+    }
+
+    const delta = parsedQty - targetItem.quantity;
     if (delta > 0) {
-      let targetItem = null;
-      for (let index = 0; index < cartItems.length; index++) {
-        if (cartItems[index].key === itemKey) {
-          targetItem = cartItems[index];
-          break;
-        }
-      }
-
-      if (!targetItem) {
-        return;
-      }
-
       let targetProduct = null;
       for (let index = 0; index < products.length; index++) {
         if (products[index].product_id === targetItem.product_id) {
@@ -343,7 +349,7 @@ export function PosPage(props) {
 
       if (!stockCheck.allowed) {
         setErrorBanner(stockCheck.message);
-        return;
+        return false;
       }
     }
 
@@ -352,16 +358,28 @@ export function PosPage(props) {
       for (let index = 0; index < previous.length; index++) {
         const item = previous[index];
         if (item.key === itemKey) {
-          const nextQty = item.quantity + delta;
-          if (nextQty > 0) {
-            next.push(Object.assign({}, item, { quantity: nextQty }));
-          }
+          next.push(Object.assign({}, item, { quantity: parsedQty }));
         } else {
           next.push(item);
         }
       }
       return next;
     });
+    return true;
+  }
+
+  function changeCartItemQty(itemKey, delta) {
+    let currentQty = 1;
+    for (let index = 0; index < cartItems.length; index++) {
+      if (cartItems[index].key === itemKey) {
+        currentQty = cartItems[index].quantity;
+        break;
+      }
+    }
+    const nextQty = currentQty + delta;
+    if (nextQty > 0) {
+      setCartItemQty(itemKey, nextQty);
+    }
   }
 
   function removeCartItem(itemKey) {
@@ -639,29 +657,19 @@ export function PosPage(props) {
       let qtyControl = <span className="font-mono text-xs text-[#777777]">Tingi</span>;
       if (item.custom_amount === null) {
         qtyControl = (
-          <div className="inline-flex items-center rounded-lg border border-[#E9E9E9] bg-white">
-            <button
-              type="button"
-              onClick={function dec() {
-                changeCartItemQty(item.key, -1);
-              }}
-              className="flex h-7 w-7 items-center justify-center text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] rounded-l-lg cursor-pointer transition-colors"
-            >
-              <Minus className="h-3 w-3" />
-            </button>
-            <span className="min-w-8 text-center font-mono text-xs font-semibold text-[#151515]">
-              {formatQuantity(item.quantity)}
-            </span>
-            <button
-              type="button"
-              onClick={function inc() {
-                changeCartItemQty(item.key, 1);
-              }}
-              className="flex h-7 w-7 items-center justify-center text-[#151515] hover:bg-[#B9F36B]/40 rounded-r-lg cursor-pointer transition-colors"
-            >
-              <Plus className="h-3 w-3" />
-            </button>
-          </div>
+          <QuantitySelector
+            value={item.quantity}
+            onChange={function onQtyChange(newQty) {
+              return setCartItemQty(item.key, newQty);
+            }}
+            onIncrement={function inc() {
+              changeCartItemQty(item.key, 1);
+            }}
+            onDecrement={function dec() {
+              changeCartItemQty(item.key, -1);
+            }}
+            min={1}
+          />
         );
       }
 
