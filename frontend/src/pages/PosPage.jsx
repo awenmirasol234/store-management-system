@@ -62,7 +62,10 @@ export function PosPage(props) {
     initialCart = props.initialCartItems;
   }
   const [localCartItems, setLocalCartItems] = useState(initialCart);
-  const cartItems = props && props.cartItems !== undefined ? props.cartItems : localCartItems;
+  let cartItems = localCartItems;
+  if (props && props.cartItems !== undefined) {
+    cartItems = props.cartItems;
+  }
 
   function setCartItems(updater) {
     if (props && typeof props.onCartChange === "function") {
@@ -81,7 +84,10 @@ export function PosPage(props) {
     initialDiscount = props.initialOrderDiscount;
   }
   const [localOrderDiscount, setLocalOrderDiscount] = useState(initialDiscount);
-  const orderDiscount = props && props.orderDiscount !== undefined ? props.orderDiscount : localOrderDiscount;
+  let orderDiscount = localOrderDiscount;
+  if (props && props.orderDiscount !== undefined) {
+    orderDiscount = props.orderDiscount;
+  }
 
   function setOrderDiscount(updater) {
     if (props && typeof props.onDiscountChange === "function") {

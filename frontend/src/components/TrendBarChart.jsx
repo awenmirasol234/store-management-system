@@ -29,6 +29,26 @@ export function TrendBarChart(props) {
           const heightPercent = Math.max(6, Math.round((val / maxVal) * 100));
           const isHovered = hoveredIndex === index;
 
+          let tooltipElement = null;
+          if (isHovered) {
+            let metaElement = null;
+            if (item.meta) {
+              metaElement = <div className="text-xs text-gray-300">{item.meta}</div>;
+            }
+            tooltipElement = (
+              <div className="absolute -top-7 z-10 whitespace-nowrap rounded-lg bg-[#151515] px-2 py-1 font-mono text-xs text-white shadow-md">
+                <div>{item.label}</div>
+                <div className="font-semibold text-[#B9F36B]">{formatPeso(val)}</div>
+                {metaElement}
+              </div>
+            );
+          }
+
+          let barBgClass = "bg-[#B9F36B] hover:bg-[#A6DE5B]";
+          if (isHovered) {
+            barBgClass = "bg-[#151515]";
+          }
+
           return (
             <div
               key={item.label || index}
@@ -40,19 +60,13 @@ export function TrendBarChart(props) {
                 setHoveredIndex(null);
               }}
             >
-              {isHovered ? (
-                <div className="absolute -top-7 z-10 whitespace-nowrap rounded-lg bg-[#151515] px-2 py-1 font-mono text-xs text-white shadow-md">
-                  <div>{item.label}</div>
-                  <div className="font-semibold text-[#B9F36B]">{formatPeso(val)}</div>
-                  {item.meta ? <div className="text-xs text-gray-300">{item.meta}</div> : null}
-                </div>
-              ) : null}
+              {tooltipElement}
 
               <div
                 style={{ height: heightPercent + "%" }}
                 className={
                   "w-full max-w-[40px] rounded-t-lg transition-all duration-200 " +
-                  (isHovered ? "bg-[#151515]" : "bg-[#B9F36B] hover:bg-[#A6DE5B]")
+                  barBgClass
                 }
               />
               <div className="mt-2 truncate font-mono text-xs text-[#777777] max-w-full text-center">
@@ -111,6 +125,19 @@ export function MultiTrendBarChart(props) {
           const profitHeight = Math.max(4, Math.round((profitVal / maxVal) * 100));
           const isHovered = hoveredIndex === index;
 
+          let multiTooltipElement = null;
+          if (isHovered) {
+            multiTooltipElement = (
+              <div className="absolute -top-10 z-10 whitespace-nowrap rounded-lg bg-[#151515] p-2 font-mono text-xs text-white shadow-lg">
+                <div className="text-gray-300">{item.label}</div>
+                <div className="flex gap-2">
+                  <span>Sales: {formatPeso(salesVal)}</span>
+                  <span className="text-[#B9F36B]">Profit: {formatPeso(profitVal)}</span>
+                </div>
+              </div>
+            );
+          }
+
           return (
             <div
               key={item.label || index}
@@ -122,15 +149,7 @@ export function MultiTrendBarChart(props) {
                 setHoveredIndex(null);
               }}
             >
-              {isHovered ? (
-                <div className="absolute -top-10 z-10 whitespace-nowrap rounded-lg bg-[#151515] p-2 font-mono text-xs text-white shadow-lg">
-                  <div className="text-gray-300">{item.label}</div>
-                  <div className="flex gap-2">
-                    <span>Sales: {formatPeso(salesVal)}</span>
-                    <span className="text-[#B9F36B]">Profit: {formatPeso(profitVal)}</span>
-                  </div>
-                </div>
-              ) : null}
+              {multiTooltipElement}
 
               <div className="flex h-full w-full max-w-[48px] items-end justify-center gap-1">
                 <div

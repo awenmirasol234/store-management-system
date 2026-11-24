@@ -75,6 +75,12 @@ export function DashboardPage(props) {
       <div className="divide-y divide-[#E9E9E9]">
         {lowStock.slice(0, 6).map(function renderLowItem(product) {
           const isOut = Number(product.current_stock) <= 0;
+          let badgeTone = "amber";
+          let badgeText = formatQuantityWithUnit(product.current_stock, product.base_unit);
+          if (isOut) {
+            badgeTone = "red";
+            badgeText = "OUT OF STOCK";
+          }
           return (
             <div key={product.product_id} className="flex items-center justify-between py-3">
               <div className="min-w-0 pr-3">
@@ -85,8 +91,8 @@ export function DashboardPage(props) {
                   Reorder at {formatQuantityWithUnit(product.reorder_level, product.base_unit)}
                 </div>
               </div>
-              <Badge tone={isOut ? "red" : "amber"} className="font-mono shrink-0">
-                {isOut ? "OUT OF STOCK" : formatQuantityWithUnit(product.current_stock, product.base_unit)}
+              <Badge tone={badgeTone} className="font-mono shrink-0">
+                {badgeText}
               </Badge>
             </div>
           );
@@ -123,6 +129,25 @@ export function DashboardPage(props) {
     );
   }
 
+  let fourthSummaryCard = (
+    <StatCard
+      label="Inventory Alerts"
+      value={String(lowStock.length)}
+      meta="Items needing reorder"
+      icon={AlertTriangle}
+    />
+  );
+  if (isOwner) {
+    fourthSummaryCard = (
+      <StatCard
+        label="Today's Profit"
+        value={grossProfit}
+        meta="Gross profit today"
+        icon={TrendingUp}
+      />
+    );
+  }
+
   return (
     <PageLayout scroll={true}>
       <PageHeader title="Dashboard" />
@@ -149,21 +174,7 @@ export function DashboardPage(props) {
           meta="Units moved today"
           icon={Layers}
         />
-        {isOwner ? (
-          <StatCard
-            label="Today's Profit"
-            value={grossProfit}
-            meta="Gross profit today"
-            icon={TrendingUp}
-          />
-        ) : (
-          <StatCard
-            label="Inventory Alerts"
-            value={String(lowStock.length)}
-            meta="Items needing reorder"
-            icon={AlertTriangle}
-          />
-        )}
+        {fourthSummaryCard}
       </div>
 
       {/* 2. Operational Sections: Top Selling, Inventory Alerts */}

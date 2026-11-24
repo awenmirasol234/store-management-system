@@ -25,7 +25,11 @@ export function exportToCsv(filename, headers, rows) {
   const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(lines.join("\n"));
   const link = document.createElement("a");
   link.setAttribute("href", csvContent);
-  link.setAttribute("download", filename.endsWith(".csv") ? filename : filename + ".csv");
+  let downloadName = filename + ".csv";
+  if (filename.endsWith(".csv")) {
+    downloadName = filename;
+  }
+  link.setAttribute("download", downloadName);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

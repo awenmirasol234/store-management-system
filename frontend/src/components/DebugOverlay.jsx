@@ -182,15 +182,14 @@ export function DebugOverlay(props) {
         <div className="grid grid-cols-6 gap-1 text-center text-2xs">
           {["xs", "sm", "md", "lg", "xl", "2xl"].map(function (step) {
             const isCurrent = step === bp.name;
+            let stepClass = "rounded py-1 font-semibold uppercase transition-colors bg-[#262626] text-[#777777]";
+            if (isCurrent) {
+              stepClass = "rounded py-1 font-semibold uppercase transition-colors bg-[#B9F36B] text-[#151515] shadow";
+            }
             return (
               <div
                 key={step}
-                className={
-                  "rounded py-1 font-semibold uppercase transition-colors " +
-                  (isCurrent
-                    ? "bg-[#B9F36B] text-[#151515] shadow"
-                    : "bg-[#262626] text-[#777777]")
-                }
+                className={stepClass}
               >
                 {step}
               </div>
