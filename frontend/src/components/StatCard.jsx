@@ -1,16 +1,3 @@
-function getValueToneClass(tone) {
-  if (tone === "blue") {
-    return "text-blue-600";
-  }
-  if (tone === "green") {
-    return "text-emerald-600";
-  }
-  if (tone === "amber") {
-    return "text-amber-600";
-  }
-  return "text-[#151515]";
-}
-
 export function StatCard(props) {
   const IconComponent = props.icon;
   let iconElement = null;
@@ -34,9 +21,7 @@ export function StatCard(props) {
           <div className="text-xs font-semibold text-[#777777]">
             {props.label}
           </div>
-          <div
-            className={"mt-2 font-mono text-2xl font-bold " + getValueToneClass(props.tone)}
-          >
+          <div className="mt-2 font-mono text-2xl font-bold text-[#151515]">
             {props.value}
           </div>
           {footerElement}

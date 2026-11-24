@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
+import { StatCard } from "../src/components/StatCard.jsx";
 import { DashboardPage } from "../src/pages/DashboardPage.jsx";
 import { PosPage } from "../src/pages/PosPage.jsx";
 import { ReportsPage } from "../src/pages/ReportsPage.jsx";
@@ -61,5 +62,21 @@ describe("Refactored page rendering", function () {
     expect(posHtml).toContain("p-4 sm:p-6 lg:p-7");
     expect(reportsHtml).toContain("p-4 sm:p-6 lg:p-7");
     expect(reportsHtml).not.toContain("space-y-4 p-5");
+  });
+
+  it("renders StatCard value strictly with text-[#151515] and no color tone classes", function () {
+    const defaultHtml = renderToString(
+      React.createElement(StatCard, { label: "Sales", value: "₱1,000.00" })
+    );
+    expect(defaultHtml).toContain("text-[#151515]");
+    expect(defaultHtml).not.toContain("text-blue-600");
+    expect(defaultHtml).not.toContain("text-emerald-600");
+    expect(defaultHtml).not.toContain("text-amber-600");
+
+    const toneHtml = renderToString(
+      React.createElement(StatCard, { label: "Profit", value: "₱500.00", tone: "green" })
+    );
+    expect(toneHtml).toContain("text-[#151515]");
+    expect(toneHtml).not.toContain("text-emerald-600");
   });
 });

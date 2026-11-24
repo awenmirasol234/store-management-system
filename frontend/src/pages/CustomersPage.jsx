@@ -136,16 +136,6 @@ export function CustomersPage(props) {
     loadCustomers(searchQuery);
   }
 
-  let utangTone = "slate";
-  if (totalUtang > 0) {
-    utangTone = "amber";
-  }
-
-  let overLimitTone = "slate";
-  if (overLimitCount > 0) {
-    overLimitTone = "red";
-  }
-
   let errorElement = null;
   if (errorBanner) {
     errorElement = <ErrorBanner message={errorBanner} className="mb-4 sm:mb-5" />;
@@ -291,26 +281,22 @@ export function CustomersPage(props) {
         <StatCard
           label="Total Outstanding Utang"
           value={formatPeso(totalUtang)}
-          tone={utangTone}
           icon={Wallet}
           meta={customersWithBalanceCount + " customer(s) with balance"}
         />
         <StatCard
           label="Customers with Utang"
           value={String(customersWithBalanceCount)}
-          tone="neutral"
           icon={Banknote}
         />
         <StatCard
           label="Active Customers"
           value={String(activeCustomersCount)}
-          tone="neutral"
           icon={Users}
         />
         <StatCard
           label="Over Credit Limit"
           value={String(overLimitCount)}
-          tone={overLimitTone}
           icon={AlertCircle}
         />
       </div>
