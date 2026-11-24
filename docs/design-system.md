@@ -9,7 +9,8 @@ Tactical specifications for the StoreFlow POS interface, design tokens, responsi
 The user interface uses a high-contrast, monochromatic palette with an intentional lime-green accent for transactional triggers:
 
 - **Surface Base**: Clean white (`#FFFFFF`) cards against soft neutral background (`#F5F5F4`).
-- **Sidebar & Dark Accents**: Near-black (`#171717`) navigation and stock badges.
+- **Dark Neutral (Unified Black - `#171717`)**: Single near-black (`#171717`, Tailwind `neutral-900`) used uniformly across all UI components, desktop sidebar, mobile navigation, primary typography, buttons, active filter pills, modal backdrops (`bg-[#171717]/40`), and indicator badges. No other black or near-black shades (such as `#151515`) are permitted in the application UI.
+- **Physical Thermal Print Pure Black (`#000000`)**: Pure black is exclusively preserved for hardware thermal receipt printing (`@media print` on `#thermal-receipt`) to guarantee maximum heat transfer, contrast, and barcode legibility on 58mm/80mm thermal paper.
 - **Transactional Accent**: Vibrant lime green (`#B9F36B`, hover `#A8E65A`) reserved for primary buttons, active navigation, and conversion checkpoints.
 - **Hairline Dividers**: Crisp borders (`#E9E9E9`).
 - **Typography**: Inter with tabular numbers (`tabular-nums`) for currency and decimal alignment.
@@ -31,6 +32,8 @@ Design tokens are declared in `frontend/src/index.css` inside the `@theme` block
 | `--color-text-primary` | `#171717` | `text-[#171717]` | Headings, product titles, prices, totals |
 | `--color-text-secondary`| `#777777` | `text-[#777777]` | Subtitles, base unit descriptions, category counts |
 | `--color-border` | `#E9E9E9` | `border-[#E9E9E9]` | 1px hairline borders, card outlines, table dividers |
+| `--color-on-primary` | `#171717` | `text-[#171717]` | Text and icons placed on top of primary lime-green elements |
+| *Hardware Print* | `#000000` | `@media print` | Preserved exclusively for physical thermal receipt printers |
 
 ---
 
@@ -125,3 +128,4 @@ All application pages share a uniform spacing scale:
 2. **Zero Ternary Statements**: Write explicit `if` / `else` blocks for program control flow.
 3. **No External Charting or UI Frameworks**: Maintain pure React + SVG/Tailwind components.
 4. **Preserve Business Logic**: Never alter financial formulas or backend endpoints during UI styling.
+5. **Unified Black Palette**: Always use `#171717` for all dark UI styling (text, borders, backdrops, active pills, badges, navigation). Never introduce `#151515` or `#000000` in UI components; `#000000` is strictly restricted to physical thermal printer styling under `@media print`.
