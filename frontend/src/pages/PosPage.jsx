@@ -627,7 +627,7 @@ export function PosPage(props) {
     );
   } else {
     productGridContent = (
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-6">
         {filteredProducts.map(function renderCard(product) {
           let categoryName = product.base_unit;
           if (product.category_name) {

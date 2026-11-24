@@ -188,5 +188,7 @@ describe("PosPage SSR test", function () {
     );
     expect(html).toContain("md:grid-cols-3");
     expect(html).not.toContain("md:grid-cols-4");
+    expect(html).toContain("xl:grid-cols-4");
+    expect(html).not.toContain("xl:grid-cols-5");
   });
 });
