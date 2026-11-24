@@ -3,7 +3,7 @@ export function StatCard(props) {
   let iconElement = null;
   if (IconComponent) {
     iconElement = (
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EEEEED] text-[#151515]">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EEEEED] text-[#171717]">
         <IconComponent className="h-5 w-5" />
       </div>
     );
@@ -21,7 +21,7 @@ export function StatCard(props) {
           <div className="text-xs font-semibold text-[#777777]">
             {props.label}
           </div>
-          <div className="mt-2 font-mono text-2xl font-bold text-[#151515]">
+          <div className="mt-2 font-mono text-2xl font-bold text-[#171717]">
             {props.value}
           </div>
           {footerElement}

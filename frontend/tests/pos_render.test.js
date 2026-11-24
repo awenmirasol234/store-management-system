@@ -98,7 +98,7 @@ describe("PosPage SSR test", function () {
     const html = renderToString(badgeElement);
     expect(html).toContain("bg-rose-600");
     expect(html).toContain("text-white");
-    expect(html).not.toContain("bg-[#151515]");
+    expect(html).not.toContain("bg-[#171717]");
     expect(html).not.toContain("text-[#B9F36B]");
   });
 
@@ -193,7 +193,7 @@ describe("PosPage SSR test", function () {
       })
     );
 
-    expect(html).toContain("border-[#151515] bg-[#EEEEED]/40");
+    expect(html).toContain("border-[#171717] bg-[#EEEEED]/40");
   });
 
   it("renders product catalog grid with 3 columns on md breakpoint", function () {

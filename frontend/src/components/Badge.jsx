@@ -3,7 +3,7 @@ function getToneClasses(tone) {
     return "bg-[#171717] text-white border-transparent";
   }
   if (tone === "green") {
-    return "bg-[#B9F36B] text-[#151515] border-transparent font-medium";
+    return "bg-[#B9F36B] text-[#171717] border-transparent font-medium";
   }
   if (tone === "amber") {
     return "bg-amber-50 text-amber-700 border-amber-200";

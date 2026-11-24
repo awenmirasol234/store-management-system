@@ -166,9 +166,9 @@ export function CashierShiftModal(props) {
           <div className="mt-2.5 flex flex-wrap gap-2">
             {PRESET_OPENING_FUNDS.map(function renderPreset(presetAmount) {
               const isSelected = Number(openingCashInput) === presetAmount;
-              let buttonTone = "border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515]";
+              let buttonTone = "border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717]";
               if (isSelected) {
-                buttonTone = "border-[#151515] bg-[#151515] text-white font-semibold";
+                buttonTone = "border-[#171717] bg-[#171717] text-white font-semibold";
               }
               return (
                 <button
@@ -232,7 +232,7 @@ export function CashierShiftModal(props) {
         </div>
 
         <div>
-          <span className="block text-xs font-medium text-[#151515] mb-1.5">
+          <span className="block text-xs font-medium text-[#171717] mb-1.5">
             Movement Type
           </span>
           <div role="group" aria-label="Movement Type" className="grid grid-cols-2 gap-2.5">
@@ -345,7 +345,7 @@ export function CashierShiftModal(props) {
 
         <div className="rounded-xl border border-[#E9E9E9] bg-[#EEEEED]/40 p-3.5 space-y-1">
           <div className="text-2xs font-medium text-[#777777]">Expected Cash in Drawer</div>
-          <div className="text-xl font-bold font-mono text-[#151515]">
+          <div className="text-xl font-bold font-mono text-[#171717]">
             {formatPeso(expectedCash)}
           </div>
         </div>
@@ -416,7 +416,7 @@ export function CashierShiftModal(props) {
               <Clock className="h-4 w-4" />
             </div>
             <div>
-              <div className="text-xs font-semibold text-[#151515]">
+              <div className="text-xs font-semibold text-[#171717]">
                 Active Cashier Drawer
               </div>
               <div className="text-2xs text-[#777777]">
@@ -432,7 +432,7 @@ export function CashierShiftModal(props) {
           <div className="text-2xs font-semibold uppercase tracking-wider text-[#777777]">
             Expected Cash in Drawer
           </div>
-          <div className="mt-1 font-mono text-2xl font-bold text-[#151515] sm:text-3xl">
+          <div className="mt-1 font-mono text-2xl font-bold text-[#171717] sm:text-3xl">
             {formatPeso(expectedCash)}
           </div>
           <div className="mt-1 text-3xs text-[#777777]">
@@ -444,7 +444,7 @@ export function CashierShiftModal(props) {
         <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
           <div className="rounded-xl border border-[#E9E9E9] bg-white p-2.5">
             <div className="text-3xs text-[#777777] font-medium">Starting Fund</div>
-            <div className="font-mono font-semibold text-[#151515]">
+            <div className="font-mono font-semibold text-[#171717]">
               {formatPeso(openingCash)}
             </div>
           </div>
@@ -465,7 +465,7 @@ export function CashierShiftModal(props) {
 
           <div className="rounded-xl border border-[#E9E9E9] bg-white p-2.5">
             <div className="text-3xs text-[#777777] font-medium">Cash In (Topups)</div>
-            <div className="font-mono font-semibold text-[#151515]">
+            <div className="font-mono font-semibold text-[#171717]">
               {"+" + formatPeso(cashIn)}
             </div>
           </div>

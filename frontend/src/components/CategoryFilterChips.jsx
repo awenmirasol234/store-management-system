@@ -72,17 +72,17 @@ export function CategoryFilterChips(props) {
   let allChipClass =
     "shrink-0 rounded-full px-4 py-2 text-xs font-medium flex items-center gap-2 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 ";
   if (isAllSelected) {
-    allChipClass = allChipClass + "bg-[#151515] font-semibold text-white shadow-xs";
+    allChipClass = allChipClass + "bg-[#171717] font-semibold text-white shadow-xs";
   } else {
     allChipClass =
-      allChipClass + "bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#151515]";
+      allChipClass + "bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#171717]";
   }
 
   let allCountBadge = null;
   if (counts && counts.ALL !== undefined) {
     let badgeClass = "px-2 py-0.5 rounded-full text-2xs font-mono ";
     if (isAllSelected) {
-      badgeClass = badgeClass + "bg-[#B9F36B] text-[#151515] font-semibold";
+      badgeClass = badgeClass + "bg-[#B9F36B] text-[#171717] font-semibold";
     } else {
       badgeClass = badgeClass + "bg-[#EEEEED] text-[#777777]";
     }
@@ -138,17 +138,17 @@ export function CategoryFilterChips(props) {
         let chipClass =
           "shrink-0 rounded-full px-4 py-2 text-xs font-medium flex items-center gap-2 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 ";
         if (isSelected) {
-          chipClass = chipClass + "bg-[#151515] font-semibold text-white shadow-xs";
+          chipClass = chipClass + "bg-[#171717] font-semibold text-white shadow-xs";
         } else {
           chipClass =
-            chipClass + "bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#151515]";
+            chipClass + "bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#171717]";
         }
 
         let countBadge = null;
         if (counts && counts[categoryId] !== undefined) {
           let badgeClass = "px-2 py-0.5 rounded-full text-2xs font-mono ";
           if (isSelected) {
-            badgeClass = badgeClass + "bg-[#B9F36B] text-[#151515] font-semibold";
+            badgeClass = badgeClass + "bg-[#B9F36B] text-[#171717] font-semibold";
           } else {
             badgeClass = badgeClass + "bg-[#EEEEED] text-[#777777]";
           }

@@ -184,7 +184,7 @@ export function DebugOverlay(props) {
             const isCurrent = step === bp.name;
             let stepClass = "rounded py-1 font-semibold uppercase transition-colors bg-[#262626] text-[#777777]";
             if (isCurrent) {
-              stepClass = "rounded py-1 font-semibold uppercase transition-colors bg-[#B9F36B] text-[#151515] shadow";
+              stepClass = "rounded py-1 font-semibold uppercase transition-colors bg-[#B9F36B] text-[#171717] shadow";
             }
             return (
               <div

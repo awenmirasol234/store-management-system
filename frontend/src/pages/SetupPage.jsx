@@ -74,7 +74,7 @@ export function SetupPage(props) {
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#171717] text-[#B9F36B] shadow-xs">
             <Store className="h-6 w-6" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-[#151515]">Welcome to StoreFlow</h1>
+          <h1 className="text-xl font-bold tracking-tight text-[#171717]">Welcome to StoreFlow</h1>
           <p className="mt-1 text-xs text-[#777777]">
             First-time launch: Set up your initial Store Owner account and security PIN
           </p>
@@ -137,8 +137,8 @@ export function SetupPage(props) {
           </div>
 
           <div className="rounded-xl bg-[#EEEEED]/60 border border-[#E9E9E9] p-3.5 text-xs text-[#777777]">
-            <div className="flex items-center gap-1.5 font-semibold text-[#151515] mb-1">
-              <ShieldCheck className="h-4 w-4 text-[#151515]" />
+            <div className="flex items-center gap-1.5 font-semibold text-[#171717] mb-1">
+              <ShieldCheck className="h-4 w-4 text-[#171717]" />
               <span>Owner Role Privileges</span>
             </div>
             Full store administrative access: manage inventory, profit reports, cashier accounts, and backups.

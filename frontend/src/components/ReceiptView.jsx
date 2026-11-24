@@ -96,7 +96,7 @@ export function ReceiptView(props) {
   let headerNoteElement = null;
   if (settings && settings.receipt_header) {
     headerNoteElement = (
-      <div className="text-2xs text-[#151515] italic pt-1">{settings.receipt_header}</div>
+      <div className="text-2xs text-[#171717] italic pt-1">{settings.receipt_header}</div>
     );
   }
 
@@ -112,7 +112,7 @@ export function ReceiptView(props) {
     } else if (sale.created_by) {
       cashierName = sale.created_by;
     }
-    cashierElement = <div className="text-tiny text-[#151515]">{"Cashier: " + cashierName}</div>;
+    cashierElement = <div className="text-tiny text-[#171717]">{"Cashier: " + cashierName}</div>;
   }
 
   let footerNoteElement = null;
@@ -128,7 +128,7 @@ export function ReceiptView(props) {
     <div className="space-y-5">
       <div
         id="thermal-receipt"
-        className="mx-auto w-full max-w-[300px] rounded-xl border border-[#E9E9E9] bg-white p-5 font-mono text-xs text-[#151515]"
+        className="mx-auto w-full max-w-[300px] rounded-xl border border-[#E9E9E9] bg-white p-5 font-mono text-xs text-[#171717]"
       >
         <div className="text-center border-b border-dashed border-[#E9E9E9] pb-3 mb-3 space-y-0.5">
           <div className="text-sm font-bold uppercase">{storeName}</div>

@@ -64,7 +64,7 @@ export function Sidebar(props) {
     headerElement = (
       <div className="flex flex-col items-center gap-3 py-6">
         <div
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] text-[#151515] shrink-0"
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] text-[#171717] shrink-0"
           title="StoreFlow POS"
         >
           <Store className="h-5 w-5" />
@@ -84,7 +84,7 @@ export function Sidebar(props) {
     headerElement = (
       <div className="flex items-center justify-between px-5 py-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] text-[#151515] shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] text-[#171717] shrink-0">
             <Store className="h-5 w-5" />
           </div>
           <div>
@@ -243,7 +243,7 @@ export function Sidebar(props) {
           let ariaCurrent = undefined;
           if (isActive) {
             ariaCurrent = "page";
-            itemClass = itemClass + "bg-[#B9F36B] text-[#151515] font-semibold shadow-xs";
+            itemClass = itemClass + "bg-[#B9F36B] text-[#171717] font-semibold shadow-xs";
           } else {
             itemClass = itemClass + "text-[#A3A3A3] hover:bg-white/5 hover:text-white";
           }

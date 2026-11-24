@@ -1,20 +1,20 @@
 function getVariantClasses(variant) {
   if (variant === "primary") {
-    return "bg-[#B9F36B] text-[#151515] hover:bg-[#A8E65A] border-transparent shadow-xs active:scale-[0.99]";
+    return "bg-[#B9F36B] text-[#171717] hover:bg-[#A8E65A] border-transparent shadow-xs active:scale-[0.99]";
   }
   if (variant === "secondary") {
-    return "bg-white text-[#151515] hover:bg-[#EEEEED] border-[#E9E9E9]";
+    return "bg-white text-[#171717] hover:bg-[#EEEEED] border-[#E9E9E9]";
   }
   if (variant === "soft") {
-    return "bg-[#EEEEED] text-[#151515] hover:bg-[#E2E2E1] border-transparent";
+    return "bg-[#EEEEED] text-[#171717] hover:bg-[#E2E2E1] border-transparent";
   }
   if (variant === "danger") {
     return "bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-200";
   }
   if (variant === "ghost") {
-    return "bg-transparent text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] border-transparent";
+    return "bg-transparent text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] border-transparent";
   }
-  return "bg-white text-[#151515] hover:bg-[#EEEEED] border-[#E9E9E9]";
+  return "bg-white text-[#171717] hover:bg-[#EEEEED] border-[#E9E9E9]";
 }
 
 function getSizeClasses(size) {

@@ -216,7 +216,7 @@ export function SettingsPage(props) {
   let previewHeaderNote = null;
   if (formData.receipt_header) {
     previewHeaderNote = (
-      <div className="text-2xs text-[#151515] italic pt-1">{formData.receipt_header}</div>
+      <div className="text-2xs text-[#171717] italic pt-1">{formData.receipt_header}</div>
     );
   }
 
@@ -226,7 +226,7 @@ export function SettingsPage(props) {
     if (currentUser && (currentUser.full_name || currentUser.username)) {
       cashierName = currentUser.full_name || currentUser.username;
     }
-    previewCashier = <div className="text-tiny text-[#151515]">{"Cashier: " + cashierName}</div>;
+    previewCashier = <div className="text-tiny text-[#171717]">{"Cashier: " + cashierName}</div>;
   }
 
   let previewFooterNote = null;
@@ -272,8 +272,8 @@ export function SettingsPage(props) {
             {/* Section 1: Store Profile */}
             <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
               <div className="mb-3.5 flex items-center gap-2">
-                <Store className="h-4 w-4 text-[#151515]" />
-                <h2 className="text-base font-semibold text-[#151515]">Store Profile</h2>
+                <Store className="h-4 w-4 text-[#171717]" />
+                <h2 className="text-base font-semibold text-[#171717]">Store Profile</h2>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -343,8 +343,8 @@ export function SettingsPage(props) {
             {/* Section 2: POS & Inventory Preferences */}
             <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
               <div className="mb-3.5 flex items-center gap-2">
-                <Sliders className="h-4 w-4 text-[#151515]" />
-                <h2 className="text-base font-semibold text-[#151515]">POS & Inventory Preferences</h2>
+                <Sliders className="h-4 w-4 text-[#171717]" />
+                <h2 className="text-base font-semibold text-[#171717]">POS & Inventory Preferences</h2>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -376,9 +376,9 @@ export function SettingsPage(props) {
                         handleFieldChange("sound_enabled", val);
                       }}
                       disabled={loading}
-                      className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30 accent-[#151515]"
+                      className="h-4 w-4 rounded border-[#E9E9E9] text-[#171717] focus:ring-[#B9F36B]/30 accent-[#171717]"
                     />
-                    <span className="text-sm text-[#151515]">Play sound on checkout</span>
+                    <span className="text-sm text-[#171717]">Play sound on checkout</span>
                   </label>
                 </div>
               </div>
@@ -387,8 +387,8 @@ export function SettingsPage(props) {
             {/* Section 3: Staff & Access */}
             <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
               <div className="mb-3.5 flex items-center gap-2">
-                <Users className="h-4 w-4 text-[#151515]" />
-                <h2 className="text-base font-semibold text-[#151515]">Staff & Access</h2>
+                <Users className="h-4 w-4 text-[#171717]" />
+                <h2 className="text-base font-semibold text-[#171717]">Staff & Access</h2>
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-4">
@@ -416,8 +416,8 @@ export function SettingsPage(props) {
             {/* Section 4: Database & Disaster Recovery */}
             <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
               <div className="mb-3.5 flex items-center gap-2">
-                <Database className="h-4 w-4 text-[#151515]" />
-                <h2 className="text-base font-semibold text-[#151515]">Database & Disaster Recovery</h2>
+                <Database className="h-4 w-4 text-[#171717]" />
+                <h2 className="text-base font-semibold text-[#171717]">Database & Disaster Recovery</h2>
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-4">
@@ -443,8 +443,8 @@ export function SettingsPage(props) {
           <div className="space-y-4 sm:space-y-5 lg:col-span-5">
             <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
               <div className="mb-3.5 flex items-center gap-2">
-                <Receipt className="h-4 w-4 text-[#151515]" />
-                <h2 className="text-base font-semibold text-[#151515]">Receipt & Thermal Printing</h2>
+                <Receipt className="h-4 w-4 text-[#171717]" />
+                <h2 className="text-base font-semibold text-[#171717]">Receipt & Thermal Printing</h2>
               </div>
 
               <div className="space-y-4">
@@ -481,9 +481,9 @@ export function SettingsPage(props) {
                         handleFieldChange("show_cashier_on_receipt", val);
                       }}
                       disabled={loading}
-                      className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30 accent-[#151515]"
+                      className="h-4 w-4 rounded border-[#E9E9E9] text-[#171717] focus:ring-[#B9F36B]/30 accent-[#171717]"
                     />
-                    <span className="text-sm text-[#151515]">Print cashier name on receipt</span>
+                    <span className="text-sm text-[#171717]">Print cashier name on receipt</span>
                   </label>
                 </div>
 
@@ -494,7 +494,7 @@ export function SettingsPage(props) {
                       <span>Thermal Receipt Preview</span>
                       <Printer className="h-3.5 w-3.5" />
                     </div>
-                    <div className="mx-auto max-w-[240px] rounded-lg border border-[#E9E9E9] bg-white p-3 font-mono text-3xs text-[#151515] shadow-xs">
+                    <div className="mx-auto max-w-[240px] rounded-lg border border-[#E9E9E9] bg-white p-3 font-mono text-3xs text-[#171717] shadow-xs">
                       <div className="border-b border-dashed border-[#E9E9E9] pb-2 text-center space-y-0.5">
                         <div className="text-xs font-bold uppercase">
                           {formData.store_name || "STOREFLOW POS"}

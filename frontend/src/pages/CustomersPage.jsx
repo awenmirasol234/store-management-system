@@ -183,7 +183,7 @@ export function CustomersPage(props) {
     );
   } else {
     tableBodyContent = filteredCustomers.map(function renderCustomerRow(customer) {
-      let balanceClass = "font-mono font-bold text-[#151515]";
+      let balanceClass = "font-mono font-bold text-[#171717]";
       if (customer.current_balance > 0) {
         balanceClass = "font-mono font-bold text-rose-600";
       }
@@ -215,7 +215,7 @@ export function CustomersPage(props) {
       return (
         <tr key={customer.customer_id} className="hover:bg-[#EEEEED]/50 transition-colors">
           <td className="px-5 py-3.5">
-            <div className="font-semibold text-[#151515]">{customer.full_name}</div>
+            <div className="font-semibold text-[#171717]">{customer.full_name}</div>
           </td>
           <td className="px-5 py-3.5 text-xs text-[#777777]">
             <div>{phoneDisplay}</div>
@@ -265,7 +265,7 @@ export function CustomersPage(props) {
     });
 
     mobileCardsContent = filteredCustomers.map(function renderCustomerCard(customer) {
-      let balanceClass = "font-mono text-base font-bold text-[#151515]";
+      let balanceClass = "font-mono text-base font-bold text-[#171717]";
       if (customer.current_balance > 0) {
         balanceClass = "font-mono text-base font-bold text-rose-600";
       }
@@ -299,7 +299,7 @@ export function CustomersPage(props) {
         >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <div className="truncate font-semibold text-[#151515]">{customer.full_name}</div>
+              <div className="truncate font-semibold text-[#171717]">{customer.full_name}</div>
               <div className="mt-0.5 truncate text-xs text-[#777777]">{contactLine}</div>
             </div>
             {statusBadge}
@@ -312,7 +312,7 @@ export function CustomersPage(props) {
             </div>
             <div className="text-right">
               <div className="text-tiny text-[#777777]">Credit Limit</div>
-              <div className="font-mono text-xs font-medium text-[#151515]">{limitDisplay}</div>
+              <div className="font-mono text-xs font-medium text-[#171717]">{limitDisplay}</div>
             </div>
           </div>
 

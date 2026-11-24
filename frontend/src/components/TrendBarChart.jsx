@@ -36,7 +36,7 @@ export function TrendBarChart(props) {
               metaElement = <div className="text-xs text-gray-300">{item.meta}</div>;
             }
             tooltipElement = (
-              <div className="absolute -top-7 z-10 whitespace-nowrap rounded-lg bg-[#151515] px-2 py-1 font-mono text-xs text-white shadow-md">
+              <div className="absolute -top-7 z-10 whitespace-nowrap rounded-lg bg-[#171717] px-2 py-1 font-mono text-xs text-white shadow-md">
                 <div>{item.label}</div>
                 <div className="font-semibold text-[#B9F36B]">{formatPeso(val)}</div>
                 {metaElement}
@@ -46,7 +46,7 @@ export function TrendBarChart(props) {
 
           let barBgClass = "bg-[#B9F36B] hover:bg-[#A6DE5B]";
           if (isHovered) {
-            barBgClass = "bg-[#151515]";
+            barBgClass = "bg-[#171717]";
           }
 
           return (
@@ -108,7 +108,7 @@ export function MultiTrendBarChart(props) {
     <div className="flex flex-col">
       <div className="mb-3 flex items-center justify-end gap-4 text-xs font-medium text-[#777777]">
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded-sm bg-[#151515]" />
+          <div className="h-3 w-3 rounded-sm bg-[#171717]" />
           <span>Sales</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -128,7 +128,7 @@ export function MultiTrendBarChart(props) {
           let multiTooltipElement = null;
           if (isHovered) {
             multiTooltipElement = (
-              <div className="absolute -top-10 z-10 whitespace-nowrap rounded-lg bg-[#151515] p-2 font-mono text-xs text-white shadow-lg">
+              <div className="absolute -top-10 z-10 whitespace-nowrap rounded-lg bg-[#171717] p-2 font-mono text-xs text-white shadow-lg">
                 <div className="text-gray-300">{item.label}</div>
                 <div className="flex gap-2">
                   <span>Sales: {formatPeso(salesVal)}</span>
@@ -154,7 +154,7 @@ export function MultiTrendBarChart(props) {
               <div className="flex h-full w-full max-w-[48px] items-end justify-center gap-1">
                 <div
                   style={{ height: salesHeight + "%" }}
-                  className="flex-1 rounded-t-sm bg-[#151515] hover:opacity-80 transition-all"
+                  className="flex-1 rounded-t-sm bg-[#171717] hover:opacity-80 transition-all"
                 />
                 <div
                   style={{ height: profitHeight + "%" }}

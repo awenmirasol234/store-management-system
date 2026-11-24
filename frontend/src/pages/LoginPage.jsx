@@ -102,7 +102,7 @@ export function LoginPage(props) {
     const isFilled = index < pin.length;
     let dotClass = "h-3.5 w-3.5 rounded-full transition-all ";
     if (isFilled) {
-      dotClass = dotClass + "bg-[#151515] scale-110 shadow-xs";
+      dotClass = dotClass + "bg-[#171717] scale-110 shadow-xs";
     } else {
       dotClass = dotClass + "border-2 border-[#E9E9E9] bg-white";
     }
@@ -127,7 +127,7 @@ export function LoginPage(props) {
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#171717] text-[#B9F36B] shadow-xs">
             <Store className="h-6 w-6" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-[#151515]">StoreFlow</h1>
+          <h1 className="text-xl font-bold tracking-tight text-[#171717]">StoreFlow</h1>
           <p className="mt-1 text-xs text-[#777777]">Sign in with your staff account and PIN</p>
         </div>
 
@@ -153,7 +153,7 @@ export function LoginPage(props) {
                   setUsername(e.target.value);
                 }}
                 placeholder="Enter username"
-                className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2.5 pl-10 pr-3.5 text-sm font-medium text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
+                className="w-full rounded-xl border border-[#E9E9E9] bg-white py-2.5 pl-10 pr-3.5 text-sm font-medium text-[#171717] placeholder:text-[#777777] focus:border-[#171717] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
                 autoComplete="username"
               />
             </div>
@@ -186,7 +186,7 @@ export function LoginPage(props) {
                   onClick={function () {
                     handleKeypadPress(num);
                   }}
-                  className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white font-mono text-xl font-bold text-[#151515] shadow-xs hover:border-[#151515] hover:bg-[#EEEEED] active:scale-95 active:bg-[#151515] active:text-white transition-all cursor-pointer select-none"
+                  className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white font-mono text-xl font-bold text-[#171717] shadow-xs hover:border-[#171717] hover:bg-[#EEEEED] active:scale-95 active:bg-[#171717] active:text-white transition-all cursor-pointer select-none"
                 >
                   {num}
                 </button>
@@ -205,14 +205,14 @@ export function LoginPage(props) {
               onClick={function () {
                 handleKeypadPress(0);
               }}
-              className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white font-mono text-xl font-bold text-[#151515] shadow-xs hover:border-[#151515] hover:bg-[#EEEEED] active:scale-95 active:bg-[#151515] active:text-white transition-all cursor-pointer select-none"
+              className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white font-mono text-xl font-bold text-[#171717] shadow-xs hover:border-[#171717] hover:bg-[#EEEEED] active:scale-95 active:bg-[#171717] active:text-white transition-all cursor-pointer select-none"
             >
               0
             </button>
             <button
               type="button"
               onClick={handleBackspace}
-              className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:border-[#151515] hover:bg-[#EEEEED] hover:text-[#151515] active:scale-95 transition-all cursor-pointer select-none"
+              className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:border-[#171717] hover:bg-[#EEEEED] hover:text-[#171717] active:scale-95 transition-all cursor-pointer select-none"
               title="Backspace"
               aria-label="Backspace"
             >

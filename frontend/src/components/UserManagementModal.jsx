@@ -135,13 +135,13 @@ export function UserManagementModal(props) {
         className="rounded-2xl border border-[#E9E9E9] bg-[#EEEEED]/40 p-4 space-y-3.5"
       >
         <div className="flex items-center justify-between border-b border-[#E9E9E9] pb-2">
-          <span className="text-xs font-bold text-[#151515]">Add New Staff Member</span>
+          <span className="text-xs font-bold text-[#171717]">Add New Staff Member</span>
           <button
             type="button"
             onClick={function () {
               setShowAddForm(false);
             }}
-            className="text-2xs text-[#777777] hover:text-[#151515] cursor-pointer transition-colors"
+            className="text-2xs text-[#777777] hover:text-[#171717] cursor-pointer transition-colors"
           >
             Cancel
           </button>
@@ -242,7 +242,7 @@ export function UserManagementModal(props) {
       let youBadge = null;
       if (isSelf) {
         youBadge = (
-          <span className="text-3xs bg-[#EEEEED] text-[#151515] px-1.5 py-0.5 rounded-md font-medium border border-[#E9E9E9]">
+          <span className="text-3xs bg-[#EEEEED] text-[#171717] px-1.5 py-0.5 rounded-md font-medium border border-[#E9E9E9]">
             You
           </span>
         );
@@ -256,7 +256,7 @@ export function UserManagementModal(props) {
             onClick={function () {
               handleToggleActive(user);
             }}
-            className="text-2xs font-medium text-[#777777] hover:text-[#151515] underline cursor-pointer transition-colors"
+            className="text-2xs font-medium text-[#777777] hover:text-[#171717] underline cursor-pointer transition-colors"
           >
             {toggleLabel}
           </button>
@@ -269,12 +269,12 @@ export function UserManagementModal(props) {
           className="flex items-center justify-between p-3.5 hover:bg-[#EEEEED]/50 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EEEEED] text-xs font-bold text-[#151515]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EEEEED] text-xs font-bold text-[#171717]">
               {user.username.slice(0, 2).toUpperCase()}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-[#151515]">
+                <span className="text-xs font-semibold text-[#171717]">
                   {user.full_name}
                 </span>
                 {youBadge}

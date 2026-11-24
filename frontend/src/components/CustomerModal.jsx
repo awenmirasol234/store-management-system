@@ -170,9 +170,9 @@ export function CustomerModal(props) {
           onChange={function handleActiveChange(event) {
             setIsActive(event.target.checked);
           }}
-          className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30 accent-[#151515]"
+          className="h-4 w-4 rounded border-[#E9E9E9] text-[#171717] focus:ring-[#B9F36B]/30 accent-[#171717]"
         />
-        <label htmlFor="customer-is-active" className="text-xs font-medium text-[#151515] select-none">
+        <label htmlFor="customer-is-active" className="text-xs font-medium text-[#171717] select-none">
           Active Customer (uncheck to disable without losing credit history)
         </label>
       </div>
@@ -219,7 +219,7 @@ export function CustomerModal(props) {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[#151515]">
+          <label className="mb-1.5 block text-xs font-medium text-[#171717]">
             Address / Landmark
           </label>
           <textarea
@@ -229,7 +229,7 @@ export function CustomerModal(props) {
             }}
             placeholder="e.g. Block 4 Lot 12, Purok 2, Near Chapel"
             rows={2}
-            className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
+            className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#171717] placeholder:text-[#777777] focus:border-[#171717] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
           />
         </div>
 

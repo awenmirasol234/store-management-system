@@ -34,7 +34,7 @@ export function NotFoundPage(props) {
     requestedPathElement = (
       <div className="mt-2 text-2xs text-[#777777]">
         Requested path:{" "}
-        <span className="rounded-md bg-[#EEEEED] border border-[#E9E9E9] px-1.5 py-0.5 font-mono text-[#151515]">
+        <span className="rounded-md bg-[#EEEEED] border border-[#E9E9E9] px-1.5 py-0.5 font-mono text-[#171717]">
           {"/" + cleanPath}
         </span>
       </div>
@@ -70,7 +70,7 @@ export function NotFoundPage(props) {
     <PageLayout scroll={true}>
       <div className="flex flex-1 items-center justify-center py-12">
         <div className="w-full max-w-md rounded-2xl border border-[#E9E9E9] bg-white p-8 text-center shadow-xs sm:p-10">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#EEEEED] text-[#151515]">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#EEEEED] text-[#171717]">
             <FileQuestion className="h-8 w-8" />
           </div>
 
@@ -78,7 +78,7 @@ export function NotFoundPage(props) {
             <Badge tone="amber">404 Error</Badge>
           </div>
 
-          <h1 className="text-xl font-bold text-[#151515] sm:text-2xl">Page Not Found</h1>
+          <h1 className="text-xl font-bold text-[#171717] sm:text-2xl">Page Not Found</h1>
 
           <p className="mt-2 text-xs leading-relaxed text-[#777777] sm:text-sm">
             The page or view you are looking for doesn't exist, may have been moved, or you don't

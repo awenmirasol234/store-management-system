@@ -28,7 +28,7 @@ describe("Frontend Auth & Security Component Rendering", function () {
     expect(html).toContain("border-[#E9E9E9]");
     expect(html).toContain("bg-[#171717]");
     expect(html).toContain("bg-[#B9F36B]");
-    expect(html).toContain("text-[#151515]");
+    expect(html).toContain("text-[#171717]");
   });
 
   it("renders SetupPage for first-time Store Owner setup", function () {

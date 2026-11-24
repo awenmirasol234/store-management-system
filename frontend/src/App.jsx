@@ -243,7 +243,7 @@ export function App(props) {
   // Initial SSR or loading check
   if (!authChecked) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[#F5F5F4] text-[#151515]">
+      <div className="flex h-screen w-screen items-center justify-center bg-[#F5F5F4] text-[#171717]">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#171717] text-[#B9F36B]">
             <Store className="h-5 w-5" />
@@ -365,7 +365,7 @@ export function App(props) {
       {/* Mobile Top Header */}
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#262626] bg-[#171717] px-4 text-white select-none md:hidden">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#B9F36B] text-[#151515]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#B9F36B] text-[#171717]">
             <Store className="h-4 w-4" />
           </div>
           <div>

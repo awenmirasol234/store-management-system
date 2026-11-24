@@ -519,7 +519,7 @@ export function InventoryPage(props) {
             <div className="flex items-center gap-3.5">
               <ProductThumb imageUrl={product.image_url} name={product.product_name} size="sm" />
               <div>
-                <div className="text-sm font-semibold text-[#151515]">{product.product_name}</div>
+                <div className="text-sm font-semibold text-[#171717]">{product.product_name}</div>
                 <div className="mt-0.5 font-mono text-xs text-[#777777]">{barcodeText}</div>
               </div>
             </div>
@@ -528,7 +528,7 @@ export function InventoryPage(props) {
           <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right whitespace-nowrap">
             {formatPeso(product.cost_price)}
           </td>
-          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right whitespace-nowrap">
+          <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#171717] text-right whitespace-nowrap">
             {formatPeso(product.selling_price)}
           </td>
           <td className="px-5 py-3.5 text-right whitespace-nowrap">
@@ -558,7 +558,7 @@ export function InventoryPage(props) {
                 onClick={function openMenu(event) {
                   toggleActionMenu(event, product);
                 }}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E9E9E9] bg-white text-[#777777] hover:border-[#151515] hover:bg-[#EEEEED] hover:text-[#151515] transition-colors cursor-pointer"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E9E9E9] bg-white text-[#777777] hover:border-[#171717] hover:bg-[#EEEEED] hover:text-[#171717] transition-colors cursor-pointer"
                 title="More actions"
               >
                 <MoreVertical className="h-4 w-4" />
@@ -585,7 +585,7 @@ export function InventoryPage(props) {
           <div className="flex items-start gap-3">
             <ProductThumb imageUrl={product.image_url} name={product.product_name} size="md" />
             <div className="min-w-0 flex-1">
-              <div className="font-semibold text-[#151515] truncate">{product.product_name}</div>
+              <div className="font-semibold text-[#171717] truncate">{product.product_name}</div>
               <div className="text-xs text-[#777777] font-mono mt-0.5">Barcode: {barcodeText}</div>
               <div className="mt-1 flex items-center gap-2">
                 <Badge tone={getStockBadgeTone(product)} className="font-mono text-xs">
@@ -594,7 +594,7 @@ export function InventoryPage(props) {
               </div>
             </div>
             <div className="text-right">
-              <div className="font-mono font-bold text-[#151515]">
+              <div className="font-mono font-bold text-[#171717]">
                 {formatPeso(product.selling_price)}
               </div>
               <div className="font-mono text-tiny text-[#777777] mt-0.5">
@@ -625,7 +625,7 @@ export function InventoryPage(props) {
               onClick={function openMenu(event) {
                 toggleActionMenu(event, product);
               }}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] transition-colors cursor-pointer"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] transition-colors cursor-pointer"
               title="More actions"
             >
               <MoreVertical className="h-4 w-4" />
@@ -670,7 +670,7 @@ export function InventoryPage(props) {
         {productOptions.map(function renderOpt(option) {
           let inactiveBadge = null;
           let toggleActionLabel = "Disable";
-          let rowTextClass = "text-sm font-medium text-[#151515]";
+          let rowTextClass = "text-sm font-medium text-[#171717]";
           if (option.is_active === false) {
             inactiveBadge = <Badge tone="neutral">Inactive</Badge>;
             toggleActionLabel = "Enable";
@@ -693,7 +693,7 @@ export function InventoryPage(props) {
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
-                <div className="font-mono text-sm font-bold text-[#151515]">
+                <div className="font-mono text-sm font-bold text-[#171717]">
                   {formatPeso(option.price)}
                 </div>
                 <button
@@ -701,7 +701,7 @@ export function InventoryPage(props) {
                   onClick={function toggleOpt() {
                     handleToggleOptionActive(option);
                   }}
-                  className="text-2xs font-medium text-[#777777] hover:text-[#151515] underline cursor-pointer transition-colors"
+                  className="text-2xs font-medium text-[#777777] hover:text-[#171717] underline cursor-pointer transition-colors"
                 >
                   {toggleActionLabel}
                 </button>
@@ -734,14 +734,14 @@ export function InventoryPage(props) {
   let activeProductToggle = null;
   if (productForm.product_id) {
     activeProductToggle = (
-      <label className="flex items-center gap-2.5 py-1 text-xs font-medium text-[#151515] cursor-pointer">
+      <label className="flex items-center gap-2.5 py-1 text-xs font-medium text-[#171717] cursor-pointer">
         <input
           type="checkbox"
           checked={Boolean(productForm.is_active)}
           onChange={function onActiveCheck(event) {
             updateProductField("is_active", event.target.checked);
           }}
-          className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30 accent-[#151515]"
+          className="h-4 w-4 rounded border-[#E9E9E9] text-[#171717] focus:ring-[#B9F36B]/30 accent-[#171717]"
         />
         <span>Active product (available on POS screen)</span>
       </label>
@@ -924,8 +924,8 @@ export function InventoryPage(props) {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-[#151515]">Product Image</label>
-              <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-dashed border-[#E9E9E9] bg-[#EEEEED]/40 px-4 py-3 text-xs text-[#151515] hover:border-[#151515] transition-colors">
+              <label className="mb-1.5 block text-xs font-medium text-[#171717]">Product Image</label>
+              <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-dashed border-[#E9E9E9] bg-[#EEEEED]/40 px-4 py-3 text-xs text-[#171717] hover:border-[#171717] transition-colors">
                 <Upload className="h-4 w-4 text-[#777777]" />
                 <span>{imageUploadLabel}</span>
                 <input
@@ -941,14 +941,14 @@ export function InventoryPage(props) {
               </label>
             </div>
 
-            <label className="flex items-center gap-2.5 py-1 text-xs font-medium text-[#151515] cursor-pointer">
+            <label className="flex items-center gap-2.5 py-1 text-xs font-medium text-[#171717] cursor-pointer">
               <input
                 type="checkbox"
                 checked={productForm.allow_custom_amount}
                 onChange={function onCheck(event) {
                   updateProductField("allow_custom_amount", event.target.checked);
                 }}
-                className="h-4 w-4 rounded border-[#E9E9E9] text-[#151515] focus:ring-[#B9F36B]/30 accent-[#151515]"
+                className="h-4 w-4 rounded border-[#E9E9E9] text-[#171717] focus:ring-[#B9F36B]/30 accent-[#171717]"
               />
               <span>Allow custom peso amount ("Tingi")</span>
             </label>
@@ -1009,7 +1009,7 @@ export function InventoryPage(props) {
           {optionsListContent}
 
           <form onSubmit={handleAddOption} className="space-y-4 border-t border-[#E9E9E9] pt-4">
-            <div className="text-xs font-semibold text-[#151515]">Add Selling Option</div>
+            <div className="text-xs font-semibold text-[#171717]">Add Selling Option</div>
             <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
               <Input
                 label="Option Name"
@@ -1115,7 +1115,7 @@ export function InventoryPage(props) {
         <div className="space-y-4">
           <p className="text-sm text-[#777777]">
             Are you sure you want to remove{" "}
-            <span className="font-semibold text-[#151515]">{deleteProductName}</span>? This
+            <span className="font-semibold text-[#171717]">{deleteProductName}</span>? This
             product will be archived and will no longer appear on the POS screen.
           </p>
           <FormActions
@@ -1157,7 +1157,7 @@ export function InventoryPage(props) {
                 setActionMenu(null);
                 openEditProduct(targetProduct);
               }}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-[#151515] hover:bg-[#EEEEED] transition-colors cursor-pointer text-left"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-[#171717] hover:bg-[#EEEEED] transition-colors cursor-pointer text-left"
             >
               <Pencil className="h-3.5 w-3.5 text-[#777777]" />
               <span>Edit Product</span>
@@ -1171,7 +1171,7 @@ export function InventoryPage(props) {
                 setActionMenu(null);
                 openOptionsModal(targetProduct);
               }}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-[#151515] hover:bg-[#EEEEED] transition-colors cursor-pointer text-left"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-[#171717] hover:bg-[#EEEEED] transition-colors cursor-pointer text-left"
             >
               <Layers className="h-3.5 w-3.5 text-[#777777]" />
               <span>Selling Options</span>
@@ -1185,7 +1185,7 @@ export function InventoryPage(props) {
                 setActionMenu(null);
                 openAdjustModal(targetProduct);
               }}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-[#151515] hover:bg-[#EEEEED] transition-colors cursor-pointer text-left"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-[#171717] hover:bg-[#EEEEED] transition-colors cursor-pointer text-left"
             >
               <SlidersHorizontal className="h-3.5 w-3.5 text-[#777777]" />
               <span>Adjust Stock</span>

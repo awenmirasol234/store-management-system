@@ -108,14 +108,14 @@ export function RecordPaymentModal(props) {
       );
     } else {
       balanceStatusElement = (
-        <span className="font-semibold text-[#151515]">{formatPeso(remainingBalance)}</span>
+        <span className="font-semibold text-[#171717]">{formatPeso(remainingBalance)}</span>
       );
     }
   } else {
     balanceStatusElement = <span className="text-[#777777]">Enter amount above</span>;
   }
 
-  let currentBalanceClass = "font-mono text-base font-bold text-[#151515]";
+  let currentBalanceClass = "font-mono text-base font-bold text-[#171717]";
   if (currentBalance > 0) {
     currentBalanceClass = "font-mono text-base font-bold text-rose-600";
   }
@@ -128,7 +128,7 @@ export function RecordPaymentModal(props) {
         {/* Customer Balance Summary Card */}
         <div className="rounded-xl border border-[#E9E9E9] bg-[#EEEEED]/40 p-4">
           <div className="text-xs font-medium text-[#777777]">Customer</div>
-          <div className="text-base font-bold text-[#151515]">{customerName}</div>
+          <div className="text-base font-bold text-[#171717]">{customerName}</div>
           <div className="mt-3 flex items-center justify-between border-t border-[#E9E9E9] pt-3">
             <span className="text-xs text-[#777777]">Current Utang Balance:</span>
             <span className={currentBalanceClass}>
@@ -139,7 +139,7 @@ export function RecordPaymentModal(props) {
 
         {/* Preset Payment Buttons */}
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[#151515]">
+          <label className="mb-1.5 block text-xs font-medium text-[#171717]">
             Quick Amount Presets
           </label>
           <div className="flex flex-wrap gap-2">
@@ -149,7 +149,7 @@ export function RecordPaymentModal(props) {
                 setAmount(String(currentBalance));
               }}
               disabled={currentBalance <= 0}
-              className="rounded-full border border-[#151515] bg-[#151515] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#262626] disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition-colors"
+              className="rounded-full border border-[#171717] bg-[#171717] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#262626] disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition-colors"
             >
               {"Full Balance (" + formatPeso(currentBalance) + ")"}
             </button>
@@ -163,7 +163,7 @@ export function RecordPaymentModal(props) {
                     setAmount(String(preset));
                   }}
                   disabled={isExceeded}
-                  className="rounded-full border border-[#E9E9E9] bg-white px-3.5 py-1.5 text-xs font-medium text-[#151515] hover:bg-[#EEEEED] disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition-colors"
+                  className="rounded-full border border-[#E9E9E9] bg-white px-3.5 py-1.5 text-xs font-medium text-[#171717] hover:bg-[#EEEEED] disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition-colors"
                 >
                   {"₱" + String(preset)}
                 </button>

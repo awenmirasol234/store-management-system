@@ -792,7 +792,7 @@ export function PosPage(props) {
       <button
         type="button"
         onClick={openDiscountModal}
-        className="inline-flex items-center gap-1 font-medium text-[#777777] hover:text-[#151515] cursor-pointer transition-colors"
+        className="inline-flex items-center gap-1 font-medium text-[#777777] hover:text-[#171717] cursor-pointer transition-colors"
       >
         <Tag className="h-3 w-3" />
         <span>+ Add Discount</span>
@@ -805,12 +805,12 @@ export function PosPage(props) {
         <button
           type="button"
           onClick={openDiscountModal}
-          className="inline-flex items-center gap-1 font-medium text-[#777777] hover:text-[#151515] underline cursor-pointer transition-colors"
+          className="inline-flex items-center gap-1 font-medium text-[#777777] hover:text-[#171717] underline cursor-pointer transition-colors"
         >
           <Tag className="h-3 w-3" />
           <span>Discount (Edit)</span>
         </button>
-        <span className="font-mono font-medium text-[#151515]">
+        <span className="font-mono font-medium text-[#171717]">
           {"-" + formatPeso(totals.discount)}
         </span>
       </div>
@@ -839,7 +839,7 @@ export function PosPage(props) {
           return (
             <div
               key={product.product_id}
-              className="flex flex-col overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white text-left transition-all hover:border-[#151515]/30 hover:shadow-xs justify-between"
+              className="flex flex-col overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white text-left transition-all hover:border-[#171717]/30 hover:shadow-xs justify-between"
             >
               <div>
                 <div
@@ -859,13 +859,13 @@ export function PosPage(props) {
                     />
                   </div>
                   <div className="p-2.5 sm:p-3 pb-0 sm:pb-0">
-                    <div className="truncate text-xs font-medium text-[#151515]">
+                    <div className="truncate text-xs font-medium text-[#171717]">
                       {product.product_name}
                     </div>
                     <div className="mt-0.5 truncate text-2xs text-[#777777]">
                       {categoryName}
                     </div>
-                    <div className="mt-1 font-mono text-sm font-semibold text-[#151515]">
+                    <div className="mt-1 font-mono text-sm font-semibold text-[#171717]">
                       {formatPeso(product.selling_price)}
                     </div>
                   </div>
@@ -877,7 +877,7 @@ export function PosPage(props) {
                   onClick={function onAddClick(event) {
                     handleProductCardClick(product, event);
                   }}
-                  className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1.5 text-xs font-semibold text-[#151515] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
+                  className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1.5 text-xs font-semibold text-[#171717] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
                 >
                   <Plus className="h-3 w-3" />
                   <span>Add to Cart</span>
@@ -921,7 +921,7 @@ export function PosPage(props) {
         <div key={item.key} className="flex items-center gap-3.5 py-3.5">
           <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
           <div className="min-w-0 flex-1">
-            <div className="truncate text-xs font-semibold text-[#151515]">
+            <div className="truncate text-xs font-semibold text-[#171717]">
               {item.product_name}
             </div>
             <div className="mt-0.5 truncate text-2xs text-[#777777]">{item.option_label}</div>
@@ -939,7 +939,7 @@ export function PosPage(props) {
             >
               <Trash2 className="h-4 w-4" />
             </button>
-            <div className="font-mono text-sm font-semibold text-[#151515]">
+            <div className="font-mono text-sm font-semibold text-[#171717]">
               {formatPeso(lineSubtotal)}
             </div>
           </div>
@@ -1028,9 +1028,9 @@ export function PosPage(props) {
     let baseCardClass =
       "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors cursor-pointer ";
     if (isBaseSelected) {
-      baseCardClass = baseCardClass + "border-[#151515] bg-[#EEEEED]/40 shadow-2xs";
+      baseCardClass = baseCardClass + "border-[#171717] bg-[#EEEEED]/40 shadow-2xs";
     } else {
-      baseCardClass = baseCardClass + "border-[#E9E9E9] hover:border-[#151515] hover:bg-[#EEEEED]";
+      baseCardClass = baseCardClass + "border-[#E9E9E9] hover:border-[#171717] hover:bg-[#EEEEED]";
     }
 
     pickerBody = (
@@ -1063,13 +1063,13 @@ export function PosPage(props) {
                       setErrorBanner("");
                     }
                   }}
-                  className="h-4 w-4 accent-[#151515] cursor-pointer"
+                  className="h-4 w-4 accent-[#171717] cursor-pointer"
                 />
-                <span className="text-sm font-medium text-[#151515]">
+                <span className="text-sm font-medium text-[#171717]">
                   {"1 " + pickerState.product.base_unit + " (Default)"}
                 </span>
               </div>
-              <span className="font-mono text-sm font-bold text-[#151515]">
+              <span className="font-mono text-sm font-bold text-[#171717]">
                 {formatPeso(pickerState.product.selling_price)}
               </span>
             </label>
@@ -1079,9 +1079,9 @@ export function PosPage(props) {
               let optionCardClass =
                 "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors cursor-pointer ";
               if (isOptionSelected) {
-                optionCardClass = optionCardClass + "border-[#151515] bg-[#EEEEED]/40 shadow-2xs";
+                optionCardClass = optionCardClass + "border-[#171717] bg-[#EEEEED]/40 shadow-2xs";
               } else {
-                optionCardClass = optionCardClass + "border-[#E9E9E9] hover:border-[#151515] hover:bg-[#EEEEED]";
+                optionCardClass = optionCardClass + "border-[#E9E9E9] hover:border-[#171717] hover:bg-[#EEEEED]";
               }
 
               return (
@@ -1111,16 +1111,16 @@ export function PosPage(props) {
                           setErrorBanner("");
                         }
                       }}
-                      className="h-4 w-4 accent-[#151515] cursor-pointer"
+                      className="h-4 w-4 accent-[#171717] cursor-pointer"
                     />
                     <div>
-                      <div className="text-sm font-medium text-[#151515]">{option.option_name}</div>
+                      <div className="text-sm font-medium text-[#171717]">{option.option_name}</div>
                       <div className="mt-0.5 font-mono text-xs text-[#777777]">
                         {formatQuantityWithUnit(option.quantity, pickerState.product.base_unit)}
                       </div>
                     </div>
                   </div>
-                  <span className="font-mono text-sm font-bold text-[#151515]">
+                  <span className="font-mono text-sm font-bold text-[#171717]">
                     {formatPeso(option.price)}
                   </span>
                 </label>
@@ -1157,7 +1157,7 @@ export function PosPage(props) {
           return (
             <div key={product.product_id} className="flex items-center justify-between py-3.5">
               <div>
-                <div className="text-sm font-semibold text-[#151515]">{product.product_name}</div>
+                <div className="text-sm font-semibold text-[#171717]">{product.product_name}</div>
                 <div className="mt-0.5 font-mono text-xs text-[#777777]">
                   Reorder at {formatQuantityWithUnit(product.reorder_level, product.base_unit)}
                 </div>
@@ -1184,14 +1184,14 @@ export function PosPage(props) {
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs">
           <span className="text-[#777777]">Subtotal</span>
-          <span className="font-mono font-medium text-[#151515]">
+          <span className="font-mono font-medium text-[#171717]">
             {formatPeso(totals.subtotal)}
           </span>
         </div>
         {discountSummaryRow}
         <div className="flex items-center justify-between pt-2">
-          <span className="text-base font-bold text-[#151515]">Total</span>
-          <span className="font-mono text-xl font-bold text-[#151515]">
+          <span className="text-base font-bold text-[#171717]">Total</span>
+          <span className="font-mono text-xl font-bold text-[#171717]">
             {formatPeso(totals.total)}
           </span>
         </div>
@@ -1221,7 +1221,7 @@ export function PosPage(props) {
   let mobileCartBar = null;
   if (cartItems.length > 0) {
     let mobileButtonClass =
-      "flex w-full items-center justify-between rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] px-4 py-3 font-semibold text-[#151515] shadow-xs active:scale-[0.99] cursor-pointer transition-all";
+      "flex w-full items-center justify-between rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] px-4 py-3 font-semibold text-[#171717] shadow-xs active:scale-[0.99] cursor-pointer transition-all";
     if (cartBadgeBumping) {
       mobileButtonClass = mobileButtonClass + " scale-[1.03]";
     }
@@ -1305,7 +1305,7 @@ export function PosPage(props) {
       <button
         type="button"
         onClick={props.onOpenShiftModal}
-        className="flex h-11 items-center gap-2 rounded-xl border border-[#E9E9E9] bg-white px-3.5 text-xs font-medium text-[#151515] hover:bg-[#EEEEED] cursor-pointer shadow-xs shrink-0 transition-colors"
+        className="flex h-11 items-center gap-2 rounded-xl border border-[#E9E9E9] bg-white px-3.5 text-xs font-medium text-[#171717] hover:bg-[#EEEEED] cursor-pointer shadow-xs shrink-0 transition-colors"
         title="Cash Drawer & Shift Reconciliation"
       >
         <Wallet className={"h-4 w-4 " + shiftIconClass} />
@@ -1324,14 +1324,14 @@ export function PosPage(props) {
     let badgeCounter = null;
     if (cartItems.length > 0) {
       badgeCounter = (
-        <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#151515] px-1 font-mono text-3xs font-bold text-white shadow-xs">
+        <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#171717] px-1 font-mono text-3xs font-bold text-white shadow-xs">
           {cartItems.length}
         </span>
       );
     }
 
     let collapsedBadgeClass =
-      "relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-[#EEEEED] text-[#151515] hover:bg-[#E2E2E1] transition-all";
+      "relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-[#EEEEED] text-[#171717] hover:bg-[#E2E2E1] transition-all";
     if (cartBadgeBumping) {
       collapsedBadgeClass = collapsedBadgeClass + " scale-110 ring-2 ring-[#B9F36B]";
     }
@@ -1348,7 +1348,7 @@ export function PosPage(props) {
             onClick={function expandCart() {
               setCartCollapsed(false);
             }}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#151515] hover:bg-[#EEEEED] cursor-pointer shadow-xs transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#171717] hover:bg-[#EEEEED] cursor-pointer shadow-xs transition-colors"
             title="Expand Cart Panel"
             aria-label="Expand Cart Panel"
           >
@@ -1379,7 +1379,7 @@ export function PosPage(props) {
             {cartItems.length} {itemUnitLabel}
           </span>
           <span
-            className="font-mono text-xs font-bold text-[#151515] break-all px-0.5"
+            className="font-mono text-xs font-bold text-[#171717] break-all px-0.5"
             title={"Total: " + formatPeso(totals.total)}
           >
             {formatCompactPeso(totals.total)}
@@ -1392,7 +1392,7 @@ export function PosPage(props) {
             type="button"
             onClick={openCheckoutModal}
             disabled={cartItems.length === 0}
-            className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] text-[#151515] shadow-xs disabled:opacity-30 disabled:pointer-events-none cursor-pointer active:scale-95 transition-all"
+            className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] text-[#171717] shadow-xs disabled:opacity-30 disabled:pointer-events-none cursor-pointer active:scale-95 transition-all"
             title="Proceed to Checkout"
             aria-label="Proceed to Checkout"
           >
@@ -1402,7 +1402,7 @@ export function PosPage(props) {
       </aside>
     );
   } else {
-    let expandedTitleClass = "text-base font-semibold text-[#151515] transition-transform duration-200";
+    let expandedTitleClass = "text-base font-semibold text-[#171717] transition-transform duration-200";
     if (cartBadgeBumping) {
       expandedTitleClass = expandedTitleClass + " scale-105";
     }
@@ -1416,7 +1416,7 @@ export function PosPage(props) {
               onClick={function collapseCart() {
                 setCartCollapsed(true);
               }}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] cursor-pointer transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] cursor-pointer transition-colors"
               title="Collapse Cart Panel"
               aria-label="Collapse Cart Panel"
             >
@@ -1465,7 +1465,7 @@ export function PosPage(props) {
               onClick={function openLowStock() {
                 setLowStockModalOpen(true);
               }}
-              className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] cursor-pointer shrink-0 transition-colors"
+              className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] cursor-pointer shrink-0 transition-colors"
               title="Low Stock Alerts"
               aria-label="Low Stock Alerts"
             >
@@ -1618,7 +1618,7 @@ export function PosPage(props) {
         <div className="space-y-4">
           <p className="text-sm text-[#777777]">
             Are you sure you want to clear all{" "}
-            <span className="font-semibold text-[#151515] font-mono">
+            <span className="font-semibold text-[#171717] font-mono">
               {cartItems.length}
             </span>{" "}
             item(s) from the current sale? Any applied discounts will also be removed.

@@ -28,7 +28,7 @@ Design tokens are declared in `frontend/src/index.css` inside the `@theme` block
 | `--color-surface` | `#FFFFFF` | `bg-white` | Cards, modals, cart panel, input fields |
 | `--color-surface-secondary`| `#EEEEED` | `bg-[#EEEEED]` | Image placeholders, neutral icon containers |
 | `--color-sidebar` | `#171717` | `bg-[#171717]` | Persistent desktop sidebar, mobile bottom navigation |
-| `--color-text-primary` | `#151515` | `text-[#151515]` | Headings, product titles, prices, totals |
+| `--color-text-primary` | `#171717` | `text-[#171717]` | Headings, product titles, prices, totals |
 | `--color-text-secondary`| `#777777` | `text-[#777777]` | Subtitles, base unit descriptions, category counts |
 | `--color-border` | `#E9E9E9` | `border-[#E9E9E9]` | 1px hairline borders, card outlines, table dividers |
 
@@ -77,25 +77,25 @@ Design tokens are declared in `frontend/src/index.css` inside the `@theme` block
 ### 4.1 Buttons (`frontend/src/components/Button.jsx`)
 - Border radius: `rounded-xl` (14px).
 - Variants:
-  - `primary`: `bg-[#B9F36B] hover:bg-[#A8E65A] text-[#151515] font-semibold shadow-xs`.
-  - `secondary`: `bg-white hover:bg-[#EEEEED] text-[#151515] border border-[#E9E9E9]`.
-  - `ghost`: `bg-transparent hover:bg-[#EEEEED] text-[#777777] hover:text-[#151515]`.
+  - `primary`: `bg-[#B9F36B] hover:bg-[#A8E65A] text-[#171717] font-semibold shadow-xs`.
+  - `secondary`: `bg-white hover:bg-[#EEEEED] text-[#171717] border border-[#E9E9E9]`.
+  - `ghost`: `bg-transparent hover:bg-[#EEEEED] text-[#777777] hover:text-[#171717]`.
   - `danger`: `bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200`.
 
 ### 4.2 Product Cards (`frontend/src/pages/PosPage.jsx`)
-- Container: `rounded-2xl border border-[#E9E9E9] bg-white p-3.5 hover:border-[#151515]/30 hover:shadow-xs`.
+- Container: `rounded-2xl border border-[#E9E9E9] bg-white p-3.5 hover:border-[#171717]/30 hover:shadow-xs`.
 - Media container: `aspect-square rounded-xl bg-[#EEEEED] relative flex items-center justify-center`.
 - Stock Badge: `absolute left-2 top-2 rounded-md bg-[#171717] px-2 py-0.5 font-mono text-2xs text-white`.
 - Action: Full-width button `py-2 rounded-xl border border-[#E9E9E9] text-xs font-semibold`.
 
 ### 4.3 Category & Status Filter Pills (`frontend/src/components/CategoryFilterChips.jsx`, `frontend/src/components/FilterPill.jsx`)
 - Pill Shape: `rounded-full` with `aria-pressed` state on toggle pills.
-- Selected: `bg-[#151515] text-white` (`px-4 py-2` for category chips, `px-3.5 py-1.5` for status/method pills).
-- Inactive: `bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#151515]`.
-- Pill Count Badge: `bg-[#B9F36B] text-[#151515]` when active; `bg-[#EEEEED] text-[#777777]` when inactive.
+- Selected: `bg-[#171717] text-white` (`px-4 py-2` for category chips, `px-3.5 py-1.5` for status/method pills).
+- Inactive: `bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#171717]`.
+- Pill Count Badge: `bg-[#B9F36B] text-[#171717]` when active; `bg-[#EEEEED] text-[#777777]` when inactive.
 
 ### 4.4 Modals (`frontend/src/components/Modal.jsx`)
-- Backdrop: `fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-3 sm:p-6` (supports Escape key and backdrop click-to-close).
+- Backdrop: `fixed inset-0 z-50 flex items-center justify-center bg-[#171717]/40 backdrop-blur-[2px] p-3 sm:p-6` (supports Escape key and backdrop click-to-close).
 - Card Container: `w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col` (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`).
 - **Padding Rule**: `Modal.jsx` owns all content padding (`p-4 sm:p-6`). Modal children must never introduce conflicting outer padding.
 - Sizes: `sm` (`max-w-sm`), `md` (`max-w-md`), `lg` (`max-w-lg`, default), `xl` (`max-w-2xl` for checkout cockpit).
@@ -103,7 +103,7 @@ Design tokens are declared in `frontend/src/index.css` inside the `@theme` block
 ### 4.5 Status Badges (`frontend/src/components/Badge.jsx`)
 - `neutral`: `bg-[#EEEEED] text-[#777777] border border-[#E9E9E9]`.
 - `dark`: `bg-[#171717] text-white`.
-- `green`: `bg-[#B9F36B] text-[#151515]`.
+- `green`: `bg-[#B9F36B] text-[#171717]`.
 - `amber`: `bg-amber-50 text-amber-700 border border-amber-200`.
 - `red`: `bg-rose-50 text-rose-700 border border-rose-200`.
 

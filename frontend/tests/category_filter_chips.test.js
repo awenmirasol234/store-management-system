@@ -36,7 +36,7 @@ describe("CategoryFilterChips component", function () {
         selectedCategoryId: "cat_snacks"
       })
     );
-    expect(html).toContain("bg-[#151515]");
+    expect(html).toContain("bg-[#171717]");
     expect(html).toContain("Snacks");
   });
 

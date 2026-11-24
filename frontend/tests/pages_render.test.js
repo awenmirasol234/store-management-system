@@ -8,7 +8,7 @@ import { ReportsPage } from "../src/pages/ReportsPage.jsx";
 import { TransactionsPage } from "../src/pages/TransactionsPage.jsx";
 
 describe("Refactored page rendering", function () {
-  it("renders DashboardPage with stats cards using default text-[#151515] without color tones", function () {
+  it("renders DashboardPage with stats cards using default text-[#171717] without color tones", function () {
     const html = renderToString(React.createElement(DashboardPage));
     expect(html).toContain("Dashboard");
     expect(html).toContain("Today&#x27;s Sales");
@@ -16,7 +16,7 @@ describe("Refactored page rendering", function () {
     expect(html).toContain("Transactions");
     expect(html).toContain("Items Sold");
     expect(html).toContain("Top Selling Products");
-    expect(html).toContain("text-[#151515]");
+    expect(html).toContain("text-[#171717]");
     expect(html).not.toContain("text-blue-600");
     expect(html).not.toContain("text-emerald-600");
     expect(html).not.toContain("text-amber-600");
@@ -43,7 +43,7 @@ describe("Refactored page rendering", function () {
     expect(html).toContain('role="tablist"');
     expect(html).toContain('shrink-0 items-center overflow-x-auto');
     expect(html).toContain('role="tab"');
-    expect(html).toContain("text-[#151515]");
+    expect(html).toContain("text-[#171717]");
     expect(html).not.toContain("text-blue-600");
     expect(html).not.toContain("text-emerald-600");
     expect(html).not.toContain("text-amber-600");
@@ -91,11 +91,11 @@ describe("Refactored page rendering", function () {
     expect(reportsHtml).not.toContain("space-y-4 p-5");
   });
 
-  it("renders StatCard value strictly with text-[#151515] and no color tone classes", function () {
+  it("renders StatCard value strictly with text-[#171717] and no color tone classes", function () {
     const defaultHtml = renderToString(
       React.createElement(StatCard, { label: "Sales", value: "₱1,000.00" })
     );
-    expect(defaultHtml).toContain("text-[#151515]");
+    expect(defaultHtml).toContain("text-[#171717]");
     expect(defaultHtml).not.toContain("text-blue-600");
     expect(defaultHtml).not.toContain("text-emerald-600");
     expect(defaultHtml).not.toContain("text-amber-600");
@@ -103,7 +103,7 @@ describe("Refactored page rendering", function () {
     const toneHtml = renderToString(
       React.createElement(StatCard, { label: "Profit", value: "₱500.00", tone: "green" })
     );
-    expect(toneHtml).toContain("text-[#151515]");
+    expect(toneHtml).toContain("text-[#171717]");
     expect(toneHtml).not.toContain("text-emerald-600");
   });
 });

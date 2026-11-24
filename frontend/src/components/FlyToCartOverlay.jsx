@@ -128,7 +128,7 @@ export function FlyToCartOverlay(props) {
     >
       <div
         style={flyerStyle}
-        className="flex items-center justify-center rounded-xl border border-[#151515]/15 bg-white p-0.5 shadow-md shadow-black/10 select-none overflow-hidden"
+        className="flex items-center justify-center rounded-xl border border-[#171717]/15 bg-white p-0.5 shadow-md shadow-[#171717]/10 select-none overflow-hidden"
       >
         <ProductThumb
           imageUrl={productImageUrl}

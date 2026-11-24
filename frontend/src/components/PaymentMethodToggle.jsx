@@ -15,9 +15,9 @@ export function PaymentMethodToggle(props) {
         let buttonClass =
           "flex flex-col items-center gap-1.5 rounded-xl border py-2 text-xs font-medium cursor-pointer transition-colors ";
         if (isSelected) {
-          buttonClass = buttonClass + "border-[#151515] bg-[#151515] text-white font-semibold shadow-xs";
+          buttonClass = buttonClass + "border-[#171717] bg-[#171717] text-white font-semibold shadow-xs";
         } else {
-          buttonClass = buttonClass + "border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515]";
+          buttonClass = buttonClass + "border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717]";
         }
         return (
           <button

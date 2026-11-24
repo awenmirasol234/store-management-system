@@ -99,7 +99,7 @@ function OpenModal(props) {
       onCancel={handleCancel}
       onKeyDown={keepTabInside}
       onClick={handleBackdropClick}
-      className="fixed inset-0 m-0 h-full w-full max-h-none max-w-none bg-black/40 backdrop-blur-[2px] p-3 open:flex items-center justify-center sm:p-6 backdrop:bg-transparent"
+      className="fixed inset-0 m-0 h-full w-full max-h-none max-w-none bg-[#171717]/40 backdrop-blur-[2px] p-3 open:flex items-center justify-center sm:p-6 backdrop:bg-transparent"
     >
       <div
         className={
@@ -108,7 +108,7 @@ function OpenModal(props) {
         }
       >
         <div className="flex items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 sm:px-6 sm:py-4">
-          <h2 id={titleId} className="text-base font-semibold text-[#151515]">
+          <h2 id={titleId} className="text-base font-semibold text-[#171717]">
             {props.title}
           </h2>
           <button
@@ -117,7 +117,7 @@ function OpenModal(props) {
             disabled={props.dismissDisabled}
             title="Close"
             aria-label="Close modal"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] cursor-pointer transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] cursor-pointer transition-colors"
           >
             <X className="h-4 w-4" />
           </button>

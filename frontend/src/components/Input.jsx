@@ -30,7 +30,7 @@ export function Input(props) {
   let labelElement = null;
   if (props.label) {
     labelElement = (
-      <label htmlFor={inputId} className="mb-1.5 block text-xs font-medium text-[#151515]">
+      <label htmlFor={inputId} className="mb-1.5 block text-xs font-medium text-[#171717]">
         {props.label}
       </label>
     );
@@ -64,7 +64,7 @@ export function Input(props) {
         required={props.required}
         disabled={props.disabled}
         className={
-          "w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors" +
+          "w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#171717] placeholder:text-[#777777] focus:border-[#171717] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors" +
           fontClass +
           customInputClass
         }

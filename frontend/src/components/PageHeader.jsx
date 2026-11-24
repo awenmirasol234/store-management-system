@@ -41,7 +41,7 @@ export function PageHeader(props) {
     <div className={containerClass}>
       <div className="min-w-0">
         <div className="flex items-center gap-2.5">
-          <h1 className="text-xl font-bold text-[#151515]">{props.title}</h1>
+          <h1 className="text-xl font-bold text-[#171717]">{props.title}</h1>
           {badgeElement}
         </div>
         {subtitleElement}

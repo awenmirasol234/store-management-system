@@ -255,9 +255,9 @@ export function ReportsPage() {
       basePresetClass = "flex items-center gap-1.5 " + basePresetClass;
     }
     if (activePreset === presetKey) {
-      return basePresetClass + "bg-[#151515] text-white";
+      return basePresetClass + "bg-[#171717] text-white";
     }
-    return basePresetClass + "text-[#777777] hover:text-[#151515] hover:bg-[#EEEEED]";
+    return basePresetClass + "text-[#777777] hover:text-[#171717] hover:bg-[#EEEEED]";
   }
 
   let customPresetLabel = "Custom";
@@ -267,9 +267,9 @@ export function ReportsPage() {
 
   function getTabButtonClass(tabId) {
     if (activeTab === tabId) {
-      return "shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold bg-[#151515] text-white cursor-pointer transition-colors";
+      return "shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold bg-[#171717] text-white cursor-pointer transition-colors";
     }
-    return "shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-[#777777] hover:text-[#151515] hover:bg-[#EEEEED] cursor-pointer transition-colors";
+    return "shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-[#777777] hover:text-[#171717] hover:bg-[#EEEEED] cursor-pointer transition-colors";
   }
 
   let activeTabContent = null;
@@ -282,9 +282,9 @@ export function ReportsPage() {
       dailyRowsContent = dailyRows.map(function (row) {
         return (
           <tr key={row.date} className="hover:bg-[#EEEEED]/40 transition-colors">
-            <td className="px-5 py-3.5 font-mono text-sm font-medium text-[#151515]">{formatSmartDate(row.date)}</td>
+            <td className="px-5 py-3.5 font-mono text-sm font-medium text-[#171717]">{formatSmartDate(row.date)}</td>
             <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{row.sale_count}</td>
-            <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right">{formatPeso(row.gross_sales)}</td>
+            <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#171717] text-right">{formatPeso(row.gross_sales)}</td>
             <td className="px-5 py-3.5 font-mono text-sm font-semibold text-emerald-700 text-right">{formatPeso(row.profit)}</td>
           </tr>
         );
@@ -302,14 +302,14 @@ export function ReportsPage() {
 
         <section className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
           <div className="mb-2">
-            <h3 className="text-base font-semibold text-[#151515]">Sales & Profit Trend</h3>
+            <h3 className="text-base font-semibold text-[#171717]">Sales & Profit Trend</h3>
             <p className="text-xs text-[#777777]">Comparing daily gross sales against gross profit</p>
           </div>
           <MultiTrendBarChart data={trendChartData} />
         </section>
 
         <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
-          <div className="border-b border-[#E9E9E9] px-5 py-3.5 text-sm font-semibold text-[#151515]">
+          <div className="border-b border-[#E9E9E9] px-5 py-3.5 text-sm font-semibold text-[#171717]">
             Daily Sales Breakdown
           </div>
           <div className="overflow-x-auto">
@@ -343,7 +343,7 @@ export function ReportsPage() {
       productRowsContent = filteredTopProducts.map(function (item) {
         return (
           <tr key={item.product_id} className="hover:bg-[#EEEEED]/40 transition-colors">
-            <td className="px-5 py-3.5 text-sm font-medium text-[#151515]">
+            <td className="px-5 py-3.5 text-sm font-medium text-[#171717]">
               <div className="flex items-center gap-3">
                 <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
                 <span className="truncate">{item.product_name}</span>
@@ -352,7 +352,7 @@ export function ReportsPage() {
             <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">
               {formatQuantityWithUnit(item.quantity_sold, item.base_unit)}
             </td>
-            <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right">
+            <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#171717] text-right">
               {formatPeso(item.revenue)}
             </td>
             <td className="px-5 py-3.5 font-mono text-sm font-semibold text-emerald-700 text-right">
@@ -366,7 +366,7 @@ export function ReportsPage() {
     activeTabContent = (
       <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
         <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 gap-2">
-          <div className="text-sm font-semibold text-[#151515]">Product Performance</div>
+          <div className="text-sm font-semibold text-[#171717]">Product Performance</div>
           <SearchInput
             size="sm"
             placeholder="Search products..."
@@ -399,9 +399,9 @@ export function ReportsPage() {
       categorySalesContent = categorySales.map(function (cat) {
         return (
           <tr key={cat.category_id} className="hover:bg-[#EEEEED]/40 transition-colors">
-            <td className="px-5 py-3.5 text-sm font-medium text-[#151515]">{cat.category_name}</td>
+            <td className="px-5 py-3.5 text-sm font-medium text-[#171717]">{cat.category_name}</td>
             <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{formatQuantity(cat.quantity_sold)}</td>
-            <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515] text-right">{formatPeso(cat.revenue)}</td>
+            <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#171717] text-right">{formatPeso(cat.revenue)}</td>
             <td className="px-5 py-3.5 font-mono text-sm font-semibold text-emerald-700 text-right">{formatPeso(cat.profit)}</td>
           </tr>
         );
@@ -410,7 +410,7 @@ export function ReportsPage() {
 
     activeTabContent = (
       <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
-        <div className="border-b border-[#E9E9E9] px-5 py-3.5 text-sm font-semibold text-[#151515]">
+        <div className="border-b border-[#E9E9E9] px-5 py-3.5 text-sm font-semibold text-[#171717]">
           Sales by Category
         </div>
         <div className="overflow-x-auto">
@@ -440,7 +440,7 @@ export function ReportsPage() {
 
         <section className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
           <div className="mb-2">
-            <h3 className="text-base font-semibold text-[#151515]">Profit Trend Analysis</h3>
+            <h3 className="text-base font-semibold text-[#171717]">Profit Trend Analysis</h3>
             <p className="text-xs text-[#777777]">Revenue vs Profit generation across selected range</p>
           </div>
           <MultiTrendBarChart data={trendChartData} />
@@ -484,7 +484,7 @@ export function ReportsPage() {
           badgeTone = "red";
         }
 
-        let quantityClass = "px-5 py-3.5 font-mono text-sm font-semibold text-right text-[#151515]";
+        let quantityClass = "px-5 py-3.5 font-mono text-sm font-semibold text-right text-[#171717]";
         let quantityPrefix = "";
         if (Number(tx.quantity) > 0) {
           quantityClass = "px-5 py-3.5 font-mono text-sm font-semibold text-right text-emerald-700";
@@ -493,7 +493,7 @@ export function ReportsPage() {
 
         let supplierPrefix = null;
         if (tx.supplier_name) {
-          supplierPrefix = <span className="font-medium text-[#151515]">{tx.supplier_name} - </span>;
+          supplierPrefix = <span className="font-medium text-[#171717]">{tx.supplier_name} - </span>;
         }
 
         let remarksDisplay = "—";
@@ -506,7 +506,7 @@ export function ReportsPage() {
         return (
           <tr key={tx.transaction_id} className="hover:bg-[#EEEEED]/40 transition-colors">
             <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{formatSmartDateTime(tx.created_at)}</td>
-            <td className="px-5 py-3.5 text-sm font-medium text-[#151515]">{tx.product_name}</td>
+            <td className="px-5 py-3.5 text-sm font-medium text-[#171717]">{tx.product_name}</td>
             <td className="px-5 py-3.5">
               <Badge tone={badgeTone}>
                 {tx.transaction_type}
@@ -528,7 +528,7 @@ export function ReportsPage() {
     activeTabContent = (
       <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
         <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 gap-2">
-          <div className="text-sm font-semibold text-[#151515]">Inventory Movements</div>
+          <div className="text-sm font-semibold text-[#171717]">Inventory Movements</div>
           <div className="flex flex-wrap items-center gap-2">
             <Select
               size="sm"
@@ -598,7 +598,7 @@ export function ReportsPage() {
 
         return (
           <tr key={sale.sale_id} className="hover:bg-[#EEEEED]/40 transition-colors">
-            <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#151515]">#{sale.receipt_number}</td>
+            <td className="px-5 py-3.5 font-mono text-sm font-semibold text-[#171717]">#{sale.receipt_number}</td>
             <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{formatSmartDateTime(sale.created_at)}</td>
             <td className="px-5 py-3.5">
               <Badge tone={paymentBadgeTone}>
@@ -608,7 +608,7 @@ export function ReportsPage() {
             <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{sale.items_count}</td>
             <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{formatPeso(sale.subtotal_amount)}</td>
             <td className="px-5 py-3.5 font-mono text-sm text-[#777777] text-right">{formatPeso(sale.discount_amount)}</td>
-            <td className="px-5 py-3.5 font-mono text-sm font-bold text-[#151515] text-right">{formatPeso(sale.total_amount)}</td>
+            <td className="px-5 py-3.5 font-mono text-sm font-bold text-[#171717] text-right">{formatPeso(sale.total_amount)}</td>
             <td className="px-5 py-3.5 font-mono text-xs text-[#777777]">{sale.created_by}</td>
           </tr>
         );
@@ -618,7 +618,7 @@ export function ReportsPage() {
     activeTabContent = (
       <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
         <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 gap-2">
-          <div className="text-sm font-semibold text-[#151515]">Completed Transactions</div>
+          <div className="text-sm font-semibold text-[#171717]">Completed Transactions</div>
           <div className="flex flex-wrap items-center gap-2">
             <Select
               size="sm"

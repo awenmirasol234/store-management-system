@@ -134,7 +134,7 @@ export function CustomerLedgerModal(props) {
 
             return (
               <tr key={tx.credit_tx_id} className="hover:bg-[#EEEEED]/50 transition-colors">
-                <td className="px-4 py-3 text-xs text-[#151515] whitespace-nowrap">
+                <td className="px-4 py-3 text-xs text-[#171717] whitespace-nowrap">
                   {formatSmartDateTime(tx.created_at)}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
@@ -157,7 +157,7 @@ export function CustomerLedgerModal(props) {
     );
   }
 
-  let balanceValueClass = "font-mono text-base font-bold text-[#151515]";
+  let balanceValueClass = "font-mono text-base font-bold text-[#171717]";
   if (currentBalance > 0) {
     balanceValueClass = "font-mono text-base font-bold text-rose-600";
   }
@@ -169,12 +169,12 @@ export function CustomerLedgerModal(props) {
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#E9E9E9] bg-[#EEEEED]/40 p-4">
           <div>
             <div className="text-xs font-semibold text-[#777777]">Customer</div>
-            <div className="text-base font-bold text-[#151515]">{customerName}</div>
+            <div className="text-base font-bold text-[#171717]">{customerName}</div>
           </div>
           <div className="flex items-center gap-6">
             <div>
               <div className="text-xs font-semibold text-[#777777]">Credit Limit</div>
-              <div className="font-mono text-sm font-bold text-[#151515]">{creditLimitDisplay}</div>
+              <div className="font-mono text-sm font-bold text-[#171717]">{creditLimitDisplay}</div>
             </div>
             <div>
               <div className="text-xs font-semibold text-[#777777]">Current Utang</div>

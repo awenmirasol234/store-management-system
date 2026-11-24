@@ -83,7 +83,7 @@ export function DashboardPage(props) {
           return (
             <div key={product.product_id} className="flex items-center justify-between py-3">
               <div className="min-w-0 pr-3">
-                <div className="truncate text-sm font-medium text-[#151515]">
+                <div className="truncate text-sm font-medium text-[#171717]">
                   {product.product_name}
                 </div>
                 <div className="mt-0.5 font-mono text-xs text-[#777777]">
@@ -110,7 +110,7 @@ export function DashboardPage(props) {
               <div className="flex items-center gap-3 min-w-0 pr-3">
                 <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-medium text-[#151515]">
+                  <div className="truncate text-sm font-medium text-[#171717]">
                     {item.product_name}
                   </div>
                   <div className="mt-0.5 font-mono text-xs text-[#777777]">
@@ -118,7 +118,7 @@ export function DashboardPage(props) {
                   </div>
                 </div>
               </div>
-              <div className="font-mono text-sm font-semibold text-[#151515] shrink-0">
+              <div className="font-mono text-sm font-semibold text-[#171717] shrink-0">
                 {formatPeso(item.revenue)}
               </div>
             </div>
@@ -174,7 +174,7 @@ export function DashboardPage(props) {
         {/* Top-Selling Products */}
         {isOwner && <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-[#151515]">Top Selling Products</h2>
+            <h2 className="text-base font-semibold text-[#171717]">Top Selling Products</h2>
             <span className="font-mono text-xs text-[#777777]">Top 5</span>
           </div>
           {topProductsList}
@@ -183,7 +183,7 @@ export function DashboardPage(props) {
         {/* Inventory Alerts */}
         <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-[#151515]">Inventory Alerts</h2>
+            <h2 className="text-base font-semibold text-[#171717]">Inventory Alerts</h2>
             <Button
               variant="ghost"
               size="sm"
