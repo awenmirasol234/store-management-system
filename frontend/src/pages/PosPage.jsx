@@ -19,7 +19,7 @@ import {
   computeItemBaseQuantity,
   computeLocalCartTotals
 } from "../cart.js";
-import { formatPeso, formatQuantity, formatQuantityWithUnit } from "../format.js";
+import { formatPeso, formatCompactPeso, formatQuantity, formatQuantityWithUnit } from "../format.js";
 import { getStockLevel, filterProducts, STOCK_LEVELS } from "../products.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
@@ -1279,8 +1279,11 @@ export function PosPage(props) {
           <span className="text-3xs font-semibold uppercase tracking-wider text-[#777777]">
             {cartItems.length} {itemUnitLabel}
           </span>
-          <span className="font-mono text-xs font-bold text-[#151515] break-all px-0.5">
-            {formatPeso(totals.total)}
+          <span
+            className="font-mono text-xs font-bold text-[#151515] break-all px-0.5"
+            title={"Total: " + formatPeso(totals.total)}
+          >
+            {formatCompactPeso(totals.total)}
           </span>
         </div>
 

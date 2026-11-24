@@ -38,6 +38,56 @@ export function formatPeso(amount) {
   return "₱" + formatted;
 }
 
+function truncateCompact(num, divisor, suffix) {
+  const scaled = num / divisor;
+  const floored = Math.floor(scaled * 10 + 1e-9) / 10;
+  let formatted = "";
+  if (Number.isInteger(floored)) {
+    formatted = String(floored);
+  } else {
+    formatted = floored.toFixed(1);
+  }
+  return formatted + suffix;
+}
+
+export function formatCompactNumber(value) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return "0";
+  }
+  const absValue = Math.abs(numericValue);
+  let compactStr = "";
+  if (absValue >= 1e9) {
+    compactStr = truncateCompact(absValue, 1e9, "B");
+  } else if (absValue >= 1e6) {
+    compactStr = truncateCompact(absValue, 1e6, "M");
+  } else if (absValue >= 1e3) {
+    compactStr = truncateCompact(absValue, 1e3, "K");
+  } else {
+    compactStr = truncateCompact(absValue, 1, "");
+  }
+  if (numericValue < 0) {
+    return "-" + compactStr;
+  }
+  return compactStr;
+}
+
+export function formatCompactPeso(amount) {
+  const numericValue = Number(amount);
+  if (!Number.isFinite(numericValue)) {
+    return "₱0.00";
+  }
+  const absValue = Math.abs(numericValue);
+  if (absValue < 1000) {
+    return formatPeso(numericValue);
+  }
+  const compactStr = formatCompactNumber(absValue);
+  if (numericValue < 0) {
+    return "-₱" + compactStr;
+  }
+  return "₱" + compactStr;
+}
+
 export function formatQuantity(quantity) {
   const numericValue = Number(quantity);
   if (!Number.isFinite(numericValue)) {

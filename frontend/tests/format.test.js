@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  formatCompactNumber,
+  formatCompactPeso,
   formatManilaDateTime,
   formatManilaTime,
   formatPeso,
@@ -22,6 +24,40 @@ describe("format helpers", function () {
     expect(formatQuantity("3.0000")).toBe("3");
     expect(formatQuantity("2.5000")).toBe("2.5");
     expect(formatQuantity("abc")).toBe("0");
+  });
+
+  it("formats compact numbers without rounding up (1.4K, 12K, 1.5M)", function () {
+    expect(formatCompactNumber(0)).toBe("0");
+    expect(formatCompactNumber("abc")).toBe("0");
+    expect(formatCompactNumber(45)).toBe("45");
+    expect(formatCompactNumber(999)).toBe("999");
+    expect(formatCompactNumber(1000)).toBe("1K");
+    expect(formatCompactNumber(1400)).toBe("1.4K");
+    expect(formatCompactNumber(1480)).toBe("1.4K");
+    expect(formatCompactNumber(1999)).toBe("1.9K");
+    expect(formatCompactNumber(12000)).toBe("12K");
+    expect(formatCompactNumber(12500)).toBe("12.5K");
+    expect(formatCompactNumber(1500000)).toBe("1.5M");
+    expect(formatCompactNumber(1590000)).toBe("1.5M");
+    expect(formatCompactNumber(-1400)).toBe("-1.4K");
+    expect(formatCompactNumber(-1480)).toBe("-1.4K");
+  });
+
+  it("formats compact peso amounts without rounding up", function () {
+    expect(formatCompactPeso(0)).toBe("₱0.00");
+    expect(formatCompactPeso("abc")).toBe("₱0.00");
+    expect(formatCompactPeso(45.5)).toBe("₱45.50");
+    expect(formatCompactPeso(999)).toBe("₱999.00");
+    expect(formatCompactPeso(1000)).toBe("₱1K");
+    expect(formatCompactPeso(1400)).toBe("₱1.4K");
+    expect(formatCompactPeso(1480)).toBe("₱1.4K");
+    expect(formatCompactPeso(1999)).toBe("₱1.9K");
+    expect(formatCompactPeso(12000)).toBe("₱12K");
+    expect(formatCompactPeso(12500)).toBe("₱12.5K");
+    expect(formatCompactPeso(1500000)).toBe("₱1.5M");
+    expect(formatCompactPeso(1590000)).toBe("₱1.5M");
+    expect(formatCompactPeso(-1400)).toBe("-₱1.4K");
+    expect(formatCompactPeso(-1480)).toBe("-₱1.4K");
   });
 
   describe("Manila dates", function () {

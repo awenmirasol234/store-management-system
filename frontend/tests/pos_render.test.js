@@ -191,4 +191,37 @@ describe("PosPage SSR test", function () {
     expect(html).toContain("xl:grid-cols-4");
     expect(html).not.toContain("xl:grid-cols-5");
   });
+
+  it("renders compact total in collapsed panel and full total in expanded panel", function () {
+    const cartItems = [
+      {
+        key: "prod-1:base",
+        product_id: "prod-1",
+        product_name: "Cooking Oil 1L",
+        unit_price: 1400,
+        selling_price: 1400,
+        quantity: 1,
+        base_quantity_per_unit: 1
+      }
+    ];
+
+    // Collapsed panel test
+    const collapsedHtml = renderToString(
+      React.createElement(PosPage, {
+        initialCartItems: cartItems,
+        initialCartCollapsed: true
+      })
+    );
+    expect(collapsedHtml).toContain("₱1.4K");
+    expect(collapsedHtml).toContain('title="Total: ₱1,400.00"');
+
+    // Expanded panel test
+    const expandedHtml = renderToString(
+      React.createElement(PosPage, {
+        initialCartItems: cartItems,
+        initialCartCollapsed: false
+      })
+    );
+    expect(expandedHtml).toContain("₱1,400.00");
+  });
 });
