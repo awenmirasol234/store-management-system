@@ -11,8 +11,13 @@ import {
 import { formatManilaDateParts } from "../src/shared/ports.js";
 import {
   normalizeBoolean,
+  normalizeOptionalEnum,
+  normalizeOptionalQueryText,
   normalizeOptionalText,
+  parseNonNegativeOffset,
   parsePositiveLimit,
+  requireObjectBody,
+  requireRouteParam,
   requireNonEmptyText
 } from "../src/shared/validation.js";
 import { ValidationError } from "../src/shared/errors.js";
@@ -114,6 +119,33 @@ describe("shared decimal and clock helpers", function () {
     expect(normalizeBoolean(null, true, "active")).toBe(true);
     expect(function () {
       normalizeBoolean("true", true, "active");
+    }).toThrow(ValidationError);
+  });
+
+  it("validates HTTP boundary primitives", function () {
+    const body = { name: "value" };
+    expect(requireObjectBody(body)).toBe(body);
+    expect(requireRouteParam({ itemId: "abc" }, "itemId")).toBe("abc");
+    expect(normalizeOptionalQueryText("  search  ", "q")).toBe("search");
+    expect(parseNonNegativeOffset("4", 0, "offset")).toBe(4);
+
+    expect(function () {
+      requireObjectBody([]);
+    }).toThrow(ValidationError);
+    expect(function () {
+      requireObjectBody(null);
+    }).toThrow(ValidationError);
+    expect(function () {
+      requireRouteParam({ itemId: " " }, "itemId");
+    }).toThrow(ValidationError);
+    expect(function () {
+      normalizeOptionalQueryText(["a", "b"], "q");
+    }).toThrow(ValidationError);
+    expect(function () {
+      parseNonNegativeOffset("-1", 0, "offset");
+    }).toThrow(ValidationError);
+    expect(function () {
+      normalizeOptionalEnum("UNKNOWN", new Set(["OPEN", "CLOSED"]), "status");
     }).toThrow(ValidationError);
   });
 });

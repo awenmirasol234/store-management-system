@@ -207,6 +207,40 @@ describe("Express REST API routes", function () {
     expect(invalid.body.error.code).toBe("VALIDATION_ERROR");
   });
 
+  it("rejects malformed request bodies, repeated query values, and invalid offsets at the HTTP boundary", async function () {
+    const baseUrl = await startTestServer();
+
+    const arrayBody = await requestJson(baseUrl, "POST", "/api/products", []);
+    expect(arrayBody.status).toBe(400);
+    expect(arrayBody.body.error.code).toBe("VALIDATION_ERROR");
+    expect(arrayBody.body.error.message).toContain("JSON object");
+
+    const missingBody = await requestJson(baseUrl, "POST", "/api/sales");
+    expect(missingBody.status).toBe(400);
+    expect(missingBody.body.error.code).toBe("VALIDATION_ERROR");
+
+    const repeatedQuery = await requestJson(baseUrl, "GET", "/api/customers?q=one&q=two");
+    expect(repeatedQuery.status).toBe(400);
+    expect(repeatedQuery.body.error.code).toBe("VALIDATION_ERROR");
+
+    const invalidOffset = await requestJson(baseUrl, "GET", "/api/shifts?offset=-1");
+    expect(invalidOffset.status).toBe(400);
+    expect(invalidOffset.body.error.code).toBe("VALIDATION_ERROR");
+
+    const invalidStatus = await requestJson(baseUrl, "GET", "/api/shifts?status=UNKNOWN");
+    expect(invalidStatus.status).toBe(400);
+    expect(invalidStatus.body.error.code).toBe("VALIDATION_ERROR");
+
+    const malformedResponse = await fetch(baseUrl + "/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: '{"product_name":'
+    });
+    const malformedBody = await malformedResponse.json();
+    expect(malformedResponse.status).toBe(400);
+    expect(malformedBody.error.code).toBe("VALIDATION_ERROR");
+  });
+
   it("processes POS CREDIT and SPLIT sales through REST API, updates customer balances, and rejects limit violations", async function () {
     const baseUrl = await startTestServer();
 

@@ -3,6 +3,7 @@ import path from "node:path";
 import express from "express";
 import multer from "multer";
 import { ValidationError } from "../shared/errors.js";
+import { requireObjectBody, requireRouteParam } from "../shared/validation.js";
 
 const ALLOWED_IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
@@ -60,25 +61,27 @@ export function createInventoryRouter(dependencies) {
   });
 
   router.get("/products/barcode/:barcode", async function lookupBarcode(request, response) {
-    const match = await dependencies.useCases.lookupBarcode({ barcode: request.params.barcode });
+    const match = await dependencies.useCases.lookupBarcode({
+      barcode: requireRouteParam(request.params, "barcode")
+    });
     response.json({ data: match });
   });
 
   router.get("/products/:productId", async function getProduct(request, response) {
     const product = await dependencies.useCases.getProduct({
-      product_id: request.params.productId
+      product_id: requireRouteParam(request.params, "productId")
     });
     response.json({ data: product });
   });
 
   router.post("/products", async function createProduct(request, response) {
-    const created = await dependencies.useCases.createProduct(request.body);
+    const created = await dependencies.useCases.createProduct(requireObjectBody(request.body));
     response.status(201).json({ data: created });
   });
 
   router.patch("/products/:productId", async function updateProduct(request, response) {
-    const payload = Object.assign({}, request.body, {
-      product_id: request.params.productId
+    const payload = Object.assign({}, requireObjectBody(request.body), {
+      product_id: requireRouteParam(request.params, "productId")
     });
     const updated = await dependencies.useCases.updateProduct(payload);
     response.json({ data: updated });
@@ -86,7 +89,7 @@ export function createInventoryRouter(dependencies) {
 
   router.delete("/products/:productId", async function deleteProduct(request, response) {
     const deleted = await dependencies.useCases.deleteProduct({
-      product_id: request.params.productId
+      product_id: requireRouteParam(request.params, "productId")
     });
     response.json({ data: deleted });
   });
@@ -100,7 +103,7 @@ export function createInventoryRouter(dependencies) {
       }
       const imageUrl = "/uploads/products/" + request.file.filename;
       const updated = await dependencies.useCases.updateProduct({
-        product_id: request.params.productId,
+        product_id: requireRouteParam(request.params, "productId"),
         image_url: imageUrl
       });
       response.json({ data: updated });
@@ -109,14 +112,14 @@ export function createInventoryRouter(dependencies) {
 
   router.get("/products/:productId/options", async function listSellingOptions(request, response) {
     const options = await dependencies.useCases.listSellingOptions({
-      product_id: request.params.productId
+      product_id: requireRouteParam(request.params, "productId")
     });
     response.json({ data: options });
   });
 
   router.post("/products/:productId/options", async function createOption(request, response) {
-    const payload = Object.assign({}, request.body, {
-      product_id: request.params.productId
+    const payload = Object.assign({}, requireObjectBody(request.body), {
+      product_id: requireRouteParam(request.params, "productId")
     });
     const saved = await dependencies.useCases.saveSellingOption(payload);
     response.status(201).json({ data: saved });
@@ -125,9 +128,9 @@ export function createInventoryRouter(dependencies) {
   router.patch(
     "/products/:productId/options/:optionId",
     async function updateOption(request, response) {
-      const payload = Object.assign({}, request.body, {
-        product_id: request.params.productId,
-        option_id: request.params.optionId
+      const payload = Object.assign({}, requireObjectBody(request.body), {
+        product_id: requireRouteParam(request.params, "productId"),
+        option_id: requireRouteParam(request.params, "optionId")
       });
       const saved = await dependencies.useCases.saveSellingOption(payload);
       response.json({ data: saved });
@@ -136,18 +139,18 @@ export function createInventoryRouter(dependencies) {
 
   router.get("/products/:productId/transactions", async function listInventoryTransactions(request, response) {
     const transactions = await dependencies.useCases.listInventoryTransactions({
-      product_id: request.params.productId
+      product_id: requireRouteParam(request.params, "productId")
     });
     response.json({ data: transactions });
   });
 
   router.post("/inventory/stock-in", async function stockIn(request, response) {
-    const result = await dependencies.useCases.stockIn(request.body);
+    const result = await dependencies.useCases.stockIn(requireObjectBody(request.body));
     response.status(201).json({ data: result });
   });
 
   router.post("/inventory/adjust", async function adjustStock(request, response) {
-    const result = await dependencies.useCases.adjustStock(request.body);
+    const result = await dependencies.useCases.adjustStock(requireObjectBody(request.body));
     response.status(201).json({ data: result });
   });
 
@@ -157,7 +160,7 @@ export function createInventoryRouter(dependencies) {
   });
 
   router.post("/categories", async function createCategory(request, response) {
-    const category = await dependencies.useCases.createCategory(request.body);
+    const category = await dependencies.useCases.createCategory(requireObjectBody(request.body));
     response.status(201).json({ data: category });
   });
 
@@ -167,7 +170,7 @@ export function createInventoryRouter(dependencies) {
   });
 
   router.post("/suppliers", async function createSupplier(request, response) {
-    const supplier = await dependencies.useCases.createSupplier(request.body);
+    const supplier = await dependencies.useCases.createSupplier(requireObjectBody(request.body));
     response.status(201).json({ data: supplier });
   });
 

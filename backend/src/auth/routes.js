@@ -1,6 +1,7 @@
 import express from "express";
 import { ROLES } from "./domain.js";
 import { ForbiddenError, UnauthorizedError } from "../shared/errors.js";
+import { requireObjectBody, requireRouteParam } from "../shared/validation.js";
 
 export function createAuthRouter(authUseCases) {
   const router = express.Router();
@@ -11,11 +12,12 @@ export function createAuthRouter(authUseCases) {
   });
 
   router.post("/setup", async function setup(request, response) {
-    const result = await authUseCases.setupInitialOwner(request.body);
+    const result = await authUseCases.setupInitialOwner(requireObjectBody(request.body));
     response.status(201).json({ data: result });
   });
 
   router.post("/login", async function login(request, response) {
+    const body = requireObjectBody(request.body);
     let ip = "local";
     if (request.ip) {
       ip = request.ip;
@@ -24,12 +26,12 @@ export function createAuthRouter(authUseCases) {
     }
 
     let username = "";
-    if (request.body && request.body.username) {
-      username = request.body.username;
+    if (body.username) {
+      username = body.username;
     }
 
     const clientKey = ip + ":" + String(username);
-    const payload = Object.assign({}, request.body, { clientKey: clientKey });
+    const payload = Object.assign({}, body, { clientKey: clientKey });
     const result = await authUseCases.login(payload);
     response.json({ data: result });
   });
@@ -50,7 +52,9 @@ export function createAuthRouter(authUseCases) {
     if (!request.user) {
       throw new UnauthorizedError("Authentication required");
     }
-    const payload = Object.assign({}, request.body, { userId: request.user.user_id });
+    const payload = Object.assign({}, requireObjectBody(request.body), {
+      userId: request.user.user_id
+    });
     const result = await authUseCases.changePin(payload);
     response.json({ data: result });
   });
@@ -81,12 +85,15 @@ export function createUsersRouter(dependencies) {
   });
 
   router.post("/", async function createUser(request, response) {
-    const user = await authUseCases.createUser(request.body);
+    const user = await authUseCases.createUser(requireObjectBody(request.body));
     response.status(201).json({ data: user });
   });
 
   router.patch("/:userId", async function updateUser(request, response) {
-    const user = await authUseCases.updateUser(request.params.userId, request.body);
+    const user = await authUseCases.updateUser(
+      requireRouteParam(request.params, "userId"),
+      requireObjectBody(request.body)
+    );
     response.json({ data: user });
   });
 

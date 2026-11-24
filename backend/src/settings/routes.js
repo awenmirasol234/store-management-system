@@ -1,5 +1,6 @@
 import express from "express";
 import fs from "node:fs";
+import { requireObjectBody } from "../shared/validation.js";
 
 export function createSettingsRouter(dependencies) {
   const router = express.Router();
@@ -17,7 +18,7 @@ export function createSettingsRouter(dependencies) {
 
   router.patch("/settings", async function updateSettings(request, response, next) {
     try {
-      const updated = await useCases.updateSettings.execute(request.body);
+      const updated = await useCases.updateSettings.execute(requireObjectBody(request.body));
       response.json({ data: updated });
     } catch (error) {
       next(error);

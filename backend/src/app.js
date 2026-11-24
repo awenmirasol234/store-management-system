@@ -132,6 +132,16 @@ function createErrorHandler() {
       return;
     }
 
+    if (error instanceof SyntaxError && error.type === "entity.parse.failed") {
+      response.status(400).json({
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Request body must contain valid JSON"
+        }
+      });
+      return;
+    }
+
     response.status(500).json({
       error: {
         code: "INTERNAL_ERROR",
