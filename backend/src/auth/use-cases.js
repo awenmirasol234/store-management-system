@@ -12,6 +12,7 @@ import {
   validateUsername,
   verifyPin
 } from "./domain.js";
+import { normalizeBoolean } from "../shared/validation.js";
 
 export function createGetAuthStatusUseCase(dependencies) {
   const userRepository = dependencies.userRepository;
@@ -32,57 +33,64 @@ export function createSetupInitialOwnerUseCase(dependencies) {
   const clock = dependencies.clock;
 
   return async function setupInitialOwner(input) {
-    if (!input) {
-      throw new ValidationError("Input is required");
+    const createOwner = async function createOwner() {
+      if (!input) {
+        throw new ValidationError("Input is required");
+      }
+
+      const count = await userRepository.countUsers();
+      if (count > 0) {
+        throw new ConflictError("Initial setup has already been completed");
+      }
+
+      const validUsername = validateUsername(input.username);
+      const validFullName = validateFullName(input.full_name);
+      const validPin = validatePin(input.pin);
+
+      const salt = generateSalt();
+      const pinHash = hashPin(validPin, salt);
+      const userId = idGenerator.nextId();
+      const nowIso = clock.nowIso();
+
+      const user = {
+        user_id: userId,
+        username: validUsername,
+        full_name: validFullName,
+        role: ROLES.OWNER,
+        pin_hash: pinHash,
+        pin_salt: salt,
+        is_active: 1,
+        created_at: nowIso,
+        updated_at: nowIso
+      };
+
+      await userRepository.createUser(user);
+
+      const token = generateSessionToken();
+      const sessionId = idGenerator.nextId();
+      const expiresAt = new Date(Date.now() + DEFAULT_SESSION_DURATION_MS).toISOString();
+
+      const session = {
+        session_id: sessionId,
+        user_id: userId,
+        token: token,
+        expires_at: expiresAt,
+        created_at: nowIso
+      };
+
+      await sessionRepository.createSession(session);
+
+      return {
+        user: sanitizeUser(user),
+        token: token,
+        expires_at: expiresAt
+      };
+    };
+
+    if (dependencies.unitOfWork) {
+      return dependencies.unitOfWork.run(createOwner);
     }
-
-    const count = await userRepository.countUsers();
-    if (count > 0) {
-      throw new ConflictError("Initial setup has already been completed");
-    }
-
-    const validUsername = validateUsername(input.username);
-    const validFullName = validateFullName(input.full_name);
-    const validPin = validatePin(input.pin);
-
-    const salt = generateSalt();
-    const pinHash = hashPin(validPin, salt);
-    const userId = idGenerator.nextId();
-    const nowIso = clock.nowIso();
-
-    const user = {
-      user_id: userId,
-      username: validUsername,
-      full_name: validFullName,
-      role: ROLES.OWNER,
-      pin_hash: pinHash,
-      pin_salt: salt,
-      is_active: 1,
-      created_at: nowIso,
-      updated_at: nowIso
-    };
-
-    await userRepository.createUser(user);
-
-    const token = generateSessionToken();
-    const sessionId = idGenerator.nextId();
-    const expiresAt = new Date(Date.now() + DEFAULT_SESSION_DURATION_MS).toISOString();
-
-    const session = {
-      session_id: sessionId,
-      user_id: userId,
-      token: token,
-      expires_at: expiresAt,
-      created_at: nowIso
-    };
-
-    await sessionRepository.createSession(session);
-
-    return {
-      user: sanitizeUser(user),
-      token: token,
-      expires_at: expiresAt
-    };
+    return createOwner();
   };
 }
 
@@ -260,7 +268,7 @@ export function createUpdateUserUseCase(dependencies) {
 
     let isActive = user.is_active;
     if (input.is_active !== undefined) {
-      isActive = Boolean(input.is_active);
+      isActive = normalizeBoolean(input.is_active, user.is_active, "is_active");
     }
 
     let pinHash = user.pin_hash;

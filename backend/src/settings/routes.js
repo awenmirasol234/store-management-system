@@ -6,6 +6,7 @@ export function createSettingsRouter(dependencies) {
   const router = express.Router();
   const useCases = dependencies.useCases;
   const databasePath = dependencies.databasePath;
+  const database = dependencies.database;
 
   router.get("/settings", async function getSettings(request, response, next) {
     try {
@@ -37,6 +38,7 @@ export function createSettingsRouter(dependencies) {
         return;
       }
 
+      database.exec("PRAGMA wal_checkpoint(TRUNCATE)");
       const dateStr = new Date().toISOString().slice(0, 10);
       const filename = "storeflow-backup-" + dateStr + ".db";
       response.download(databasePath, filename);

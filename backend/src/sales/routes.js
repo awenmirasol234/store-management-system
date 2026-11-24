@@ -10,7 +10,14 @@ export function createSalesRouter(dependencies) {
   });
 
   router.post("/sales", async function createSale(request, response) {
-    const result = await dependencies.useCases.processSale(requireObjectBody(request.body));
+    const body = requireObjectBody(request.body);
+    let createdBy = body.created_by;
+    if (request.user && request.user.username) {
+      createdBy = request.user.username;
+    }
+    const result = await dependencies.useCases.processSale(
+      Object.assign({}, body, { created_by: createdBy })
+    );
     response.status(201).json({ data: result });
   });
 
@@ -29,8 +36,14 @@ export function createSalesRouter(dependencies) {
   });
 
   router.post("/sales/:saleId/returns", async function createReturn(request, response) {
-    const payload = Object.assign({}, requireObjectBody(request.body), {
-      sale_id: requireRouteParam(request.params, "saleId")
+    const body = requireObjectBody(request.body);
+    let createdBy = body.created_by;
+    if (request.user && request.user.username) {
+      createdBy = request.user.username;
+    }
+    const payload = Object.assign({}, body, {
+      sale_id: requireRouteParam(request.params, "saleId"),
+      created_by: createdBy
     });
     const result = await dependencies.useCases.processReturn(payload);
     response.status(201).json({ data: result });

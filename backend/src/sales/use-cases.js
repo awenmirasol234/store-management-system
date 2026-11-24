@@ -348,6 +348,11 @@ export function createProcessReturnUseCase(dependencies) {
 
       for (let index = 0; index < safeInput.items.length; index++) {
         const requestItem = safeInput.items[index];
+        for (let previousIndex = 0; previousIndex < index; previousIndex++) {
+          if (safeInput.items[previousIndex].sale_item_id === requestItem.sale_item_id) {
+            throw new ValidationError("Each sale item can appear only once in a return");
+          }
+        }
         const saleItem = itemsById.get(requestItem.sale_item_id);
         if (!saleItem) {
           throw new NotFoundError("Sale item not found in sale: " + requestItem.sale_item_id);

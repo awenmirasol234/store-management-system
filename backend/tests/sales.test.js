@@ -348,6 +348,18 @@ describe("sales domain and use cases", function () {
         created_by: "cashier-1"
       })
     ).rejects.toThrow(ValidationError);
+
+    await expect(
+      processReturn({
+        sale_id: saleResult.sale.sale_id,
+        items: [
+          { sale_item_id: saleResult.items[0].sale_item_id, quantity: 0.5 },
+          { sale_item_id: saleResult.items[0].sale_item_id, quantity: 0.5 }
+        ],
+        remarks: "Duplicate line items",
+        created_by: "cashier-1"
+      })
+    ).rejects.toThrow("Each sale item can appear only once");
   });
 
   it("validates sale lines before price and stock calculations", function () {

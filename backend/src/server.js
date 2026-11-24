@@ -18,7 +18,8 @@ const uploadsDir = requireEnv("UPLOADS_DIR");
 
 const runtime = createApp({
   databasePath: databasePath,
-  uploadsDir: uploadsDir
+  uploadsDir: uploadsDir,
+  enforceAuth: process.env.ENFORCE_AUTH !== "false"
 });
 
 runtime.app.listen(portValue, function onStarted() {

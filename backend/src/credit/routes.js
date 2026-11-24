@@ -38,7 +38,7 @@ export function createCreditRouter(dependencies) {
   router.post("/customers/:customerId/payments", async function recordPayment(request, response) {
     const body = requireObjectBody(request.body);
     let createdBy = body.created_by;
-    if (!createdBy && request.user && request.user.username) {
+    if (request.user && request.user.username) {
       createdBy = request.user.username;
     }
     const payload = Object.assign({}, body, {

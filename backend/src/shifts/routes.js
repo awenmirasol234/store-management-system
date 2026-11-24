@@ -1,5 +1,6 @@
 import express from "express";
 import { SHIFT_STATUSES } from "./domain.js";
+import { ForbiddenError } from "../shared/errors.js";
 import {
   normalizeOptionalEnum,
   normalizeOptionalQueryText,
@@ -12,6 +13,15 @@ import {
 export function createShiftsRouter(dependencies) {
   const router = express.Router();
   const useCases = dependencies.useCases;
+
+  function ensureShiftAccess(request, shift) {
+    if (!request.user || request.user.role === "OWNER") {
+      return;
+    }
+    if (!shift || shift.user_id !== request.user.user_id) {
+      throw new ForbiddenError("You can only access your own shifts");
+    }
+  }
 
   router.post("/shifts/open", async function handleOpenShift(request, response) {
     const body = requireObjectBody(request.body);
@@ -32,7 +42,9 @@ export function createShiftsRouter(dependencies) {
 
   router.get("/shifts/active", async function handleGetActiveShift(request, response) {
     let userId = null;
-    if (request.query && request.query.user_id) {
+    if (request.user && request.user.role !== "OWNER") {
+      userId = request.user.user_id;
+    } else if (request.query && request.query.user_id) {
       userId = normalizeOptionalQueryText(request.query.user_id, "user_id");
     } else if (request.user && request.user.user_id) {
       userId = request.user.user_id;
@@ -46,6 +58,11 @@ export function createShiftsRouter(dependencies) {
 
   router.post("/shifts/:shift_id/close", async function handleCloseShift(request, response) {
     const body = requireObjectBody(request.body);
+    const shiftId = requireRouteParam(request.params, "shift_id");
+    const existingShift = await useCases.getShift({
+      shift_id: shiftId
+    });
+    ensureShiftAccess(request, existingShift.shift);
     let closedBy = null;
     if (request.user && request.user.user_id) {
       closedBy = request.user.user_id;
@@ -54,7 +71,7 @@ export function createShiftsRouter(dependencies) {
     }
 
     const result = await useCases.closeShift({
-      shift_id: requireRouteParam(request.params, "shift_id"),
+      shift_id: shiftId,
       actual_cash: body.actual_cash,
       notes: body.notes,
       closed_by: closedBy
@@ -73,6 +90,10 @@ export function createShiftsRouter(dependencies) {
         createdBy = body.created_by;
       }
 
+      const shift = await useCases.getShift({
+        shift_id: requireRouteParam(request.params, "shift_id")
+      });
+      ensureShiftAccess(request, shift.shift);
       const result = await useCases.recordCashMovement({
         shift_id: requireRouteParam(request.params, "shift_id"),
         type: body.type,
@@ -88,12 +109,17 @@ export function createShiftsRouter(dependencies) {
     const result = await useCases.getShift({
       shift_id: requireRouteParam(request.params, "shift_id")
     });
+    ensureShiftAccess(request, result.shift);
     response.json({ data: result });
   });
 
   router.get("/shifts", async function handleListShifts(request, response) {
+    let userId = normalizeOptionalQueryText(request.query.user_id, "user_id");
+    if (request.user && request.user.role !== "OWNER") {
+      userId = request.user.user_id;
+    }
     const result = await useCases.listShifts({
-      user_id: normalizeOptionalQueryText(request.query.user_id, "user_id"),
+      user_id: userId,
       status: normalizeOptionalEnum(
         request.query.status,
         new Set(Object.values(SHIFT_STATUSES)),

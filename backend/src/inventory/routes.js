@@ -145,12 +145,26 @@ export function createInventoryRouter(dependencies) {
   });
 
   router.post("/inventory/stock-in", async function stockIn(request, response) {
-    const result = await dependencies.useCases.stockIn(requireObjectBody(request.body));
+    const body = requireObjectBody(request.body);
+    let createdBy = body.created_by;
+    if (request.user && request.user.username) {
+      createdBy = request.user.username;
+    }
+    const result = await dependencies.useCases.stockIn(
+      Object.assign({}, body, { created_by: createdBy })
+    );
     response.status(201).json({ data: result });
   });
 
   router.post("/inventory/adjust", async function adjustStock(request, response) {
-    const result = await dependencies.useCases.adjustStock(requireObjectBody(request.body));
+    const body = requireObjectBody(request.body);
+    let createdBy = body.created_by;
+    if (request.user && request.user.username) {
+      createdBy = request.user.username;
+    }
+    const result = await dependencies.useCases.adjustStock(
+      Object.assign({}, body, { created_by: createdBy })
+    );
     response.status(201).json({ data: result });
   });
 

@@ -360,6 +360,7 @@ export function createApp(options) {
     "/api",
     createSettingsRouter({
       databasePath: config.databasePath,
+      database: database,
       useCases: settingsUseCases
     })
   );

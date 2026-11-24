@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { openSqliteDatabase } from "../src/db/sqlite.js";
+import { createSqliteUnitOfWork, openSqliteDatabase } from "../src/db/sqlite.js";
 import { createDefaultIdGenerator, createSystemClock } from "../src/shared/ports.js";
 import {
   ConflictError,
@@ -101,6 +101,7 @@ describe("Auth Domain", function () {
 describe("Auth Workflows & Repositories", function () {
   function setupTestEnvironment() {
     const database = openSqliteDatabase(":memory:");
+    const unitOfWork = createSqliteUnitOfWork(database);
     const userRepository = createSqliteUserRepository(database);
     const sessionRepository = createSqliteSessionRepository(database);
     const idGenerator = createDefaultIdGenerator();
@@ -109,6 +110,7 @@ describe("Auth Workflows & Repositories", function () {
     const deps = {
       userRepository: userRepository,
       sessionRepository: sessionRepository,
+      unitOfWork: unitOfWork,
       idGenerator: idGenerator,
       clock: clock
     };
@@ -287,6 +289,10 @@ describe("Auth Workflows & Repositories", function () {
     expect(reLogin.user.username).toBe("cashier1");
 
     // Deactivate user - should revoke active sessions
+    await expect(
+      env.useCases.updateUser(cashier.user_id, { is_active: "false" })
+    ).rejects.toThrow(ValidationError);
+
     await env.useCases.updateUser(cashier.user_id, { is_active: false });
 
     const sessionCheck = await env.useCases.getCurrentUser({ token: reLogin.token });
