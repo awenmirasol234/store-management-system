@@ -70,12 +70,12 @@ export function CategoryFilterChips(props) {
 
   const isAllSelected = selectedCategoryId === "ALL";
   let allChipClass =
-    "shrink-0 rounded-full px-4 py-2 text-xs font-medium flex items-center gap-2 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 ";
+    "shrink-0 rounded-full px-4 py-2 text-xs font-medium flex items-center gap-2 cursor-pointer transition-all duration-100 focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 ";
   if (isAllSelected) {
-    allChipClass = allChipClass + "bg-[#151515] font-semibold text-white shadow-xs";
+    allChipClass = allChipClass + "bg-[#151515] font-semibold text-white border border-[#151515] border-b-2 border-b-[#2B2B2B] shadow-xs active:translate-y-[1px] active:shadow-none";
   } else {
     allChipClass =
-      allChipClass + "bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#151515]";
+      allChipClass + "bg-white text-[#777777] border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] shadow-xs hover:bg-[#F9F9F8] hover:text-[#151515] active:translate-y-[1px] active:shadow-none";
   }
 
   let allCountBadge = null;
@@ -136,12 +136,12 @@ export function CategoryFilterChips(props) {
 
         const isSelected = selectedCategoryId === categoryId;
         let chipClass =
-          "shrink-0 rounded-full px-4 py-2 text-xs font-medium flex items-center gap-2 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 ";
+          "shrink-0 rounded-full px-4 py-2 text-xs font-medium flex items-center gap-2 cursor-pointer transition-all duration-100 focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 ";
         if (isSelected) {
-          chipClass = chipClass + "bg-[#151515] font-semibold text-white shadow-xs";
+          chipClass = chipClass + "bg-[#151515] font-semibold text-white border border-[#151515] border-b-2 border-b-[#2B2B2B] shadow-xs active:translate-y-[1px] active:shadow-none";
         } else {
           chipClass =
-            chipClass + "bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#151515]";
+            chipClass + "bg-white text-[#777777] border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] shadow-xs hover:bg-[#F9F9F8] hover:text-[#151515] active:translate-y-[1px] active:shadow-none";
         }
 
         let countBadge = null;

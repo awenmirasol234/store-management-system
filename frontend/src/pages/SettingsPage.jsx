@@ -270,7 +270,7 @@ export function SettingsPage(props) {
           {/* Left Column: Profile, Preferences, Disaster Recovery */}
           <div className="space-y-4 sm:space-y-5 lg:col-span-7">
             {/* Section 1: Store Profile */}
-            <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+            <div className="rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-4 sm:p-5 shadow-xs">
               <div className="mb-3.5 flex items-center gap-2">
                 <Store className="h-4 w-4 text-[#151515]" />
                 <h2 className="text-base font-semibold text-[#151515]">Store Profile</h2>
@@ -341,7 +341,7 @@ export function SettingsPage(props) {
             </div>
 
             {/* Section 2: POS & Inventory Preferences */}
-            <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+            <div className="rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-4 sm:p-5 shadow-xs">
               <div className="mb-3.5 flex items-center gap-2">
                 <Sliders className="h-4 w-4 text-[#151515]" />
                 <h2 className="text-base font-semibold text-[#151515]">POS & Inventory Preferences</h2>
@@ -385,7 +385,7 @@ export function SettingsPage(props) {
             </div>
 
             {/* Section 3: Staff & Access */}
-            <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+            <div className="rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-4 sm:p-5 shadow-xs">
               <div className="mb-3.5 flex items-center gap-2">
                 <Users className="h-4 w-4 text-[#151515]" />
                 <h2 className="text-base font-semibold text-[#151515]">Staff & Access</h2>
@@ -414,7 +414,7 @@ export function SettingsPage(props) {
             </div>
 
             {/* Section 4: Database & Disaster Recovery */}
-            <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+            <div className="rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-4 sm:p-5 shadow-xs">
               <div className="mb-3.5 flex items-center gap-2">
                 <Database className="h-4 w-4 text-[#151515]" />
                 <h2 className="text-base font-semibold text-[#151515]">Database & Disaster Recovery</h2>
@@ -441,7 +441,7 @@ export function SettingsPage(props) {
 
           {/* Right Column: Receipt Customization & Thermal Printer Preview */}
           <div className="space-y-4 sm:space-y-5 lg:col-span-5">
-            <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+            <div className="rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-4 sm:p-5 shadow-xs">
               <div className="mb-3.5 flex items-center gap-2">
                 <Receipt className="h-4 w-4 text-[#151515]" />
                 <h2 className="text-base font-semibold text-[#151515]">Receipt & Thermal Printing</h2>

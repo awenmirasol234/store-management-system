@@ -558,7 +558,7 @@ export function InventoryPage(props) {
                 onClick={function openMenu(event) {
                   toggleActionMenu(event, product);
                 }}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E9E9E9] bg-white text-[#777777] hover:border-[#151515] hover:bg-[#EEEEED] hover:text-[#151515] transition-colors cursor-pointer"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#777777] shadow-xs hover:border-[#151515] hover:border-b-2 hover:border-b-[#151515] hover:bg-[#EEEEED] hover:text-[#151515] active:translate-y-[1px] active:shadow-none transition-all duration-100 cursor-pointer"
                 title="More actions"
               >
                 <MoreVertical className="h-4 w-4" />
@@ -580,7 +580,7 @@ export function InventoryPage(props) {
       return (
         <div
           key={product.product_id}
-          className="rounded-2xl border border-[#E9E9E9] bg-white p-4 shadow-xs space-y-3"
+          className="rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-4 shadow-xs space-y-3"
         >
           <div className="flex items-start gap-3">
             <ProductThumb imageUrl={product.image_url} name={product.product_name} size="md" />
@@ -625,7 +625,7 @@ export function InventoryPage(props) {
               onClick={function openMenu(event) {
                 toggleActionMenu(event, product);
               }}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] transition-colors cursor-pointer"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#777777] shadow-xs hover:border-[#151515] hover:border-b-2 hover:border-b-[#151515] hover:bg-[#EEEEED] hover:text-[#151515] active:translate-y-[1px] active:shadow-none transition-all duration-100 cursor-pointer"
               title="More actions"
             >
               <MoreVertical className="h-4 w-4" />
@@ -666,7 +666,7 @@ export function InventoryPage(props) {
   );
   if (productOptions.length > 0 && optionsModalProduct) {
     optionsListContent = (
-      <div className="divide-y divide-[#E9E9E9] rounded-xl border border-[#E9E9E9]">
+      <div className="divide-y divide-[#E9E9E9] rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] shadow-2xs">
         {productOptions.map(function renderOpt(option) {
           let inactiveBadge = null;
           let toggleActionLabel = "Disable";
@@ -801,7 +801,7 @@ export function InventoryPage(props) {
       </div>
 
       {/* Desktop Product Table (>= md) */}
-      <div className="hidden md:block flex-1 overflow-auto rounded-2xl border border-[#E9E9E9] bg-white">
+      <div className="hidden md:block flex-1 overflow-auto rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white shadow-xs">
         <DataTable
           stickyHead={true}
           headRow={
@@ -1144,7 +1144,7 @@ export function InventoryPage(props) {
           <div
             role="menu"
             style={{ top: actionMenu.top, right: actionMenu.right }}
-            className="fixed w-44 rounded-xl border border-[#E9E9E9] bg-white p-1 shadow-lg"
+            className="fixed w-44 rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#D0CFCB] bg-white p-1 shadow-xl"
             onClick={function stopPropagation(event) {
               event.stopPropagation();
             }}

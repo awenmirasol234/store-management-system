@@ -250,14 +250,14 @@ export function ReportsPage() {
     });
 
   function getPresetButtonClass(presetKey) {
-    let basePresetClass = "rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors ";
+    let basePresetClass = "rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-all duration-100 ";
     if (presetKey === "CUSTOM") {
       basePresetClass = "flex items-center gap-1.5 " + basePresetClass;
     }
     if (activePreset === presetKey) {
-      return basePresetClass + "bg-[#151515] text-white";
+      return basePresetClass + "bg-[#151515] text-white border border-[#151515] border-b-2 border-b-[#2B2B2B] shadow-xs active:translate-y-[1px] active:shadow-none";
     }
-    return basePresetClass + "text-[#777777] hover:text-[#151515] hover:bg-[#EEEEED]";
+    return basePresetClass + "border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#777777] shadow-xs hover:bg-[#F9F9F8] hover:text-[#151515] active:translate-y-[1px] active:shadow-none";
   }
 
   let customPresetLabel = "Custom";
@@ -267,7 +267,7 @@ export function ReportsPage() {
 
   function getTabButtonClass(tabId) {
     if (activeTab === tabId) {
-      return "shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold bg-[#151515] text-white cursor-pointer transition-colors";
+      return "shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold bg-[#151515] text-white border border-[#151515] border-b-2 border-b-[#2B2B2B] shadow-xs active:translate-y-[1px] active:shadow-none cursor-pointer transition-all duration-100";
     }
     return "shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-[#777777] hover:text-[#151515] hover:bg-[#EEEEED] cursor-pointer transition-colors";
   }
@@ -300,7 +300,7 @@ export function ReportsPage() {
           <StatCard label="Net Sales" value={netSales} meta="Gross - Discounts & Refunds" icon={TrendingUp} />
         </div>
 
-        <section className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+        <section className="rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-4 sm:p-5 shadow-xs">
           <div className="mb-2">
             <h3 className="text-base font-semibold text-[#151515]">Sales & Profit Trend</h3>
             <p className="text-xs text-[#777777]">Comparing daily gross sales against gross profit</p>
@@ -308,7 +308,7 @@ export function ReportsPage() {
           <MultiTrendBarChart data={trendChartData} />
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
+        <section className="overflow-hidden rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white shadow-xs">
           <div className="border-b border-[#E9E9E9] px-5 py-3.5 text-sm font-semibold text-[#151515]">
             Daily Sales Breakdown
           </div>
@@ -364,7 +364,7 @@ export function ReportsPage() {
     }
 
     activeTabContent = (
-      <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
+      <section className="overflow-hidden rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white shadow-xs">
         <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 gap-2">
           <div className="text-sm font-semibold text-[#151515]">Product Performance</div>
           <SearchInput
@@ -409,7 +409,7 @@ export function ReportsPage() {
     }
 
     activeTabContent = (
-      <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
+      <section className="overflow-hidden rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white shadow-xs">
         <div className="border-b border-[#E9E9E9] px-5 py-3.5 text-sm font-semibold text-[#151515]">
           Sales by Category
         </div>
@@ -438,7 +438,7 @@ export function ReportsPage() {
           <StatCard label="Net Profit" value={netProfit} meta="Sales - COGS - Refunds" icon={TrendingUp} />
         </div>
 
-        <section className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+        <section className="rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-4 sm:p-5 shadow-xs">
           <div className="mb-2">
             <h3 className="text-base font-semibold text-[#151515]">Profit Trend Analysis</h3>
             <p className="text-xs text-[#777777]">Revenue vs Profit generation across selected range</p>
@@ -526,7 +526,7 @@ export function ReportsPage() {
     }
 
     activeTabContent = (
-      <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
+      <section className="overflow-hidden rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white shadow-xs">
         <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 gap-2">
           <div className="text-sm font-semibold text-[#151515]">Inventory Movements</div>
           <div className="flex flex-wrap items-center gap-2">
@@ -616,7 +616,7 @@ export function ReportsPage() {
     }
 
     activeTabContent = (
-      <section className="overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
+      <section className="overflow-hidden rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white shadow-xs">
         <div className="flex flex-wrap items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 gap-2">
           <div className="text-sm font-semibold text-[#151515]">Completed Transactions</div>
           <div className="flex flex-wrap items-center gap-2">

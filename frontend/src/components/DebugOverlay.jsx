@@ -93,7 +93,7 @@ export function DebugOverlay(props) {
   if (!isExpanded) {
     return (
       <div
-        className="fixed bottom-20 right-4 z-50 flex items-center gap-2 rounded-xl border border-[#262626] bg-[#171717] px-3 py-1.5 font-mono text-xs text-white shadow-xl md:bottom-4"
+        className="fixed bottom-20 right-4 z-50 flex items-center gap-2 rounded-xl border border-[#333333] border-b-2 border-b-[#111111] bg-[#171717] px-3 py-1.5 font-mono text-xs text-white shadow-xl md:bottom-4"
         title="Live Responsive Overlay (Alt+D to toggle, click to expand)"
       >
         <span className="flex h-2 w-2 rounded-full bg-[#B9F36B] animate-pulse" />
@@ -127,7 +127,7 @@ export function DebugOverlay(props) {
 
   // Expanded panel displaying width, breakpoints, and spacing scale
   return (
-    <div className="fixed bottom-20 right-4 z-50 w-80 rounded-2xl border border-[#262626] bg-[#171717] p-4 font-mono text-xs text-white shadow-2xl md:bottom-4">
+    <div className="fixed bottom-20 right-4 z-50 w-80 rounded-2xl border border-[#333333] border-b-2 border-b-black bg-[#171717] p-4 font-mono text-xs text-white shadow-2xl md:bottom-4">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[#262626] pb-2.5">
         <div className="flex items-center gap-2">

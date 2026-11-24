@@ -22,7 +22,7 @@ export function BottomNav(props) {
   return (
     <nav
       aria-label="Mobile navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 flex h-16 border-t border-[#262626] bg-[#171717] select-none md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-40 flex h-16 border-t border-[#262626] bg-[#171717]/95 backdrop-blur shadow-[0_-4px_16px_rgba(0,0,0,0.3)] select-none md:hidden"
     >
       <div className={gridClass}>
         {items.map(function renderBottomItem(item) {
@@ -31,7 +31,7 @@ export function BottomNav(props) {
 
           let ariaCurrent = undefined;
           let buttonClass =
-            "flex min-w-0 flex-col items-center justify-center gap-1 py-1 font-medium transition-colors cursor-pointer ";
+            "flex min-w-0 flex-col items-center justify-center gap-1 py-1 font-medium transition-all duration-100 cursor-pointer active:translate-y-[0.5px] ";
           if (isActive) {
             ariaCurrent = "page";
             buttonClass = buttonClass + "text-white font-semibold";
@@ -41,7 +41,7 @@ export function BottomNav(props) {
 
           let iconClass = "h-5 w-5 shrink-0 ";
           if (isActive) {
-            iconClass = iconClass + "text-[#B9F36B]";
+            iconClass = iconClass + "text-[#B9F36B] drop-shadow-[0_1px_4px_rgba(185,243,107,0.35)]";
           } else {
             iconClass = iconClass + "text-[#A3A3A3]";
           }

@@ -103,7 +103,7 @@ function OpenModal(props) {
     >
       <div
         className={
-          "w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col " +
+          "w-full rounded-2xl bg-white shadow-2xl border border-[#E5E5E3] border-b-2 border-b-[#D0CFCB] max-h-[92vh] flex flex-col " +
           widthClass
         }
       >
@@ -117,7 +117,7 @@ function OpenModal(props) {
             disabled={props.dismissDisabled}
             title="Close"
             aria-label="Close modal"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] cursor-pointer transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#777777] hover:bg-[#F9F9F8] hover:text-[#151515] shadow-xs active:translate-y-[1px] active:shadow-none transition-all duration-100 cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>

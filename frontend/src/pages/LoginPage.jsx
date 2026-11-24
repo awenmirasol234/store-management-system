@@ -186,7 +186,7 @@ export function LoginPage(props) {
                   onClick={function () {
                     handleKeypadPress(num);
                   }}
-                  className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white font-mono text-xl font-bold text-[#151515] shadow-xs hover:border-[#151515] hover:bg-[#EEEEED] active:scale-95 active:bg-[#151515] active:text-white transition-all cursor-pointer select-none"
+                  className="flex h-13 items-center justify-center rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white font-mono text-xl font-bold text-[#151515] shadow-xs hover:border-[#D6D6D3] hover:border-b-[#C8C8C4] hover:bg-[#F9F9F8] active:translate-y-[1px] active:shadow-none transition-all duration-100 cursor-pointer select-none"
                 >
                   {num}
                 </button>
@@ -195,7 +195,7 @@ export function LoginPage(props) {
             <button
               type="button"
               onClick={handleClear}
-              className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-xs font-semibold text-[#777777] hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 active:scale-95 transition-all cursor-pointer select-none"
+              className="flex h-13 items-center justify-center rounded-xl border border-rose-200 border-b-2 border-b-rose-200 bg-white text-xs font-semibold text-[#777777] hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 active:translate-y-[1px] active:shadow-none transition-all duration-100 cursor-pointer select-none"
               title="Clear PIN"
             >
               Clear
@@ -205,14 +205,14 @@ export function LoginPage(props) {
               onClick={function () {
                 handleKeypadPress(0);
               }}
-              className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white font-mono text-xl font-bold text-[#151515] shadow-xs hover:border-[#151515] hover:bg-[#EEEEED] active:scale-95 active:bg-[#151515] active:text-white transition-all cursor-pointer select-none"
+              className="flex h-13 items-center justify-center rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white font-mono text-xl font-bold text-[#151515] shadow-xs hover:border-[#D6D6D3] hover:border-b-[#C8C8C4] hover:bg-[#F9F9F8] active:translate-y-[1px] active:shadow-none transition-all duration-100 cursor-pointer select-none"
             >
               0
             </button>
             <button
               type="button"
               onClick={handleBackspace}
-              className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:border-[#151515] hover:bg-[#EEEEED] hover:text-[#151515] active:scale-95 transition-all cursor-pointer select-none"
+              className="flex h-13 items-center justify-center rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#777777] hover:border-[#D6D6D3] hover:bg-[#EEEEED] hover:text-[#151515] active:translate-y-[1px] active:shadow-none transition-all duration-100 cursor-pointer select-none"
               title="Backspace"
               aria-label="Backspace"
             >

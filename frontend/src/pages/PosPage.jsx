@@ -839,7 +839,7 @@ export function PosPage(props) {
           return (
             <div
               key={product.product_id}
-              className="flex flex-col overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white text-left transition-all hover:border-[#151515]/30 hover:shadow-xs justify-between"
+              className="flex flex-col overflow-hidden rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white text-left shadow-xs hover:border-[#CCCCCC] hover:border-b-[#BEBEBC] hover:shadow-sm transition-all duration-150 justify-between"
             >
               <div>
                 <div
@@ -877,7 +877,7 @@ export function PosPage(props) {
                   onClick={function onAddClick(event) {
                     handleProductCardClick(product, event);
                   }}
-                  className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1.5 text-xs font-semibold text-[#151515] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
+                  className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white py-1.5 text-xs font-semibold text-[#151515] shadow-xs hover:bg-[#F9F9F8] hover:border-b-[#CECECA] active:translate-y-[1px] active:shadow-none transition-all duration-100 cursor-pointer"
                 >
                   <Plus className="h-3 w-3" />
                   <span>Add to Cart</span>
@@ -1026,11 +1026,11 @@ export function PosPage(props) {
 
     const isBaseSelected = selectedOptionId === "base";
     let baseCardClass =
-      "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors cursor-pointer ";
+      "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-all cursor-pointer ";
     if (isBaseSelected) {
-      baseCardClass = baseCardClass + "border-[#151515] bg-[#EEEEED]/40 shadow-2xs";
+      baseCardClass = baseCardClass + "border-[#151515] bg-[#EEEEED]/40 border-b-2 border-b-[#151515] shadow-xs";
     } else {
-      baseCardClass = baseCardClass + "border-[#E9E9E9] hover:border-[#151515] hover:bg-[#EEEEED]";
+      baseCardClass = baseCardClass + "border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] hover:border-[#151515] hover:border-b-[#151515] hover:bg-[#EEEEED] shadow-2xs";
     }
 
     pickerBody = (
@@ -1077,11 +1077,11 @@ export function PosPage(props) {
             {pickerState.options.map(function renderOption(option) {
               const isOptionSelected = selectedOptionId === option.option_id;
               let optionCardClass =
-                "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors cursor-pointer ";
+                "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-all cursor-pointer ";
               if (isOptionSelected) {
-                optionCardClass = optionCardClass + "border-[#151515] bg-[#EEEEED]/40 shadow-2xs";
+                optionCardClass = optionCardClass + "border-[#151515] bg-[#EEEEED]/40 border-b-2 border-b-[#151515] shadow-xs";
               } else {
-                optionCardClass = optionCardClass + "border-[#E9E9E9] hover:border-[#151515] hover:bg-[#EEEEED]";
+                optionCardClass = optionCardClass + "border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] hover:border-[#151515] hover:border-b-[#151515] hover:bg-[#EEEEED] shadow-2xs";
               }
 
               return (
@@ -1221,13 +1221,13 @@ export function PosPage(props) {
   let mobileCartBar = null;
   if (cartItems.length > 0) {
     let mobileButtonClass =
-      "flex w-full items-center justify-between rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] px-4 py-3 font-semibold text-[#151515] shadow-xs active:scale-[0.99] cursor-pointer transition-all";
+      "flex w-full items-center justify-between rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] border border-[#A2E84D] border-b-2 border-b-[#8FD838] px-4 py-3 font-semibold text-[#151515] shadow-xs active:translate-y-[1px] active:shadow-none cursor-pointer transition-all duration-100";
     if (cartBadgeBumping) {
       mobileButtonClass = mobileButtonClass + " scale-[1.03]";
     }
 
     mobileCartBar = (
-      <div className="fixed bottom-16 left-0 right-0 z-30 border-t border-[#E9E9E9] bg-white/95 p-3 backdrop-blur md:hidden">
+      <div className="fixed bottom-16 left-0 right-0 z-30 border-t border-[#E5E5E3] bg-white/95 p-3 backdrop-blur shadow-lg md:hidden">
         <button
           data-cart-target="mobile-bar"
           type="button"
@@ -1305,7 +1305,7 @@ export function PosPage(props) {
       <button
         type="button"
         onClick={props.onOpenShiftModal}
-        className="flex h-11 items-center gap-2 rounded-xl border border-[#E9E9E9] bg-white px-3.5 text-xs font-medium text-[#151515] hover:bg-[#EEEEED] cursor-pointer shadow-xs shrink-0 transition-colors"
+        className="flex h-11 items-center gap-2 rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white px-3.5 text-xs font-medium text-[#151515] hover:bg-[#F9F9F8] cursor-pointer shadow-xs shrink-0 active:translate-y-[1px] active:shadow-none transition-all duration-100"
         title="Cash Drawer & Shift Reconciliation"
       >
         <Wallet className={"h-4 w-4 " + shiftIconClass} />
@@ -1348,7 +1348,7 @@ export function PosPage(props) {
             onClick={function expandCart() {
               setCartCollapsed(false);
             }}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#151515] hover:bg-[#EEEEED] cursor-pointer shadow-xs transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#151515] hover:bg-[#F9F9F8] cursor-pointer shadow-xs active:translate-y-[1px] active:shadow-none transition-all duration-100"
             title="Expand Cart Panel"
             aria-label="Expand Cart Panel"
           >
@@ -1392,7 +1392,7 @@ export function PosPage(props) {
             type="button"
             onClick={openCheckoutModal}
             disabled={cartItems.length === 0}
-            className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] text-[#151515] shadow-xs disabled:opacity-30 disabled:pointer-events-none cursor-pointer active:scale-95 transition-all"
+            className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] border border-[#A2E84D] border-b-2 border-b-[#8FD838] text-[#151515] shadow-xs disabled:opacity-30 disabled:pointer-events-none cursor-pointer active:translate-y-[1px] active:shadow-none transition-all duration-100"
             title="Proceed to Checkout"
             aria-label="Proceed to Checkout"
           >
@@ -1465,7 +1465,7 @@ export function PosPage(props) {
               onClick={function openLowStock() {
                 setLowStockModalOpen(true);
               }}
-              className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] cursor-pointer shrink-0 transition-colors"
+              className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#777777] hover:bg-[#F9F9F8] hover:text-[#151515] cursor-pointer shadow-xs shrink-0 active:translate-y-[1px] active:shadow-none transition-all duration-100"
               title="Low Stock Alerts"
               aria-label="Low Stock Alerts"
             >

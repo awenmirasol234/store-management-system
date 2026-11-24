@@ -64,7 +64,7 @@ export function Sidebar(props) {
     headerElement = (
       <div className="flex flex-col items-center gap-3 py-6">
         <div
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] text-[#151515] shrink-0"
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] border border-[#A2E84D] border-b-2 border-b-[#8FD838] text-[#151515] shrink-0 shadow-xs"
           title="StoreFlow POS"
         >
           <Store className="h-5 w-5" />
@@ -84,7 +84,7 @@ export function Sidebar(props) {
     headerElement = (
       <div className="flex items-center justify-between px-5 py-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] text-[#151515] shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] border border-[#A2E84D] border-b-2 border-b-[#8FD838] text-[#151515] shrink-0 shadow-xs">
             <Store className="h-5 w-5" />
           </div>
           <div>
@@ -127,7 +127,7 @@ export function Sidebar(props) {
       <button
         type="button"
         onClick={props.onOpenUserModal}
-        className="flex w-full items-center gap-2 rounded-lg bg-white/5 px-2.5 py-1.5 text-2xs font-medium text-[#A3A3A3] hover:bg-white/10 hover:text-white transition cursor-pointer"
+        className="flex w-full items-center gap-2 rounded-lg bg-white/5 border border-white/10 border-b-2 border-b-white/5 px-2.5 py-1.5 text-2xs font-medium text-[#A3A3A3] hover:bg-white/10 hover:border-white/15 hover:text-white shadow-2xs transition-all cursor-pointer"
       >
         <Users className="h-3.5 w-3.5 text-[#A3A3A3]" />
         <span>Manage Staff</span>
@@ -161,7 +161,7 @@ export function Sidebar(props) {
       <button
         type="button"
         onClick={props.onOpenShiftModal}
-        className="flex w-full items-center justify-between rounded-lg bg-white/5 px-2.5 py-1.5 text-2xs font-medium text-[#A3A3A3] hover:bg-white/10 hover:text-white transition cursor-pointer"
+        className="flex w-full items-center justify-between rounded-lg bg-white/5 border border-white/10 border-b-2 border-b-white/5 px-2.5 py-1.5 text-2xs font-medium text-[#A3A3A3] hover:bg-white/10 hover:border-white/15 hover:text-white shadow-2xs transition-all cursor-pointer"
         title="Cash Drawer & Shifts"
       >
         <div className="flex items-center gap-2">
@@ -233,7 +233,7 @@ export function Sidebar(props) {
           const IconComponent = item.icon;
           const isActive = props.activePage === item.key;
           let itemClass =
-            "flex w-full items-center rounded-xl text-xs font-medium transition-colors cursor-pointer ";
+            "flex w-full items-center rounded-xl text-xs font-medium transition-all duration-100 cursor-pointer ";
           if (collapsed) {
             itemClass = itemClass + "justify-center px-0 py-3 ";
           } else {
@@ -243,9 +243,9 @@ export function Sidebar(props) {
           let ariaCurrent = undefined;
           if (isActive) {
             ariaCurrent = "page";
-            itemClass = itemClass + "bg-[#B9F36B] text-[#151515] font-semibold shadow-xs";
+            itemClass = itemClass + "bg-[#B9F36B] text-[#151515] font-semibold border border-[#A2E84D] border-b-2 border-b-[#8FD838] shadow-xs active:translate-y-[1px] active:shadow-none";
           } else {
-            itemClass = itemClass + "text-[#A3A3A3] hover:bg-white/5 hover:text-white";
+            itemClass = itemClass + "text-[#A3A3A3] hover:bg-white/5 hover:text-white active:translate-y-[1px]";
           }
 
           let labelSpan = <span>{item.label}</span>;

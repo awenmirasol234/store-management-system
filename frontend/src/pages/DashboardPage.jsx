@@ -172,7 +172,7 @@ export function DashboardPage(props) {
       {/* 2. Operational Sections: Top Selling, Inventory Alerts */}
       <div className={sectionsClass}>
         {/* Top-Selling Products */}
-        {isOwner && <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+        {isOwner && <section className="flex flex-col rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-4 sm:p-5 shadow-xs">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold text-[#151515]">Top Selling Products</h2>
             <span className="font-mono text-xs text-[#777777]">Top 5</span>
@@ -181,7 +181,7 @@ export function DashboardPage(props) {
         </section>}
 
         {/* Inventory Alerts */}
-        <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+        <section className="flex flex-col rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-4 sm:p-5 shadow-xs">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold text-[#151515]">Inventory Alerts</h2>
             <Button

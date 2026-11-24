@@ -29,7 +29,7 @@ export function ErrorBanner(props) {
     <div
       role="alert"
       className={
-        "flex items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-medium text-rose-700" +
+        "flex items-center justify-between gap-3 rounded-xl border border-rose-200 border-b-2 border-b-rose-300/80 bg-rose-50 px-4 py-3 text-xs font-medium text-rose-700 shadow-xs" +
         extraClass
       }
     >

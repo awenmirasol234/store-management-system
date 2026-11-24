@@ -69,7 +69,7 @@ export function SetupPage(props) {
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[#F5F5F4] px-4 py-8 select-none">
-      <div className="w-full max-w-md rounded-2xl border border-[#E9E9E9] bg-white p-6 shadow-sm md:p-8">
+      <div className="w-full max-w-md rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-6 shadow-xs md:p-8">
         <div className="mb-6 flex flex-col items-center text-center">
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#171717] text-[#B9F36B] shadow-xs">
             <Store className="h-6 w-6" />

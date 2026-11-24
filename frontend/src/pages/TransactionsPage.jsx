@@ -242,7 +242,7 @@ export function TransactionsPage(props) {
       return (
         <div
           key={sale.sale_id}
-          className="rounded-2xl border border-[#E9E9E9] bg-white p-4 space-y-3"
+          className="rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-4 shadow-xs space-y-3"
         >
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -333,7 +333,7 @@ export function TransactionsPage(props) {
                       updateReturnQty(item.sale_item_id, event.target.value);
                     }}
                     placeholder="0"
-                    className="w-20 rounded-xl border border-[#E9E9E9] bg-white px-2.5 py-1.5 text-right font-mono text-xs text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30"
+                    className="w-20 rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white px-2.5 py-1.5 text-right font-mono text-xs text-[#151515] shadow-2xs focus:border-[#151515] focus:border-b-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-all"
                   />
                 </div>
               );
@@ -414,7 +414,7 @@ export function TransactionsPage(props) {
       </div>
 
       {/* Desktop Table (>= md) */}
-      <div className="hidden md:block flex-1 overflow-auto rounded-2xl border border-[#E9E9E9] bg-white">
+      <div className="hidden md:block flex-1 overflow-auto rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white shadow-xs">
         <DataTable
           stickyHead={true}
           headRow={

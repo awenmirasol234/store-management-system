@@ -166,9 +166,9 @@ export function CashierShiftModal(props) {
           <div className="mt-2.5 flex flex-wrap gap-2">
             {PRESET_OPENING_FUNDS.map(function renderPreset(presetAmount) {
               const isSelected = Number(openingCashInput) === presetAmount;
-              let buttonTone = "border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515]";
+              let buttonTone = "border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#777777] shadow-xs hover:border-[#151515] hover:bg-[#EEEEED] hover:text-[#151515] active:translate-y-[1px] active:shadow-none";
               if (isSelected) {
-                buttonTone = "border-[#151515] bg-[#151515] text-white font-semibold";
+                buttonTone = "border border-[#151515] border-b-2 border-b-black bg-[#151515] text-white font-semibold shadow-xs active:translate-y-[1px] active:shadow-none";
               }
               return (
                 <button
@@ -179,7 +179,7 @@ export function CashierShiftModal(props) {
                     setOpeningCashInput(String(presetAmount));
                   }}
                   className={
-                    "rounded-xl border px-3 py-1.5 text-xs font-mono transition cursor-pointer " +
+                    "rounded-xl px-3 py-1.5 text-xs font-mono transition-all duration-100 cursor-pointer " +
                     buttonTone
                   }
                 >
@@ -213,14 +213,14 @@ export function CashierShiftModal(props) {
   } else if (mode === "MOVEMENT") {
     // 2. CASH MOVEMENT FORM
     let cashInSelected = movementType === "CASH_IN";
-    let inButtonClass = "border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED]";
+    let inButtonClass = "border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#777777] hover:bg-[#F9F9F8]";
     if (cashInSelected) {
-      inButtonClass = "border-emerald-600 bg-emerald-50 text-emerald-700 font-semibold";
+      inButtonClass = "border-emerald-600 border-b-2 border-b-emerald-600 bg-emerald-50 text-emerald-800 font-semibold shadow-xs";
     }
 
-    let outButtonClass = "border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED]";
+    let outButtonClass = "border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#777777] hover:bg-[#F9F9F8]";
     if (!cashInSelected) {
-      outButtonClass = "border-rose-600 bg-rose-50 text-rose-700 font-semibold";
+      outButtonClass = "border-rose-500 border-b-2 border-b-rose-500 bg-rose-50 text-rose-800 font-semibold shadow-xs";
     }
 
     modalContent = (
@@ -243,7 +243,7 @@ export function CashierShiftModal(props) {
                 setMovementType("CASH_IN");
               }}
               className={
-                "flex items-center justify-center gap-2 rounded-xl border p-2.5 text-xs transition cursor-pointer " +
+                "flex items-center justify-center gap-2 rounded-xl border p-2.5 text-xs shadow-xs active:translate-y-[1px] active:shadow-none transition-all duration-100 cursor-pointer " +
                 inButtonClass
               }
             >
@@ -257,7 +257,7 @@ export function CashierShiftModal(props) {
                 setMovementType("CASH_OUT");
               }}
               className={
-                "flex items-center justify-center gap-2 rounded-xl border p-2.5 text-xs transition cursor-pointer " +
+                "flex items-center justify-center gap-2 rounded-xl border p-2.5 text-xs shadow-xs active:translate-y-[1px] active:shadow-none transition-all duration-100 cursor-pointer " +
                 outButtonClass
               }
             >

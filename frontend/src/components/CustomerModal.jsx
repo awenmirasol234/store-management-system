@@ -229,7 +229,7 @@ export function CustomerModal(props) {
             }}
             placeholder="e.g. Block 4 Lot 12, Purok 2, Near Chapel"
             rows={2}
-            className="w-full rounded-xl border border-[#E9E9E9] bg-white px-3.5 py-2.5 text-sm text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors"
+            className="w-full rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white px-3.5 py-2.5 text-sm text-[#151515] shadow-2xs placeholder:text-[#777777] focus:border-[#151515] focus:border-b-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-all"
           />
         </div>
 

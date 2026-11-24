@@ -149,7 +149,7 @@ export function RecordPaymentModal(props) {
                 setAmount(String(currentBalance));
               }}
               disabled={currentBalance <= 0}
-              className="rounded-full border border-[#151515] bg-[#151515] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#262626] disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition-colors"
+              className="rounded-full border border-[#151515] border-b-2 border-b-[#2B2B2B] bg-[#151515] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#262626] shadow-xs active:translate-y-[1px] active:shadow-none disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed disabled:active:translate-y-0 transition-all duration-100"
             >
               {"Full Balance (" + formatPeso(currentBalance) + ")"}
             </button>
@@ -163,7 +163,7 @@ export function RecordPaymentModal(props) {
                     setAmount(String(preset));
                   }}
                   disabled={isExceeded}
-                  className="rounded-full border border-[#E9E9E9] bg-white px-3.5 py-1.5 text-xs font-medium text-[#151515] hover:bg-[#EEEEED] disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition-colors"
+                  className="rounded-full border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white px-3.5 py-1.5 text-xs font-medium text-[#151515] hover:bg-[#F9F9F8] shadow-xs active:translate-y-[1px] active:shadow-none disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed disabled:active:translate-y-0 transition-all duration-100"
                 >
                   {"₱" + String(preset)}
                 </button>

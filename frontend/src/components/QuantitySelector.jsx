@@ -121,7 +121,7 @@ export function QuantitySelector(props) {
   return (
     <div
       className={
-        "inline-flex items-center rounded-lg border border-[#E9E9E9] bg-white transition-colors focus-within:border-[#151515]" +
+        "inline-flex items-center rounded-lg border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white shadow-2xs transition-all focus-within:border-[#151515] focus-within:border-b-[#151515]" +
         extraClass
       }
     >
@@ -129,7 +129,7 @@ export function QuantitySelector(props) {
         type="button"
         onClick={handleDecrement}
         disabled={props.disabled || isMinReached}
-        className="flex h-7 w-7 items-center justify-center text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] disabled:opacity-30 disabled:pointer-events-none rounded-l-lg cursor-pointer transition-colors"
+        className="flex h-7 w-7 items-center justify-center text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] active:translate-y-[0.5px] disabled:opacity-30 disabled:pointer-events-none rounded-l-lg cursor-pointer transition-all duration-100"
         title="Decrease quantity"
         aria-label="Decrease quantity"
       >
@@ -154,7 +154,7 @@ export function QuantitySelector(props) {
         type="button"
         onClick={handleIncrement}
         disabled={props.disabled}
-        className="flex h-7 w-7 items-center justify-center text-[#151515] hover:bg-[#B9F36B]/40 disabled:opacity-30 disabled:pointer-events-none rounded-r-lg cursor-pointer transition-colors"
+        className="flex h-7 w-7 items-center justify-center text-[#151515] hover:bg-[#B9F36B]/40 active:translate-y-[0.5px] disabled:opacity-30 disabled:pointer-events-none rounded-r-lg cursor-pointer transition-all duration-100"
         title="Increase quantity"
         aria-label="Increase quantity"
       >

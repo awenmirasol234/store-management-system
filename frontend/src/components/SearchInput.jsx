@@ -64,7 +64,7 @@ export function SearchInput(props) {
     );
   } else if (props.shortcutHint) {
     trailingElement = (
-      <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 rounded border border-[#E9E9E9] bg-[#EEEEED] px-2 py-0.5 font-mono text-tiny text-[#777777]">
+      <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 rounded-lg border border-[#E2E1DF] bg-[#EEEEED] px-2 py-0.5 font-mono text-tiny text-[#777777] shadow-2xs">
         {props.shortcutHint}
       </span>
     );
@@ -82,7 +82,7 @@ export function SearchInput(props) {
         placeholder={props.placeholder}
         aria-label={computedAriaLabel}
         className={
-          "w-full rounded-xl border border-[#E9E9E9] bg-white text-[#151515] placeholder:text-[#777777] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-colors " +
+          "w-full rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#151515] placeholder:text-[#777777] shadow-xs focus:border-[#151515] focus:border-b-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 transition-all " +
           inputSizeClass
         }
       />

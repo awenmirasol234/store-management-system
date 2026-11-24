@@ -13,11 +13,11 @@ export function PaymentMethodToggle(props) {
         const IconComponent = method.icon;
         const isSelected = props.paymentMethod === method.key;
         let buttonClass =
-          "flex flex-col items-center gap-1.5 rounded-xl border py-2 text-xs font-medium cursor-pointer transition-colors ";
+          "flex flex-col items-center gap-1.5 rounded-xl border py-2 text-xs font-medium cursor-pointer transition-all duration-100 ";
         if (isSelected) {
-          buttonClass = buttonClass + "border-[#151515] bg-[#151515] text-white font-semibold shadow-xs";
+          buttonClass = buttonClass + "border-[#151515] border-b-2 border-b-[#2B2B2B] bg-[#151515] text-white font-semibold shadow-xs active:translate-y-[1px] active:shadow-none";
         } else {
-          buttonClass = buttonClass + "border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515]";
+          buttonClass = buttonClass + "border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#777777] shadow-xs hover:bg-[#F9F9F8] hover:text-[#151515] active:translate-y-[1px] active:shadow-none";
         }
         return (
           <button

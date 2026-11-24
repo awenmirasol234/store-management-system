@@ -72,42 +72,70 @@ Design tokens are declared in `frontend/src/index.css` inside the `@theme` block
 
 ---
 
-## 4. Component Implementation Specifications
+## 4. Component Implementation Specifications & Elevation Hierarchy
+
+### 4.0 Five-Tier Elevation Architecture
+
+StoreFlow implements a disciplined 5-tier elevation hierarchy designed for retail POS speed, clarity, and tactile responsiveness:
+
+| Level | Role | Styling Tokens | Target Primitives |
+| :--- | :--- | :--- | :--- |
+| **L0** | Ground Plane | `bg-[#F5F5F4]` | Application viewport canvas |
+| **L1** | Inset / Wells | `border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] shadow-2xs` | `Input.jsx`, `Select.jsx`, `SearchInput.jsx` |
+| **L2** | Surface Cards | `bg-white border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] shadow-xs` | `StatCard.jsx`, POS Cards, Table wrappers |
+| **L3** | Tactile Controls | `border-b-2`, `shadow-xs`, `active:translate-y-[1px] active:shadow-none` | `Button.jsx`, Tabs, Filter Pills, Nav Items |
+| **L4** | Floating Windows | `shadow-2xl` / `shadow-lg`, `border-b-2 border-b-[#D0CFCB]` | `Modal.jsx`, `DebugOverlay.jsx`, Sticky Bars |
+
+---
 
 ### 4.1 Buttons (`frontend/src/components/Button.jsx`)
-- Border radius: `rounded-xl` (14px).
+- Tactile Raised Styling: Buttons feature softened elevation depth via a subtle bottom bevel (`border-b-2`), ambient micro-shadow (`shadow-xs`), and responsive click physics (`active:translate-y-[1px] active:shadow-none`).
+- Border radius: `rounded-xl` (12px).
 - Variants:
-  - `primary`: `bg-[#B9F36B] hover:bg-[#A8E65A] text-[#151515] font-semibold shadow-xs`.
-  - `secondary`: `bg-white hover:bg-[#EEEEED] text-[#151515] border border-[#E9E9E9]`.
-  - `ghost`: `bg-transparent hover:bg-[#EEEEED] text-[#777777] hover:text-[#151515]`.
-  - `danger`: `bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200`.
+  - `primary`: `bg-[#B9F36B] text-[#151515] font-semibold border border-[#A2E84D] border-b-2 border-b-[#8FD838] shadow-xs hover:bg-[#A8E65A] hover:border-[#97DF43] hover:border-b-[#84CE30]`.
+  - `secondary`: `bg-white text-[#151515] border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] shadow-xs hover:bg-[#F9F9F8] hover:border-[#DCDCDA] hover:border-b-[#CECECA]`.
+  - `soft`: `bg-[#EEEEED] text-[#151515] border border-[#E2E1DF] border-b-2 border-b-[#D0CFCB] shadow-xs hover:bg-[#E6E6E5]`.
+  - `danger`: `bg-rose-50 text-rose-700 border border-rose-200/80 border-b-2 border-b-rose-200 shadow-xs hover:bg-rose-100 hover:border-rose-200 hover:border-b-rose-300`.
+  - `ghost`: `bg-transparent text-[#777777] hover:bg-[#EEEEED] hover:text-[#151515] border border-transparent` (retains clean borderless feel).
+- Keypads & Standalone Buttons: Numerical keypads, product card add-to-cart buttons, and quick actions share identical softened tactile depth tokens (`border-b-2 border-b-[#D6D6D3] shadow-xs active:translate-y-[1px] active:shadow-none`).
 
-### 4.2 Product Cards (`frontend/src/pages/PosPage.jsx`)
-- Container: `rounded-2xl border border-[#E9E9E9] bg-white p-3.5 hover:border-[#151515]/30 hover:shadow-xs`.
-- Media container: `aspect-square rounded-xl bg-[#EEEEED] relative flex items-center justify-center`.
-- Stock Badge: `absolute left-2 top-2 rounded-md bg-[#171717] px-2 py-0.5 font-mono text-2xs text-white`.
-- Action: Full-width button `py-2 rounded-xl border border-[#E9E9E9] text-xs font-semibold`.
+### 4.2 Surface Cards & Product Tiles (`frontend/src/pages/PosPage.jsx`, `frontend/src/components/StatCard.jsx`)
+- Stat Cards: `rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-4 sm:p-5 shadow-xs`. Icon container: `rounded-xl bg-[#EEEEED] border border-[#E2E1DF] border-b-2 border-b-[#D0CFCB] text-[#151515] shadow-2xs`.
+- POS Product Cards: `rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-3.5 shadow-xs hover:border-[#CCCCCC] hover:border-b-[#BEBEBC] hover:shadow-sm transition-all duration-150`.
+- Data Table Wrappers: `overflow-hidden rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white shadow-xs`.
 
-### 4.3 Category & Status Filter Pills (`frontend/src/components/CategoryFilterChips.jsx`, `frontend/src/components/FilterPill.jsx`)
-- Pill Shape: `rounded-full` with `aria-pressed` state on toggle pills.
-- Selected: `bg-[#151515] text-white` (`px-4 py-2` for category chips, `px-3.5 py-1.5` for status/method pills).
-- Inactive: `bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#151515]`.
-- Pill Count Badge: `bg-[#B9F36B] text-[#151515]` when active; `bg-[#EEEEED] text-[#777777]` when inactive.
+### 4.3 Form Inputs, Selects, & Search Controls (`frontend/src/components/Input.jsx`, `Select.jsx`, `SearchInput.jsx`)
+- Text & Number Inputs: `rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white px-3.5 py-2.5 text-sm text-[#151515] shadow-2xs focus:border-[#151515] focus:border-b-[#151515] focus:ring-2 focus:ring-[#B9F36B]/30`.
+- Dropdown Selects: `rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#151515] shadow-xs focus:border-[#151515] focus:ring-2 focus:ring-[#B9F36B]/30`.
+- Search Input: `rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white shadow-xs focus:border-[#151515] focus:ring-2 focus:ring-[#B9F36B]/30`. Shortcut badge: `rounded-lg border border-[#E2E1DF] bg-[#EEEEED] px-2 py-0.5 shadow-2xs`.
 
-### 4.4 Modals (`frontend/src/components/Modal.jsx`)
-- Backdrop: `fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-3 sm:p-6` (supports Escape key and backdrop click-to-close).
-- Card Container: `w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col` (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`).
-- **Padding Rule**: `Modal.jsx` owns all content padding (`p-4 sm:p-6`). Modal children must never introduce conflicting outer padding.
-- Sizes: `sm` (`max-w-sm`), `md` (`max-w-md`), `lg` (`max-w-lg`, default), `xl` (`max-w-2xl` for checkout cockpit).
+### 4.4 Category & Status Filter Pills, Tabs, & Presets (`frontend/src/components/CategoryFilterChips.jsx`, `FilterPill.jsx`, `ReportsPage.jsx`)
+- Filter Pills & Chips:
+  - Active: `bg-[#151515] font-semibold text-white border border-[#151515] border-b-2 border-b-[#2B2B2B] shadow-xs active:translate-y-[1px] active:shadow-none`.
+  - Inactive: `bg-white text-[#777777] border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] shadow-xs hover:bg-[#F9F9F8] hover:text-[#151515] active:translate-y-[1px] active:shadow-none`.
+- Report Tabs:
+  - Active: `bg-[#151515] text-white border border-[#151515] border-b-2 border-b-[#2B2B2B] shadow-xs active:translate-y-[1px] active:shadow-none`.
+  - Inactive: `text-[#777777] hover:text-[#151515] hover:bg-[#EEEEED] transition-colors`.
 
-### 4.5 Status Badges (`frontend/src/components/Badge.jsx`)
+### 4.5 Navigation Items & App Shell (`frontend/src/components/Sidebar.jsx`, `BottomNav.jsx`)
+- Sidebar Active Item: `bg-[#B9F36B] text-[#151515] font-semibold border border-[#A2E84D] border-b-2 border-b-[#8FD838] shadow-xs active:translate-y-[1px] active:shadow-none`.
+- Sidebar Brand Mark: `bg-[#B9F36B] text-[#151515] border border-[#A2E84D] border-b-2 border-b-[#8FD838] shadow-xs`.
+- Mobile BottomNav Bar: `bg-[#171717]/95 backdrop-blur border-t border-[#262626] shadow-[0_-4px_16px_rgba(0,0,0,0.3)]`.
+
+### 4.6 Modals & Floating Elements (`frontend/src/components/Modal.jsx`, `ErrorBanner.jsx`, `DebugOverlay.jsx`)
+- Modal Dialog Window: `w-full rounded-2xl bg-white shadow-2xl border border-[#E5E5E3] border-b-2 border-b-[#D0CFCB] max-h-[92vh] flex flex-col`.
+- Modal Close Button: `flex h-9 w-9 items-center justify-center rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#777777] hover:bg-[#F9F9F8] shadow-xs active:translate-y-[1px] active:shadow-none`.
+- Error Banner: `rounded-xl border border-rose-200 border-b-2 border-b-rose-300/80 bg-rose-50 px-4 py-3 text-xs font-medium text-rose-700 shadow-xs`.
+- Debug Overlay: `bg-[#171717]/95 text-white rounded-2xl border border-[#333333] border-b-2 border-b-black shadow-2xl backdrop-blur`.
+
+### 4.7 Status Badges (`frontend/src/components/Badge.jsx`)
 - `neutral`: `bg-[#EEEEED] text-[#777777] border border-[#E9E9E9]`.
 - `dark`: `bg-[#171717] text-white`.
 - `green`: `bg-[#B9F36B] text-[#151515]`.
 - `amber`: `bg-amber-50 text-amber-700 border border-amber-200`.
 - `red`: `bg-rose-50 text-rose-700 border border-rose-200`.
 
-### 4.6 Standard Spacing Rhythm
+### 4.8 Standard Spacing Rhythm
 All application pages share a uniform spacing scale:
 - **Outer Page Padding**: `p-4 sm:p-6 lg:p-7` (`PageLayout` and `PosPage` catalog workspace).
 - **Page Header Margin**: `mb-3 sm:mb-4` (`PageHeader`).

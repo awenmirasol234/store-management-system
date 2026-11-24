@@ -41,7 +41,7 @@ export function Select(props) {
           disabled={props.disabled}
           aria-label={props.ariaLabel}
           className={
-            "w-full appearance-none rounded-xl border border-[#E9E9E9] bg-white text-[#151515] focus:border-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors " +
+            "w-full appearance-none rounded-xl border border-[#E5E5E3] border-b-2 border-b-[#D6D6D3] bg-white text-[#151515] shadow-xs focus:border-[#151515] focus:border-b-[#151515] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all " +
             sizeClasses
           }
         >

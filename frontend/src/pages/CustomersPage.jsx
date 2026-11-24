@@ -295,7 +295,7 @@ export function CustomersPage(props) {
       return (
         <div
           key={customer.customer_id}
-          className="rounded-2xl border border-[#E9E9E9] bg-white p-4 space-y-3"
+          className="rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white p-4 shadow-xs space-y-3"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -440,7 +440,7 @@ export function CustomersPage(props) {
       </div>
 
       {/* Desktop Customers Table (>= md) */}
-      <div className="hidden md:block overflow-x-auto rounded-2xl border border-[#E9E9E9] bg-white">
+      <div className="hidden md:block overflow-x-auto rounded-2xl border border-[#E5E5E3] border-b-2 border-b-[#DCDCDA] bg-white shadow-xs">
         <DataTable headRow={tableHeadRow} stickyHead={true}>
           {tableBodyContent}
         </DataTable>
