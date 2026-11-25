@@ -5,14 +5,15 @@ import {
   formatPeso,
   formatQuantity,
   formatQuantityWithUnit,
-  formatSmartDate,
   formatUnit,
   getManilaIsoDateOffset
 } from "../format.js";
+import { buildDailySeries, groupTopItems } from "../chart-data.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
 import { EmptyState } from "../components/EmptyState.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
+import { FilterPill } from "../components/FilterPill.jsx";
 import { LineChart } from "../components/LineChart.jsx";
 import { PageHeader } from "../components/PageHeader.jsx";
 import { PageLayout } from "../components/PageLayout.jsx";
@@ -23,6 +24,7 @@ import { StatCard } from "../components/StatCard.jsx";
 export function DashboardPage(props) {
   const [summary, setSummary] = useState(null);
   const [previousSummary, setPreviousSummary] = useState(null);
+  const [rangeSummary, setRangeSummary] = useState(null);
   const [lowStock, setLowStock] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
   const [dailyTrends, setDailyTrends] = useState([]);
@@ -53,6 +55,7 @@ export function DashboardPage(props) {
       const results = await Promise.all([
         api.getReportsSummary(today, today),
         api.getReportsSummary(yesterday, yesterday),
+        api.getReportsSummary(startDate, today),
         api.listLowStockProducts(),
         api.getTopProducts(null, null, 5),
         api.getDailyReport(startDate, today),
@@ -60,10 +63,11 @@ export function DashboardPage(props) {
       ]);
       setSummary(results[0]);
       setPreviousSummary(results[1]);
-      setLowStock(results[2]);
-      setTopProducts(results[3]);
-      setDailyTrends(results[4] || []);
-      setCategorySales(results[5] || []);
+      setRangeSummary(results[2]);
+      setLowStock(results[3]);
+      setTopProducts(results[4]);
+      setDailyTrends(results[5] || []);
+      setCategorySales(results[6] || []);
     } catch (error) {
       setErrorBanner(error.message);
     }
@@ -105,48 +109,56 @@ export function DashboardPage(props) {
     profitTrend = calculatePercentageTrend(summary.net_profit, previousSummary.net_profit);
   }
 
-  // Format line chart trend data (oldest to newest)
-  const trendChartData = (dailyTrends || [])
-    .slice()
-    .reverse()
-    .map(function (row) {
-      let shortLabel = "";
-      if (row.date) {
-        shortLabel = row.date.slice(5);
-      }
-      return {
-        label: formatSmartDate(row.date),
-        shortLabel: shortLabel,
-        fullDate: formatSmartDate(row.date),
-        sales: row.gross_sales,
-        profit: row.profit,
-        meta: row.sale_count + " transactions"
-      };
-    });
+  // Format line chart trend series spanning full calendar range
+  const today = getManilaIsoDateOffset(0);
+  let daysOffset = -6;
+  if (trendRange === "30D") {
+    daysOffset = -29;
+  }
+  const startDate = getManilaIsoDateOffset(daysOffset);
 
-  // Format category sales for pie chart
-  const categoryPieData = (categorySales || []).map(function (cat) {
-    return {
+  const trendSeries = buildDailySeries({
+    rows: dailyTrends,
+    startDate: startDate,
+    endDate: today
+  });
+
+  // Format category sales for pie chart, grouping items beyond top 5
+  const rawCategoryItems = [];
+  for (let i = 0; i < (categorySales || []).length; i++) {
+    const cat = categorySales[i];
+    rawCategoryItems.push({
       label: cat.category_name,
       value: cat.revenue,
       count: cat.quantity_sold
-    };
+    });
+  }
+
+  const categoryPieData = groupTopItems({
+    items: rawCategoryItems,
+    limit: 5,
+    otherLabel: "Other"
   });
 
-  // Format payment breakdown for pie chart
+  // Format payment breakdown for pie chart using the selected range summary
   const paymentPieData = [];
-  if (summary) {
-    if (summary.cash_sales > 0) {
+  let paymentSource = summary;
+  if (rangeSummary) {
+    paymentSource = rangeSummary;
+  }
+
+  if (paymentSource) {
+    if (paymentSource.cash_sales > 0) {
       paymentPieData.push({
         label: "Cash Sales",
-        value: summary.cash_sales,
+        value: paymentSource.cash_sales,
         color: "#171717"
       });
     }
-    if (summary.credit_sales > 0) {
+    if (paymentSource.credit_sales > 0) {
       paymentPieData.push({
         label: "Utang / Credit",
-        value: summary.credit_sales,
+        value: paymentSource.credit_sales,
         color: "#B9F36B"
       });
     }
@@ -219,13 +231,32 @@ export function DashboardPage(props) {
     sectionsClass = sectionsClass + " lg:grid-cols-2";
   }
 
+  let rangeCaption = "Last 7 days";
+  if (trendRange === "30D") {
+    rangeCaption = "Last 30 days";
+  }
+
+  let activePieData = categoryPieData;
+  let activePieCaption = categoryPieData.length + " categories";
+  if (categoryPieData.length === 1) {
+    activePieCaption = "1 category";
+  }
+
+  if (pieMode === "PAYMENT") {
+    activePieData = paymentPieData;
+    activePieCaption = paymentPieData.length + " methods";
+    if (paymentPieData.length === 1) {
+      activePieCaption = "1 method";
+    }
+  }
+
   return (
     <PageLayout scroll={true}>
       <PageHeader title="Dashboard" />
 
       {errorElement}
 
-      {/* 1. Summary KPI Cards */}
+      {/* 1. Summary KPI Cards (Unchanged) */}
       {isOwner && (
         <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
@@ -259,93 +290,76 @@ export function DashboardPage(props) {
         </div>
       )}
 
-      {/* 2. Visual Analytics: Sales & Profit Line Chart and Category/Payment Donut Chart */}
+      {/* 2. Visual Analytics Section */}
       {isOwner && (
-        <div className="mb-4 sm:mb-5 grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
-          {/* Sales & Profit Line Chart Card */}
-          <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5 lg:col-span-2">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <h2 className="text-base font-semibold text-[#171717]">Sales &amp; Profit Trend</h2>
+        <div className="mb-4 sm:mb-5">
+          {/* Shared Section Header with Range Toggle */}
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-base font-semibold text-[#171717]">Sales Overview</h2>
+              <p className="text-xs text-[#777777]">{rangeCaption}</p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <FilterPill
+                label="7 Days"
+                active={trendRange === "7D"}
+                onClick={function () {
+                  setTrendRange("7D");
+                }}
+              />
+              <FilterPill
+                label="30 Days"
+                active={trendRange === "30D"}
+                onClick={function () {
+                  setTrendRange("30D");
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Equal Height Charts Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 items-stretch">
+            {/* Sales & Profit Line Chart Card */}
+            <section className="h-full flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5 lg:col-span-2">
+              <div className="mb-2">
+                <h3 className="text-sm font-semibold text-[#171717]">Sales &amp; Profit Trend</h3>
                 <p className="text-xs text-[#777777]">Daily performance over time</p>
               </div>
-              <div className="flex items-center gap-1 rounded-xl bg-[#F5F5F4] p-1 border border-[#E9E9E9]">
-                <button
-                  type="button"
-                  onClick={function () {
-                    setTrendRange("7D");
-                  }}
-                  className={
-                    "rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer transition-colors " +
-                    (trendRange === "7D"
-                      ? "bg-[#171717] text-white shadow-xs"
-                      : "text-[#777777] hover:text-[#171717]")
-                  }
-                >
-                  7 Days
-                </button>
-                <button
-                  type="button"
-                  onClick={function () {
-                    setTrendRange("30D");
-                  }}
-                  className={
-                    "rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer transition-colors " +
-                    (trendRange === "30D"
-                      ? "bg-[#171717] text-white shadow-xs"
-                      : "text-[#777777] hover:text-[#171717]")
-                  }
-                >
-                  30 Days
-                </button>
-              </div>
-            </div>
-            <LineChart data={trendChartData} />
-          </section>
+              <LineChart data={trendSeries} className="mt-2 flex-1" />
+            </section>
 
-          {/* Distribution Donut Chart Card */}
-          <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5 lg:col-span-1">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <h2 className="text-base font-semibold text-[#171717]">Sales Distribution</h2>
-                <p className="text-xs text-[#777777]">Revenue breakdown by segment</p>
+            {/* Distribution Donut Chart Card */}
+            <section className="h-full flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5 lg:col-span-1">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-sm font-semibold text-[#171717]">Sales Distribution</h3>
+                  <p className="text-xs text-[#777777]">Revenue breakdown by segment</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <FilterPill
+                    label="Category"
+                    active={pieMode === "CATEGORY"}
+                    onClick={function () {
+                      setPieMode("CATEGORY");
+                    }}
+                  />
+                  <FilterPill
+                    label="Payment"
+                    active={pieMode === "PAYMENT"}
+                    onClick={function () {
+                      setPieMode("PAYMENT");
+                    }}
+                  />
+                </div>
               </div>
-              <div className="flex items-center gap-1 rounded-xl bg-[#F5F5F4] p-1 border border-[#E9E9E9]">
-                <button
-                  type="button"
-                  onClick={function () {
-                    setPieMode("CATEGORY");
-                  }}
-                  className={
-                    "rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer transition-colors " +
-                    (pieMode === "CATEGORY"
-                      ? "bg-[#171717] text-white shadow-xs"
-                      : "text-[#777777] hover:text-[#171717]")
-                  }
-                >
-                  Category
-                </button>
-                <button
-                  type="button"
-                  onClick={function () {
-                    setPieMode("PAYMENT");
-                  }}
-                  className={
-                    "rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer transition-colors " +
-                    (pieMode === "PAYMENT"
-                      ? "bg-[#171717] text-white shadow-xs"
-                      : "text-[#777777] hover:text-[#171717]")
-                  }
-                >
-                  Payment
-                </button>
-              </div>
-            </div>
-            <PieChart
-              data={pieMode === "CATEGORY" ? categoryPieData : paymentPieData}
-              centerLabel={pieMode === "CATEGORY" ? "Categories" : "Payments"}
-            />
-          </section>
+              <PieChart
+                data={activePieData}
+                centerLabel={pieMode === "CATEGORY" ? "Categories" : "Payments"}
+                centerCaption={activePieCaption}
+                className="mt-2 flex-1"
+              />
+            </section>
+          </div>
         </div>
       )}
 

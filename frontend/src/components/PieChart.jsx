@@ -23,10 +23,12 @@ function polarToCartesian(cx, cy, r, angleInDegrees) {
 function buildArcPath(cx, cy, r, innerR, startAngle, endAngle) {
   const outerStart = polarToCartesian(cx, cy, r, startAngle);
   const outerEnd = polarToCartesian(cx, cy, r, endAngle);
-  const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1;
+  let largeArcFlag = 0;
+  if (endAngle - startAngle > 180) {
+    largeArcFlag = 1;
+  }
 
   if (innerR <= 0) {
-    // Solid Pie Slice
     return (
       "M " +
       cx +
@@ -50,7 +52,6 @@ function buildArcPath(cx, cy, r, innerR, startAngle, endAngle) {
     );
   }
 
-  // Donut Ring Slice
   const innerStart = polarToCartesian(cx, cy, innerR, startAngle);
   const innerEnd = polarToCartesian(cx, cy, innerR, endAngle);
 
@@ -91,18 +92,21 @@ export function PieChart(props) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const rawData = props.data || [];
 
-  // Filter non-zero items and compute total
   let total = 0;
   const validItems = [];
   for (let i = 0; i < rawData.length; i++) {
     const val = Number(rawData[i].value || 0);
     if (val > 0) {
       total = total + val;
+      let itemColor = rawData[i].color;
+      if (!itemColor) {
+        itemColor = DEFAULT_PALETTE[validItems.length % DEFAULT_PALETTE.length];
+      }
       validItems.push({
         label: rawData[i].label,
         value: val,
         count: rawData[i].count,
-        color: rawData[i].color || DEFAULT_PALETTE[validItems.length % DEFAULT_PALETTE.length]
+        color: itemColor
       });
     }
   }
@@ -120,13 +124,15 @@ export function PieChart(props) {
   }
 
   const isDonut = props.donut !== false;
-  const svgSize = 220;
+  const svgSize = 200;
   const cx = svgSize / 2;
   const cy = svgSize / 2;
   const outerR = 85;
-  const innerR = isDonut ? 55 : 0;
+  let innerR = 54;
+  if (!isDonut) {
+    innerR = 0;
+  }
 
-  // Build slice paths
   const slices = [];
   let currentAngle = 0;
 
@@ -141,7 +147,6 @@ export function PieChart(props) {
 
     let pathD = "";
     if (validItems.length === 1) {
-      // SVG arc cannot do a complete 360 circle in one path; use two 180 arcs
       const midAngle = startAngle + 180;
       pathD =
         buildArcPath(cx, cy, outerR, innerR, startAngle, midAngle) +
@@ -159,7 +164,6 @@ export function PieChart(props) {
     });
   }
 
-  // Active slice details for center / tooltip display
   let activeSlice = null;
   if (hoveredIndex !== null && slices[hoveredIndex]) {
     activeSlice = slices[hoveredIndex];
@@ -168,6 +172,9 @@ export function PieChart(props) {
   let centerLabelText = props.centerLabel || "Total";
   let centerValueText = formatPeso(total);
   let centerSubtext = validItems.length + " categories";
+  if (props.centerCaption) {
+    centerSubtext = props.centerCaption;
+  }
 
   if (activeSlice) {
     centerLabelText = activeSlice.item.label;
@@ -181,19 +188,19 @@ export function PieChart(props) {
   }
 
   return (
-    <div className={"flex flex-col" + wrapperExtraClass}>
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        {/* SVG Donut / Pie Visualization */}
+    <div className={"@container flex flex-col justify-center" + wrapperExtraClass}>
+      <div className="flex flex-col items-center gap-4 @md:flex-row @md:items-center @md:justify-between">
+        {/* Donut Visualization */}
         <div className="relative shrink-0 flex items-center justify-center">
           <svg
             viewBox={"0 0 " + svgSize + " " + svgSize}
-            className="h-48 w-48 overflow-visible"
+            className="w-36 h-36 @md:w-40 @md:h-40 overflow-visible"
             role="img"
             aria-label="Distribution pie chart"
           >
             {slices.map(function (slice, index) {
               const isHovered = hoveredIndex === index;
-              let sliceOpacity = "opacity-95";
+              let sliceOpacity = "opacity-100";
               let strokeClass = "stroke-white";
               let strokeWidth = "2";
 
@@ -203,7 +210,7 @@ export function PieChart(props) {
                   strokeClass = "stroke-[#171717]";
                   strokeWidth = "2.5";
                 } else {
-                  sliceOpacity = "opacity-50";
+                  sliceOpacity = "opacity-40";
                 }
               }
 
@@ -230,13 +237,13 @@ export function PieChart(props) {
             })}
           </svg>
 
-          {/* Interactive Donut Center Badge */}
+          {/* Donut Center Caption */}
           {isDonut && (
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center p-2">
-              <span className="truncate max-w-[90px] text-3xs font-medium text-[#777777] uppercase tracking-wider">
+              <span className="truncate max-w-[85px] text-3xs font-medium text-[#777777] uppercase tracking-wider">
                 {centerLabelText}
               </span>
-              <span className="font-mono text-sm font-bold text-[#171717] leading-tight">
+              <span className="font-mono text-xs @md:text-sm font-bold text-[#171717] leading-tight">
                 {centerValueText}
               </span>
               <span className="font-mono text-3xs text-[#777777] mt-0.5">
@@ -246,28 +253,35 @@ export function PieChart(props) {
           )}
         </div>
 
-        {/* Legend List */}
-        <div className="flex-1 w-full space-y-1.5 overflow-y-auto max-h-48 pr-1">
+        {/* Legend Button List */}
+        <div className="w-full flex-1 space-y-1">
           {slices.map(function (slice, index) {
             const isHovered = hoveredIndex === index;
-            let itemBg = "hover:bg-[#EEEEED]/50";
+            let itemBg = "hover:bg-[#EEEEED]/60";
             if (isHovered) {
               itemBg = "bg-[#EEEEED] shadow-2xs";
             }
 
             return (
-              <div
+              <button
+                type="button"
                 key={slice.item.label || index}
-                className={
-                  "flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs transition-colors cursor-pointer " +
-                  itemBg
-                }
                 onMouseEnter={function () {
                   setHoveredIndex(index);
                 }}
                 onMouseLeave={function () {
                   setHoveredIndex(null);
                 }}
+                onFocus={function () {
+                  setHoveredIndex(index);
+                }}
+                onBlur={function () {
+                  setHoveredIndex(null);
+                }}
+                className={
+                  "flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs transition-colors cursor-pointer text-left focus:outline-none focus:ring-1 focus:ring-[#171717] " +
+                  itemBg
+                }
               >
                 <div className="flex items-center gap-2 min-w-0 pr-2">
                   <span
@@ -278,7 +292,7 @@ export function PieChart(props) {
                     {slice.item.label}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 font-mono text-2xs shrink-0">
+                <div className="flex items-center gap-1.5 font-mono text-2xs shrink-0">
                   <span className="font-semibold text-[#171717]">
                     {formatPeso(slice.item.value)}
                   </span>
@@ -286,7 +300,7 @@ export function PieChart(props) {
                     {slice.percentage + "%"}
                   </span>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>

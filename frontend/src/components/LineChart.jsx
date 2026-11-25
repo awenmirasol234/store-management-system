@@ -1,8 +1,12 @@
-import { useState } from "react";
-import { formatPeso } from "../format.js";
+import { useId, useState } from "react";
+import { formatCompactPeso, formatPeso } from "../format.js";
+import { pickTickIndexes } from "../chart-data.js";
 
 export function LineChart(props) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const reactId = useId();
+  const profitGradientId = "profit-gradient-" + reactId.replace(/:/g, "");
+
   const data = props.data || [];
 
   if (data.length === 0) {
@@ -17,10 +21,9 @@ export function LineChart(props) {
     );
   }
 
-  // Calculate scaling boundaries
-  let maxVal = 1;
   let totalSales = 0;
   let totalProfit = 0;
+  let maxVal = 1;
 
   for (let i = 0; i < data.length; i++) {
     const s = Number(data[i].sales || 0);
@@ -35,94 +38,126 @@ export function LineChart(props) {
     }
   }
 
-  // Rounded grid ceiling for clean ticks
-  const chartWidth = 500;
-  const chartHeight = 200;
-  const paddingLeft = 55;
-  const paddingRight = 20;
-  const paddingTop = 20;
-  const paddingBottom = 30;
-
-  const plotWidth = chartWidth - paddingLeft - paddingRight;
-  const plotHeight = chartHeight - paddingTop - paddingBottom;
-  const bottomY = paddingTop + plotHeight;
-
   // Build coordinate points
   const points = [];
   for (let i = 0; i < data.length; i++) {
-    let x = paddingLeft;
+    let xPercent = 50;
     if (data.length > 1) {
-      x = paddingLeft + (i / (data.length - 1)) * plotWidth;
-    } else {
-      x = paddingLeft + plotWidth / 2;
+      xPercent = (i / (data.length - 1)) * 100;
     }
 
     const salesVal = Math.max(0, Number(data[i].sales || 0));
     const profitVal = Math.max(0, Number(data[i].profit || 0));
 
-    const salesY = paddingTop + plotHeight - (salesVal / maxVal) * plotHeight;
-    const profitY = paddingTop + plotHeight - (profitVal / maxVal) * plotHeight;
+    const salesYPercent = 100 - (salesVal / maxVal) * 100;
+    const profitYPercent = 100 - (profitVal / maxVal) * 100;
 
     points.push({
-      x: x,
-      salesY: salesY,
-      profitY: profitY,
+      index: i,
+      xPercent: xPercent,
+      salesYPercent: salesYPercent,
+      profitYPercent: profitYPercent,
       sales: salesVal,
       profit: profitVal,
       item: data[i]
     });
   }
 
-  // Build SVG polyline paths
-  let salesPointsString = "";
-  let profitPointsString = "";
+  // Build SVG path strings on a 0 0 100 100 grid
+  let salesPathD = "";
+  let profitPathD = "";
   for (let i = 0; i < points.length; i++) {
     const pt = points[i];
-    salesPointsString = salesPointsString + (i === 0 ? "M " : " L ") + pt.x + " " + pt.salesY;
-    profitPointsString = profitPointsString + (i === 0 ? "M " : " L ") + pt.x + " " + pt.profitY;
+    const prefix = i === 0 ? "M " : " L ";
+    salesPathD = salesPathD + prefix + pt.xPercent + " " + pt.salesYPercent;
+    profitPathD = profitPathD + prefix + pt.xPercent + " " + pt.profitYPercent;
   }
 
-  let salesAreaString = "";
-  let profitAreaString = "";
+  let profitAreaD = "";
   if (points.length > 0) {
-    salesAreaString =
-      salesPointsString +
+    const lastX = points[points.length - 1].xPercent;
+    const firstX = points[0].xPercent;
+    profitAreaD =
+      profitPathD +
       " L " +
-      points[points.length - 1].x +
-      " " +
-      bottomY +
-      " L " +
-      points[0].x +
-      " " +
-      bottomY +
-      " Z";
-
-    profitAreaString =
-      profitPointsString +
-      " L " +
-      points[points.length - 1].x +
-      " " +
-      bottomY +
-      " L " +
-      points[0].x +
-      " " +
-      bottomY +
-      " Z";
+      lastX +
+      " 100 L " +
+      firstX +
+      " 100 Z";
   }
 
-  // Tooltip presentation
+  // Pick tick indices for X axis
+  const tickIndices = pickTickIndexes({
+    count: data.length,
+    maxTicks: 6
+  });
+
+  const tickList = [];
+  for (let t = 0; t < tickIndices.length; t++) {
+    const index = tickIndices[t];
+    if (points[index]) {
+      tickList.push(points[index]);
+    }
+  }
+
+  // Active hover/focus point
   let activePoint = null;
-  let tooltipLeftPercent = 50;
   if (hoveredIndex !== null && points[hoveredIndex]) {
     activePoint = points[hoveredIndex];
-    tooltipLeftPercent = (activePoint.x / chartWidth) * 100;
   }
 
   let tooltipAlignmentClass = "-translate-x-1/2";
-  if (tooltipLeftPercent < 25) {
-    tooltipAlignmentClass = "translate-x-0";
-  } else if (tooltipLeftPercent > 75) {
-    tooltipAlignmentClass = "-translate-x-full";
+  if (activePoint) {
+    if (activePoint.xPercent < 25) {
+      tooltipAlignmentClass = "translate-x-2";
+    } else if (activePoint.xPercent > 75) {
+      tooltipAlignmentClass = "-translate-x-full -translate-x-2";
+    }
+  }
+
+  let tooltipTopPercent = 50;
+  let tooltipYClass = "-translate-y-full -translate-y-3";
+  if (activePoint) {
+    const highestDot = Math.min(activePoint.salesYPercent, activePoint.profitYPercent);
+    if (highestDot < 35) {
+      tooltipTopPercent = Math.max(activePoint.salesYPercent, activePoint.profitYPercent);
+      tooltipYClass = "translate-y-4";
+    } else {
+      tooltipTopPercent = highestDot;
+      tooltipYClass = "-translate-y-full -translate-y-4";
+    }
+  }
+
+  function handleKeyDown(event) {
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      if (hoveredIndex === null) {
+        setHoveredIndex(0);
+      } else if (hoveredIndex < data.length - 1) {
+        setHoveredIndex(hoveredIndex + 1);
+      }
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      if (hoveredIndex === null) {
+        setHoveredIndex(data.length - 1);
+      } else if (hoveredIndex > 0) {
+        setHoveredIndex(hoveredIndex - 1);
+      }
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      setHoveredIndex(null);
+    }
+  }
+
+  function handlePointerMove(event) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (rect.width <= 0) {
+      return;
+    }
+    const relativeX = event.clientX - rect.left;
+    const ratio = Math.max(0, Math.min(1, relativeX / rect.width));
+    const nearestIndex = Math.round(ratio * (data.length - 1));
+    setHoveredIndex(nearestIndex);
   }
 
   let wrapperExtraClass = "";
@@ -130,11 +165,17 @@ export function LineChart(props) {
     wrapperExtraClass = " " + props.className;
   }
 
+  const ariaDescription =
+    "Sales and profit trend chart. Total sales: " +
+    formatPeso(totalSales) +
+    ", net profit: " +
+    formatPeso(totalProfit);
+
   return (
-    <div className={"flex flex-col" + wrapperExtraClass}>
-      {/* Chart Legend & Summary Totals */}
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-4 text-[#777777]">
+    <div className={"flex flex-col select-none" + wrapperExtraClass}>
+      {/* Legend & Summary Totals */}
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-3 text-[#777777]">
           <div className="flex items-center gap-1.5 font-medium">
             <span className="h-2.5 w-2.5 rounded-full bg-[#171717]" />
             <span className="text-[#171717]">Gross Sales</span>
@@ -145,207 +186,183 @@ export function LineChart(props) {
           </div>
         </div>
         <div className="flex items-center gap-3 font-mono text-2xs text-[#777777]">
-          <span>Sales: <strong className="text-[#171717]">{formatPeso(totalSales)}</strong></span>
-          <span>Profit: <strong className="text-[#171717]">{formatPeso(totalProfit)}</strong></span>
+          <span>
+            Sales: <strong className="text-[#171717]">{formatPeso(totalSales)}</strong>
+          </span>
+          <span>
+            Profit: <strong className="text-[#171717]">{formatPeso(totalProfit)}</strong>
+          </span>
         </div>
       </div>
 
-      {/* Responsive SVG Chart Canvas */}
-      <div className="relative w-full">
-        {activePoint && (
-          <div
-            style={{ left: tooltipLeftPercent + "%" }}
-            className={
-              "pointer-events-none absolute -top-3 z-20 whitespace-nowrap rounded-xl bg-[#171717] p-2.5 font-mono text-xs text-white shadow-xl transition-all duration-75 " +
-              tooltipAlignmentClass
-            }
-          >
-            <div className="mb-1 text-2xs text-[#A3A3A3]">
-              {activePoint.item.fullDate || activePoint.item.label}
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="font-semibold text-white">
-                Sales: {formatPeso(activePoint.sales)}
-              </span>
-              <span className="font-semibold text-[#B9F36B]">
-                Profit: {formatPeso(activePoint.profit)}
-              </span>
-            </div>
-            {activePoint.item.meta && (
-              <div className="mt-0.5 text-3xs text-[#A3A3A3]">{activePoint.item.meta}</div>
-            )}
-          </div>
-        )}
+      {/* Main Plot Area */}
+      <div className="flex items-stretch gap-2">
+        {/* Y-Axis HTML Labels */}
+        <div className="relative flex w-12 sm:w-14 shrink-0 flex-col justify-between py-1 text-right font-mono text-3xs text-[#777777]">
+          <span className="truncate">{formatCompactPeso(maxVal)}</span>
+          <span className="truncate">{formatCompactPeso(maxVal / 2)}</span>
+          <span className="truncate">₱0</span>
+        </div>
 
-        <svg
-          viewBox={"0 0 " + chartWidth + " " + chartHeight}
-          className="h-52 w-full overflow-visible"
+        {/* Responsive Interactive Canvas */}
+        <div
           role="img"
-          aria-label="Sales and Profit line chart"
+          aria-label={ariaDescription}
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={function () {
+            setHoveredIndex(null);
+          }}
+          className="relative h-48 sm:h-56 lg:h-60 flex-1 cursor-crosshair rounded-xl border border-[#E9E9E9]/60 bg-[#FAFAFA]/40 focus:outline-none focus:ring-1 focus:ring-[#171717]"
         >
-          <defs>
-            <linearGradient id="sales-gradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#171717" stopOpacity="0.12" />
-              <stop offset="100%" stopColor="#171717" stopOpacity="0.0" />
-            </linearGradient>
-            <linearGradient id="profit-gradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#B9F36B" stopOpacity="0.30" />
-              <stop offset="100%" stopColor="#B9F36B" stopOpacity="0.0" />
-            </linearGradient>
-          </defs>
+          {/* Subtle Horizontal Reference Gridlines */}
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-x-0 top-0 border-t border-dashed border-[#E9E9E9]" />
+            <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-[#E9E9E9]" />
+            <div className="absolute inset-x-0 bottom-0 border-t border-[#E9E9E9]" />
+          </div>
 
-          {/* Reference Gridlines & Y-Axis Labels */}
-          <g className="gridlines">
-            {/* Top reference line (100%) */}
-            <line
-              x1={paddingLeft}
-              x2={chartWidth - paddingRight}
-              y1={paddingTop}
-              y2={paddingTop}
-              stroke="#E9E9E9"
-              strokeDasharray="2 2"
+          {/* SVG Shape Layer */}
+          <svg
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            className="absolute inset-0 h-full w-full overflow-visible"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id={profitGradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#B9F36B" stopOpacity="0.35" />
+                <stop offset="100%" stopColor="#B9F36B" stopOpacity="0.0" />
+              </linearGradient>
+            </defs>
+
+            {/* Profit Area Fill */}
+            <path d={profitAreaD} fill={"url(#" + profitGradientId + ")"} />
+
+            {/* Net Profit Trend Line */}
+            <path
+              d={profitPathD}
+              fill="none"
+              stroke="#B9F36B"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
             />
-            <text
-              x={paddingLeft - 8}
-              y={paddingTop + 3}
-              textAnchor="end"
-              className="fill-[#777777] font-mono text-3xs"
-            >
-              {formatPeso(maxVal)}
-            </text>
 
-            {/* Middle reference line (50%) */}
-            <line
-              x1={paddingLeft}
-              x2={chartWidth - paddingRight}
-              y1={paddingTop + plotHeight / 2}
-              y2={paddingTop + plotHeight / 2}
-              stroke="#E9E9E9"
-              strokeDasharray="2 2"
-            />
-            <text
-              x={paddingLeft - 8}
-              y={paddingTop + plotHeight / 2 + 3}
-              textAnchor="end"
-              className="fill-[#777777] font-mono text-3xs"
-            >
-              {formatPeso(maxVal / 2)}
-            </text>
-
-            {/* Bottom reference baseline (0) */}
-            <line
-              x1={paddingLeft}
-              x2={chartWidth - paddingRight}
-              y1={bottomY}
-              y2={bottomY}
-              stroke="#E9E9E9"
-            />
-            <text
-              x={paddingLeft - 8}
-              y={bottomY + 3}
-              textAnchor="end"
-              className="fill-[#777777] font-mono text-3xs"
-            >
-              ₱0
-            </text>
-          </g>
-
-          {/* Area Fills */}
-          <path d={salesAreaString} fill="url(#sales-gradient)" />
-          <path d={profitAreaString} fill="url(#profit-gradient)" />
-
-          {/* Vertical Hover Crosshair */}
-          {activePoint && (
-            <line
-              x1={activePoint.x}
-              x2={activePoint.x}
-              y1={paddingTop}
-              y2={bottomY}
+            {/* Gross Sales Trend Line */}
+            <path
+              d={salesPathD}
+              fill="none"
               stroke="#171717"
-              strokeWidth="1"
-              strokeDasharray="3 3"
-              className="opacity-40"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
+
+          {/* Active Hover / Focus Vertical Crosshair */}
+          {activePoint && (
+            <div
+              style={{ left: activePoint.xPercent + "%" }}
+              className="pointer-events-none absolute inset-y-0 w-px border-l border-dashed border-[#171717]/40"
             />
           )}
 
-          {/* Primary Trend Lines */}
-          <path
-            d={salesPointsString}
-            fill="none"
-            stroke="#171717"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d={profitPointsString}
-            fill="none"
-            stroke="#B9F36B"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          {/* Active Hover / Focus Markers */}
+          {activePoint && (
+            <>
+              {/* Sales Marker Dot */}
+              <div
+                style={{
+                  left: activePoint.xPercent + "%",
+                  top: activePoint.salesYPercent + "%"
+                }}
+                className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 h-3.5 w-3.5 rounded-full border-2 border-white bg-[#171717] shadow-xs"
+              />
+              {/* Profit Marker Dot */}
+              <div
+                style={{
+                  left: activePoint.xPercent + "%",
+                  top: activePoint.profitYPercent + "%"
+                }}
+                className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 h-3.5 w-3.5 rounded-full border-2 border-white bg-[#B9F36B] shadow-xs"
+              />
+            </>
+          )}
 
-          {/* Circular Data Markers & Interactive Hover Hitboxes */}
-          {points.map(function (pt, index) {
-            const isHovered = hoveredIndex === index;
-            const markerSalesRadius = isHovered ? 5 : 3;
-            const markerProfitRadius = isHovered ? 5 : 3;
+          {/* Floating Interactive Tooltip */}
+          {activePoint && (
+            <div
+              style={{
+                left: activePoint.xPercent + "%",
+                top: tooltipTopPercent + "%"
+              }}
+              className={
+                "pointer-events-none absolute z-20 whitespace-nowrap rounded-xl bg-[#171717] p-2.5 font-mono text-xs text-white shadow-xl transition-all duration-75 " +
+                tooltipAlignmentClass +
+                " " +
+                tooltipYClass
+              }
+            >
+              <div className="mb-1 text-2xs text-[#A3A3A3]">
+                {activePoint.item.label || activePoint.item.date}
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1.5 font-semibold text-white">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                  Sales: {formatPeso(activePoint.sales)}
+                </span>
+                <span className="flex items-center gap-1.5 font-semibold text-[#B9F36B]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#B9F36B]" />
+                  Profit: {formatPeso(activePoint.profit)}
+                </span>
+              </div>
+              {activePoint.item.meta && (
+                <div className="mt-1 text-3xs text-[#A3A3A3]">
+                  {activePoint.item.meta}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
 
-            return (
-              <g key={pt.item.label || index}>
-                {/* Sales Marker */}
-                <circle
-                  cx={pt.x}
-                  cy={pt.salesY}
-                  r={markerSalesRadius}
-                  fill="#FFFFFF"
-                  stroke="#171717"
-                  strokeWidth="2"
-                />
+      {/* X-Axis HTML Labels Container */}
+      <div className="relative mt-2 ml-14 sm:ml-16 h-5">
+        {tickList.map(function (tick) {
+          let alignClass = "-translate-x-1/2 text-center";
+          if (tick.index === 0) {
+            alignClass = "translate-x-0 text-left";
+          } else if (tick.index === data.length - 1) {
+            alignClass = "-translate-x-full text-right";
+          }
 
-                {/* Profit Marker */}
-                <circle
-                  cx={pt.x}
-                  cy={pt.profitY}
-                  r={markerProfitRadius}
-                  fill="#FFFFFF"
-                  stroke="#B9F36B"
-                  strokeWidth="2"
-                />
+          const isHovered = hoveredIndex === tick.index;
+          let textStyle = "text-[#777777]";
+          if (isHovered) {
+            textStyle = "font-semibold text-[#171717]";
+          }
 
-                {/* X-Axis Date Label */}
-                <text
-                  x={pt.x}
-                  y={bottomY + 16}
-                  textAnchor="middle"
-                  className={
-                    "font-mono text-3xs transition-colors " +
-                    (isHovered ? "fill-[#171717] font-semibold" : "fill-[#777777]")
-                  }
-                >
-                  {pt.item.shortLabel || pt.item.label}
-                </text>
+          const tickDisplay = tick.item.tickLabel || tick.item.shortLabel || tick.item.label;
 
-                {/* Full-height Transparent Column Hitbox for Easy Hovering */}
-                <rect
-                  x={pt.x - plotWidth / (points.length * 2 || 2)}
-                  y={paddingTop}
-                  width={plotWidth / (points.length || 1)}
-                  height={plotHeight}
-                  fill="transparent"
-                  className="cursor-pointer"
-                  onMouseEnter={function () {
-                    setHoveredIndex(index);
-                  }}
-                  onMouseLeave={function () {
-                    setHoveredIndex(null);
-                  }}
-                />
-              </g>
-            );
-          })}
-        </svg>
+          return (
+            <span
+              key={tick.item.date || tick.index}
+              style={{ left: tick.xPercent + "%" }}
+              className={
+                "absolute top-0 font-mono text-3xs transition-colors " +
+                alignClass +
+                " " +
+                textStyle
+              }
+            >
+              {tickDisplay}
+            </span>
+          );
+        })}
       </div>
     </div>
   );
