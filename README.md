@@ -98,7 +98,7 @@ docker compose up -d --build
 docker compose exec backend node src/db/seed.js
 ```
 
-Add `store.home.arpa` to local DNS or the hosts file, then open `https://store.home.arpa`.
+Add `store.home.arpa` to local DNS or the hosts file, then open `https://store.home.arpa:8443`.
 
 The first browser visit requires trusting Caddy's local root certificate. Caddy stores its certificate data in the `caddy_data` volume.
 

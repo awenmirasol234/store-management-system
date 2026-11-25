@@ -5,8 +5,8 @@ services:
     build: ./frontend
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"
+      - "8443:443"
     extra_hosts:
       - "store.home.arpa:127.0.0.1"
     depends_on:

@@ -9,7 +9,7 @@ Tactical deployment instructions for containerized execution with Docker Compose
 Docker Compose orchestrates two container services and two persistent volumes:
 
 ```
- [ Host: Ports 80 and 443 ]
+ [ Host: Ports 8080 and 8443 ]
          ↓
    [ caddy (HTTPS, Frontend Static Assets & Reverse Proxy) ]
         ↓ (Private Compose Network: backend:3001)
@@ -49,7 +49,19 @@ docker compose exec backend node src/db/seed.js
 docker compose ps
 ```
 
-Both containers must report `healthy` status. Resolve `store.home.arpa` to the Docker host, trust Caddy's local root certificate, and open `https://store.home.arpa` in a browser.
+Both containers must report `healthy` status. Resolve `store.home.arpa` to the Docker host and open `https://store.home.arpa:8443` in a browser.
+
+### Trust Caddy's Certificate on Windows
+
+Run these commands in PowerShell from the project root:
+
+```powershell
+$certPath = Join-Path $env:TEMP "store-caddy-root.crt"
+docker cp store-management-system-caddy:/data/caddy/pki/authorities/local/root.crt $certPath
+certutil -user -addstore Root $certPath
+```
+
+This trusts the local Caddy certificate for your Windows user. Restart the browser afterward. Only trust a certificate from your own app.
 
 ---
 
