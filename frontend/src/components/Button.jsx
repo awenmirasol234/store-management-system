@@ -1,20 +1,20 @@
 function getVariantClasses(variant) {
   if (variant === "primary") {
-    return "bg-[#B9F36B] text-[#171717] hover:bg-[#A8E65A] border-transparent shadow-xs active:scale-[0.99]";
+    return "btn-glossy btn-glossy-primary bg-[#B9F36B] text-[#171717] hover:bg-[#A8E65A] border-transparent shadow-xs";
   }
   if (variant === "secondary") {
-    return "bg-white text-[#171717] hover:bg-[#EEEEED] border-[#E9E9E9]";
+    return "btn-glossy btn-glossy-secondary bg-white text-[#171717] hover:bg-[#EEEEED] border-[#E9E9E9]";
   }
   if (variant === "soft") {
-    return "bg-[#EEEEED] text-[#171717] hover:bg-[#E2E2E1] border-transparent";
+    return "btn-glossy btn-glossy-soft bg-[#EEEEED] text-[#171717] hover:bg-[#E2E2E1] border-transparent";
   }
   if (variant === "danger") {
-    return "bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-200";
+    return "btn-glossy btn-glossy-danger bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-200";
   }
   if (variant === "ghost") {
-    return "bg-transparent text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] border-transparent";
+    return "btn-glossy btn-glossy-ghost bg-transparent text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] border-transparent";
   }
-  return "bg-white text-[#171717] hover:bg-[#EEEEED] border-[#E9E9E9]";
+  return "btn-glossy btn-glossy-secondary bg-white text-[#171717] hover:bg-[#EEEEED] border-[#E9E9E9]";
 }
 
 function getSizeClasses(size) {

@@ -186,7 +186,7 @@ export function LoginPage(props) {
                   onClick={function () {
                     handleKeypadPress(num);
                   }}
-                  className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white font-mono text-xl font-bold text-[#171717] shadow-xs hover:border-[#171717] hover:bg-[#EEEEED] active:scale-95 active:bg-[#171717] active:text-white transition-all cursor-pointer select-none"
+                  className="btn-glossy btn-glossy-secondary flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white font-mono text-xl font-bold text-[#171717] shadow-xs hover:border-[#171717] hover:bg-[#EEEEED] active:scale-95 active:bg-[#171717] active:text-white transition-all cursor-pointer select-none"
                 >
                   {num}
                 </button>
@@ -195,7 +195,7 @@ export function LoginPage(props) {
             <button
               type="button"
               onClick={handleClear}
-              className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-xs font-semibold text-[#777777] hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 active:scale-95 transition-all cursor-pointer select-none"
+              className="btn-glossy btn-glossy-secondary flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-xs font-semibold text-[#777777] hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 active:scale-95 transition-all cursor-pointer select-none"
               title="Clear PIN"
             >
               Clear
@@ -205,14 +205,14 @@ export function LoginPage(props) {
               onClick={function () {
                 handleKeypadPress(0);
               }}
-              className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white font-mono text-xl font-bold text-[#171717] shadow-xs hover:border-[#171717] hover:bg-[#EEEEED] active:scale-95 active:bg-[#171717] active:text-white transition-all cursor-pointer select-none"
+              className="btn-glossy btn-glossy-secondary flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white font-mono text-xl font-bold text-[#171717] shadow-xs hover:border-[#171717] hover:bg-[#EEEEED] active:scale-95 active:bg-[#171717] active:text-white transition-all cursor-pointer select-none"
             >
               0
             </button>
             <button
               type="button"
               onClick={handleBackspace}
-              className="flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:border-[#171717] hover:bg-[#EEEEED] hover:text-[#171717] active:scale-95 transition-all cursor-pointer select-none"
+              className="btn-glossy btn-glossy-secondary flex h-13 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:border-[#171717] hover:bg-[#EEEEED] hover:text-[#171717] active:scale-95 transition-all cursor-pointer select-none"
               title="Backspace"
               aria-label="Backspace"
             >

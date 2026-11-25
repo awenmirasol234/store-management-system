@@ -87,11 +87,13 @@ Centralized danger and alert color tokens are declared in `frontend/src/index.cs
 
 ### 4.1 Buttons (`frontend/src/components/Button.jsx`)
 - Border radius: `rounded-xl` (14px).
+- Subtle 3D Glossy Effect: All buttons feature gentle gradient lighting, subtle inner specular highlights (`inset 0 1px 0`), a slight bottom bevel (`inset 0 -1px 0`), soft ambient drop shadows (`0 1px 2px`, `0 2px 4px`), and a tactile micro-press on active click (`active:translate-y-[0.5px]`, slight scale, depressed inner shadow).
 - Variants:
-  - `primary`: `bg-[#B9F36B] hover:bg-[#A8E65A] text-[#171717] font-semibold shadow-xs`.
-  - `secondary`: `bg-white hover:bg-[#EEEEED] text-[#171717] border border-[#E9E9E9]`.
-  - `ghost`: `bg-transparent hover:bg-[#EEEEED] text-[#777777] hover:text-[#171717]`.
-  - `danger`: `bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200`.
+  - `primary`: `.btn-glossy-primary` with `bg-[#B9F36B] hover:bg-[#A8E65A] text-[#171717] font-semibold`.
+  - `secondary`: `.btn-glossy-secondary` with `bg-white hover:bg-[#EEEEED] text-[#171717] border border-[#E9E9E9]`.
+  - `soft`: `.btn-glossy-soft` with `bg-[#EEEEED] hover:bg-[#E2E2E1] text-[#171717]`.
+  - `danger`: `.btn-glossy-danger` with `bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200`.
+  - `ghost`: `.btn-glossy-ghost` with `bg-transparent hover:bg-[#EEEEED] text-[#777777] hover:text-[#171717]`.
 
 ### 4.2 Product Cards (`frontend/src/pages/PosPage.jsx`)
 - Container: `rounded-2xl border border-[#E9E9E9] bg-white p-3.5 hover:border-[#171717]/30 hover:shadow-xs`.

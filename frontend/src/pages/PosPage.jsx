@@ -876,7 +876,7 @@ export function PosPage(props) {
                 onClick={function onAddClick(event) {
                   handleProductCardClick(product, event);
                 }}
-                className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1.5 text-xs font-semibold text-[#171717] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
+                className="btn-glossy btn-glossy-secondary flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1.5 text-xs font-semibold text-[#171717] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
               >
                 <Plus className="h-3 w-3" />
                 <span>Add to Cart</span>
@@ -1288,7 +1288,7 @@ export function PosPage(props) {
   let mobileCartBar = null;
   if (cartItems.length > 0) {
     let mobileButtonClass =
-      "flex w-full items-center justify-between rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] px-4 py-3 font-semibold text-[#171717] shadow-xs active:scale-[0.99] cursor-pointer transition-all";
+      "btn-glossy btn-glossy-primary flex w-full items-center justify-between rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] px-4 py-3 font-semibold text-[#171717] shadow-xs active:scale-[0.99] cursor-pointer transition-all";
     if (cartBadgeBumping) {
       mobileButtonClass = mobileButtonClass + " scale-[1.03]";
     }
@@ -1372,7 +1372,7 @@ export function PosPage(props) {
       <button
         type="button"
         onClick={props.onOpenShiftModal}
-        className="flex h-11 items-center gap-2 rounded-xl border border-[#E9E9E9] bg-white px-3.5 text-xs font-medium text-[#171717] hover:bg-[#EEEEED] cursor-pointer shadow-xs shrink-0 transition-colors"
+        className="btn-glossy btn-glossy-secondary flex h-11 items-center gap-2 rounded-xl border border-[#E9E9E9] bg-white px-3.5 text-xs font-medium text-[#171717] hover:bg-[#EEEEED] cursor-pointer shadow-xs shrink-0 transition-colors"
         title="Cash Drawer & Shift Reconciliation"
       >
         <Wallet className={"h-4 w-4 " + shiftIconClass} />
@@ -1459,7 +1459,7 @@ export function PosPage(props) {
             type="button"
             onClick={openCheckoutModal}
             disabled={cartItems.length === 0}
-            className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] text-[#171717] shadow-xs disabled:opacity-30 disabled:pointer-events-none cursor-pointer active:scale-95 transition-all"
+            className="btn-glossy btn-glossy-primary flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-[#B9F36B] hover:bg-[#A8E65A] text-[#171717] shadow-xs disabled:opacity-30 disabled:pointer-events-none cursor-pointer active:scale-95 transition-all"
             title="Proceed to Checkout"
             aria-label="Proceed to Checkout"
           >
@@ -1532,7 +1532,7 @@ export function PosPage(props) {
               onClick={function openLowStock() {
                 setLowStockModalOpen(true);
               }}
-              className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] cursor-pointer shrink-0 transition-colors"
+              className="btn-glossy btn-glossy-secondary relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] cursor-pointer shrink-0 transition-colors"
               title="Low Stock Alerts"
               aria-label="Low Stock Alerts"
             >

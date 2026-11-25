@@ -129,7 +129,7 @@ export function QuantitySelector(props) {
         type="button"
         onClick={handleDecrement}
         disabled={props.disabled || isMinReached}
-        className="flex h-7 w-7 items-center justify-center text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] disabled:opacity-30 disabled:pointer-events-none rounded-l-lg cursor-pointer transition-colors"
+        className="btn-glossy btn-glossy-soft flex h-7 w-7 items-center justify-center text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] disabled:opacity-30 disabled:pointer-events-none rounded-l-lg cursor-pointer transition-colors"
         title="Decrease quantity"
         aria-label="Decrease quantity"
       >
@@ -154,7 +154,7 @@ export function QuantitySelector(props) {
         type="button"
         onClick={handleIncrement}
         disabled={props.disabled}
-        className="flex h-7 w-7 items-center justify-center text-[#171717] hover:bg-[#B9F36B]/40 disabled:opacity-30 disabled:pointer-events-none rounded-r-lg cursor-pointer transition-colors"
+        className="btn-glossy btn-glossy-soft flex h-7 w-7 items-center justify-center text-[#171717] hover:bg-[#B9F36B]/40 disabled:opacity-30 disabled:pointer-events-none rounded-r-lg cursor-pointer transition-colors"
         title="Increase quantity"
         aria-label="Increase quantity"
       >
