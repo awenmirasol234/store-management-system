@@ -385,6 +385,7 @@ export function SettingsPage(props) {
             </div>
 
             {/* Section 3: Staff & Access */}
+            {(!props.capabilities || props.capabilities.staff_management) && (
             <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
               <div className="mb-3.5 flex items-center gap-2">
                 <Users className="h-4 w-4 text-[#171717]" />
@@ -412,8 +413,10 @@ export function SettingsPage(props) {
                 </Button>
               </div>
             </div>
+            )}
 
             {/* Section 4: Database & Disaster Recovery */}
+            {(!props.capabilities || props.capabilities.database_backup) && (
             <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
               <div className="mb-3.5 flex items-center gap-2">
                 <Database className="h-4 w-4 text-[#171717]" />
@@ -437,6 +440,7 @@ export function SettingsPage(props) {
                 </Button>
               </div>
             </div>
+            )}
           </div>
 
           {/* Right Column: Receipt Customization & Thermal Printer Preview */}

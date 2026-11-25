@@ -490,6 +490,7 @@ export function PosCheckoutModal(props) {
         <PaymentMethodToggle
           paymentMethod={props.paymentMethod}
           onChange={props.onPaymentMethodChange}
+          allowCredit={props.allowCredit}
         />
 
         {/* Balanced Responsive Two-Column Cockpit Layout */}

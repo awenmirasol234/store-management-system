@@ -5,7 +5,12 @@ import {
   toMoneyInt,
   toQuantityInt
 } from "../shared/decimal.js";
-import { ForbiddenError, NotFoundError, ValidationError } from "../shared/errors.js";
+import {
+  FeatureDisabledError,
+  ForbiddenError,
+  NotFoundError,
+  ValidationError
+} from "../shared/errors.js";
 import {
   normalizeOptionalText,
   parsePositiveLimit,
@@ -35,6 +40,21 @@ async function resolveCartLines(dependencies, cartItems) {
 
   for (let index = 0; index < cartItems.length; index++) {
     const rawItem = cartItems[index];
+    if (
+      rawItem.custom_amount !== undefined &&
+      rawItem.custom_amount !== null &&
+      dependencies.features &&
+      !dependencies.features.customAmountSales
+    ) {
+      throw new FeatureDisabledError("custom_amount_sales");
+    }
+    if (
+      rawItem.option_id &&
+      dependencies.features &&
+      !dependencies.features.sellingOptions
+    ) {
+      throw new FeatureDisabledError("selling_options");
+    }
     let product = productCache.get(rawItem.product_id);
     if (!product) {
       product = await dependencies.productRepository.findById(rawItem.product_id);
@@ -233,6 +253,13 @@ export function createProcessSaleUseCase(dependencies) {
         customer_id: safeInput.customer_id
       });
 
+      if (
+        payment.credit_amount > 0 &&
+        dependencies.features &&
+        !dependencies.features.customerCredit
+      ) {
+        throw new FeatureDisabledError("customer_credit");
+      }
       const creditContext = await validateCustomerCredit(dependencies, payment);
 
       const now = dependencies.clock.nowIso();

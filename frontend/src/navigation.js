@@ -21,7 +21,8 @@ export const NAV_ITEMS = [
     label: "Customers",
     shortLabel: "Utang",
     pageTitle: "Customer Credit & Utang",
-    icon: Users
+    icon: Users,
+    capability: "customer_credit"
   },
   {
     key: "transactions",
@@ -48,6 +49,26 @@ export const NAV_ITEMS = [
   }
 ];
 
+export const DEFAULT_CAPABILITIES = {
+  mode: "multi_user",
+  staff_management: true,
+  roles: true,
+  cash_drawer: true,
+  customer_credit: true,
+  selling_options: true,
+  custom_amount_sales: true,
+  catalog_extras: true,
+  product_images: true,
+  database_backup: true
+};
+
+function isCapabilityEnabled(item, capabilities) {
+  if (!item.capability || !capabilities) {
+    return true;
+  }
+  return capabilities[item.capability] !== false;
+}
+
 export function isValidPage(pageKey) {
   if (!pageKey) {
     return false;
@@ -60,18 +81,28 @@ export function isValidPage(pageKey) {
   return false;
 }
 
-export function getFilteredNavItems(role) {
-  if (!role || role === "OWNER") {
-    return NAV_ITEMS;
-  }
+export function getFilteredNavItems(role, capabilities) {
   const filtered = [];
   for (let index = 0; index < NAV_ITEMS.length; index = index + 1) {
     const item = NAV_ITEMS[index];
-    if (!item.roles || item.roles.includes(role)) {
+    let roleAllowed = true;
+    if (role && role !== "OWNER" && item.roles && !item.roles.includes(role)) {
+      roleAllowed = false;
+    }
+    if (roleAllowed && isCapabilityEnabled(item, capabilities)) {
       filtered.push(item);
     }
   }
   return filtered;
+}
+
+export function isPageEnabled(pageKey, capabilities) {
+  for (let index = 0; index < NAV_ITEMS.length; index = index + 1) {
+    if (NAV_ITEMS[index].key === pageKey) {
+      return isCapabilityEnabled(NAV_ITEMS[index], capabilities);
+    }
+  }
+  return true;
 }
 
 export function getPageTitle(pageKey) {

@@ -12,6 +12,7 @@ import {
   Upload
 } from "lucide-react";
 import { api, resolveImageUrl } from "../api.js";
+import { DEFAULT_CAPABILITIES } from "../navigation.js";
 import { formatPeso, formatQuantity, formatQuantityWithUnit } from "../format.js";
 import {
   COMMON_BASE_UNITS,
@@ -142,6 +143,7 @@ function getStockBadgeTone(product) {
 
 export function InventoryPage(props) {
   const canWrite = !props.currentUser || props.currentUser.role === "OWNER";
+  const capabilities = props.capabilities || DEFAULT_CAPABILITIES;
   const pendingWrite = useRef(false);
   const savedProductForm = useRef(null);
   const [products, setProducts] = useState([]);
@@ -244,10 +246,16 @@ export function InventoryPage(props) {
   async function loadAll() {
     setErrorBanner("");
     try {
+      let categoriesPromise = Promise.resolve([]);
+      let suppliersPromise = Promise.resolve([]);
+      if (capabilities.catalog_extras) {
+        categoriesPromise = api.listCategories();
+        suppliersPromise = api.listSuppliers();
+      }
       const results = await Promise.all([
         api.listProducts(),
-        api.listCategories(),
-        api.listSuppliers(),
+        categoriesPromise,
+        suppliersPromise,
         api.listUnits().catch(function handleUnitsError() {
           return null;
         })

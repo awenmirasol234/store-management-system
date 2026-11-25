@@ -27,6 +27,8 @@ async function startTestServer(serverOptions) {
       uploadsDir: uploadsDir,
       fetch: options.fetch,
       dnsLookup: options.dnsLookup,
+      operationMode: "multi_user",
+      features: { cashDrawer: true },
     clock: {
       nowIso() {
         return "2026-11-20T02:00:00.000Z";

@@ -7,9 +7,17 @@ const PAYMENT_METHODS = [
 ];
 
 export function PaymentMethodToggle(props) {
+  let visibleMethods = PAYMENT_METHODS;
+  if (props.allowCredit === false) {
+    visibleMethods = [PAYMENT_METHODS[0]];
+  }
   return (
-    <div role="group" aria-label="Payment method" className="grid grid-cols-3 gap-2">
-      {PAYMENT_METHODS.map(function renderMethod(method) {
+    <div
+      role="group"
+      aria-label="Payment method"
+      className={"grid gap-2 " + (visibleMethods.length === 1 ? "grid-cols-1" : "grid-cols-3")}
+    >
+      {visibleMethods.map(function renderMethod(method) {
         const IconComponent = method.icon;
         const isSelected = props.paymentMethod === method.key;
         let buttonClass =

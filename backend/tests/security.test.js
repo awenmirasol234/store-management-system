@@ -25,7 +25,9 @@ async function startSecurityTestServer(options) {
     {
       databasePath: ":memory:",
       uploadsDir: uploadsDir,
-      enforceAuth: true
+      enforceAuth: true,
+      operationMode: "multi_user",
+      features: { cashDrawer: true }
     },
     options
   );

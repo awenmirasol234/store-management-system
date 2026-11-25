@@ -10,6 +10,7 @@ import {
   Wallet
 } from "lucide-react";
 import { api } from "../api.js";
+import { DEFAULT_CAPABILITIES } from "../navigation.js";
 import {
   calculateProductCartStockUsage,
   canAddStockToCart,
@@ -47,6 +48,7 @@ function buildCartKey(productId, optionId, customAmount) {
 
 export function PosPage(props) {
   const searchInputRef = useRef(null);
+  const capabilities = props.capabilities || DEFAULT_CAPABILITIES;
 
   let initialProductsList = [];
   if (props && props.initialProducts) {
@@ -286,15 +288,21 @@ export function PosPage(props) {
     setErrorBanner("");
     try {
       let customerList = [];
-      try {
-        customerList = await api.listCustomers();
-      } catch (customerError) {
-        customerList = [];
+      if (capabilities.customer_credit) {
+        try {
+          customerList = await api.listCustomers();
+        } catch (customerError) {
+          customerList = [];
+        }
       }
 
+      let categoriesPromise = Promise.resolve([]);
+      if (capabilities.catalog_extras) {
+        categoriesPromise = api.listCategories();
+      }
       const results = await Promise.all([
         api.listProducts(),
-        api.listCategories(),
+        categoriesPromise,
         api.listLowStockProducts()
       ]);
       const activeProducts = [];
@@ -443,7 +451,10 @@ export function PosPage(props) {
     }
 
     try {
-      const options = await api.listSellingOptions(product.product_id);
+      let options = [];
+      if (capabilities.selling_options) {
+        options = await api.listSellingOptions(product.product_id);
+      }
       if (!isMounted.current) {
         return;
       }
@@ -454,7 +465,10 @@ export function PosPage(props) {
         }
       }
 
-      if (activeOptions.length > 0 || product.allow_custom_amount) {
+      if (
+        activeOptions.length > 0 ||
+        (capabilities.custom_amount_sales && product.allow_custom_amount)
+      ) {
         setErrorBanner("");
         setCustomPesoInput("");
         setSelectedOptionId("base");
@@ -1016,7 +1030,7 @@ export function PosPage(props) {
     }
 
     let tingiForm = null;
-    if (pickerState.product.allow_custom_amount) {
+    if (capabilities.custom_amount_sales && pickerState.product.allow_custom_amount) {
       tingiForm = (
         <form
           onSubmit={function submitTingi(event) {
@@ -1281,6 +1295,7 @@ export function PosPage(props) {
       <PaymentMethodToggle
         paymentMethod={paymentMethod}
         onChange={handlePaymentMethodChange}
+        allowCredit={capabilities.customer_credit}
       />
     </div>
   );
@@ -1661,6 +1676,7 @@ export function PosPage(props) {
         errorMessage={errorBanner}
         onSubmit={handleCompleteSale}
         customers={customers}
+        allowCredit={capabilities.customer_credit}
         onCustomerCreated={function handleCustomerCreated(newCustomer) {
           setCustomers(function updateCustomers(previous) {
             const nextList = [newCustomer];

@@ -5,6 +5,7 @@ import multer from "multer";
 import { DomainError } from "./shared/errors.js";
 import { createSecurityHeadersMiddleware } from "./shared/security-headers.js";
 import { createDefaultIdGenerator, createSystemClock } from "./shared/ports.js";
+import { createFeatureConfig, getFeatureCapabilities, requireFeature } from "./shared/features.js";
 import { createSqliteUnitOfWork, openSqliteDatabase } from "./db/sqlite.js";
 import {
   createSqliteCategoryRepository,
@@ -158,6 +159,7 @@ export function createApp(options) {
   }
 
   const database = config.database || openSqliteDatabase(config.databasePath);
+  const features = createFeatureConfig(config);
   const backendRoot = path.resolve(import.meta.dirname, "..");
   const uploadsDir = config.uploadsDir || path.join(backendRoot, "uploads");
   const idGenerator = config.idGenerator || createDefaultIdGenerator();
@@ -199,7 +201,8 @@ export function createApp(options) {
     shiftRepository: shiftRepository,
     cashMovementRepository: cashMovementRepository,
     settingsRepository: settingsRepository,
-    rateLimiter: rateLimiter
+    rateLimiter: rateLimiter,
+    features: features
   };
 
   const inventoryUseCases = {
@@ -287,16 +290,23 @@ export function createApp(options) {
   app.get("/api/health", function healthCheck(request, response) {
     response.json({ data: { status: "ok" } });
   });
+  app.get("/api/capabilities", function capabilities(request, response) {
+    response.json({ data: getFeatureCapabilities(features) });
+  });
 
   app.use("/api/auth", createAuthRouter(authUseCases));
   app.use(
     "/api/users",
+    requireFeature(features, "staffManagement"),
     createUsersRouter({
       useCases: authUseCases,
       authMiddleware: authMiddleware,
       enforceAuth: enforceAuth
     })
   );
+  app.use("/api/customers", requireFeature(features, "customerCredit"));
+  app.use("/api/shifts", requireFeature(features, "cashDrawer"));
+  app.use("/api/settings/backup", requireFeature(features, "databaseBackup"));
 
   if (enforceAuth) {
     const requireAuthOrOwnerForWrite = function checkAuth(request, response, next) {
@@ -326,7 +336,8 @@ export function createApp(options) {
       uploadsDir: uploadsDir,
       useCases: inventoryUseCases,
       fetch: config.fetch,
-      dnsLookup: config.dnsLookup
+      dnsLookup: config.dnsLookup,
+      features: features
     })
   );
 
@@ -405,7 +416,8 @@ export function createApp(options) {
       credit: creditUseCases,
       auth: authUseCases,
       shifts: shiftsUseCases,
-      settings: settingsUseCases
+      settings: settingsUseCases,
+      features: features
     }
   };
 }

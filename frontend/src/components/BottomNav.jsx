@@ -5,7 +5,7 @@ export function BottomNav(props) {
   if (props && props.currentUser) {
     userRole = props.currentUser.role;
   }
-  const items = getFilteredNavItems(userRole);
+  const items = getFilteredNavItems(userRole, props.capabilities);
   let gridClass = "grid h-full w-full ";
   if (items.length === 4) {
     gridClass = gridClass + "grid-cols-4";

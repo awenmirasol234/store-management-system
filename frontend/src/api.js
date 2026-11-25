@@ -262,6 +262,9 @@ export const api = {
   getAuthStatus() {
     return request("GET", "/api/auth/status");
   },
+  getCapabilities() {
+    return request("GET", "/api/capabilities");
+  },
   setupInitialOwner(data) {
     return request("POST", "/api/auth/setup", data);
   },

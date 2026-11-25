@@ -68,3 +68,10 @@ export class TooManyRequestsError extends DomainError {
     this.name = "TooManyRequestsError";
   }
 }
+
+export class FeatureDisabledError extends DomainError {
+  constructor(featureName) {
+    super(featureName + " is disabled in the current store configuration", "FEATURE_DISABLED", 404);
+    this.name = "FeatureDisabledError";
+  }
+}

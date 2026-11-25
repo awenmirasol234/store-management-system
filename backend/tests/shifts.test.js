@@ -439,7 +439,9 @@ describe("Cashier Shifts & Cash Drawer Reconciliation", function () {
     async function startServer() {
       const appRoot = createApp({
         databasePath: ":memory:",
-        enforceAuth: false
+        enforceAuth: false,
+        operationMode: "multi_user",
+        features: { cashDrawer: true }
       });
 
       // Seed a user

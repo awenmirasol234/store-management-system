@@ -39,7 +39,7 @@ export function Sidebar(props) {
   if (user) {
     userRole = user.role;
   }
-  const navItems = getFilteredNavItems(userRole);
+  const navItems = getFilteredNavItems(userRole, props.capabilities);
 
   function handleToggle() {
     const nextState = !collapsed;
@@ -122,7 +122,11 @@ export function Sidebar(props) {
 
   let manageStaffButton = null;
   let collapsedStaffButton = null;
-  if (isOwner && props.onOpenUserModal) {
+  if (
+    isOwner &&
+    (!props.capabilities || props.capabilities.staff_management) &&
+    props.onOpenUserModal
+  ) {
     manageStaffButton = (
       <button
         type="button"
@@ -148,7 +152,7 @@ export function Sidebar(props) {
 
   let cashDrawerButton = null;
   let collapsedDrawerButton = null;
-  if (props.onOpenShiftModal) {
+  if (props.capabilities && props.capabilities.cash_drawer && props.onOpenShiftModal) {
     let dotTone = "bg-amber-400";
     let statusLabel = "No Shift";
     let drawerTitle = "Cash Drawer (No Shift)";

@@ -5,6 +5,7 @@ import path from "node:path";
 import express from "express";
 import multer from "multer";
 import { ValidationError } from "../shared/errors.js";
+import { requireFeature } from "../shared/features.js";
 import { requireNonEmptyText, requireObjectBody, requireRouteParam } from "../shared/validation.js";
 
 const ALLOWED_IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -207,6 +208,15 @@ function createProductImageUpload(uploadsDir) {
 export function createInventoryRouter(dependencies) {
   const router = express.Router();
   const upload = createProductImageUpload(dependencies.uploadsDir);
+  const features = dependencies.features;
+  function featureMiddleware(featureName) {
+    if (!features) {
+      return function featureEnabledByDefault(request, response, next) {
+        next();
+      };
+    }
+    return requireFeature(features, featureName);
+  }
 
   router.get("/products", async function listProducts(request, response) {
     const products = await dependencies.useCases.listProducts();
@@ -254,6 +264,7 @@ export function createInventoryRouter(dependencies) {
 
   router.post(
     "/products/:productId/image",
+    featureMiddleware("productImages"),
     upload.single("image"),
     async function uploadProductImage(request, response) {
       if (!request.file) {
@@ -276,6 +287,7 @@ export function createInventoryRouter(dependencies) {
 
   router.post(
     "/products/:productId/image-url",
+    featureMiddleware("productImages"),
     async function saveProductImageUrl(request, response) {
       const body = requireObjectBody(request.body);
       const url = requireNonEmptyText(body.url, "url");
@@ -362,23 +374,32 @@ export function createInventoryRouter(dependencies) {
     }
   );
 
-  router.get("/products/:productId/options", async function listSellingOptions(request, response) {
+  router.get(
+    "/products/:productId/options",
+    featureMiddleware("sellingOptions"),
+    async function listSellingOptions(request, response) {
     const options = await dependencies.useCases.listSellingOptions({
       product_id: requireRouteParam(request.params, "productId")
     });
     response.json({ data: options });
-  });
+    }
+  );
 
-  router.post("/products/:productId/options", async function createOption(request, response) {
+  router.post(
+    "/products/:productId/options",
+    featureMiddleware("sellingOptions"),
+    async function createOption(request, response) {
     const payload = Object.assign({}, requireObjectBody(request.body), {
       product_id: requireRouteParam(request.params, "productId")
     });
     const saved = await dependencies.useCases.saveSellingOption(payload);
     response.status(201).json({ data: saved });
-  });
+    }
+  );
 
   router.patch(
     "/products/:productId/options/:optionId",
+    featureMiddleware("sellingOptions"),
     async function updateOption(request, response) {
       const payload = Object.assign({}, requireObjectBody(request.body), {
         product_id: requireRouteParam(request.params, "productId"),
@@ -420,25 +441,41 @@ export function createInventoryRouter(dependencies) {
     response.status(201).json({ data: result });
   });
 
-  router.get("/categories", async function listCategories(request, response) {
+  router.get(
+    "/categories",
+    featureMiddleware("catalogExtras"),
+    async function listCategories(request, response) {
     const categories = await dependencies.useCases.listCategories();
     response.json({ data: categories });
-  });
+    }
+  );
 
-  router.post("/categories", async function createCategory(request, response) {
+  router.post(
+    "/categories",
+    featureMiddleware("catalogExtras"),
+    async function createCategory(request, response) {
     const category = await dependencies.useCases.createCategory(requireObjectBody(request.body));
     response.status(201).json({ data: category });
-  });
+    }
+  );
 
-  router.get("/suppliers", async function listSuppliers(request, response) {
+  router.get(
+    "/suppliers",
+    featureMiddleware("catalogExtras"),
+    async function listSuppliers(request, response) {
     const suppliers = await dependencies.useCases.listSuppliers();
     response.json({ data: suppliers });
-  });
+    }
+  );
 
-  router.post("/suppliers", async function createSupplier(request, response) {
+  router.post(
+    "/suppliers",
+    featureMiddleware("catalogExtras"),
+    async function createSupplier(request, response) {
     const supplier = await dependencies.useCases.createSupplier(requireObjectBody(request.body));
     response.status(201).json({ data: supplier });
-  });
+    }
+  );
 
   router.get("/units", async function listUnits(request, response) {
     const units = await dependencies.useCases.listUnits();

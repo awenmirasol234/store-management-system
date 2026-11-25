@@ -126,7 +126,9 @@ describe("Store Settings Module", function () {
       tempDbFile = path.join(os.tmpdir(), "storeflow-test-" + Date.now() + ".db");
       const appRoot = createApp({
         databasePath: tempDbFile,
-        enforceAuth: false
+        enforceAuth: false,
+        operationMode: "multi_user",
+        features: { cashDrawer: true }
       });
 
       await new Promise(function (resolve) {
@@ -200,7 +202,9 @@ describe("Store Settings Module", function () {
     beforeEach(async function () {
       const appRoot = createApp({
         databasePath: ":memory:",
-        enforceAuth: true
+        enforceAuth: true,
+        operationMode: "multi_user",
+        features: { cashDrawer: true }
       });
 
       // Seed owner and cashier

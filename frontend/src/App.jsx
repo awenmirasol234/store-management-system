@@ -4,7 +4,13 @@ import { api, clearAuthToken, getAuthToken, subscribeToSessionExpiry } from "./a
 import { Sidebar } from "./components/Sidebar.jsx";
 import { BottomNav } from "./components/BottomNav.jsx";
 import { UserManagementModal } from "./components/UserManagementModal.jsx";
-import { getPageFromPath, getPageTitle, getPathFromPage } from "./navigation.js";
+import {
+  DEFAULT_CAPABILITIES,
+  getPageFromPath,
+  getPageTitle,
+  getPathFromPage,
+  isPageEnabled
+} from "./navigation.js";
 import { DashboardPage } from "./pages/DashboardPage.jsx";
 import { PosPage } from "./pages/PosPage.jsx";
 import { TransactionsPage } from "./pages/TransactionsPage.jsx";
@@ -51,6 +57,7 @@ export function App(props) {
   const [currentUser, setCurrentUser] = useState(null);
   const [isSetupRequired, setIsSetupRequired] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [capabilities, setCapabilities] = useState(null);
   const [activePage, setActivePage] = useState(initialActivePage);
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [activeShift, setActiveShift] = useState(null);
@@ -125,8 +132,12 @@ export function App(props) {
   );
 
   const sessionToken = getAuthToken();
+  const activeCapabilities = capabilities || DEFAULT_CAPABILITIES;
 
   async function loadActiveShift(userId, token) {
+    if (!activeCapabilities.cash_drawer) {
+      return;
+    }
     if (!token || token !== getAuthToken()) {
       return;
     }
@@ -199,6 +210,16 @@ export function App(props) {
     async function checkAuth() {
       try {
         const status = await api.getAuthStatus();
+        let loadedCapabilities = DEFAULT_CAPABILITIES;
+        try {
+          const capabilityResult = await api.getCapabilities();
+          if (capabilityResult && capabilityResult.cash_drawer !== undefined) {
+            loadedCapabilities = capabilityResult;
+          }
+        } catch (capabilityError) {
+          loadedCapabilities = DEFAULT_CAPABILITIES;
+        }
+        setCapabilities(loadedCapabilities);
         if (isCancelled) {
           return;
         }
@@ -216,7 +237,9 @@ export function App(props) {
           }
           if (user) {
             setCurrentUser(user);
-            loadActiveShift(user.user_id, token);
+            if (loadedCapabilities.cash_drawer) {
+              loadActiveShift(user.user_id, token);
+            }
             if (initialActivePage === "dashboard" && user.role === "CASHIER") {
               setActivePage("pos");
             }
@@ -242,7 +265,9 @@ export function App(props) {
   function handleAuthSuccess(user, token) {
     setCurrentUser(user);
     setIsSetupRequired(false);
-    loadActiveShift(user.user_id, token);
+    if (activeCapabilities.cash_drawer) {
+      loadActiveShift(user.user_id, token);
+    }
     if (activePage === "dashboard" && user.role === "CASHIER") {
       handleNavigate("pos");
     } else if (activePage !== "not-found") {
@@ -298,7 +323,9 @@ export function App(props) {
     pageElement = (
       <PosPage
         currentUser={currentUser}
+        capabilities={activeCapabilities}
         activeShift={activeShift}
+        cashDrawerEnabled={activeCapabilities.cash_drawer}
         onOpenShiftModal={function () {
           setShiftModalOpen(true);
         }}
@@ -322,9 +349,19 @@ export function App(props) {
       />
     );
   } else if (activePage === "inventory") {
-    pageElement = <InventoryPage currentUser={currentUser} />;
+    pageElement = <InventoryPage currentUser={currentUser} capabilities={activeCapabilities} />;
   } else if (activePage === "customers") {
-    pageElement = <CustomersPage currentUser={currentUser} />;
+    if (isPageEnabled("customers", activeCapabilities)) {
+      pageElement = <CustomersPage currentUser={currentUser} />;
+    } else {
+      pageElement = (
+        <NotFoundPage
+          onNavigate={handleNavigate}
+          currentUser={currentUser}
+          requestedPath="customers"
+        />
+      );
+    }
   } else if (activePage === "transactions") {
     pageElement = <TransactionsPage currentUser={currentUser} />;
   } else if (activePage === "reports") {
@@ -344,6 +381,7 @@ export function App(props) {
       pageElement = (
         <SettingsPage
           currentUser={currentUser}
+          capabilities={activeCapabilities}
           onOpenUserModal={function () {
             setUserModalOpen(true);
           }}
@@ -389,6 +427,74 @@ export function App(props) {
     mobileShiftTitle = "Cash Drawer (Shift Open)";
   }
 
+  let openShiftHandler = null;
+  let shiftChangeHandler = null;
+  if (activeCapabilities.cash_drawer) {
+    openShiftHandler = function openShift() {
+      setShiftModalOpen(true);
+    };
+    shiftChangeHandler = function refreshShift() {
+      if (currentUser) {
+        return loadActiveShift(currentUser.user_id, sessionToken);
+      }
+    };
+  }
+
+  let openUserHandler = null;
+  if (activeCapabilities.staff_management) {
+    openUserHandler = function openUserManagement() {
+      setUserModalOpen(true);
+    };
+  }
+
+  let mobileDrawerElement = null;
+  if (activeCapabilities.cash_drawer) {
+    mobileDrawerElement = (
+      <button
+        type="button"
+        onClick={openShiftHandler}
+        title={mobileShiftTitle}
+        aria-label={mobileShiftTitle}
+        className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-[#A3A3A3] hover:bg-white/10 hover:text-white cursor-pointer transition-colors"
+      >
+        <Wallet className="h-4 w-4" />
+        <span
+          className={
+            "absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full " + mobileShiftDotClass
+          }
+        />
+      </button>
+    );
+  }
+
+  let userModalElement = null;
+  if (activeCapabilities.staff_management) {
+    userModalElement = (
+      <UserManagementModal
+        open={userModalOpen}
+        onClose={function closeUsers() {
+          setUserModalOpen(false);
+        }}
+        currentUser={currentUser}
+      />
+    );
+  }
+
+  let shiftModalElement = null;
+  if (activeCapabilities.cash_drawer) {
+    shiftModalElement = (
+      <CashierShiftModal
+        open={shiftModalOpen}
+        onClose={function closeShift() {
+          setShiftModalOpen(false);
+        }}
+        currentUser={currentUser}
+        activeShift={activeShift}
+        onShiftChange={shiftChangeHandler}
+      />
+    );
+  }
+
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#F5F5F4] md:flex-row">
       {/* Mobile Top Header */}
@@ -403,22 +509,7 @@ export function App(props) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={function openMobileShift() {
-              setShiftModalOpen(true);
-            }}
-            title={mobileShiftTitle}
-            aria-label={mobileShiftTitle}
-            className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-[#A3A3A3] hover:bg-white/10 hover:text-white cursor-pointer transition-colors"
-          >
-            <Wallet className="h-4 w-4" />
-            <span
-              className={
-                "absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full " + mobileShiftDotClass
-              }
-            />
-          </button>
+          {mobileDrawerElement}
           <div
             className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-2xs font-semibold text-white"
             title={currentUser.full_name + " (" + currentUser.role + ")"}
@@ -441,14 +532,11 @@ export function App(props) {
         activePage={activePage}
         onNavigate={handleNavigate}
         currentUser={currentUser}
+        capabilities={activeCapabilities}
         activeShift={activeShift}
         onLogout={handleLogout}
-        onOpenUserModal={function () {
-          setUserModalOpen(true);
-        }}
-        onOpenShiftModal={function () {
-          setShiftModalOpen(true);
-        }}
+        onOpenUserModal={openUserHandler}
+        onOpenShiftModal={openShiftHandler}
       />
 
       <main className="flex flex-1 overflow-hidden pb-16 md:pb-0">
@@ -467,29 +555,11 @@ export function App(props) {
         activePage={activePage}
         onNavigate={handleNavigate}
         currentUser={currentUser}
+        capabilities={activeCapabilities}
       />
 
-      <UserManagementModal
-        open={userModalOpen}
-        onClose={function () {
-          setUserModalOpen(false);
-        }}
-        currentUser={currentUser}
-      />
-
-      <CashierShiftModal
-        open={shiftModalOpen}
-        onClose={function () {
-          setShiftModalOpen(false);
-        }}
-        currentUser={currentUser}
-        activeShift={activeShift}
-        onShiftChange={function () {
-          if (currentUser) {
-            return loadActiveShift(currentUser.user_id, sessionToken);
-          }
-        }}
-      />
+      {userModalElement}
+      {shiftModalElement}
 
       <DebugOverlay defaultVisible={false} />
     </div>
