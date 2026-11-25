@@ -241,6 +241,56 @@ describe("Modal entrance & exit animation lifecycle", function () {
     expect(closeCallCount).toBe(2);
   });
 
+  it("focuses modal controls on open and restores the opener on close", async function () {
+    function Host() {
+      const [isOpen, setIsOpen] = useState(false);
+      return React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "button",
+          {
+            id: "open-trigger",
+            onClick: function () {
+              setIsOpen(true);
+            }
+          },
+          "Open"
+        ),
+        React.createElement(
+          Modal,
+          {
+            open: isOpen,
+            title: "Focus Test",
+            onClose: function () {
+              setIsOpen(false);
+            }
+          },
+          React.createElement("input", { id: "focus-input" })
+        )
+      );
+    }
+
+    await act(async function () {
+      root.render(React.createElement(Host));
+    });
+
+    const opener = container.querySelector("#open-trigger");
+    await act(async function () {
+      opener.focus();
+      opener.click();
+    });
+    expect(document.activeElement).toBe(container.querySelector("dialog button"));
+
+    await act(async function () {
+      container.querySelector("dialog").dispatchEvent(new Event("cancel", { cancelable: true }));
+    });
+    await act(async function () {
+      vi.advanceTimersByTime(150);
+    });
+    expect(document.activeElement).toBe(opener);
+  });
+
   it("exits immediately when prefers-reduced-motion is enabled", async function () {
     const originalMatchMedia = window.matchMedia;
     window.matchMedia = vi.fn().mockImplementation(function (query) {

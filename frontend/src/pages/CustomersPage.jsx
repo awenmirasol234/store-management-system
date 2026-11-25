@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertCircle, Banknote, Plus, Users, Wallet } from "lucide-react";
 import { api } from "../api.js";
 import { formatPeso } from "../format.js";
@@ -23,6 +23,7 @@ export function CustomersPage(props) {
   const [activeFilter, setActiveFilter] = useState("ALL");
   const [loading, setLoading] = useState(false);
   const [errorBanner, setErrorBanner] = useState("");
+  const requestVersion = useRef(0);
 
   const [customerModalOpen, setCustomerModalOpen] = useState(false);
   const [selectedCustomerForEdit, setSelectedCustomerForEdit] = useState(null);
@@ -34,21 +35,34 @@ export function CustomersPage(props) {
   const [selectedCustomerForLedger, setSelectedCustomerForLedger] = useState(null);
 
   async function loadCustomers(queryText) {
+    requestVersion.current = requestVersion.current + 1;
+    const currentRequest = requestVersion.current;
     setErrorBanner("");
     setLoading(true);
     try {
       const list = await api.listCustomers(queryText);
+      if (currentRequest !== requestVersion.current) {
+        return;
+      }
       setCustomers(list || []);
     } catch (error) {
+      if (currentRequest !== requestVersion.current) {
+        return;
+      }
       setErrorBanner(error.message);
     } finally {
-      setLoading(false);
+      if (currentRequest === requestVersion.current) {
+        setLoading(false);
+      }
     }
   }
 
   useEffect(
     function fetchInitial() {
       loadCustomers(searchQuery);
+      return function cancelPendingRequest() {
+        requestVersion.current = requestVersion.current + 1;
+      };
     },
     [searchQuery]
   );

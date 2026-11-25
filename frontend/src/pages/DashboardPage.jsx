@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../api.js";
 import {
   calculatePercentageTrend,
@@ -32,14 +32,20 @@ export function DashboardPage(props) {
   const [trendRange, setTrendRange] = useState("7D");
   const [pieMode, setPieMode] = useState("CATEGORY");
   const [errorBanner, setErrorBanner] = useState("");
+  const requestVersion = useRef(0);
 
   const isOwner = Boolean(!props.currentUser || props.currentUser.role === "OWNER");
 
   async function loadDashboard() {
+    requestVersion.current = requestVersion.current + 1;
+    const currentRequest = requestVersion.current;
     setErrorBanner("");
     try {
       if (!isOwner) {
         const products = await api.listLowStockProducts();
+        if (currentRequest !== requestVersion.current) {
+          return;
+        }
         setLowStock(products || []);
         return;
       }
@@ -61,6 +67,9 @@ export function DashboardPage(props) {
         api.getDailyReport(startDate, today),
         api.getCategorySalesReport(startDate, today)
       ]);
+      if (currentRequest !== requestVersion.current) {
+        return;
+      }
       setSummary(results[0]);
       setPreviousSummary(results[1]);
       setRangeSummary(results[2]);
@@ -69,6 +78,9 @@ export function DashboardPage(props) {
       setDailyTrends(results[5] || []);
       setCategorySales(results[6] || []);
     } catch (error) {
+      if (currentRequest !== requestVersion.current) {
+        return;
+      }
       setErrorBanner(error.message);
     }
   }
@@ -76,6 +88,9 @@ export function DashboardPage(props) {
   useEffect(
     function initOrRangeChange() {
       loadDashboard();
+      return function cancelPendingRequest() {
+        requestVersion.current = requestVersion.current + 1;
+      };
     },
     [trendRange]
   );

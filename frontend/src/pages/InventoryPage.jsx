@@ -115,6 +115,20 @@ function validateProductFormField(fieldName, value, form) {
   return "";
 }
 
+export function validateProductImageFile(file) {
+  if (!file) {
+    return "Please select an image file";
+  }
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  if (!allowedTypes.includes(file.type)) {
+    return "Image must be JPEG, PNG, or WebP";
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    return "Image must be 2 MB or smaller";
+  }
+  return "";
+}
+
 function getStockBadgeTone(product) {
   const stockLevel = getStockLevel(product);
   if (stockLevel === STOCK_LEVELS.OUT) {
@@ -291,6 +305,19 @@ export function InventoryPage(props) {
       copy[fieldName] = value;
       return copy;
     });
+  }
+
+  function handleImageFileSelection(event) {
+    const file = event.target.files && event.target.files[0];
+    const validationError = validateProductImageFile(file);
+    if (validationError) {
+      setImageFile(null);
+      setModalError(validationError);
+      event.target.value = "";
+      return;
+    }
+    setModalError("");
+    setImageFile(file);
   }
 
   function handleProductFieldChange(fieldName, value) {
@@ -1131,11 +1158,7 @@ export function InventoryPage(props) {
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
-              onChange={function onFile(event) {
-                if (event.target.files && event.target.files[0]) {
-                  setImageFile(event.target.files[0]);
-                }
-              }}
+              onChange={handleImageFileSelection}
               className="hidden"
             />
           </label>
@@ -1178,11 +1201,7 @@ export function InventoryPage(props) {
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
-              onChange={function onFile(event) {
-                if (event.target.files && event.target.files[0]) {
-                  setImageFile(event.target.files[0]);
-                }
-              }}
+              onChange={handleImageFileSelection}
               className="hidden"
             />
           </label>
@@ -1207,11 +1226,7 @@ export function InventoryPage(props) {
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          onChange={function onFile(event) {
-            if (event.target.files && event.target.files[0]) {
-              setImageFile(event.target.files[0]);
-            }
-          }}
+          onChange={handleImageFileSelection}
           className="hidden"
         />
       </label>

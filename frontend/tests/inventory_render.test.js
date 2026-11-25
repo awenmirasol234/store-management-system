@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import { Globe, MoreVertical } from "lucide-react";
-import { InventoryPage } from "../src/pages/InventoryPage.jsx";
+import { InventoryPage, validateProductImageFile } from "../src/pages/InventoryPage.jsx";
 import { Badge } from "../src/components/Badge.jsx";
 import { Button } from "../src/components/Button.jsx";
 
@@ -89,5 +89,11 @@ describe("InventoryPage SSR test", function () {
       React.createElement(Badge, { tone: "dark", className: "font-mono" }, "12 Cans")
     );
     expect(inStockBadgeHtml).toContain("12 Cans");
+  });
+
+  it("validates product image type and size before upload", function () {
+    expect(validateProductImageFile({ type: "image/png", size: 1024 })).toBe("");
+    expect(validateProductImageFile({ type: "image/gif", size: 1024 })).toContain("JPEG");
+    expect(validateProductImageFile({ type: "image/png", size: 2 * 1024 * 1024 + 1 })).toContain("2 MB");
   });
 });

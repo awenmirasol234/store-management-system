@@ -95,13 +95,24 @@ function OpenModal(props) {
   const titleId = useId();
   const dialogRef = useRef(null);
   const backdropRef = useRef(null);
+  const openerRef = useRef(null);
 
   useLayoutEffect(
     function openDialog() {
       const dialog = dialogRef.current;
+      openerRef.current = document.activeElement;
       dialog.showModal();
+      const focusable = dialog.querySelectorAll(
+        'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
       return function cleanup() {
         dialog.close();
+        if (openerRef.current && typeof openerRef.current.focus === "function") {
+          openerRef.current.focus();
+        }
       };
     },
     []

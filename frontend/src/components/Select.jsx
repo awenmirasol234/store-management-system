@@ -254,6 +254,11 @@ export function Select(props) {
     iconClasses = "right-2.5 h-3.5 w-3.5";
   }
 
+  let activeOptionId = undefined;
+  if (isOpen && highlightedIndex >= 0 && highlightedIndex < options.length) {
+    activeOptionId = selectId + "-option-" + highlightedIndex;
+  }
+
   let labelElement = null;
   if (props.label) {
     let labelContent = props.label;
@@ -309,6 +314,7 @@ export function Select(props) {
           aria-haspopup="listbox"
           aria-expanded={isOpen}
           aria-controls={listboxId}
+          aria-activedescendant={activeOptionId}
           aria-label={props.ariaLabel}
           disabled={props.disabled}
           onClick={function handleToggle() {
@@ -386,6 +392,7 @@ export function Select(props) {
               return (
                 <button
                   key={opt.value + "-" + index}
+                  id={selectId + "-option-" + index}
                   type="button"
                   role="option"
                   aria-selected={isSelected}

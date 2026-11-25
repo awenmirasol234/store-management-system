@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { LogOut, Store, Wallet } from "lucide-react";
 import { api, clearAuthToken, getAuthToken, subscribeToSessionExpiry } from "./api.js";
 import { Sidebar } from "./components/Sidebar.jsx";
@@ -8,15 +8,34 @@ import { getPageFromPath, getPageTitle, getPathFromPage } from "./navigation.js"
 import { DashboardPage } from "./pages/DashboardPage.jsx";
 import { PosPage } from "./pages/PosPage.jsx";
 import { TransactionsPage } from "./pages/TransactionsPage.jsx";
-import { InventoryPage } from "./pages/InventoryPage.jsx";
 import { CustomersPage } from "./pages/CustomersPage.jsx";
-import { ReportsPage } from "./pages/ReportsPage.jsx";
-import { SettingsPage } from "./pages/SettingsPage.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
 import { SetupPage } from "./pages/SetupPage.jsx";
 import { NotFoundPage } from "./pages/NotFoundPage.jsx";
 import { CashierShiftModal } from "./components/CashierShiftModal.jsx";
 import { DebugOverlay } from "./components/DebugOverlay.jsx";
+
+const InventoryPage = lazy(function loadInventoryPage() {
+  return import("./pages/InventoryPage.jsx").then(function (module) {
+    return { default: module.InventoryPage };
+  });
+});
+const ReportsPage = lazy(function loadReportsPage() {
+  return import("./pages/ReportsPage.jsx").then(function (module) {
+    return { default: module.ReportsPage };
+  });
+});
+const SettingsPage = lazy(function loadSettingsPage() {
+  return import("./pages/SettingsPage.jsx").then(function (module) {
+    return { default: module.SettingsPage };
+  });
+});
+
+function reportStorageError(error) {
+  if (import.meta.env.DEV && typeof console !== "undefined" && console.warn) {
+    console.warn("StoreFlow local storage is unavailable.", error);
+  }
+}
 
 export function App(props) {
   let initialActivePage = "dashboard";
@@ -47,7 +66,9 @@ export function App(props) {
             return parsed;
           }
         }
-      } catch (e) {}
+      } catch (error) {
+        reportStorageError(error);
+      }
     }
     return [];
   });
@@ -62,7 +83,9 @@ export function App(props) {
             return num;
           }
         }
-      } catch (e) {}
+      } catch (error) {
+        reportStorageError(error);
+      }
     }
     return 0;
   });
@@ -76,7 +99,9 @@ export function App(props) {
           } else {
             window.localStorage.removeItem("storeflow_pos_cart");
           }
-        } catch (e) {}
+        } catch (error) {
+          reportStorageError(error);
+        }
       }
     },
     [posCartItems]
@@ -91,7 +116,9 @@ export function App(props) {
           } else {
             window.localStorage.removeItem("storeflow_pos_discount");
           }
-        } catch (e) {}
+        } catch (error) {
+          reportStorageError(error);
+        }
       }
     },
     [posOrderDiscount]
@@ -235,7 +262,9 @@ export function App(props) {
       try {
         window.localStorage.removeItem("storeflow_pos_cart");
         window.localStorage.removeItem("storeflow_pos_discount");
-      } catch (e) {}
+      } catch (error) {
+        reportStorageError(error);
+      }
     }
     handleNavigate("pos");
   }
@@ -422,7 +451,17 @@ export function App(props) {
         }}
       />
 
-      <main className="flex flex-1 overflow-hidden pb-16 md:pb-0">{pageElement}</main>
+      <main className="flex flex-1 overflow-hidden pb-16 md:pb-0">
+        <Suspense
+          fallback={
+            <div className="flex flex-1 items-center justify-center bg-[#F5F5F4] text-sm text-[#777777]">
+              Loading page...
+            </div>
+          }
+        >
+          {pageElement}
+        </Suspense>
+      </main>
 
       <BottomNav
         activePage={activePage}

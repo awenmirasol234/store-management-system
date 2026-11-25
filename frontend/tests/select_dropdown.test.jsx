@@ -81,6 +81,7 @@ describe("Custom styled Select dropdown interactions and styling", function () {
     });
 
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(trigger.getAttribute("aria-activedescendant")).toBe("unit-select-option-1");
     const listbox = container.querySelector('[role="listbox"]');
     expect(listbox).not.toBeNull();
     expect(listbox.className).toContain("rounded-xl");
@@ -111,6 +112,7 @@ describe("Custom styled Select dropdown interactions and styling", function () {
       trigger.click();
     });
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(trigger.getAttribute("aria-activedescendant")).toBeNull();
     expect(container.querySelector('[role="listbox"]')).toBeNull();
   });
 
