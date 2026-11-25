@@ -62,6 +62,19 @@ export function createProductEntity(input) {
   const barcode = normalizeOptionalText(input.barcode, "barcode");
   const description = normalizeOptionalText(input.description, "description");
   const imageUrl = normalizeOptionalText(input.image_url, "image_url");
+  if (imageUrl !== null) {
+    if (imageUrl.length > 2048) {
+      throw new ValidationError("image_url cannot exceed 2048 characters");
+    }
+    const isAllowedPath =
+      imageUrl.startsWith("http://") ||
+      imageUrl.startsWith("https://") ||
+      imageUrl.startsWith("/uploads/") ||
+      imageUrl.startsWith("/");
+    if (!isAllowedPath) {
+      throw new ValidationError("image_url must be an HTTP/HTTPS URL or a local path");
+    }
+  }
   const baseUnit = requireNonEmptyText(input.base_unit, "base_unit");
 
   let rawStock = input.current_stock;

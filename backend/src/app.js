@@ -324,7 +324,8 @@ export function createApp(options) {
     "/api",
     createInventoryRouter({
       uploadsDir: uploadsDir,
-      useCases: inventoryUseCases
+      useCases: inventoryUseCases,
+      fetch: config.fetch
     })
   );
 

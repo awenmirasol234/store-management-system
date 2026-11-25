@@ -128,6 +128,13 @@ export const api = {
   deleteProduct(productId) {
     return request("DELETE", "/api/products/" + encodeURIComponent(productId));
   },
+  saveProductImageUrl(productId, url) {
+    return request(
+      "POST",
+      "/api/products/" + encodeURIComponent(productId) + "/image-url",
+      { url: url }
+    );
+  },
   uploadProductImage(productId, file) {
     const formData = new FormData();
     formData.append("image", file);

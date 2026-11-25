@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { filterProducts, getStockLevel, PRODUCT_CATEGORIES, STOCK_LEVELS } from "../src/products.js";
+import {
+  filterProducts,
+  getStockLevel,
+  PRODUCT_CATEGORIES,
+  STOCK_LEVELS,
+  validateImageUrl
+} from "../src/products.js";
 
 describe("stock levels", function () {
   it("marks out of stock when current stock is zero or negative", function () {
@@ -71,5 +77,33 @@ describe("PRODUCT_CATEGORIES", function () {
     expect(PRODUCT_CATEGORIES[2]).toBe("Snacks");
     expect(PRODUCT_CATEGORIES[3]).toBe("Biscuits & Crackers");
     expect(PRODUCT_CATEGORIES[27]).toBe("Other");
+  });
+});
+
+describe("validateImageUrl", function () {
+  it("allows empty or undefined URLs since the field is optional", function () {
+    expect(validateImageUrl("")).toBe("");
+    expect(validateImageUrl("   ")).toBe("");
+    expect(validateImageUrl(null)).toBe("");
+    expect(validateImageUrl(undefined)).toBe("");
+  });
+
+  it("accepts valid http and https image URLs", function () {
+    expect(validateImageUrl("https://example.com/product.jpg")).toBe("");
+    expect(validateImageUrl("http://example.com/product.png")).toBe("");
+    expect(
+      validateImageUrl("https://images.unsplash.com/photo-1544943910-4c1dc44a0b27?w=400&auto=format")
+    ).toBe("");
+  });
+
+  it("rejects non-http/https protocols such as javascript, ftp, and file", function () {
+    expect(validateImageUrl("javascript:alert(1)")).toBe("URL must start with http:// or https://");
+    expect(validateImageUrl("ftp://example.com/file.jpg")).toBe("URL must start with http:// or https://");
+    expect(validateImageUrl("file:///C:/image.png")).toBe("URL must start with http:// or https://");
+  });
+
+  it("rejects malformed URLs without domains", function () {
+    expect(validateImageUrl("https://")).toBe("Please enter a valid web URL");
+    expect(validateImageUrl("not-a-valid-url")).toBe("URL must start with http:// or https://");
   });
 });

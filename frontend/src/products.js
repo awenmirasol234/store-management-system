@@ -112,3 +112,28 @@ export function filterProducts(products, query) {
   }
   return results;
 }
+
+export function validateImageUrl(url) {
+  if (url === undefined || url === null || typeof url !== "string") {
+    return "";
+  }
+  const trimmed = url.trim();
+  if (trimmed.length === 0) {
+    return "";
+  }
+  if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
+    return "URL must start with http:// or https://";
+  }
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return "Only HTTP and HTTPS URLs are supported";
+    }
+    if (!parsed.hostname || parsed.hostname.length === 0) {
+      return "Image URL must contain a valid domain name";
+    }
+  } catch (error) {
+    return "Please enter a valid web URL";
+  }
+  return "";
+}

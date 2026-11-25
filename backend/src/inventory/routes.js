@@ -3,10 +3,81 @@ import path from "node:path";
 import express from "express";
 import multer from "multer";
 import { ValidationError } from "../shared/errors.js";
-import { requireObjectBody, requireRouteParam } from "../shared/validation.js";
+import { requireNonEmptyText, requireObjectBody, requireRouteParam } from "../shared/validation.js";
 
 const ALLOWED_IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
+
+function validateExternalImageUrl(url) {
+  if (typeof url !== "string" || url.trim().length === 0) {
+    throw new ValidationError("Image URL is required");
+  }
+  const trimmed = url.trim();
+  if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
+    throw new ValidationError("Only HTTP and HTTPS image URLs are supported");
+  }
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(trimmed);
+  } catch (error) {
+    throw new ValidationError("Invalid image URL provided");
+  }
+
+  const hostname = parsedUrl.hostname.toLowerCase();
+  if (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "0.0.0.0" ||
+    hostname === "::1" ||
+    hostname.endsWith(".localhost") ||
+    hostname.endsWith(".local")
+  ) {
+    throw new ValidationError("Private or loopback image URLs are not permitted");
+  }
+
+  if (
+    hostname.startsWith("10.") ||
+    hostname.startsWith("192.168.") ||
+    hostname.startsWith("169.254.") ||
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname)
+  ) {
+    throw new ValidationError("Private network image URLs are not permitted");
+  }
+
+  return parsedUrl;
+}
+
+function detectImageMime(mimeType, buffer, urlPath) {
+  if (mimeType && ALLOWED_IMAGE_MIMES.has(mimeType)) {
+    return mimeType;
+  }
+  if (buffer && buffer.length >= 4) {
+    if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+      return "image/jpeg";
+    }
+    if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) {
+      return "image/png";
+    }
+    if (
+      buffer.length >= 12 &&
+      buffer.toString("ascii", 0, 4) === "RIFF" &&
+      buffer.toString("ascii", 8, 12) === "WEBP"
+    ) {
+      return "image/webp";
+    }
+  }
+  const lowerPath = urlPath.toLowerCase();
+  if (lowerPath.endsWith(".png")) {
+    return "image/png";
+  }
+  if (lowerPath.endsWith(".webp")) {
+    return "image/webp";
+  }
+  if (lowerPath.endsWith(".jpg") || lowerPath.endsWith(".jpeg")) {
+    return "image/jpeg";
+  }
+  return null;
+}
 
 function extensionForMime(mimeType) {
   if (mimeType === "image/png") {
@@ -104,6 +175,84 @@ export function createInventoryRouter(dependencies) {
       const imageUrl = "/uploads/products/" + request.file.filename;
       const updated = await dependencies.useCases.updateProduct({
         product_id: requireRouteParam(request.params, "productId"),
+        image_url: imageUrl
+      });
+      response.json({ data: updated });
+    }
+  );
+
+  router.post(
+    "/products/:productId/image-url",
+    async function saveProductImageUrl(request, response) {
+      const body = requireObjectBody(request.body);
+      const url = requireNonEmptyText(body.url, "url");
+      const productId = requireRouteParam(request.params, "productId");
+
+      const parsedUrl = validateExternalImageUrl(url);
+
+      const productsDir = path.join(dependencies.uploadsDir, "products");
+      fs.mkdirSync(productsDir, { recursive: true });
+
+      const fetchImpl = dependencies.fetch || globalThis.fetch;
+      if (typeof fetchImpl !== "function") {
+        throw new ValidationError("Fetch client is not available in the runtime");
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(function onTimeout() {
+        controller.abort();
+      }, 10000);
+
+      let fetchResponse;
+      try {
+        fetchResponse = await fetchImpl(url, {
+          signal: controller.signal,
+          headers: {
+            Accept: "image/jpeg,image/png,image/webp,image/*",
+            "User-Agent": "StoreFlow-POS/1.0"
+          }
+        });
+      } catch (err) {
+        clearTimeout(timeoutId);
+        if (err.name === "AbortError") {
+          throw new ValidationError("Image download timed out. Please check the URL.");
+        }
+        throw new ValidationError("Could not download image from the provided URL: " + err.message);
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      if (!fetchResponse.ok) {
+        throw new ValidationError("Failed to download image from URL (HTTP " + fetchResponse.status + ")");
+      }
+
+      let rawContentType = "";
+      if (fetchResponse.headers && typeof fetchResponse.headers.get === "function") {
+        rawContentType = fetchResponse.headers.get("content-type") || "";
+      }
+      const mimeType = rawContentType.split(";")[0].trim().toLowerCase();
+
+      const arrayBuffer = await fetchResponse.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      if (buffer.length > MAX_IMAGE_SIZE_BYTES) {
+        throw new ValidationError("Downloaded image exceeds the maximum 2MB size limit");
+      }
+
+      const detectedMime = detectImageMime(mimeType, buffer, parsedUrl.pathname);
+      if (!detectedMime) {
+        throw new ValidationError("Downloaded file is not a supported image format (JPEG, PNG, WebP)");
+      }
+
+      const safeId = String(productId).replace(/[^a-zA-Z0-9_-]/g, "");
+      const ext = extensionForMime(detectedMime);
+      const filename = safeId + "-" + String(Date.now()) + ext;
+
+      fs.writeFileSync(path.join(productsDir, filename), buffer);
+
+      const imageUrl = "/uploads/products/" + filename;
+      const updated = await dependencies.useCases.updateProduct({
+        product_id: productId,
         image_url: imageUrl
       });
       response.json({ data: updated });

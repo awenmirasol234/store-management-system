@@ -6,12 +6,20 @@ import {
   Pencil,
   Plus,
   SlidersHorizontal,
+  AlertCircle,
+  Globe,
   Trash2,
   Upload
 } from "lucide-react";
-import { api } from "../api.js";
+import { api, resolveImageUrl } from "../api.js";
 import { formatPeso, formatQuantity, formatQuantityWithUnit } from "../format.js";
-import { COMMON_BASE_UNITS, filterProducts, getStockLevel, STOCK_LEVELS } from "../products.js";
+import {
+  COMMON_BASE_UNITS,
+  filterProducts,
+  getStockLevel,
+  STOCK_LEVELS,
+  validateImageUrl
+} from "../products.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
 import { CategoryFilterChips } from "../components/CategoryFilterChips.jsx";
@@ -137,6 +145,11 @@ export function InventoryPage(props) {
   const [productForm, setProductForm] = useState(createEmptyProductForm());
   const [imageFile, setImageFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+  const [imageSourceMode, setImageSourceMode] = useState("file");
+  const [imageUrlInput, setImageUrlInput] = useState("");
+  const [imageUrlStatus, setImageUrlStatus] = useState("idle");
+  const [imageUrlError, setImageUrlError] = useState("");
+  const [existingImageUrl, setExistingImageUrl] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
   const [touchedFields, setTouchedFields] = useState({});
   const [savingProduct, setSavingProduct] = useState(false);
@@ -324,6 +337,12 @@ export function InventoryPage(props) {
     savedProductForm.current = null;
     setProductForm(createEmptyProductForm());
     setImageFile(null);
+    setImagePreviewUrl(null);
+    setImageSourceMode("file");
+    setImageUrlInput("");
+    setImageUrlStatus("idle");
+    setImageUrlError("");
+    setExistingImageUrl(null);
     setProductModalOpen(true);
   }
 
@@ -355,7 +374,59 @@ export function InventoryPage(props) {
       is_active: product.is_active
     });
     setImageFile(null);
+    setImagePreviewUrl(null);
+    setImageUrlError("");
+    if (product.image_url) {
+      setExistingImageUrl(product.image_url);
+      if (product.image_url.startsWith("http://") || product.image_url.startsWith("https://")) {
+        setImageSourceMode("url");
+        setImageUrlInput(product.image_url);
+        setImageUrlStatus("loaded");
+      } else {
+        setImageSourceMode("file");
+        setImageUrlInput("");
+        setImageUrlStatus("idle");
+      }
+    } else {
+      setExistingImageUrl(null);
+      setImageSourceMode("file");
+      setImageUrlInput("");
+      setImageUrlStatus("idle");
+    }
     setProductModalOpen(true);
+  }
+
+  function handleImageUrlChange(value) {
+    setImageUrlInput(value);
+    const trimmed = value.trim();
+    if (trimmed.length === 0) {
+      setImageUrlStatus("idle");
+      setImageUrlError("");
+      setFieldErrors(function updateErrors(prev) {
+        const next = Object.assign({}, prev);
+        delete next.image_url;
+        return next;
+      });
+      return;
+    }
+    const validationError = validateImageUrl(trimmed);
+    if (validationError) {
+      setImageUrlStatus("error");
+      setImageUrlError(validationError);
+      setFieldErrors(function updateErrors(prev) {
+        const next = Object.assign({}, prev);
+        next.image_url = validationError;
+        return next;
+      });
+    } else {
+      setImageUrlStatus("loading");
+      setImageUrlError("");
+      setFieldErrors(function updateErrors(prev) {
+        const next = Object.assign({}, prev);
+        delete next.image_url;
+        return next;
+      });
+    }
   }
 
   async function handleSaveProduct(event) {
@@ -397,6 +468,13 @@ export function InventoryPage(props) {
       const reorderError = validateProductFormField("reorder_level", productForm.reorder_level, productForm);
       if (reorderError) {
         newErrors.reorder_level = reorderError;
+      }
+    }
+
+    if (imageSourceMode === "url" && imageUrlInput.trim().length > 0) {
+      const urlValidationError = validateImageUrl(imageUrlInput.trim());
+      if (urlValidationError) {
+        newErrors.image_url = urlValidationError;
       }
     }
 
@@ -453,13 +531,27 @@ export function InventoryPage(props) {
         }
       }
 
-      if (imageFile) {
+      if (imageSourceMode === "url" && imageUrlInput.trim().length > 0) {
+        try {
+          await api.saveProductImageUrl(productId, imageUrlInput.trim());
+        } catch (error) {
+          setModalError("Product saved, but image download failed: " + error.message);
+          await loadAll();
+          return;
+        }
+      } else if (imageSourceMode === "file" && imageFile) {
         try {
           await api.uploadProductImage(productId, imageFile);
         } catch (error) {
           setModalError("Product saved. Image upload failed: " + error.message);
           await loadAll();
           return;
+        }
+      } else if (productForm.product_id && !existingImageUrl && !imageFile && !imageUrlInput.trim()) {
+        try {
+          await api.updateProduct(productId, { image_url: null });
+        } catch (error) {
+          // ignore clear error
         }
       }
 
@@ -954,7 +1046,50 @@ export function InventoryPage(props) {
     }
   }
 
-  let imagePreviewSection = null;
+  const imageModeSelector = (
+    <div
+      role="tablist"
+      aria-label="Image source options"
+      className="inline-flex items-center gap-1 rounded-xl bg-[#EEEEED]/70 p-1 mb-2.5"
+    >
+      <button
+        type="button"
+        role="tab"
+        aria-selected={imageSourceMode === "file"}
+        onClick={function chooseFileMode() {
+          setImageSourceMode("file");
+        }}
+        className={
+          "flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium cursor-pointer transition-colors " +
+          (imageSourceMode === "file"
+            ? "bg-[#171717] text-white shadow-xs font-semibold"
+            : "text-[#777777] hover:text-[#171717]")
+        }
+      >
+        <Upload className="h-3.5 w-3.5" />
+        <span>Upload File</span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={imageSourceMode === "url"}
+        onClick={function chooseUrlMode() {
+          setImageSourceMode("url");
+        }}
+        className={
+          "flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium cursor-pointer transition-colors " +
+          (imageSourceMode === "url"
+            ? "bg-[#171717] text-white shadow-xs font-semibold"
+            : "text-[#777777] hover:text-[#171717]")
+        }
+      >
+        <Globe className="h-3.5 w-3.5" />
+        <span>Image URL</span>
+      </button>
+    </div>
+  );
+
+  let fileModeContent = null;
   if (imageFile) {
     let fileSizeLabel = "";
     if (imageFile.size) {
@@ -981,7 +1116,7 @@ export function InventoryPage(props) {
       );
     }
 
-    imagePreviewSection = (
+    fileModeContent = (
       <div className="flex items-center justify-between gap-3 rounded-xl border border-[#E9E9E9] bg-white p-2.5">
         <div className="flex items-center gap-3 min-w-0">
           {thumbnailElement}
@@ -1016,8 +1151,56 @@ export function InventoryPage(props) {
         </div>
       </div>
     );
+  } else if (existingImageUrl) {
+    const existingSrc = resolveImageUrl(existingImageUrl);
+    fileModeContent = (
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-[#E9E9E9] bg-white p-2.5">
+        <div className="flex items-center gap-3 min-w-0">
+          {existingSrc ? (
+            <img
+              src={existingSrc}
+              alt="Current product"
+              className="h-12 w-12 rounded-lg object-cover border border-[#E9E9E9] shrink-0"
+            />
+          ) : (
+            <div className="h-12 w-12 rounded-lg bg-[#EEEEED] flex items-center justify-center shrink-0">
+              <Upload className="h-5 w-5 text-[#777777]" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="truncate text-xs font-medium text-[#171717]">Current Image</p>
+            <p className="text-2xs text-[#777777] font-mono">Saved locally</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <label className="text-2xs font-medium text-[#171717] hover:underline cursor-pointer">
+            <span>Change</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={function onFile(event) {
+                if (event.target.files && event.target.files[0]) {
+                  setImageFile(event.target.files[0]);
+                }
+              }}
+              className="hidden"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={function removeExistingImage() {
+              setExistingImageUrl(null);
+              setImageFile(null);
+            }}
+            className="text-2xs font-medium text-[#E0533C] hover:underline cursor-pointer"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    );
   } else {
-    imagePreviewSection = (
+    fileModeContent = (
       <label className="flex cursor-pointer items-center justify-center gap-2.5 rounded-xl border border-dashed border-[#E9E9E9] bg-[#EEEEED]/30 px-4 py-3.5 text-xs text-[#171717] hover:border-[#171717] hover:bg-[#EEEEED]/50 transition-colors">
         <Upload className="h-4 w-4 text-[#777777]" />
         <span className="text-[#777777]">Upload JPEG, PNG, or WebP <span className="text-2xs text-[#999999]">(max 2MB)</span></span>
@@ -1034,6 +1217,120 @@ export function InventoryPage(props) {
       </label>
     );
   }
+
+  let urlPreviewCard = null;
+  const trimmedUrl = imageUrlInput.trim();
+  if (trimmedUrl.length > 0) {
+    let thumbnailElement = (
+      <div className="h-12 w-12 rounded-lg bg-[#EEEEED] flex items-center justify-center shrink-0 border border-[#E9E9E9]">
+        <Globe className="h-5 w-5 text-[#777777]" />
+      </div>
+    );
+
+    if (imageUrlStatus === "loading") {
+      thumbnailElement = (
+        <div className="h-12 w-12 rounded-lg bg-[#EEEEED] flex items-center justify-center shrink-0 border border-[#E9E9E9]">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#171717] border-t-transparent" />
+        </div>
+      );
+    } else if (imageUrlStatus === "error") {
+      thumbnailElement = (
+        <div className="h-12 w-12 rounded-lg bg-rose-50 flex items-center justify-center shrink-0 border border-rose-200">
+          <AlertCircle className="h-5 w-5 text-rose-600" />
+        </div>
+      );
+    } else if (imageUrlStatus === "loaded") {
+      thumbnailElement = (
+        <img
+          src={trimmedUrl}
+          alt="Preview"
+          className="h-12 w-12 rounded-lg object-cover border border-[#E9E9E9] shrink-0"
+        />
+      );
+    }
+
+    let statusDescription = "Loading preview...";
+    let statusClass = "text-[#777777]";
+    if (imageUrlStatus === "loaded") {
+      statusDescription = "Preview ready · Will be saved locally on submit";
+      statusClass = "text-[#171717] font-medium";
+    } else if (imageUrlStatus === "error") {
+      statusDescription = imageUrlError || "Failed to load image";
+      statusClass = "text-rose-600 font-medium";
+    }
+
+    urlPreviewCard = (
+      <div className="space-y-2">
+        <img
+          src={trimmedUrl}
+          alt=""
+          aria-hidden="true"
+          className="hidden"
+          onLoad={function handleProbeLoad() {
+            setImageUrlStatus("loaded");
+            setImageUrlError("");
+          }}
+          onError={function handleProbeError() {
+            setImageUrlStatus("error");
+            setImageUrlError("Unable to load image. Please check the URL or try another link.");
+          }}
+        />
+
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-[#E9E9E9] bg-white p-2.5">
+          <div className="flex items-center gap-3 min-w-0">
+            {thumbnailElement}
+            <div className="min-w-0">
+              <p className="truncate text-xs font-medium text-[#171717]">{trimmedUrl}</p>
+              <p className={"text-2xs truncate " + statusClass}>{statusDescription}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={function clearUrl() {
+                setImageUrlInput("");
+                setImageUrlStatus("idle");
+                setImageUrlError("");
+                setFieldErrors(function (prev) {
+                  const next = Object.assign({}, prev);
+                  delete next.image_url;
+                  return next;
+                });
+              }}
+              className="text-2xs font-medium text-[#E0533C] hover:underline cursor-pointer"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const urlModeContent = (
+    <div className="space-y-3">
+      <Input
+        label="Image Web Address (URL)"
+        type="url"
+        placeholder="https://example.com/product-image.jpg"
+        value={imageUrlInput}
+        error={fieldErrors.image_url || imageUrlError}
+        helper="Paste a direct image link (JPEG, PNG, or WebP). It will be saved locally on your POS."
+        onChange={function onUrlChange(event) {
+          handleImageUrlChange(event.target.value);
+        }}
+        autoComplete="off"
+      />
+      {urlPreviewCard}
+    </div>
+  );
+
+  let imagePreviewSection = (
+    <div>
+      {imageModeSelector}
+      {imageSourceMode === "file" ? fileModeContent : urlModeContent}
+    </div>
+  );
 
   let confirmLabel = "Add Product";
   if (productForm.product_id) {

@@ -258,6 +258,86 @@ describe("frontend review regressions", function () {
     expect(dialog.textContent).toContain("Selling Below Cost:");
   });
 
+  it("supports pasting direct image URL with live preview, validation, and local save in Add Product form", async function () {
+    const inventoryFetch = fetch.getMockImplementation();
+    const saveImageUrlMock = vi.fn();
+
+    fetch.mockImplementation(function (url, options) {
+      if (url.startsWith("/api/products") && options && options.method === "POST" && !url.includes("/image")) {
+        return Promise.resolve(
+          Response.json({
+            data: {
+              product_id: "url-product-1",
+              product_name: "Instant Coffee"
+            }
+          })
+        );
+      }
+      if (url === "/api/products/url-product-1/image-url") {
+        const payload = JSON.parse(options.body);
+        saveImageUrlMock(payload.url);
+        return Promise.resolve(
+          Response.json({
+            data: {
+              product_id: "url-product-1",
+              image_url: "/uploads/products/url-product-1-123.jpg"
+            }
+          })
+        );
+      }
+      return inventoryFetch(url, options);
+    });
+
+    await render(<InventoryPage currentUser={owner} />);
+    await click("Add Product");
+    const dialog = openDialog();
+    expect(dialog).not.toBeNull();
+
+    // 1. Verify Image source tabs exist
+    expect(dialog.textContent).toContain("Upload File");
+    expect(dialog.textContent).toContain("Image URL");
+
+    // 2. Switch to Image URL mode
+    await click("Image URL");
+    const urlInput = dialog.querySelector('input[type="url"]');
+    expect(urlInput).not.toBeNull();
+    expect(urlInput.placeholder).toContain("https://example.com/product-image.jpg");
+
+    // 3. Invalid URL shows validation error
+    await act(async function () {
+      changeInput(urlInput, "ftp://invalid-url.com/pic.png");
+      urlInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    expect(dialog.textContent).toContain("URL must start with http:// or https://");
+
+    // 4. Valid URL updates input and renders preview card
+    await act(async function () {
+      changeInput(urlInput, "https://images.unsplash.com/photo-test.jpg");
+      urlInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    expect(dialog.textContent).toContain("https://images.unsplash.com/photo-test.jpg");
+
+    // 5. Fill required fields and submit
+    const nameInput = dialog.querySelector("input");
+    const inputs = dialog.querySelectorAll('input[type="number"]');
+    const costInput = Array.from(inputs).find(function (inp) {
+      return inp.step === "0.01" && inp.min === "0";
+    });
+    const priceInput = Array.from(inputs).find(function (inp) {
+      return inp.step === "0.01" && inp.min === "0.01";
+    });
+
+    await act(async function () {
+      changeInput(nameInput, "Instant Coffee 100g");
+      changeInput(costInput, "50");
+      changeInput(priceInput, "75");
+      submit(dialog.querySelector("form"));
+    });
+
+    expect(saveImageUrlMock).toHaveBeenCalledWith("https://images.unsplash.com/photo-test.jpg");
+    expect(openDialog()).toBeNull();
+  });
+
   it.each([1, 2])("checks overlapping scans against the latest controlled cart with stock %i", async function (stock) {
     const inventoryFetch = fetch.getMockImplementation();
     const lookups = [];

@@ -19,11 +19,13 @@ afterEach(async function teardown() {
   }
 });
 
-async function startTestServer() {
-  const uploadsDir = path.join(os.tmpdir(), "store-mgmt-test-uploads");
+async function startTestServer(serverOptions) {
+  const options = serverOptions || {};
+  const uploadsDir = options.uploadsDir || path.join(os.tmpdir(), "store-mgmt-test-uploads");
   const runtime = createApp({
     databasePath: ":memory:",
     uploadsDir: uploadsDir,
+    fetch: options.fetch,
     clock: {
       nowIso() {
         return "2026-11-20T02:00:00.000Z";
@@ -344,5 +346,77 @@ describe("Express REST API routes", function () {
 
     const finalCustomer = await requestJson(baseUrl, "GET", "/api/customers/" + customerId);
     expect(finalCustomer.body.data.current_balance).toBe(200);
+  });
+
+  it("downloads image from URL, validates SSRF and file constraints, and stores locally", async function () {
+    const fakePng = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00]);
+    const mockFetch = async function (url) {
+      if (url.includes("fail-404")) {
+        return { ok: false, status: 404 };
+      }
+      if (url.includes("not-image")) {
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers({ "content-type": "text/html" }),
+          arrayBuffer: async function () {
+            return Buffer.from("<html>not an image</html>");
+          }
+        };
+      }
+      return {
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-type": "image/png" }),
+        arrayBuffer: async function () {
+          return fakePng;
+        }
+      };
+    };
+
+    const baseUrl = await startTestServer({ fetch: mockFetch });
+
+    const createRes = await requestJson(baseUrl, "POST", "/api/products", {
+      product_name: "Coffee Drink",
+      base_unit: "can",
+      current_stock: 5,
+      cost_price: 20,
+      selling_price: 30
+    });
+    expect(createRes.status).toBe(201);
+    const productId = createRes.body.data.product_id;
+
+    const loopbackRes = await requestJson(baseUrl, "POST", "/api/products/" + productId + "/image-url", {
+      url: "http://localhost:8080/image.png"
+    });
+    expect(loopbackRes.status).toBe(400);
+    expect(loopbackRes.body.error.message).toContain("loopback");
+
+    const privateIpRes = await requestJson(baseUrl, "POST", "/api/products/" + productId + "/image-url", {
+      url: "http://192.168.1.100/image.png"
+    });
+    expect(privateIpRes.status).toBe(400);
+    expect(privateIpRes.body.error.message).toContain("Private");
+
+    const notImageRes = await requestJson(baseUrl, "POST", "/api/products/" + productId + "/image-url", {
+      url: "https://example.com/not-image.html"
+    });
+    expect(notImageRes.status).toBe(400);
+    expect(notImageRes.body.error.message).toContain("supported image format");
+
+    const notFoundRes = await requestJson(baseUrl, "POST", "/api/products/" + productId + "/image-url", {
+      url: "https://example.com/fail-404.png"
+    });
+    expect(notFoundRes.status).toBe(400);
+    expect(notFoundRes.body.error.message).toContain("Failed to download");
+
+    const successRes = await requestJson(baseUrl, "POST", "/api/products/" + productId + "/image-url", {
+      url: "https://example.com/valid-image.png"
+    });
+    expect(successRes.status).toBe(200);
+    expect(successRes.body.data.image_url).toMatch(/^\/uploads\/products\/[a-zA-Z0-9_-]+-\d+\.png$/);
+
+    const productRes = await requestJson(baseUrl, "GET", "/api/products/" + productId);
+    expect(productRes.body.data.image_url).toBe(successRes.body.data.image_url);
   });
 });

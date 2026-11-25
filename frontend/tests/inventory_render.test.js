@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
-import { MoreVertical } from "lucide-react";
+import { Globe, MoreVertical } from "lucide-react";
 import { InventoryPage } from "../src/pages/InventoryPage.jsx";
 import { Badge } from "../src/components/Badge.jsx";
 import { Button } from "../src/components/Button.jsx";
@@ -19,6 +19,8 @@ describe("InventoryPage SSR test", function () {
   it("imports MoreVertical icon without reference error", function () {
     expect(MoreVertical).toBeDefined();
     expect(typeof MoreVertical).toBe("object");
+    expect(Globe).toBeDefined();
+    expect(typeof Globe).toBe("object");
   });
 
   it("lets cashiers browse inventory without write controls", function () {
