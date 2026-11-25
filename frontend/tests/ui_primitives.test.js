@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
+import { DataTable } from "../src/components/DataTable.jsx";
 import { ErrorBanner } from "../src/components/ErrorBanner.jsx";
 import { FilterPill } from "../src/components/FilterPill.jsx";
 import { Input } from "../src/components/Input.jsx";
@@ -240,5 +241,33 @@ describe("Standardized UI primitives & accessibility", function () {
     );
     expect(selectHtml).not.toContain("text-rose-500");
     expect(selectHtml).not.toContain("*");
+  });
+
+  it("renders DataTable with sticky head and z-10 when stickyHead is true", function () {
+    const html = renderToString(
+      React.createElement(
+        DataTable,
+        {
+          stickyHead: true,
+          headRow: React.createElement("tr", null, React.createElement("th", null, "Stock"))
+        },
+        React.createElement("tr", null, React.createElement("td", null, "Item 1"))
+      )
+    );
+    expect(html).toContain("sticky top-0 z-10");
+  });
+
+  it("renders DataTable standard head without sticky or z-10 when stickyHead is omitted", function () {
+    const html = renderToString(
+      React.createElement(
+        DataTable,
+        {
+          headRow: React.createElement("tr", null, React.createElement("th", null, "Stock"))
+        },
+        React.createElement("tr", null, React.createElement("td", null, "Item 1"))
+      )
+    );
+    expect(html).not.toContain("sticky top-0");
+    expect(html).not.toContain("z-10");
   });
 });

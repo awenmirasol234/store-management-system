@@ -1,7 +1,7 @@
 export function DataTable(props) {
   let headClass = "bg-[#EEEEED] border-b border-[#E9E9E9] text-xs font-semibold text-[#171717]";
   if (props.stickyHead) {
-    headClass = "sticky top-0 " + headClass;
+    headClass = "sticky top-0 z-10 " + headClass;
   }
 
   return (
