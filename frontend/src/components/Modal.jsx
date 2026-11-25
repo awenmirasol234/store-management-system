@@ -162,6 +162,10 @@ function OpenModal(props) {
     widthClass = "max-w-2xl";
   } else if (props.size === "2xl") {
     widthClass = "max-w-3xl";
+  } else if (props.size === "3xl") {
+    widthClass = "max-w-4xl";
+  } else if (props.size === "4xl") {
+    widthClass = "max-w-5xl";
   }
 
   if (props.maxWidth) {

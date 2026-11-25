@@ -1457,6 +1457,7 @@ export function InventoryPage(props) {
       <Modal
         open={productModalOpen}
         dismissDisabled={savingProduct}
+        size="3xl"
         onClose={function close() {
           setProductModalOpen(false);
           setFieldErrors({});
@@ -1467,7 +1468,10 @@ export function InventoryPage(props) {
         <form onSubmit={handleSaveProduct}>
           <ErrorBanner message={modalError} className="mb-4" />
           <fieldset disabled={savingProduct} className="space-y-6">
-            {/* Section 1: Basic Details */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Column: Core Product Details */}
+              <div className="lg:col-span-7 space-y-6">
+                {/* Section 1: Basic Details */}
             <div>
               <div className="border-b border-[#E9E9E9] pb-1.5 mb-3">
                 <span className="text-2xs font-semibold tracking-wider text-[#777777] uppercase">
@@ -1610,7 +1614,11 @@ export function InventoryPage(props) {
               </div>
             </div>
 
-            {/* Section 4: Media & Preferences */}
+              </div>
+
+              {/* Right Column: Media & Preferences */}
+              <div className="lg:col-span-5 space-y-6">
+                {/* Section 4: Media & Preferences */}
             <div>
               <div className="border-b border-[#E9E9E9] pb-1.5 mb-3">
                 <span className="text-2xs font-semibold tracking-wider text-[#777777] uppercase">
@@ -1648,7 +1656,11 @@ export function InventoryPage(props) {
               </div>
             </div>
 
-            <FormActions
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-[#E9E9E9]">
+              <FormActions
               onCancel={function cancel() {
                 setProductModalOpen(false);
                 setFieldErrors({});
@@ -1657,7 +1669,8 @@ export function InventoryPage(props) {
               confirmLabel={confirmLabel}
               disabled={savingProduct}
             />
-          </fieldset>
+          </div>
+        </fieldset>
         </form>
       </Modal>
 
