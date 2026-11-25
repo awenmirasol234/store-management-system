@@ -254,6 +254,26 @@ CREATE INDEX IF NOT EXISTS idx_shifts_user_id
 CREATE INDEX IF NOT EXISTS idx_shifts_status
   ON cashier_shifts(status);
 
+CREATE TRIGGER IF NOT EXISTS cashier_shifts_one_open_per_user_insert
+BEFORE INSERT ON cashier_shifts
+WHEN NEW.status = 'OPEN' AND EXISTS (
+  SELECT 1 FROM cashier_shifts
+  WHERE user_id = NEW.user_id AND status = 'OPEN'
+)
+BEGIN
+  SELECT RAISE(ABORT, 'User already has an active shift');
+END;
+
+CREATE TRIGGER IF NOT EXISTS cashier_shifts_one_open_per_user_update
+BEFORE UPDATE OF user_id, status ON cashier_shifts
+WHEN NEW.status = 'OPEN' AND EXISTS (
+  SELECT 1 FROM cashier_shifts
+  WHERE user_id = NEW.user_id AND status = 'OPEN' AND shift_id <> NEW.shift_id
+)
+BEGIN
+  SELECT RAISE(ABORT, 'User already has an active shift');
+END;
+
 -- Cash Movements
 CREATE TABLE IF NOT EXISTS cash_movements (
   movement_id TEXT PRIMARY KEY,

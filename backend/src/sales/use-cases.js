@@ -5,7 +5,7 @@ import {
   toMoneyInt,
   toQuantityInt
 } from "../shared/decimal.js";
-import { NotFoundError, ValidationError } from "../shared/errors.js";
+import { ForbiddenError, NotFoundError, ValidationError } from "../shared/errors.js";
 import {
   normalizeOptionalText,
   parsePositiveLimit,
@@ -69,6 +69,19 @@ async function resolveCartLines(dependencies, cartItems) {
     productsById: productCache,
     subtotal_int: subtotalInt
   };
+}
+
+async function validateActivityShift(dependencies, shiftId, actorUserId) {
+  if (!shiftId) {
+    return;
+  }
+  const shift = await dependencies.shiftRepository.findById(shiftId);
+  if (!shift || shift.status !== "OPEN") {
+    throw new ValidationError("Sales activity requires an open shift");
+  }
+  if (actorUserId && shift.user_id !== actorUserId) {
+    throw new ForbiddenError("You can only record activity on your own shift");
+  }
 }
 
 function applyOrderDiscount(subtotalInt, orderDiscountRaw) {
@@ -195,6 +208,7 @@ export function createProcessSaleUseCase(dependencies) {
     return dependencies.unitOfWork.run(async function runProcessSale() {
       const createdBy = requireNonEmptyText(safeInput.created_by, "created_by");
       const shiftId = normalizeOptionalText(safeInput.shift_id, "shift_id");
+      await validateActivityShift(dependencies, shiftId, safeInput.actor_user_id);
       const resolved = await resolveCartLines(dependencies, safeInput.items);
       const totals = applyOrderDiscount(resolved.subtotal_int, safeInput.discount_amount);
       const requiredByProduct = aggregateRequiredStockByProduct(resolved.lines);
@@ -321,6 +335,7 @@ export function createProcessReturnUseCase(dependencies) {
       const createdBy = requireNonEmptyText(safeInput.created_by, "created_by");
       const remarks = requireNonEmptyText(safeInput.remarks, "remarks");
       const shiftId = normalizeOptionalText(safeInput.shift_id, "shift_id");
+      await validateActivityShift(dependencies, shiftId, safeInput.actor_user_id);
 
       if (!Array.isArray(safeInput.items) || safeInput.items.length === 0) {
         throw new ValidationError("Return must include at least one item");

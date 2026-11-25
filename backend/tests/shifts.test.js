@@ -297,6 +297,34 @@ describe("Cashier Shifts & Cash Drawer Reconciliation", function () {
   });
 
   describe("SQLite Persistence & Shift Aggregation", function () {
+    it("prevents a second open shift for the same user at the database boundary", async function () {
+      const db = openSqliteDatabase(":memory:");
+      const shiftRepo = createSqliteShiftRepository(db);
+      db.prepare(`
+        INSERT INTO users (user_id, username, full_name, role, pin_hash, pin_salt, created_at, updated_at)
+        VALUES ('cashier-one', 'cashier_one', 'Cashier One', 'CASHIER', 'hash', 'salt', ?, ?)
+      `).run("2026-11-25T08:00:00.000Z", "2026-11-25T08:00:00.000Z");
+      const firstShift = {
+        shift_id: "shift-first",
+        user_id: "cashier-one",
+        opened_at: "2026-11-25T08:00:00.000Z",
+        closed_at: null,
+        opening_cash: 100,
+        expected_cash: null,
+        actual_cash: null,
+        variance: null,
+        notes: null,
+        status: "OPEN"
+      };
+      await shiftRepo.save(firstShift);
+
+      await expect(
+        shiftRepo.save(Object.assign({}, firstShift, { shift_id: "shift-second" }))
+      ).rejects.toThrow("User already has an active shift");
+      expect((await shiftRepo.findActiveByUserId("cashier-one")).shift_id).toBe("shift-first");
+      db.close();
+    });
+
     it("persists and aggregates live ledger totals across sales, credit, returns, and cash movements", async function () {
       const db = openSqliteDatabase(":memory:");
       const shiftRepo = createSqliteShiftRepository(db);

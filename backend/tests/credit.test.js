@@ -25,6 +25,7 @@ import {
   createSqliteInventoryTransactionRepository
 } from "../src/inventory/sqlite-repo.js";
 import { createSqliteSalesRepository } from "../src/sales/sqlite-repo.js";
+import { createSqliteShiftRepository } from "../src/shifts/sqlite-repo.js";
 import { createProcessSaleUseCase, createProcessReturnUseCase } from "../src/sales/use-cases.js";
 
 function setupCreditTestEnv() {
@@ -39,6 +40,7 @@ function setupCreditTestEnv() {
   const sellingOptionRepository = createSqliteSellingOptionRepository(database);
   const inventoryTransactionRepository = createSqliteInventoryTransactionRepository(database);
   const salesRepository = createSqliteSalesRepository(database);
+  const shiftRepository = createSqliteShiftRepository(database);
 
   const sharedDeps = {
     idGenerator: idGenerator,
@@ -49,7 +51,8 @@ function setupCreditTestEnv() {
     productRepository: productRepository,
     sellingOptionRepository: sellingOptionRepository,
     inventoryTransactionRepository: inventoryTransactionRepository,
-    salesRepository: salesRepository
+    salesRepository: salesRepository,
+    shiftRepository: shiftRepository
   };
 
   const useCases = {
@@ -294,6 +297,63 @@ describe("Credit Customer Use Cases & Repositories", function () {
       created_by: "owner"
     });
     expect(paid.customer.current_balance).toBe(0);
+  });
+
+  it("rejects payments assigned to another user's or a closed shift", async function () {
+    const env = setupCreditTestEnv();
+    const customer = await env.useCases.createCustomer({
+      full_name: "Active Customer",
+      credit_limit: 500
+    });
+    await env.repositories.customerRepository.save(
+      Object.assign({}, customer, { current_balance: 100 })
+    );
+    const now = "2026-11-25T10:00:00.000Z";
+    env.database.prepare(`
+      INSERT INTO users (user_id, username, full_name, role, pin_hash, pin_salt, created_at, updated_at)
+      VALUES
+        ('cashier-1', 'cashier_one', 'Cashier One', 'CASHIER', 'hash', 'salt', ?, ?),
+        ('cashier-2', 'cashier_two', 'Cashier Two', 'CASHIER', 'hash', 'salt', ?, ?)
+    `).run(now, now, now, now);
+    await env.repositories.shiftRepository.save({
+      shift_id: "other-shift",
+      user_id: "cashier-2",
+      opened_at: now,
+      closed_at: null,
+      opening_cash: 0,
+      expected_cash: null,
+      actual_cash: null,
+      variance: null,
+      notes: null,
+      status: "OPEN"
+    });
+    await env.repositories.shiftRepository.save({
+      shift_id: "closed-shift",
+      user_id: "cashier-1",
+      opened_at: now,
+      closed_at: now,
+      opening_cash: 0,
+      expected_cash: null,
+      actual_cash: null,
+      variance: null,
+      notes: null,
+      status: "CLOSED"
+    });
+
+    const paymentInput = {
+      customer_id: customer.customer_id,
+      amount: 10,
+      created_by: "cashier-1",
+      actor_user_id: "cashier-1"
+    };
+    await expect(
+      env.useCases.recordPayment(Object.assign({}, paymentInput, { shift_id: "other-shift" }))
+    ).rejects.toThrow("own shift");
+    await expect(
+      env.useCases.recordPayment(Object.assign({}, paymentInput, { shift_id: "closed-shift" }))
+    ).rejects.toThrow("open shift");
+    expect((await env.useCases.getCustomer({ customer_id: customer.customer_id })).current_balance)
+      .toBe(100);
   });
 });
 

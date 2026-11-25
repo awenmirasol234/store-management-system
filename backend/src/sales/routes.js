@@ -12,11 +12,13 @@ export function createSalesRouter(dependencies) {
   router.post("/sales", async function createSale(request, response) {
     const body = requireObjectBody(request.body);
     let createdBy = body.created_by;
+    let actorUserId = null;
     if (request.user && request.user.username) {
       createdBy = request.user.username;
+      actorUserId = request.user.user_id;
     }
     const result = await dependencies.useCases.processSale(
-      Object.assign({}, body, { created_by: createdBy })
+      Object.assign({}, body, { created_by: createdBy, actor_user_id: actorUserId })
     );
     response.status(201).json({ data: result });
   });
@@ -38,12 +40,15 @@ export function createSalesRouter(dependencies) {
   router.post("/sales/:saleId/returns", async function createReturn(request, response) {
     const body = requireObjectBody(request.body);
     let createdBy = body.created_by;
+    let actorUserId = null;
     if (request.user && request.user.username) {
       createdBy = request.user.username;
+      actorUserId = request.user.user_id;
     }
     const payload = Object.assign({}, body, {
       sale_id: requireRouteParam(request.params, "saleId"),
-      created_by: createdBy
+      created_by: createdBy,
+      actor_user_id: actorUserId
     });
     const result = await dependencies.useCases.processReturn(payload);
     response.status(201).json({ data: result });

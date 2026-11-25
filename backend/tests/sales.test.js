@@ -23,6 +23,7 @@ function createInMemorySalesDeps() {
   const returns = [];
   const customers = new Map();
   const creditTransactions = [];
+  const shifts = new Map();
   const receiptSeqByDate = new Map();
   let counter = 1;
 
@@ -34,6 +35,7 @@ function createInMemorySalesDeps() {
     returns: returns,
     customers: customers,
     creditTransactions: creditTransactions,
+    shifts: shifts,
     idGenerator: {
       nextId() {
         const idValue = "id-" + String(counter);
@@ -52,6 +54,11 @@ function createInMemorySalesDeps() {
     unitOfWork: {
       async run(work) {
         return work();
+      }
+    },
+    shiftRepository: {
+      async findById(shiftId) {
+        return shifts.get(shiftId) || null;
       }
     },
     productRepository: {
@@ -247,6 +254,44 @@ describe("sales domain and use cases", function () {
     ).rejects.toThrow(ValidationError);
   });
 
+  it("requires a shift to be open and owned by the authenticated cashier", async function () {
+    const deps = createInMemorySalesDeps();
+    const createProduct = createCreateProductUseCase(deps);
+    const processSale = createProcessSaleUseCase(deps);
+    const product = await createProduct({
+      product_name: "Water",
+      base_unit: "piece",
+      current_stock: 5,
+      cost_price: 10,
+      selling_price: 15
+    });
+    deps.shifts.set("other-shift", {
+      shift_id: "other-shift",
+      user_id: "cashier-2",
+      status: "OPEN"
+    });
+    deps.shifts.set("closed-shift", {
+      shift_id: "closed-shift",
+      user_id: "cashier-1",
+      status: "CLOSED"
+    });
+
+    const saleInput = {
+      items: [{ product_id: product.product_id, quantity: 1 }],
+      payment_method: PAYMENT_METHODS.CASH,
+      amount_paid: 20,
+      created_by: "cashier-1",
+      actor_user_id: "cashier-1"
+    };
+    await expect(
+      processSale(Object.assign({}, saleInput, { shift_id: "other-shift" }))
+    ).rejects.toThrow("own shift");
+    await expect(
+      processSale(Object.assign({}, saleInput, { shift_id: "closed-shift" }))
+    ).rejects.toThrow("open shift");
+    expect(deps.sales.size).toBe(0);
+  });
+
   it("fails closed when credit repositories are missing", async function () {
     const deps = createInMemorySalesDeps();
     const createProduct = createCreateProductUseCase(deps);
@@ -286,6 +331,11 @@ describe("sales domain and use cases", function () {
       current_stock: 50,
       cost_price: 45,
       selling_price: 60
+    });
+    deps.shifts.set("shift-1", {
+      shift_id: "shift-1",
+      user_id: "cashier-1",
+      status: "OPEN"
     });
 
     deps.customers.set("cust-1", {

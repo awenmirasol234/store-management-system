@@ -1,6 +1,10 @@
 import { fromMoneyInt, toMoneyInt } from "../shared/decimal.js";
-import { NotFoundError, ValidationError } from "../shared/errors.js";
-import { parsePositiveLimit, requireNonEmptyText } from "../shared/validation.js";
+import { ForbiddenError, NotFoundError, ValidationError } from "../shared/errors.js";
+import {
+  normalizeOptionalText,
+  parsePositiveLimit,
+  requireNonEmptyText
+} from "../shared/validation.js";
 import {
   CREDIT_TRANSACTION_TYPES,
   createCreditTransactionEntity,
@@ -111,6 +115,16 @@ export function createRecordPaymentUseCase(dependencies) {
     return dependencies.unitOfWork.run(async function runRecordPayment() {
       const customerId = requireNonEmptyText(safeInput.customer_id, "customer_id");
       const createdBy = requireNonEmptyText(safeInput.created_by, "created_by");
+      const shiftId = normalizeOptionalText(safeInput.shift_id, "shift_id");
+      if (shiftId !== null) {
+        const shift = await dependencies.shiftRepository.findById(shiftId);
+        if (!shift || shift.status !== "OPEN") {
+          throw new ValidationError("Payment activity requires an open shift");
+        }
+        if (safeInput.actor_user_id && shift.user_id !== safeInput.actor_user_id) {
+          throw new ForbiddenError("You can only record activity on your own shift");
+        }
+      }
 
       const customer = await dependencies.customerRepository.findById(customerId);
       if (!customer) {
@@ -146,7 +160,7 @@ export function createRecordPaymentUseCase(dependencies) {
         credit_tx_id: txId,
         customer_id: customerId,
         sale_id: null,
-        shift_id: safeInput.shift_id,
+        shift_id: shiftId,
         type: CREDIT_TRANSACTION_TYPES.PAYMENT,
         amount: safeInput.amount,
         remarks: safeInput.remarks,

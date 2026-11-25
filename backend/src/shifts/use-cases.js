@@ -46,7 +46,14 @@ export function createOpenShiftUseCase(dependencies) {
       status: SHIFT_STATUSES.OPEN
     });
 
-    await dependencies.shiftRepository.save(shift);
+    try {
+      await dependencies.shiftRepository.save(shift);
+    } catch (error) {
+      if (error.message === "User already has an active shift") {
+        throw new ConflictError("User already has an active shift");
+      }
+      throw error;
+    }
     return { shift: shift };
   };
 }
