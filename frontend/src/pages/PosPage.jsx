@@ -348,7 +348,7 @@ export function PosPage(props) {
     if (!product) {
       return false;
     }
-    if (product.current_stock <= 0) {
+    if (getStockLevel(product) === STOCK_LEVELS.OUT) {
       setErrorBanner(product.product_name + " is out of stock");
       return false;
     }
@@ -432,7 +432,7 @@ export function PosPage(props) {
 
   async function handleProductCardClick(product, event) {
     setErrorBanner("");
-    if (product.current_stock <= 0) {
+    if (getStockLevel(product) === STOCK_LEVELS.OUT) {
       setErrorBanner(product.product_name + " is out of stock");
       return;
     }
@@ -836,6 +836,54 @@ export function PosPage(props) {
           if (product.category_name) {
             categoryName = product.category_name;
           }
+
+          const isOut = getStockLevel(product) === STOCK_LEVELS.OUT;
+          let stockBadge = null;
+          if (isOut) {
+            stockBadge = (
+              <div className="absolute left-2 top-2 z-10 rounded-md bg-rose-600 px-1.5 py-0.5 font-mono text-3xs sm:text-2xs font-semibold text-white shadow-xs">
+                Out of Stock
+              </div>
+            );
+          } else {
+            stockBadge = (
+              <div className="absolute left-2 top-2 z-10 rounded-md bg-[#171717]/85 backdrop-blur-xs px-1.5 py-0.5 font-mono text-3xs sm:text-2xs font-medium text-white shadow-xs">
+                {"Stock: " + formatQuantity(product.current_stock)}
+              </div>
+            );
+          }
+
+          let cardClickClass = "cursor-pointer";
+          if (isOut) {
+            cardClickClass = "cursor-not-allowed opacity-75";
+          }
+
+          let addToCartButton = null;
+          if (isOut) {
+            addToCartButton = (
+              <button
+                type="button"
+                disabled={true}
+                className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-[#EEEEED] py-1.5 text-xs font-semibold text-[#777777] cursor-not-allowed opacity-75"
+              >
+                <span>Out of Stock</span>
+              </button>
+            );
+          } else {
+            addToCartButton = (
+              <button
+                type="button"
+                onClick={function onAddClick(event) {
+                  handleProductCardClick(product, event);
+                }}
+                className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1.5 text-xs font-semibold text-[#171717] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
+              >
+                <Plus className="h-3 w-3" />
+                <span>Add to Cart</span>
+              </button>
+            );
+          }
+
           return (
             <div
               key={product.product_id}
@@ -844,14 +892,14 @@ export function PosPage(props) {
               <div>
                 <div
                   onClick={function onCardClick(event) {
-                    handleProductCardClick(product, event);
+                    if (!isOut) {
+                      handleProductCardClick(product, event);
+                    }
                   }}
-                  className="cursor-pointer"
+                  className={cardClickClass}
                 >
                   <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#EEEEED]">
-                    <div className="absolute left-2 top-2 z-10 rounded-md bg-[#171717]/85 backdrop-blur-xs px-1.5 py-0.5 font-mono text-3xs sm:text-2xs font-medium text-white shadow-xs">
-                      Stock: {formatQuantity(product.current_stock)}
-                    </div>
+                    {stockBadge}
                     <ProductThumb
                       imageUrl={product.image_url}
                       name={product.product_name}
@@ -872,16 +920,7 @@ export function PosPage(props) {
                 </div>
               </div>
               <div className="p-2.5 sm:p-3 pt-2.5 sm:pt-2.5">
-                <button
-                  type="button"
-                  onClick={function onAddClick(event) {
-                    handleProductCardClick(product, event);
-                  }}
-                  className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1.5 text-xs font-semibold text-[#171717] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
-                >
-                  <Plus className="h-3 w-3" />
-                  <span>Add to Cart</span>
-                </button>
+                {addToCartButton}
               </div>
             </div>
           );
@@ -952,6 +991,16 @@ export function PosPage(props) {
   let pickerBody = null;
   if (pickerState) {
     pickerTitle = pickerState.product.product_name;
+    const isPickerProductOut = getStockLevel(pickerState.product) === STOCK_LEVELS.OUT;
+
+    let pickerStockBadge = null;
+    if (isPickerProductOut) {
+      pickerStockBadge = (
+        <div className="flex items-center gap-2">
+          <Badge tone="red">Out of Stock</Badge>
+        </div>
+      );
+    }
 
     let pickerErrorBanner = null;
     if (errorBanner) {
@@ -992,6 +1041,7 @@ export function PosPage(props) {
             type="number"
             step="0.01"
             min="0.01"
+            disabled={isPickerProductOut}
             value={customPesoInput}
             onChange={function onChange(event) {
               setCustomPesoInput(event.target.value);
@@ -1001,14 +1051,17 @@ export function PosPage(props) {
             }}
             placeholder="e.g. 10.00"
           />
-          <Button type="submit" variant="primary" className="w-full">
-            Add Custom Amount
+          <Button type="submit" variant="primary" className="w-full" disabled={isPickerProductOut}>
+            {isPickerProductOut ? "Out of Stock" : "Add Custom Amount"}
           </Button>
         </form>
       );
     }
 
     function handleConfirmOption() {
+      if (isPickerProductOut) {
+        return;
+      }
       let chosenOption = null;
       if (selectedOptionId !== "base") {
         for (let i = 0; i < pickerState.options.length; i++) {
@@ -1026,21 +1079,27 @@ export function PosPage(props) {
 
     const isBaseSelected = selectedOptionId === "base";
     let baseCardClass =
-      "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors cursor-pointer ";
-    if (isBaseSelected) {
-      baseCardClass = baseCardClass + "border-[#171717] bg-[#EEEEED]/40 shadow-2xs";
+      "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ";
+    if (isPickerProductOut) {
+      baseCardClass = baseCardClass + "border-[#E9E9E9] opacity-60 cursor-not-allowed";
+    } else if (isBaseSelected) {
+      baseCardClass = baseCardClass + "border-[#171717] bg-[#EEEEED]/40 shadow-2xs cursor-pointer";
     } else {
-      baseCardClass = baseCardClass + "border-[#E9E9E9] hover:border-[#171717] hover:bg-[#EEEEED]";
+      baseCardClass = baseCardClass + "border-[#E9E9E9] hover:border-[#171717] hover:bg-[#EEEEED] cursor-pointer";
     }
 
     pickerBody = (
       <div className="space-y-5">
         {pickerErrorBanner}
+        {pickerStockBadge}
         <div className="space-y-3">
           <div className="space-y-2.5">
             <label
               className={baseCardClass}
               onDoubleClick={function directPickBase(event) {
+                if (isPickerProductOut) {
+                  return;
+                }
                 let sourceRect = pendingSourceRect;
                 if (event && event.currentTarget && typeof event.currentTarget.getBoundingClientRect === "function") {
                   sourceRect = event.currentTarget.getBoundingClientRect();
@@ -1056,6 +1115,7 @@ export function PosPage(props) {
                   type="radio"
                   name="pos-selling-option"
                   value="base"
+                  disabled={isPickerProductOut}
                   checked={isBaseSelected}
                   onChange={function onSelectBase() {
                     setSelectedOptionId("base");
@@ -1077,11 +1137,13 @@ export function PosPage(props) {
             {pickerState.options.map(function renderOption(option) {
               const isOptionSelected = selectedOptionId === option.option_id;
               let optionCardClass =
-                "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors cursor-pointer ";
-              if (isOptionSelected) {
-                optionCardClass = optionCardClass + "border-[#171717] bg-[#EEEEED]/40 shadow-2xs";
+                "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ";
+              if (isPickerProductOut) {
+                optionCardClass = optionCardClass + "border-[#E9E9E9] opacity-60 cursor-not-allowed";
+              } else if (isOptionSelected) {
+                optionCardClass = optionCardClass + "border-[#171717] bg-[#EEEEED]/40 shadow-2xs cursor-pointer";
               } else {
-                optionCardClass = optionCardClass + "border-[#E9E9E9] hover:border-[#171717] hover:bg-[#EEEEED]";
+                optionCardClass = optionCardClass + "border-[#E9E9E9] hover:border-[#171717] hover:bg-[#EEEEED] cursor-pointer";
               }
 
               return (
@@ -1089,6 +1151,9 @@ export function PosPage(props) {
                   key={option.option_id}
                   className={optionCardClass}
                   onDoubleClick={function directPickOption(event) {
+                    if (isPickerProductOut) {
+                      return;
+                    }
                     let sourceRect = pendingSourceRect;
                     if (event && event.currentTarget && typeof event.currentTarget.getBoundingClientRect === "function") {
                       sourceRect = event.currentTarget.getBoundingClientRect();
@@ -1104,6 +1169,7 @@ export function PosPage(props) {
                       type="radio"
                       name="pos-selling-option"
                       value={option.option_id}
+                      disabled={isPickerProductOut}
                       checked={isOptionSelected}
                       onChange={function onSelectOption() {
                         setSelectedOptionId(option.option_id);
@@ -1132,9 +1198,10 @@ export function PosPage(props) {
             type="button"
             variant="primary"
             className="w-full"
+            disabled={isPickerProductOut}
             onClick={handleConfirmOption}
           >
-            Add to Cart
+            {isPickerProductOut ? "Out of Stock" : "Add to Cart"}
           </Button>
         </div>
         {tingiForm}

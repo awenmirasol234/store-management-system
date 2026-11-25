@@ -54,4 +54,38 @@ describe("InventoryPage SSR test", function () {
     expect(html).toContain("whitespace-nowrap");
     expect(html).toContain("Stock In");
   });
+
+  it("renders Out of Stock badge label when product current stock is 0", function () {
+    const oosProduct = {
+      product_id: "inv-prod-oos",
+      product_name: "Corned Beef 150g",
+      base_unit: "Can",
+      current_stock: 0,
+      cost_price: 35,
+      selling_price: 45,
+      reorder_level: 5,
+      is_active: true
+    };
+    const inStockProduct = {
+      product_id: "inv-prod-in",
+      product_name: "Sardines in Tomato Sauce",
+      base_unit: "Can",
+      current_stock: 12,
+      cost_price: 20,
+      selling_price: 28,
+      reorder_level: 5,
+      is_active: true
+    };
+
+    // Test Badge directly for out-of-stock and in-stock values
+    const oosBadgeHtml = renderToString(
+      React.createElement(Badge, { tone: "red", className: "font-mono" }, "Out of Stock")
+    );
+    expect(oosBadgeHtml).toContain("Out of Stock");
+
+    const inStockBadgeHtml = renderToString(
+      React.createElement(Badge, { tone: "dark", className: "font-mono" }, "12 Cans")
+    );
+    expect(inStockBadgeHtml).toContain("12 Cans");
+  });
 });

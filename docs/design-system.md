@@ -35,7 +35,13 @@ Design tokens are declared in `frontend/src/index.css` inside the `@theme` block
 | `--color-text-secondary`| `#777777` | `text-[#777777]` | Subtitles, base unit descriptions, category counts |
 | `--color-border` | `#E9E9E9` | `border-[#E9E9E9]` | 1px hairline borders, card outlines, table dividers |
 | `--color-on-primary` | `#171717` | `text-[#171717]` | Text and icons placed on top of primary lime-green elements |
+| `--color-danger-50` | `#FFF1F2` | `bg-rose-50` | Soft danger background, error banners, hover triggers |
+| `--color-danger-200` | `#FECDD3` | `border-rose-200` | Soft danger hairline borders |
+| `--color-danger-600` | `#E11D48` | `bg-rose-600`, `text-rose-600` | Critical solid badges (out-of-stock, bell dot), overdue balances |
+| `--color-danger-700` | `#BE123C` | `text-rose-700` | Error banner typography, high-contrast danger text |
 | *Hardware Print* | `#000000` | `@media print` | Preserved exclusively for physical thermal receipt printers |
+
+Centralized danger and alert color tokens are declared in `frontend/src/index.css` inside the `@theme` block alongside the application color palette.
 
 ---
 

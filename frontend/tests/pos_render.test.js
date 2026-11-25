@@ -299,4 +299,75 @@ describe("PosPage SSR test", function () {
     expect(firstIndex).toBeGreaterThan(-1);
     expect(firstIndex).toBe(lastIndex);
   });
+
+  it("renders Out of Stock badge and disabled Out of Stock button when product stock is 0", function () {
+    const oosProduct = {
+      product_id: "prod-oos-1",
+      product_name: "Magic Flakes Crackers",
+      base_unit: "Pack",
+      current_stock: 0,
+      selling_price: 10,
+      category_name: "Snacks",
+      is_active: true
+    };
+    const inStockProduct = {
+      product_id: "prod-instock-1",
+      product_name: "SkyFlakes Crackers",
+      base_unit: "Pack",
+      current_stock: 15,
+      selling_price: 10,
+      category_name: "Snacks",
+      is_active: true
+    };
+
+    const html = renderToString(
+      React.createElement(PosPage, {
+        initialProducts: [oosProduct, inStockProduct]
+      })
+    );
+
+    // OOS card assertions
+    expect(html).toContain("Out of Stock");
+    expect(html).toContain("bg-rose-600");
+    expect(html).toContain("cursor-not-allowed");
+
+    // In-stock card assertions
+    expect(html).toContain("Stock: 15");
+    expect(html).toContain("Add to Cart");
+  });
+
+  it("renders Out of Stock badge and disabled action buttons in product detail options picker modal when stock is 0", function () {
+    const oosProduct = {
+      product_id: "prod-picker-oos",
+      product_name: "Coke In Bottle",
+      base_unit: "Bottle",
+      current_stock: 0,
+      selling_price: 20,
+      allow_custom_amount: true,
+      is_active: true
+    };
+    const options = [
+      {
+        option_id: "opt-case-oos",
+        product_id: "prod-picker-oos",
+        option_name: "Case of 24",
+        quantity: 24,
+        price: 450,
+        is_active: true
+      }
+    ];
+
+    const html = renderToString(
+      React.createElement(PosPage, {
+        initialPickerState: {
+          product: oosProduct,
+          options: options
+        }
+      })
+    );
+
+    expect(html).toContain("Coke In Bottle");
+    expect(html).toContain("Out of Stock");
+    expect(html).not.toContain("Add Custom Amount");
+  });
 });

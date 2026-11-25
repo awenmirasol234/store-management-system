@@ -513,6 +513,10 @@ export function InventoryPage(props) {
       if (product.barcode) {
         barcodeText = product.barcode;
       }
+      let stockBadgeLabel = formatQuantityWithUnit(product.current_stock, product.base_unit);
+      if (getStockLevel(product) === STOCK_LEVELS.OUT) {
+        stockBadgeLabel = "Out of Stock";
+      }
       return (
         <tr key={product.product_id} className="hover:bg-[#EEEEED]/50 transition-colors">
           <td className="px-5 py-3.5">
@@ -533,7 +537,7 @@ export function InventoryPage(props) {
           </td>
           <td className="px-5 py-3.5 text-right whitespace-nowrap">
             <Badge tone={getStockBadgeTone(product)} className="font-mono">
-              {formatQuantityWithUnit(product.current_stock, product.base_unit)}
+              {stockBadgeLabel}
             </Badge>
           </td>
           {canWrite && <td className="px-5 py-3.5 text-right whitespace-nowrap">
@@ -577,6 +581,10 @@ export function InventoryPage(props) {
       if (product.barcode) {
         barcodeText = product.barcode;
       }
+      let stockBadgeLabel = formatQuantityWithUnit(product.current_stock, product.base_unit);
+      if (getStockLevel(product) === STOCK_LEVELS.OUT) {
+        stockBadgeLabel = "Out of Stock";
+      }
       return (
         <div
           key={product.product_id}
@@ -589,7 +597,7 @@ export function InventoryPage(props) {
               <div className="text-xs text-[#777777] font-mono mt-0.5">Barcode: {barcodeText}</div>
               <div className="mt-1 flex items-center gap-2">
                 <Badge tone={getStockBadgeTone(product)} className="font-mono text-xs">
-                  {formatQuantityWithUnit(product.current_stock, product.base_unit)}
+                  {stockBadgeLabel}
                 </Badge>
               </div>
             </div>

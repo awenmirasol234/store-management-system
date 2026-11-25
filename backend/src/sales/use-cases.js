@@ -216,6 +216,9 @@ export function createProcessSaleUseCase(dependencies) {
       for (const [productId, requiredInt] of requiredByProduct.entries()) {
         const product = resolved.productsById.get(productId);
         const availableInt = toQuantityInt(product.current_stock, "current_stock");
+        if (availableInt <= 0) {
+          throw new ValidationError("Product is out of stock: " + product.product_name);
+        }
         if (requiredInt > availableInt) {
           throw new ValidationError("Insufficient stock for product: " + product.product_name);
         }

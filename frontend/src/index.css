@@ -22,6 +22,12 @@
   --color-on-primary: #171717;
   --color-on-sidebar: #FFFFFF;
   --color-sidebar-muted: #A3A3A3;
+  --color-danger-50: #FFF1F2;
+  --color-danger-100: #FFE4E6;
+  --color-danger-200: #FECDD3;
+  --color-danger-500: #F43F5E;
+  --color-danger-600: #E11D48;
+  --color-danger-700: #BE123C;
 
   /* Shape & Radii */
   --radius-card: 16px;

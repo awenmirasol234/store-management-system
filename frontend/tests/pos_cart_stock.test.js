@@ -236,4 +236,32 @@ describe("POS cart stock quantity validation", function () {
     expect(check.allowed).toBe(false);
     expect(check.message).toContain("Requested quantity exceeds available stock");
   });
+
+  it("blocks out-of-stock product additions and automatically allows them once replenished", function () {
+    const product = {
+      product_id: "prod-replenish",
+      product_name: "Evaporated Milk",
+      base_unit: "Can",
+      current_stock: 0,
+      selling_price: 32
+    };
+
+    // When stock is 0, addition is blocked
+    const initialCheck = canAddStockToCart({
+      cartItems: [],
+      product: product,
+      additionalBaseQuantity: 1
+    });
+    expect(initialCheck.allowed).toBe(false);
+    expect(initialCheck.message).toBe("Evaporated Milk is out of stock");
+
+    // Stock is replenished
+    const replenishedProduct = Object.assign({}, product, { current_stock: 24 });
+    const replenishedCheck = canAddStockToCart({
+      cartItems: [],
+      product: replenishedProduct,
+      additionalBaseQuantity: 1
+    });
+    expect(replenishedCheck.allowed).toBe(true);
+  });
 });

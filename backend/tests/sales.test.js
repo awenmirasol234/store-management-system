@@ -254,6 +254,29 @@ describe("sales domain and use cases", function () {
     ).rejects.toThrow(ValidationError);
   });
 
+  it("rejects sale with out-of-stock validation error when product stock is 0", async function () {
+    const deps = createInMemorySalesDeps();
+    const createProduct = createCreateProductUseCase(deps);
+    const processSale = createProcessSaleUseCase(deps);
+
+    const outItem = await createProduct({
+      product_name: "Out of Stock Soda",
+      base_unit: "can",
+      current_stock: 0,
+      cost_price: 15,
+      selling_price: 25
+    });
+
+    await expect(
+      processSale({
+        items: [{ product_id: outItem.product_id, quantity: 1 }],
+        payment_method: PAYMENT_METHODS.CASH,
+        amount_paid: 50,
+        created_by: "cashier-1"
+      })
+    ).rejects.toThrow("Product is out of stock: Out of Stock Soda");
+  });
+
   it("requires a shift to be open and owned by the authenticated cashier", async function () {
     const deps = createInMemorySalesDeps();
     const createProduct = createCreateProductUseCase(deps);
