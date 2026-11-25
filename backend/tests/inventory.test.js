@@ -178,6 +178,40 @@ describe("inventory domain and use cases", function () {
     expect(result.transaction.unit_cost).toBe(11.5);
   });
 
+  it("does not update a selling option through another product", async function () {
+    const deps = createInMemoryInventoryDeps();
+    const createProduct = createCreateProductUseCase(deps);
+    const saveOption = createSaveSellingOptionUseCase(deps);
+
+    const firstProduct = await createProduct({
+      product_name: "First Product",
+      base_unit: "piece",
+      selling_price: 10
+    });
+    const secondProduct = await createProduct({
+      product_name: "Second Product",
+      base_unit: "piece",
+      selling_price: 20
+    });
+    const option = await saveOption({
+      product_id: firstProduct.product_id,
+      option_name: "Box",
+      quantity: 10,
+      price: 90
+    });
+
+    await expect(
+      saveOption({
+        product_id: secondProduct.product_id,
+        option_id: option.option_id,
+        option_name: "Other Box",
+        quantity: 5,
+        price: 45
+      })
+    ).rejects.toThrow("does not belong to product");
+    expect(deps.options.get(option.option_id).product_id).toBe(firstProduct.product_id);
+  });
+
   it("enforces sign rules, remarks, and non-negative stock on AdjustStock", async function () {
     const deps = createInMemoryInventoryDeps();
     const createProduct = createCreateProductUseCase(deps);

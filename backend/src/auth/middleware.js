@@ -7,17 +7,33 @@ export function createInMemoryRateLimiter(options) {
   }
   const maxAttempts = config.maxAttempts || 5;
   const windowMs = config.windowMs || 15 * 60 * 1000;
+  const maxEntries = config.maxEntries || 10000;
   const attempts = new Map();
+
+  function removeExpired(now) {
+    for (const [key, record] of attempts.entries()) {
+      if (now >= record.resetAt) {
+        attempts.delete(key);
+      }
+    }
+  }
+
+  function makeRoom() {
+    while (attempts.size >= maxEntries) {
+      const firstKey = attempts.keys().next().value;
+      if (firstKey === undefined) {
+        return;
+      }
+      attempts.delete(firstKey);
+    }
+  }
 
   return {
     check(key) {
+      const now = Date.now();
+      removeExpired(now);
       const record = attempts.get(key);
       if (!record) {
-        return;
-      }
-      const now = Date.now();
-      if (now >= record.resetAt) {
-        attempts.delete(key);
         return;
       }
       if (record.count >= maxAttempts) {
@@ -30,8 +46,12 @@ export function createInMemoryRateLimiter(options) {
 
     recordFailure(key) {
       const now = Date.now();
+      removeExpired(now);
       const record = attempts.get(key);
       if (!record || now >= record.resetAt) {
+        if (!record) {
+          makeRoom();
+        }
         attempts.set(key, {
           count: 1,
           resetAt: now + windowMs

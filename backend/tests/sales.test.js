@@ -435,6 +435,50 @@ describe("sales domain and use cases", function () {
     ).rejects.toThrow("Each sale item can appear only once");
   });
 
+  it("refunds already-paid credit as cash instead of creating a negative balance", async function () {
+    const deps = createInMemorySalesDeps();
+    const createProduct = createCreateProductUseCase(deps);
+    const processSale = createProcessSaleUseCase(deps);
+    const processReturn = createProcessReturnUseCase(deps);
+    const product = await createProduct({
+      product_name: "Paid Credit Product",
+      base_unit: "piece",
+      current_stock: 5,
+      cost_price: 10,
+      selling_price: 100
+    });
+
+    deps.customers.set("cust-1", {
+      customer_id: "cust-1",
+      full_name: "Customer",
+      credit_limit: 500,
+      current_balance: 0,
+      is_active: true
+    });
+
+    const sale = await processSale({
+      items: [{ product_id: product.product_id, quantity: 1 }],
+      payment_method: PAYMENT_METHODS.CREDIT,
+      customer_id: "cust-1",
+      created_by: "cashier"
+    });
+    deps.customers.set("cust-1", Object.assign({}, deps.customers.get("cust-1"), {
+      current_balance: 20
+    }));
+
+    const returned = await processReturn({
+      sale_id: sale.sale.sale_id,
+      items: [{ sale_item_id: sale.items[0].sale_item_id, quantity: 1 }],
+      remarks: "Paid before return",
+      created_by: "cashier"
+    });
+
+    expect(returned.return_record.credit_refund_amount).toBe(20);
+    expect(returned.return_record.cash_refund_amount).toBe(80);
+    expect(deps.customers.get("cust-1").current_balance).toBe(0);
+    expect(deps.creditTransactions[1].amount).toBe(20);
+  });
+
   it("validates sale lines before price and stock calculations", function () {
     const product = {
       product_id: "prod-1",

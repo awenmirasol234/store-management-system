@@ -325,7 +325,8 @@ export function createApp(options) {
     createInventoryRouter({
       uploadsDir: uploadsDir,
       useCases: inventoryUseCases,
-      fetch: config.fetch
+      fetch: config.fetch,
+      dnsLookup: config.dnsLookup
     })
   );
 

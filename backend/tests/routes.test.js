@@ -23,9 +23,10 @@ async function startTestServer(serverOptions) {
   const options = serverOptions || {};
   const uploadsDir = options.uploadsDir || path.join(os.tmpdir(), "store-mgmt-test-uploads");
   const runtime = createApp({
-    databasePath: ":memory:",
-    uploadsDir: uploadsDir,
-    fetch: options.fetch,
+      databasePath: ":memory:",
+      uploadsDir: uploadsDir,
+      fetch: options.fetch,
+      dnsLookup: options.dnsLookup,
     clock: {
       nowIso() {
         return "2026-11-20T02:00:00.000Z";
@@ -351,6 +352,23 @@ describe("Express REST API routes", function () {
   it("downloads image from URL, validates SSRF and file constraints, and stores locally", async function () {
     const fakePng = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00]);
     const mockFetch = async function (url) {
+      if (url.includes("redirect-private")) {
+        return {
+          ok: false,
+          status: 302,
+          headers: new Headers({ location: "http://127.0.0.1/internal.png" })
+        };
+      }
+      if (url.includes("wrong-signature")) {
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers({ "content-type": "image/png" }),
+          arrayBuffer: async function () {
+            return Buffer.from("<html>not an image</html>");
+          }
+        };
+      }
       if (url.includes("fail-404")) {
         return { ok: false, status: 404 };
       }
@@ -374,7 +392,12 @@ describe("Express REST API routes", function () {
       };
     };
 
-    const baseUrl = await startTestServer({ fetch: mockFetch });
+     const baseUrl = await startTestServer({
+       fetch: mockFetch,
+       dnsLookup: async function lookupPublicHost() {
+         return [{ address: "93.184.216.34", family: 4 }];
+       }
+     });
 
     const createRes = await requestJson(baseUrl, "POST", "/api/products", {
       product_name: "Coffee Drink",
@@ -410,11 +433,46 @@ describe("Express REST API routes", function () {
     expect(notFoundRes.status).toBe(400);
     expect(notFoundRes.body.error.message).toContain("Failed to download");
 
+    const redirectRes = await requestJson(
+      baseUrl,
+      "POST",
+      "/api/products/" + productId + "/image-url",
+      { url: "https://example.com/redirect-private.png" }
+    );
+    expect(redirectRes.status).toBe(400);
+    expect(redirectRes.body.error.message).toContain("Private");
+
+    const wrongSignatureRes = await requestJson(
+      baseUrl,
+      "POST",
+      "/api/products/" + productId + "/image-url",
+      { url: "https://example.com/wrong-signature.png" }
+    );
+    expect(wrongSignatureRes.status).toBe(400);
+    expect(wrongSignatureRes.body.error.message).toContain("supported image format");
+
     const successRes = await requestJson(baseUrl, "POST", "/api/products/" + productId + "/image-url", {
       url: "https://example.com/valid-image.png"
     });
     expect(successRes.status).toBe(200);
     expect(successRes.body.data.image_url).toMatch(/^\/uploads\/products\/[a-zA-Z0-9_-]+-\d+\.png$/);
+
+    const invalidUploadBody = new FormData();
+    invalidUploadBody.append(
+      "image",
+      new Blob(["not an image"], { type: "image/png" }),
+      "fake.png"
+    );
+    const invalidUploadResponse = await fetch(
+      baseUrl + "/api/products/" + productId + "/image",
+      {
+        method: "POST",
+        body: invalidUploadBody
+      }
+    );
+    const invalidUploadPayload = await invalidUploadResponse.json();
+    expect(invalidUploadResponse.status).toBe(400);
+    expect(invalidUploadPayload.error.message).toContain("supported image format");
 
     const productRes = await requestJson(baseUrl, "GET", "/api/products/" + productId);
     expect(productRes.body.data.image_url).toBe(successRes.body.data.image_url);

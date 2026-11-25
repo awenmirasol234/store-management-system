@@ -140,6 +140,9 @@ export function createSaveSellingOptionUseCase(dependencies) {
       if (!existing) {
         throw new NotFoundError("Selling option not found: " + optionId);
       }
+      if (existing.product_id !== product.product_id) {
+        throw new ValidationError("Selling option does not belong to product");
+      }
       createdAt = existing.created_at;
     } else {
       optionId = dependencies.idGenerator.nextId();

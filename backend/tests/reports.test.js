@@ -9,7 +9,10 @@ import {
 import { createCreateProductUseCase } from "../src/inventory/use-cases.js";
 import { createSqliteSalesRepository } from "../src/sales/sqlite-repo.js";
 import { PAYMENT_METHODS } from "../src/sales/domain.js";
-import { createProcessSaleUseCase } from "../src/sales/use-cases.js";
+import {
+  createProcessReturnUseCase,
+  createProcessSaleUseCase
+} from "../src/sales/use-cases.js";
 import { createSqliteReportsRepository } from "../src/reports/sqlite-repo.js";
 import {
   createGetCategorySalesUseCase,
@@ -90,12 +93,13 @@ describe("reports SQLite repository", function () {
       reorder_level: 8
     });
 
-    await processSale({
+    const saleResult = await processSale({
       items: [{ product_id: water.product_id, quantity: 4 }],
       payment_method: PAYMENT_METHODS.CASH,
       amount_paid: 100,
       created_by: "owner"
     });
+    const processReturn = createProcessReturnUseCase(deps);
 
     const summary = await getSummary({ from: "2026-11-20", to: "2026-11-20" });
     expect(summary.sale_count).toBe(1);
@@ -131,6 +135,37 @@ describe("reports SQLite repository", function () {
     expect(txs.length).toBe(1);
     expect(txs[0].total_amount).toBe(60);
     expect(txs[0].payment_method).toBe(PAYMENT_METHODS.CASH);
+
+    await processReturn({
+      sale_id: saleResult.sale.sale_id,
+      items: [{ sale_item_id: saleResult.items[0].sale_item_id, quantity: 1 }],
+      remarks: "Returned",
+      created_by: "owner"
+    });
+
+    const returnedSummary = await getSummary({ from: "2026-11-20", to: "2026-11-20" });
+    expect(returnedSummary.net_sales).toBe(45);
+    expect(returnedSummary.total_items_sold).toBe(3);
+
+    const returnedTopProducts = await getTopProducts({
+      from: "2026-11-20",
+      to: "2026-11-20",
+      limit: 5
+    });
+    expect(returnedTopProducts[0].quantity_sold).toBe(3);
+    expect(returnedTopProducts[0].revenue).toBe(45);
+
+    const returnedDaily = await getDailyBreakdown({
+      from: "2026-11-20",
+      to: "2026-11-20"
+    });
+    expect(returnedDaily[0].gross_sales).toBe(45);
+
+    const returnedCategories = await getCategorySales({
+      from: "2026-11-20",
+      to: "2026-11-20"
+    });
+    expect(returnedCategories[0].revenue).toBe(45);
   });
 
   it("validates report date format, calendar dates, and net profit calculations", function () {

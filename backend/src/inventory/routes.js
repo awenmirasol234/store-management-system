@@ -1,4 +1,6 @@
+import dns from "node:dns/promises";
 import fs from "node:fs";
+import net from "node:net";
 import path from "node:path";
 import express from "express";
 import multer from "multer";
@@ -8,7 +10,48 @@ import { requireNonEmptyText, requireObjectBody, requireRouteParam } from "../sh
 const ALLOWED_IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
 
-function validateExternalImageUrl(url) {
+function isPrivateIpAddress(address) {
+  const normalized = address.toLowerCase().split("%")[0];
+  const ipVersion = net.isIP(normalized);
+  if (ipVersion === 4) {
+    const parts = normalized.split(".").map(Number);
+    if (parts[0] === 10 || parts[0] === 127 || parts[0] === 0) {
+      return true;
+    }
+    if (parts[0] === 169 && parts[1] === 254) {
+      return true;
+    }
+    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) {
+      return true;
+    }
+    if (parts[0] === 192 && parts[1] === 168) {
+      return true;
+    }
+    if (parts[0] === 100 && parts[1] >= 64 && parts[1] <= 127) {
+      return true;
+    }
+    return false;
+  }
+
+  if (ipVersion === 6) {
+    if (
+      normalized === "::1" ||
+      normalized === "::" ||
+      normalized.startsWith("fc") ||
+      normalized.startsWith("fd") ||
+      normalized.startsWith("fe80:")
+    ) {
+      return true;
+    }
+    if (normalized.startsWith("::ffff:")) {
+      return isPrivateIpAddress(normalized.slice(7));
+    }
+  }
+
+  return false;
+}
+
+async function validateExternalImageUrl(url, dnsLookup) {
   if (typeof url !== "string" || url.trim().length === 0) {
     throw new ValidationError("Image URL is required");
   }
@@ -23,34 +66,44 @@ function validateExternalImageUrl(url) {
     throw new ValidationError("Invalid image URL provided");
   }
 
-  const hostname = parsedUrl.hostname.toLowerCase();
+  const hostname = parsedUrl.hostname.toLowerCase().replace(/^\[|\]$/g, "");
   if (
     hostname === "localhost" ||
-    hostname === "127.0.0.1" ||
-    hostname === "0.0.0.0" ||
-    hostname === "::1" ||
     hostname.endsWith(".localhost") ||
     hostname.endsWith(".local")
   ) {
     throw new ValidationError("Private or loopback image URLs are not permitted");
   }
 
-  if (
-    hostname.startsWith("10.") ||
-    hostname.startsWith("192.168.") ||
-    hostname.startsWith("169.254.") ||
-    /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname)
-  ) {
+  if (isPrivateIpAddress(hostname)) {
     throw new ValidationError("Private network image URLs are not permitted");
+  }
+
+  const lookup = dnsLookup || dns.lookup;
+  let addresses;
+  try {
+    if (net.isIP(hostname)) {
+      addresses = [{ address: hostname }];
+    } else {
+      addresses = await lookup(hostname, { all: true, verbatim: true });
+    }
+  } catch (error) {
+    throw new ValidationError("Image host could not be resolved");
+  }
+  if (addresses.length === 0) {
+    throw new ValidationError("Image host could not be resolved");
+  }
+
+  for (let index = 0; index < addresses.length; index = index + 1) {
+    if (isPrivateIpAddress(addresses[index].address)) {
+      throw new ValidationError("Private network image URLs are not permitted");
+    }
   }
 
   return parsedUrl;
 }
 
 function detectImageMime(mimeType, buffer, urlPath) {
-  if (mimeType && ALLOWED_IMAGE_MIMES.has(mimeType)) {
-    return mimeType;
-  }
   if (buffer && buffer.length >= 4) {
     if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
       return "image/jpeg";
@@ -65,6 +118,10 @@ function detectImageMime(mimeType, buffer, urlPath) {
     ) {
       return "image/webp";
     }
+    return null;
+  }
+  if (mimeType && ALLOWED_IMAGE_MIMES.has(mimeType)) {
+    return mimeType;
   }
   const lowerPath = urlPath.toLowerCase();
   if (lowerPath.endsWith(".png")) {
@@ -77,6 +134,36 @@ function detectImageMime(mimeType, buffer, urlPath) {
     return "image/jpeg";
   }
   return null;
+}
+
+async function readResponseBody(response) {
+  if (response.body && typeof response.body.getReader === "function") {
+    const reader = response.body.getReader();
+    const chunks = [];
+    let totalLength = 0;
+
+    while (true) {
+      const result = await reader.read();
+      if (result.done) {
+        break;
+      }
+      const chunk = Buffer.from(result.value);
+      totalLength = totalLength + chunk.length;
+      if (totalLength > MAX_IMAGE_SIZE_BYTES) {
+        await reader.cancel();
+        throw new ValidationError("Downloaded image exceeds the maximum 2MB size limit");
+      }
+      chunks.push(chunk);
+    }
+    return Buffer.concat(chunks, totalLength);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  if (buffer.length > MAX_IMAGE_SIZE_BYTES) {
+    throw new ValidationError("Downloaded image exceeds the maximum 2MB size limit");
+  }
+  return buffer;
 }
 
 function extensionForMime(mimeType) {
@@ -172,6 +259,12 @@ export function createInventoryRouter(dependencies) {
       if (!request.file) {
         throw new ValidationError("Image file is required under field name 'image'");
       }
+      const uploadedBuffer = fs.readFileSync(request.file.path);
+      const detectedMime = detectImageMime("", uploadedBuffer, request.file.originalname);
+      if (!detectedMime) {
+        fs.unlinkSync(request.file.path);
+        throw new ValidationError("Uploaded file is not a supported image format");
+      }
       const imageUrl = "/uploads/products/" + request.file.filename;
       const updated = await dependencies.useCases.updateProduct({
         product_id: requireRouteParam(request.params, "productId"),
@@ -188,38 +281,53 @@ export function createInventoryRouter(dependencies) {
       const url = requireNonEmptyText(body.url, "url");
       const productId = requireRouteParam(request.params, "productId");
 
-      const parsedUrl = validateExternalImageUrl(url);
-
       const productsDir = path.join(dependencies.uploadsDir, "products");
       fs.mkdirSync(productsDir, { recursive: true });
+      let currentUrl = url;
+      let fetchResponse = null;
+      for (let redirectCount = 0; redirectCount <= 3; redirectCount = redirectCount + 1) {
+        await validateExternalImageUrl(currentUrl, dependencies.dnsLookup);
 
-      const fetchImpl = dependencies.fetch || globalThis.fetch;
-      if (typeof fetchImpl !== "function") {
-        throw new ValidationError("Fetch client is not available in the runtime");
-      }
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(function onTimeout() {
-        controller.abort();
-      }, 10000);
-
-      let fetchResponse;
-      try {
-        fetchResponse = await fetchImpl(url, {
-          signal: controller.signal,
-          headers: {
-            Accept: "image/jpeg,image/png,image/webp,image/*",
-            "User-Agent": "StoreFlow-POS/1.0"
-          }
-        });
-      } catch (err) {
-        clearTimeout(timeoutId);
-        if (err.name === "AbortError") {
-          throw new ValidationError("Image download timed out. Please check the URL.");
+        const fetchImpl = dependencies.fetch || globalThis.fetch;
+        if (typeof fetchImpl !== "function") {
+          throw new ValidationError("Fetch client is not available in the runtime");
         }
-        throw new ValidationError("Could not download image from the provided URL: " + err.message);
-      } finally {
-        clearTimeout(timeoutId);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(function onTimeout() {
+          controller.abort();
+        }, 10000);
+
+        try {
+          fetchResponse = await fetchImpl(currentUrl, {
+            redirect: "manual",
+            signal: controller.signal,
+            headers: {
+              Accept: "image/jpeg,image/png,image/webp,image/*",
+              "User-Agent": "StoreFlow-POS/1.0"
+            }
+          });
+        } catch (err) {
+          if (err.name === "AbortError") {
+            throw new ValidationError("Image download timed out. Please check the URL.");
+          }
+          throw new ValidationError("Could not download image from the provided URL: " + err.message);
+        } finally {
+          clearTimeout(timeoutId);
+        }
+
+        if (fetchResponse.status >= 300 && fetchResponse.status < 400) {
+          const location = fetchResponse.headers.get("location");
+          if (!location) {
+            throw new ValidationError("Image URL redirect did not provide a target");
+          }
+          if (redirectCount === 3) {
+            throw new ValidationError("Too many image URL redirects");
+          }
+          currentUrl = new URL(location, currentUrl).toString();
+          continue;
+        }
+        break;
       }
 
       if (!fetchResponse.ok) {
@@ -232,14 +340,9 @@ export function createInventoryRouter(dependencies) {
       }
       const mimeType = rawContentType.split(";")[0].trim().toLowerCase();
 
-      const arrayBuffer = await fetchResponse.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+      const buffer = await readResponseBody(fetchResponse);
 
-      if (buffer.length > MAX_IMAGE_SIZE_BYTES) {
-        throw new ValidationError("Downloaded image exceeds the maximum 2MB size limit");
-      }
-
-      const detectedMime = detectImageMime(mimeType, buffer, parsedUrl.pathname);
+      const detectedMime = detectImageMime(mimeType, buffer, new URL(currentUrl).pathname);
       if (!detectedMime) {
         throw new ValidationError("Downloaded file is not a supported image format (JPEG, PNG, WebP)");
       }

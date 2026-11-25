@@ -22,6 +22,7 @@ import {
   createSqliteSessionRepository,
   createSqliteUserRepository
 } from "../src/auth/sqlite-repo.js";
+import { createInMemoryRateLimiter } from "../src/auth/middleware.js";
 import {
   createChangePinUseCase,
   createCreateUserUseCase,
@@ -35,6 +36,24 @@ import {
 } from "../src/auth/use-cases.js";
 
 describe("Auth Domain", function () {
+  it("bounds failed-login rate limiter records", function () {
+    const rateLimiter = createInMemoryRateLimiter({
+      maxAttempts: 1,
+      maxEntries: 1,
+      windowMs: 60 * 60 * 1000
+    });
+
+    rateLimiter.recordFailure("first");
+    rateLimiter.recordFailure("second");
+
+    expect(function () {
+      rateLimiter.check("first");
+    }).not.toThrow();
+    expect(function () {
+      rateLimiter.check("second");
+    }).toThrow();
+  });
+
   it("hashes and verifies PIN using scrypt with timing-safe comparison", function () {
     const salt = generateSalt();
     const pin = "1234";

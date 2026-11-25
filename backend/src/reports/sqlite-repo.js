@@ -26,6 +26,18 @@ export function createSqliteReportsRepository(database) {
   `);
 
   const salesItemsInRangeStmt = database.prepare(`
+    WITH return_totals AS (
+      SELECT
+        sri.sale_item_id,
+        COALESCE(SUM(sri.quantity_int), 0) AS returned_quantity_int,
+        COALESCE(SUM(sri.base_quantity_int), 0) AS returned_base_quantity_int,
+        COALESCE(SUM(sri.refund_amount_int), 0) AS returned_refund_int
+      FROM sales_return_items sri
+      INNER JOIN sales_returns sr ON sr.return_id = sri.return_id
+      WHERE date(sr.created_at, ${MANILA_SQL_OFFSET}) >= ?
+        AND date(sr.created_at, ${MANILA_SQL_OFFSET}) <= ?
+      GROUP BY sri.sale_item_id
+    )
     SELECT
       si.product_id,
       p.product_name,
@@ -33,15 +45,16 @@ export function createSqliteReportsRepository(database) {
       p.base_unit,
       p.category_id,
       pc.category_name,
-      si.quantity_int,
-      si.base_quantity_int,
+      si.quantity_int - COALESCE(rt.returned_quantity_int, 0) AS quantity_int,
+      si.base_quantity_int - COALESCE(rt.returned_base_quantity_int, 0) AS base_quantity_int,
       si.unit_cost_int,
-      si.subtotal_int,
+      si.subtotal_int - COALESCE(rt.returned_refund_int, 0) AS subtotal_int,
       date(st.created_at, ${MANILA_SQL_OFFSET}) AS manila_date
     FROM sales_items si
     INNER JOIN sales_transactions st ON st.sale_id = si.sale_id
     INNER JOIN products p ON p.product_id = si.product_id
     LEFT JOIN product_categories pc ON pc.category_id = p.category_id
+    LEFT JOIN return_totals rt ON rt.sale_item_id = si.sale_item_id
     WHERE st.status = '${COMPLETED_SALE_STATUS}'
       AND date(st.created_at, ${MANILA_SQL_OFFSET}) >= ?
       AND date(st.created_at, ${MANILA_SQL_OFFSET}) <= ?
@@ -90,16 +103,40 @@ export function createSqliteReportsRepository(database) {
   `);
 
   const dailySalesStmt = database.prepare(`
+    WITH sales_by_day AS (
+      SELECT
+        date(created_at, ${MANILA_SQL_OFFSET}) AS manila_date,
+        COUNT(*) AS sale_count,
+        COALESCE(SUM(total_amount_int), 0) AS gross_sales_int
+      FROM sales_transactions
+      WHERE status = '${COMPLETED_SALE_STATUS}'
+        AND date(created_at, ${MANILA_SQL_OFFSET}) >= ?
+        AND date(created_at, ${MANILA_SQL_OFFSET}) <= ?
+      GROUP BY date(created_at, ${MANILA_SQL_OFFSET})
+    ),
+    returns_by_day AS (
+      SELECT
+        date(created_at, ${MANILA_SQL_OFFSET}) AS manila_date,
+        COALESCE(SUM(total_refund_amount_int), 0) AS total_refund_int
+      FROM sales_returns
+      WHERE date(created_at, ${MANILA_SQL_OFFSET}) >= ?
+        AND date(created_at, ${MANILA_SQL_OFFSET}) <= ?
+      GROUP BY date(created_at, ${MANILA_SQL_OFFSET})
+    ),
+    report_dates AS (
+      SELECT manila_date FROM sales_by_day
+      UNION
+      SELECT manila_date FROM returns_by_day
+    )
     SELECT
-      date(created_at, ${MANILA_SQL_OFFSET}) AS manila_date,
-      COUNT(*) AS sale_count,
-      COALESCE(SUM(total_amount_int), 0) AS gross_sales_int
-    FROM sales_transactions
-    WHERE status = '${COMPLETED_SALE_STATUS}'
-      AND date(created_at, ${MANILA_SQL_OFFSET}) >= ?
-      AND date(created_at, ${MANILA_SQL_OFFSET}) <= ?
-    GROUP BY date(created_at, ${MANILA_SQL_OFFSET})
-    ORDER BY manila_date DESC
+      report_dates.manila_date,
+      COALESCE(sales_by_day.sale_count, 0) AS sale_count,
+      COALESCE(sales_by_day.gross_sales_int, 0) -
+        COALESCE(returns_by_day.total_refund_int, 0) AS gross_sales_int
+    FROM report_dates
+    LEFT JOIN sales_by_day ON sales_by_day.manila_date = report_dates.manila_date
+    LEFT JOIN returns_by_day ON returns_by_day.manila_date = report_dates.manila_date
+    ORDER BY report_dates.manila_date DESC
   `);
 
   const activeProductsStmt = database.prepare(`
@@ -116,17 +153,17 @@ export function createSqliteReportsRepository(database) {
       return {
         sales: salesSummaryStmt.get(fromDate, toDate),
         returns: returnsSummaryStmt.get(fromDate, toDate),
-        items: salesItemsInRangeStmt.all(fromDate, toDate),
+        items: salesItemsInRangeStmt.all(fromDate, toDate, fromDate, toDate),
         products: activeProductsStmt.all()
       };
     },
 
     async getSalesItems(fromDate, toDate) {
-      return salesItemsInRangeStmt.all(fromDate, toDate);
+      return salesItemsInRangeStmt.all(fromDate, toDate, fromDate, toDate);
     },
 
     async getDailySalesRows(fromDate, toDate) {
-      return dailySalesStmt.all(fromDate, toDate);
+      return dailySalesStmt.all(fromDate, toDate, fromDate, toDate);
     },
 
     async getStockMovementRows(fromDate, toDate) {

@@ -444,9 +444,27 @@ export function createProcessReturnUseCase(dependencies) {
       const previouslyRefundedCredit = await dependencies.salesRepository.getRefundedCreditBySaleId(
         sale.sale_id
       );
-      const remainingCreditInt =
+      let remainingCreditInt =
         toMoneyInt(sale.credit_amount, "credit_amount") -
         toMoneyInt(previouslyRefundedCredit, "previously_refunded_credit");
+      if (remainingCreditInt < 0) {
+        remainingCreditInt = 0;
+      }
+
+      let refundCustomer = null;
+      if (sale.customer_id !== null && remainingCreditInt > 0) {
+        if (!dependencies.customerRepository || !dependencies.creditTransactionRepository) {
+          throw new ValidationError("Credit refunds are not configured");
+        }
+        refundCustomer = await dependencies.customerRepository.findById(sale.customer_id);
+        if (!refundCustomer) {
+          throw new NotFoundError("Customer not found: " + sale.customer_id);
+        }
+        const currentBalanceInt = toMoneyInt(refundCustomer.current_balance, "current_balance");
+        if (remainingCreditInt > currentBalanceInt) {
+          remainingCreditInt = currentBalanceInt;
+        }
+      }
 
       const refundSplit = calculateReturnRefundSplit(
         fromMoneyInt(totalRefundInt),
@@ -454,38 +472,27 @@ export function createProcessReturnUseCase(dependencies) {
       );
 
       let creditAdjustment = null;
-      if (
-        refundSplit.credit_refund_amount > 0 &&
-        sale.customer_id !== null &&
-        dependencies.customerRepository &&
-        dependencies.creditTransactionRepository
-      ) {
-        const customer = await dependencies.customerRepository.findById(sale.customer_id);
-        if (customer) {
-          const currentBalanceInt = toMoneyInt(customer.current_balance, "current_balance");
-          const adjustInt = toMoneyInt(refundSplit.credit_refund_amount, "credit_refund_amount");
-          let nextBalanceInt = currentBalanceInt - adjustInt;
-          if (nextBalanceInt < 0) {
-            nextBalanceInt = 0;
-          }
-          await dependencies.customerRepository.save(
-            Object.assign({}, customer, {
-              current_balance: fromMoneyInt(nextBalanceInt)
-            })
-          );
-          creditAdjustment = {
-            credit_tx_id: dependencies.idGenerator.nextId(),
-            customer_id: customer.customer_id,
-            sale_id: sale.sale_id,
-            shift_id: shiftId,
-            type: "RETURN_ADJUSTMENT",
-            amount: refundSplit.credit_refund_amount,
-            remarks: remarks,
-            created_by: createdBy,
-            created_at: now
-          };
-          await dependencies.creditTransactionRepository.save(creditAdjustment);
-        }
+      if (refundSplit.credit_refund_amount > 0 && refundCustomer) {
+        const currentBalanceInt = toMoneyInt(refundCustomer.current_balance, "current_balance");
+        const adjustInt = toMoneyInt(refundSplit.credit_refund_amount, "credit_refund_amount");
+        const nextBalanceInt = currentBalanceInt - adjustInt;
+        await dependencies.customerRepository.save(
+          Object.assign({}, refundCustomer, {
+            current_balance: fromMoneyInt(nextBalanceInt)
+          })
+        );
+        creditAdjustment = {
+          credit_tx_id: dependencies.idGenerator.nextId(),
+          customer_id: refundCustomer.customer_id,
+          sale_id: sale.sale_id,
+          shift_id: shiftId,
+          type: "RETURN_ADJUSTMENT",
+          amount: refundSplit.credit_refund_amount,
+          remarks: remarks,
+          created_by: createdBy,
+          created_at: now
+        };
+        await dependencies.creditTransactionRepository.save(creditAdjustment);
       }
 
       const returnRecord = {
