@@ -1,5 +1,5 @@
 export function exportToCsv(filename, headers, rows) {
-  if (!rows || rows.length === 0) {
+  if (!rows) {
     return false;
   }
   const headerKeys = headers.map(function (h) {
@@ -26,7 +26,7 @@ export function exportToCsv(filename, headers, rows) {
   const link = document.createElement("a");
   link.setAttribute("href", csvContent);
   let downloadName = filename + ".csv";
-  if (filename.endsWith(".csv")) {
+  if (filename.toLowerCase().endsWith(".csv")) {
     downloadName = filename;
   }
   link.setAttribute("download", downloadName);
@@ -40,8 +40,11 @@ function escapeCsvValue(value) {
   if (value === null || value === undefined) {
     return '""';
   }
-  const stringValue = String(value);
-  if (stringValue.includes(",") || stringValue.includes('"') || stringValue.includes("\n")) {
+  let stringValue = String(value);
+  if (typeof value === "string" && /^[\t ]*[=+\-@]/.test(stringValue)) {
+    stringValue = "'" + stringValue;
+  }
+  if (stringValue.includes(",") || stringValue.includes('"') || stringValue.includes("\r") || stringValue.includes("\n")) {
     return '"' + stringValue.replace(/"/g, '""') + '"';
   }
   return '"' + stringValue + '"';
