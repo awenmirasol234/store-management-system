@@ -70,7 +70,17 @@ Open `http://localhost:5173`. Vite proxies `/api` and `/uploads` requests to `ht
 
 ---
 
-## 3. Database Seeding & Reset
+## 3. Feature Configuration
+
+The default configuration is for one owner. Optional features such as staff
+management, cash drawer management, customer credit, and selling options can
+be enabled with environment variables. See
+[docs/feature-configuration.md](docs/feature-configuration.md) for the short
+beginner guide and examples.
+
+---
+
+## 4. Database Seeding & Reset
 
 Run all seed commands from `backend/`:
 
@@ -89,7 +99,7 @@ Run all seed commands from `backend/`:
 
 ---
 
-## 4. Docker Deployment
+## 5. Docker Deployment
 
 Deploy the entire stack (Nginx frontend proxy on port `8080` + private Express backend) with Docker Compose:
 
@@ -113,7 +123,7 @@ For production image tags, updates, and rollbacks, see [docs/docker-deployment.m
 
 ---
 
-## 5. Verification & Testing
+## 6. Verification & Testing
 
 Run test suites before every commit:
 
@@ -139,7 +149,7 @@ Run test suites before every commit:
 
 ---
 
-## 6. Documentation Index
+## 7. Documentation Index
 
 - [ARCHITECTURE.md](ARCHITECTURE.md): Clean Architecture layers, module layout, data scaling, and API contracts.
 - [CONTRIBUTING.md](CONTRIBUTING.md): Pre-change requirements, development constraints, and verification procedures.
@@ -148,3 +158,4 @@ Run test suites before every commit:
 - [docs/store-management-system-plan.md](docs/store-management-system-plan.md): Architectural roadmap and current implementation status.
 - [docs/design-system.md](docs/design-system.md): Tailwind v4 design tokens, POS cockpit layout, and UI component specifications.
 - [docs/docker-deployment.md](docs/docker-deployment.md): Container architecture, image publishing, and volume maintenance.
+- [docs/feature-configuration.md](docs/feature-configuration.md): Beginner guide to optional feature flags and store modes.
