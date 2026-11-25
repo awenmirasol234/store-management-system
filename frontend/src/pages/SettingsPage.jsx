@@ -17,6 +17,41 @@ import { PageHeader } from "../components/PageHeader.jsx";
 import { PageLayout } from "../components/PageLayout.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
 
+function normalizeSettings(data) {
+  let settings = data;
+  if (!settings) {
+    settings = {};
+  }
+
+  let threshold = Number(settings.default_low_stock_threshold);
+  if (!Number.isInteger(threshold) || threshold < 0) {
+    threshold = 5;
+  }
+
+  let soundEnabled = Number(settings.sound_enabled);
+  if (soundEnabled !== 0 && soundEnabled !== 1) {
+    soundEnabled = 1;
+  }
+
+  let showCashier = Number(settings.show_cashier_on_receipt);
+  if (showCashier !== 0 && showCashier !== 1) {
+    showCashier = 1;
+  }
+
+  return {
+    store_name: settings.store_name || "",
+    tagline: settings.tagline || "",
+    address: settings.address || "",
+    phone: settings.phone || "",
+    tax_number: settings.tax_number || "",
+    receipt_header: settings.receipt_header || "",
+    receipt_footer: settings.receipt_footer || "",
+    default_low_stock_threshold: threshold,
+    sound_enabled: soundEnabled,
+    show_cashier_on_receipt: showCashier
+  };
+}
+
 export function SettingsPage(props) {
   const currentUser = props.currentUser;
 
@@ -53,18 +88,7 @@ export function SettingsPage(props) {
           data = result.data;
         }
         if (data) {
-          setFormData({
-            store_name: data.store_name || "",
-            tagline: data.tagline || "",
-            address: data.address || "",
-            phone: data.phone || "",
-            tax_number: data.tax_number || "",
-            receipt_header: data.receipt_header || "",
-            receipt_footer: data.receipt_footer || "",
-            default_low_stock_threshold: Number(data.default_low_stock_threshold),
-            sound_enabled: Number(data.sound_enabled),
-            show_cashier_on_receipt: Number(data.show_cashier_on_receipt)
-          });
+          setFormData(normalizeSettings(data));
         }
         setLoading(false);
       })
@@ -94,6 +118,9 @@ export function SettingsPage(props) {
   async function handleSave(event) {
     if (event && event.preventDefault) {
       event.preventDefault();
+    }
+    if (saving || loading) {
+      return;
     }
     setSaving(true);
     setErrorMessage("");
@@ -125,18 +152,7 @@ export function SettingsPage(props) {
         saved = result.data;
       }
       if (saved) {
-        setFormData({
-          store_name: saved.store_name || "",
-          tagline: saved.tagline || "",
-          address: saved.address || "",
-          phone: saved.phone || "",
-          tax_number: saved.tax_number || "",
-          receipt_header: saved.receipt_header || "",
-          receipt_footer: saved.receipt_footer || "",
-          default_low_stock_threshold: Number(saved.default_low_stock_threshold),
-          sound_enabled: Number(saved.sound_enabled),
-          show_cashier_on_receipt: Number(saved.show_cashier_on_receipt)
-        });
+        setFormData(normalizeSettings(saved));
       }
       setSuccessMessage("Settings saved successfully");
     } catch (error) {
