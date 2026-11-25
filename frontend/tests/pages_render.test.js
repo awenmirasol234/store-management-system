@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import { StatCard } from "../src/components/StatCard.jsx";
+import { calculatePercentageTrend } from "../src/format.js";
 import { DashboardPage } from "../src/pages/DashboardPage.jsx";
 import { PosPage } from "../src/pages/PosPage.jsx";
 import { ReportsPage } from "../src/pages/ReportsPage.jsx";
@@ -105,5 +106,80 @@ describe("Refactored page rendering", function () {
     );
     expect(toneHtml).toContain("text-[#171717]");
     expect(toneHtml).not.toContain("text-emerald-600");
+  });
+
+  it("calculates percentage trend accurately across positive, negative, zero, and boundary cases", function () {
+    expect(calculatePercentageTrend(125, 100)).toEqual({
+      direction: "up",
+      percentage: 25,
+      label: "+25%"
+    });
+    expect(calculatePercentageTrend(80, 100)).toEqual({
+      direction: "down",
+      percentage: 20,
+      label: "−20%"
+    });
+    expect(calculatePercentageTrend(112.5, 100)).toEqual({
+      direction: "up",
+      percentage: 12.5,
+      label: "+12.5%"
+    });
+    expect(calculatePercentageTrend(50, 50)).toEqual({
+      direction: "neutral",
+      percentage: 0,
+      label: "0%"
+    });
+    expect(calculatePercentageTrend(0, 0)).toEqual({
+      direction: "neutral",
+      percentage: 0,
+      label: "0%"
+    });
+    expect(calculatePercentageTrend(250, 0)).toEqual({
+      direction: "up",
+      percentage: 100,
+      label: "+100%"
+    });
+    expect(calculatePercentageTrend(-50, -100)).toEqual({
+      direction: "up",
+      percentage: 50,
+      label: "+50%"
+    });
+    expect(calculatePercentageTrend(null, 100)).toBeNull();
+    expect(calculatePercentageTrend(100, undefined)).toBeNull();
+  });
+
+  it("renders StatCard Trend Indicator Pill for positive, negative, and zero trends", function () {
+    const upHtml = renderToString(
+      React.createElement(StatCard, {
+        label: "Today's Sales",
+        value: "₱1,250.00",
+        trend: { direction: "up", percentage: 25, label: "+25%" },
+        trendLabel: "Compared to yesterday"
+      })
+    );
+    expect(upHtml).toContain("+25%");
+    expect(upHtml).toContain("bg-emerald-50 text-emerald-700 border-emerald-200");
+    expect(upHtml).toContain('aria-label="Compared to yesterday: +25%"');
+    expect(upHtml).toContain("<svg");
+
+    const downHtml = renderToString(
+      React.createElement(StatCard, {
+        label: "Transactions",
+        value: "8",
+        trend: { direction: "down", percentage: 20, label: "−20%" }
+      })
+    );
+    expect(downHtml).toContain("−20%");
+    expect(downHtml).toContain("bg-rose-50 text-rose-700 border-rose-200");
+
+    const neutralHtml = renderToString(
+      React.createElement(StatCard, {
+        label: "Items Sold",
+        value: "0",
+        trend: { direction: "neutral", percentage: 0, label: "0%" }
+      })
+    );
+    expect(neutralHtml).toContain("0%");
+    expect(neutralHtml).toContain("bg-[#EEEEED] text-[#777777] border-[#E9E9E9]");
   });
 });

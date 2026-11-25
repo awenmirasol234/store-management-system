@@ -318,3 +318,49 @@ export function getManilaIsoDateOffset(daysOffset) {
   const day = String(shifted.getUTCDate()).padStart(2, "0");
   return year + "-" + month + "-" + day;
 }
+
+export function calculatePercentageTrend(currentValue, previousValue) {
+  if (currentValue === null || currentValue === undefined) {
+    return null;
+  }
+  if (previousValue === null || previousValue === undefined) {
+    return null;
+  }
+  const current = Number(currentValue);
+  const previous = Number(previousValue);
+  if (!Number.isFinite(current) || !Number.isFinite(previous)) {
+    return null;
+  }
+
+  let rawPercent = 0;
+  if (previous === 0) {
+    if (current > 0) {
+      rawPercent = 100;
+    } else if (current < 0) {
+      rawPercent = -100;
+    }
+  } else {
+    rawPercent = ((current - previous) / Math.abs(previous)) * 100;
+  }
+
+  const rounded = Math.round(rawPercent * 10) / 10;
+  if (rounded === 0) {
+    return {
+      direction: "neutral",
+      percentage: 0,
+      label: "0%"
+    };
+  }
+  if (rounded > 0) {
+    return {
+      direction: "up",
+      percentage: rounded,
+      label: "+" + rounded + "%"
+    };
+  }
+  return {
+    direction: "down",
+    percentage: Math.abs(rounded),
+    label: "\u2212" + Math.abs(rounded) + "%"
+  };
+}
