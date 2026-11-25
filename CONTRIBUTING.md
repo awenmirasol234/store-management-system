@@ -2,6 +2,8 @@
 
 Tactical workflow and requirements for modifying this repository.
 
+Use this guide for the contributor process. `AGENTS.md` contains the persistent rules for coding agents; architecture and business specifications remain in their linked reference documents.
+
 ---
 
 ## 1. Preparation & Inspection
@@ -11,7 +13,7 @@ Execute these steps before writing or editing code:
 1. **Read Instructions**: Review [AGENTS.md](AGENTS.md) and [.agents/skills/ponytail/SKILL.md](.agents/skills/ponytail/SKILL.md) (`full` mode).
 2. **Inspect Callers**: Search for and inspect all callers, tests, fixtures, exports, and configuration for every function, endpoint, or component you plan to touch.
 3. **Check Working Tree**: Run `git status`. Do not discard, overwrite, or reset existing changes.
-4. **Define Minimal Scope**: Identify the smallest complete change that satisfies the request. Do not refactor unrelated code.
+4. **Define Minimal Scope**: Record the requested outcome, affected files and callers, success checks, and the smallest complete change. Do not refactor unrelated code.
 
 ---
 

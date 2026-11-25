@@ -2,6 +2,8 @@
 
 Tactical deployment instructions for containerized execution with Docker Compose.
 
+Use this guide before changing or operating the Docker deployment. Confirm the target environment and data-preservation requirements before any operation that can remove volumes or stored data.
+
 ---
 
 ## 1. Architecture & Port Mapping

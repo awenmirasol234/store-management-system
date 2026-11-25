@@ -2,6 +2,8 @@
 
 Authoritative status, architectural contracts, implemented capabilities, and verification roadmap.
 
+Use this document to understand project scope, reported implementation status, and deferred work. It is a planning reference; use [ARCHITECTURE.md](../ARCHITECTURE.md) for detailed layer contracts and the domain specifications for business rules.
+
 ---
 
 ## 1. System Scope & Architecture

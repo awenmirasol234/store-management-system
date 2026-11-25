@@ -2,6 +2,8 @@
 
 Authoritative domain specification for retail inventory, packaging options, sales calculations, and stock movements.
 
+Use this document as the source of truth when changing product inventory, selling options, sales quantity calculations, or stock movement rules. Keep implementation and tests consistent with these invariants.
+
 ---
 
 ## 1. Domain Architecture & Core Invariants

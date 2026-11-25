@@ -2,6 +2,8 @@
 
 Local-first point-of-sale (POS) and inventory management system for Philippine retail stores.
 
+Use this README for prerequisites, local setup, seeding, deployment entry points, and verification commands. Detailed rules belong in the linked architecture and domain documents.
+
 - **Currency**: Philippine Peso (`₱`), stored as scaled integer centavos (`× 100`).
 - **Timezone**: `Asia/Manila` (`UTC+8`) for business-day calculations and receipt sequencing.
 - **Backend**: Node.js 24, Express, plain SQL via `node:sqlite`, Vitest.

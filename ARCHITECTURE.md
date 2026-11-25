@@ -2,6 +2,8 @@
 
 Clean Architecture rules, module responsibilities, persistence boundaries, and API contracts.
 
+Use this document when changing module boundaries, data access, API contracts, or application composition. Domain-specific inventory rules are defined in [the inventory specification](docs/product-inventory-and-selling-options.md).
+
 ---
 
 ## 1. Core Architectural Rules

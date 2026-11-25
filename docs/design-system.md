@@ -2,6 +2,8 @@
 
 Tactical specifications for the StoreFlow POS interface, design tokens, responsive layout, and UI components.
 
+Use this document when changing frontend styling, shared UI components, or POS layout. Preserve the documented accessibility and responsive behavior alongside the visual specifications.
+
 ---
 
 ## 1. Visual Foundation & Palette

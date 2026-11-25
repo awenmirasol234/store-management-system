@@ -2,6 +2,17 @@
 
 These rules apply to every coding agent working in this repository.
 
+## Task Workflow
+
+For each request:
+
+1. Define the requested outcome and its scope. Ask before proceeding when a requirement or consequential choice is unclear.
+2. Read this file, `.agents/skills/ponytail/SKILL.md`, and the files, callers, tests, configuration, and documentation affected by the task.
+3. Check `git status` before editing. Treat existing changes as user work.
+4. Identify the smallest complete change. List all required callers, tests, fixtures, exports, configuration, and documentation updates.
+5. Implement only the requested behavior, following the architecture and specifications in the reference documents below.
+6. Run relevant tests and checks, review the full diff, and report the result, checks run or skipped, and remaining risks.
+
 ## Required Preparation
 
 - Read the files that directly affect the requested change before editing.
@@ -14,6 +25,13 @@ These rules apply to every coding agent working in this repository.
 
 ## Documentation Responsibilities
 
+- Treat this file as persistent agent rules, not as a project overview or detailed specification.
+- Use `CONTRIBUTING.md` for the contributor workflow and verification checklist.
+- Use `ARCHITECTURE.md` for layer boundaries and API contracts.
+- Use `docs/product-inventory-and-selling-options.md` for inventory and selling rules.
+- Use `docs/store-management-system-plan.md` for project scope, implementation status, and roadmap.
+- Use `docs/design-system.md` for frontend visual and component specifications.
+- Use `docs/docker-deployment.md` before deployment or container operations.
 - Keep `AGENTS.md` limited to persistent rules for coding agents.
 - Put project overview, prerequisites, setup, installation, and usage instructions in `README.md`.
 - Put detailed architecture, folder responsibilities, and design decisions in `ARCHITECTURE.md` or the relevant file under `docs/`.
