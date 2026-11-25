@@ -54,7 +54,19 @@ Both containers must report `healthy` status. Open `http://localhost:8080` in a 
 
 ---
 
-## 3. Production Deployment with Published Images
+## 3. Creating Another Owner Account
+
+Run the interactive account tool in the backend container. Use `-it` so it can securely prompt for the account details and hidden PIN:
+
+```bash
+docker compose exec -it backend node create-admin.js
+```
+
+The script creates an `OWNER` account in the configured database. The new owner can sign in through the app with the username and PIN entered at the prompt.
+
+---
+
+## 4. Production Deployment with Published Images
 
 CI publishes container images to GitHub Container Registry (GHCR):
 - `ghcr.io/awenmirasol234/store-management-system-backend`
@@ -84,7 +96,7 @@ IMAGE_TAG=sha-previous docker compose up -d
 
 ---
 
-## 4. Recreating Services & Upstream Resolution
+## 5. Recreating Services & Upstream Resolution
 
 Nginx resolves `backend:3001` at container startup. When recreating only the backend container, always restart Nginx to refresh DNS resolution:
 
@@ -95,7 +107,7 @@ docker compose restart nginx
 
 ---
 
-## 5. Routine Management Commands
+## 6. Routine Management Commands
 
 - **Stream Backend Logs**:
   ```bash
@@ -118,7 +130,7 @@ docker compose restart nginx
 
 ---
 
-## 6. Container Environment Variables
+## 7. Container Environment Variables
 
 Compose passes the following defaults to the backend service:
 
