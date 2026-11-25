@@ -29,9 +29,29 @@ export function Input(props) {
 
   let labelElement = null;
   if (props.label) {
+    let labelContent = props.label;
+    let isRequired = Boolean(props.required);
+    let cleanLabel = props.label;
+
+    if (typeof props.label === "string") {
+      if (props.label.trim().endsWith("*")) {
+        isRequired = true;
+      }
+      cleanLabel = props.label.replace(/\s*\*+\s*$/, "");
+    }
+
+    if (isRequired) {
+      labelContent = (
+        <>
+          {cleanLabel}{" "}
+          <span className="text-rose-500">*</span>
+        </>
+      );
+    }
+
     labelElement = (
       <label htmlFor={inputId} className="mb-1.5 block text-xs font-medium text-[#171717]">
-        {props.label}
+        {labelContent}
       </label>
     );
   }

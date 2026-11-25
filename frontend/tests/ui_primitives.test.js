@@ -168,4 +168,77 @@ describe("Standardized UI primitives & accessibility", function () {
     expect(html).toContain("border-[#E0533C]");
     expect(html).toContain("Base unit is required");
   });
+
+  it("renders Input required field label with red asterisk when required is set", function () {
+    const html = renderToString(
+      React.createElement(Input, {
+        label: "Store Name",
+        value: "",
+        required: true,
+        onChange: function () {}
+      })
+    );
+    expect(html).toContain('class="text-rose-500"');
+    expect(html).toContain("Store Name");
+    expect(html).toContain("*");
+  });
+
+  it("renders Input label with red asterisk when label has trailing asterisk without duplicates", function () {
+    const html = renderToString(
+      React.createElement(Input, {
+        label: "Product Name *",
+        value: "",
+        required: true,
+        onChange: function () {}
+      })
+    );
+    expect(html).toContain('class="text-rose-500">*</span>');
+    expect(html).toContain("Product Name");
+    expect(html).not.toContain("**");
+    expect(html).not.toContain("Product Name * *");
+  });
+
+  it("renders Select required field label with red asterisk", function () {
+    const html = renderToString(
+      React.createElement(
+        Select,
+        {
+          label: "Base Unit *",
+          value: "PCS",
+          required: true,
+          onChange: function () {}
+        },
+        React.createElement("option", { value: "PCS" }, "Pieces")
+      )
+    );
+    expect(html).toContain('class="text-rose-500">*</span>');
+    expect(html).toContain("Base Unit");
+    expect(html).not.toContain("**");
+  });
+
+  it("does not render red asterisk for non-required Input and Select", function () {
+    const inputHtml = renderToString(
+      React.createElement(Input, {
+        label: "Barcode (optional)",
+        value: "",
+        onChange: function () {}
+      })
+    );
+    expect(inputHtml).not.toContain("text-rose-500");
+    expect(inputHtml).not.toContain("*");
+
+    const selectHtml = renderToString(
+      React.createElement(
+        Select,
+        {
+          label: "Category (optional)",
+          value: "",
+          onChange: function () {}
+        },
+        React.createElement("option", { value: "" }, "None")
+      )
+    );
+    expect(selectHtml).not.toContain("text-rose-500");
+    expect(selectHtml).not.toContain("*");
+  });
 });

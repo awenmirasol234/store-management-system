@@ -35,7 +35,8 @@ describe("Customers & Utang UI components", function () {
       })
     );
     expect(html).toContain("New Customer");
-    expect(html).toContain("Full Name *");
+    expect(html).toContain("Full Name");
+    expect(html).toContain('class="text-rose-500">*</span>');
     expect(html).toContain("Phone Number");
     expect(html).toContain("Credit Limit (₱)");
     expect(html).toContain("Address / Landmark");
