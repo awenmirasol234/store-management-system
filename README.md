@@ -68,6 +68,16 @@ Open `http://localhost:5173`. Vite proxies `/api` and `/uploads` requests to `ht
 3. Use the created PIN to sign in.
 4. Set `ENFORCE_AUTH=true` in the backend environment when route-level authentication and role checks must be enforced. Default is `false` for development ease.
 
+### Run a Production Build Locally
+
+Run from the project root:
+
+```bash
+python prod.py
+```
+
+The script builds the frontend, starts the backend and Vite production preview, and serves the app at `http://localhost:4173`. Press `Ctrl+C` to stop both servers. Ports `3001` and `4173` must be available.
+
 ---
 
 ## 3. Database Seeding & Reset
