@@ -196,6 +196,68 @@ describe("frontend review regressions", function () {
     expect(openDialog()).toBeNull();
   });
 
+  it("renders Add Product form with logical sections, required indicators, inline validation, and profit margin preview", async function () {
+    await render(<InventoryPage currentUser={owner} />);
+    await click("Add Product");
+    const dialog = openDialog();
+    expect(dialog).not.toBeNull();
+
+    // 1. Verify 4 logical section headers
+    const sectionHeaders = Array.from(dialog.querySelectorAll("span")).map(function (el) {
+      return el.textContent.trim();
+    });
+    expect(sectionHeaders).toContain("Basic Details");
+    expect(sectionHeaders).toContain("Pricing & Unit");
+    expect(sectionHeaders).toContain("Inventory Tracking");
+    expect(sectionHeaders).toContain("Media & Preferences");
+
+    // 2. Verify required vs optional field labels
+    const labels = Array.from(dialog.querySelectorAll("label")).map(function (el) {
+      return el.textContent.trim();
+    });
+    expect(labels.some(function (l) { return l.includes("Product Name *"); })).toBe(true);
+    expect(labels.some(function (l) { return l.includes("Base Unit *"); })).toBe(true);
+    expect(labels.some(function (l) { return l.includes("Cost Price (₱) *"); })).toBe(true);
+    expect(labels.some(function (l) { return l.includes("Selling Price (₱) *"); })).toBe(true);
+    expect(labels.some(function (l) { return l.includes("Barcode (optional)"); })).toBe(true);
+    expect(labels.some(function (l) { return l.includes("Category (optional)"); })).toBe(true);
+    expect(labels.some(function (l) { return l.includes("Initial Stock (optional)"); })).toBe(true);
+    expect(labels.some(function (l) { return l.includes("Reorder Level (optional)"); })).toBe(true);
+    expect(labels.some(function (l) { return l.includes("Product Image (optional)"); })).toBe(true);
+
+    // 3. Verify inline validation when submitted with empty name
+    await act(async function () {
+      submit(dialog.querySelector("form"));
+    });
+    expect(dialog.textContent).toContain("Product name is required");
+
+    // 4. Fill name and prices, verify live profit preview
+    const nameInput = dialog.querySelector("input");
+    const inputs = dialog.querySelectorAll('input[type="number"]');
+    const costInput = Array.from(inputs).find(function (inp) {
+      return inp.step === "0.01" && inp.min === "0";
+    });
+    const priceInput = Array.from(inputs).find(function (inp) {
+      return inp.step === "0.01" && inp.min === "0.01";
+    });
+
+    await act(async function () {
+      changeInput(nameInput, "Premium Coffee 200g");
+      changeInput(costInput, "120");
+      changeInput(priceInput, "180");
+    });
+
+    // Profit = 180 - 120 = 60; Margin = (60 / 180) * 100 = 33.3%
+    expect(dialog.textContent).toContain("Est. Profit:");
+    expect(dialog.textContent).toContain("33.3% margin");
+
+    // Test below-cost warning
+    await act(async function () {
+      changeInput(priceInput, "100");
+    });
+    expect(dialog.textContent).toContain("Selling Below Cost:");
+  });
+
   it.each([1, 2])("checks overlapping scans against the latest controlled cart with stock %i", async function (stock) {
     const inventoryFetch = fetch.getMockImplementation();
     const lookups = [];

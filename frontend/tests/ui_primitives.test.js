@@ -138,4 +138,34 @@ describe("Standardized UI primitives & accessibility", function () {
     expect(html).toContain("Split");
     expect(html).toContain('aria-pressed="true"');
   });
+
+  it("renders Input with error styling and inline error message", function () {
+    const html = renderToString(
+      React.createElement(Input, {
+        label: "Selling Price",
+        value: "0",
+        error: "Selling price must be greater than ₱0.00",
+        onChange: function () {}
+      })
+    );
+    expect(html).toContain("border-[#E0533C]");
+    expect(html).toContain("Selling price must be greater than ₱0.00");
+  });
+
+  it("renders Select with error styling and inline error message", function () {
+    const html = renderToString(
+      React.createElement(
+        Select,
+        {
+          label: "Base Unit",
+          value: "",
+          error: "Base unit is required",
+          onChange: function () {}
+        },
+        React.createElement("option", { value: "" }, "Select unit")
+      )
+    );
+    expect(html).toContain("border-[#E0533C]");
+    expect(html).toContain("Base unit is required");
+  });
 });

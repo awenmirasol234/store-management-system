@@ -47,6 +47,66 @@ function createEmptyProductForm() {
   };
 }
 
+function validateProductFormField(fieldName, value, form) {
+  if (fieldName === "product_name") {
+    if (!value || typeof value !== "string" || value.trim().length === 0) {
+      return "Product name is required";
+    }
+    return "";
+  }
+
+  if (fieldName === "base_unit") {
+    if (!value || typeof value !== "string" || value.trim().length === 0) {
+      return "Base unit is required";
+    }
+    return "";
+  }
+
+  if (fieldName === "cost_price") {
+    if (value === "" || value === null || value === undefined) {
+      return "Cost price is required";
+    }
+    const costNumber = Number(value);
+    if (isNaN(costNumber) || costNumber < 0) {
+      return "Cost price cannot be negative";
+    }
+    return "";
+  }
+
+  if (fieldName === "selling_price") {
+    if (value === "" || value === null || value === undefined) {
+      return "Selling price is required";
+    }
+    const priceNumber = Number(value);
+    if (isNaN(priceNumber) || priceNumber <= 0) {
+      return "Selling price must be greater than ₱0.00";
+    }
+    return "";
+  }
+
+  if (fieldName === "current_stock") {
+    if (value !== "" && value !== null && value !== undefined) {
+      const stockNumber = Number(value);
+      if (isNaN(stockNumber) || stockNumber < 0) {
+        return "Initial stock cannot be negative";
+      }
+    }
+    return "";
+  }
+
+  if (fieldName === "reorder_level") {
+    if (value !== "" && value !== null && value !== undefined) {
+      const reorderNumber = Number(value);
+      if (isNaN(reorderNumber) || reorderNumber < 0) {
+        return "Reorder level cannot be negative";
+      }
+    }
+    return "";
+  }
+
+  return "";
+}
+
 function getStockBadgeTone(product) {
   const stockLevel = getStockLevel(product);
   if (stockLevel === STOCK_LEVELS.OUT) {
@@ -76,6 +136,9 @@ export function InventoryPage(props) {
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [productForm, setProductForm] = useState(createEmptyProductForm());
   const [imageFile, setImageFile] = useState(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [touchedFields, setTouchedFields] = useState({});
   const [savingProduct, setSavingProduct] = useState(false);
   const [savingStock, setSavingStock] = useState(false);
 
@@ -181,6 +244,34 @@ export function InventoryPage(props) {
     loadAll();
   }, []);
 
+  useEffect(
+    function syncImagePreview() {
+      if (!imageFile) {
+        setImagePreviewUrl(null);
+        return;
+      }
+      let objectUrl = null;
+      if (typeof URL !== "undefined" && typeof URL.createObjectURL === "function") {
+        try {
+          objectUrl = URL.createObjectURL(imageFile);
+          setImagePreviewUrl(objectUrl);
+        } catch (err) {
+          setImagePreviewUrl(null);
+        }
+      }
+      return function cleanup() {
+        if (objectUrl && typeof URL !== "undefined" && typeof URL.revokeObjectURL === "function") {
+          try {
+            URL.revokeObjectURL(objectUrl);
+          } catch (err) {
+            // ignore error in mock environment
+          }
+        }
+      };
+    },
+    [imageFile]
+  );
+
   function updateProductField(fieldName, value) {
     setProductForm(function update(previous) {
       const copy = Object.assign({}, previous);
@@ -189,9 +280,47 @@ export function InventoryPage(props) {
     });
   }
 
+  function handleProductFieldChange(fieldName, value) {
+    updateProductField(fieldName, value);
+    if (touchedFields[fieldName]) {
+      const updatedForm = Object.assign({}, productForm);
+      updatedForm[fieldName] = value;
+      const error = validateProductFormField(fieldName, value, updatedForm);
+      setFieldErrors(function updateErrors(prev) {
+        const next = Object.assign({}, prev);
+        if (error) {
+          next[fieldName] = error;
+        } else {
+          delete next[fieldName];
+        }
+        return next;
+      });
+    }
+  }
+
+  function handleProductFieldBlur(fieldName) {
+    setTouchedFields(function markTouched(prev) {
+      const next = Object.assign({}, prev);
+      next[fieldName] = true;
+      return next;
+    });
+    const error = validateProductFormField(fieldName, productForm[fieldName], productForm);
+    setFieldErrors(function updateErrors(prev) {
+      const next = Object.assign({}, prev);
+      if (error) {
+        next[fieldName] = error;
+      } else {
+        delete next[fieldName];
+      }
+      return next;
+    });
+  }
+
   function openCreateProduct() {
     setErrorBanner("");
     setModalError("");
+    setFieldErrors({});
+    setTouchedFields({});
     savedProductForm.current = null;
     setProductForm(createEmptyProductForm());
     setImageFile(null);
@@ -201,6 +330,8 @@ export function InventoryPage(props) {
   function openEditProduct(product) {
     setErrorBanner("");
     setModalError("");
+    setFieldErrors({});
+    setTouchedFields({});
     savedProductForm.current = null;
     let categoryIdValue = "";
     if (product.category_id) {
@@ -232,6 +363,55 @@ export function InventoryPage(props) {
     if (pendingWrite.current) {
       return;
     }
+
+    const newErrors = {};
+    const nameError = validateProductFormField("product_name", productForm.product_name, productForm);
+    if (nameError) {
+      newErrors.product_name = nameError;
+    }
+
+    if (productForm.selling_price !== "") {
+      const priceError = validateProductFormField("selling_price", productForm.selling_price, productForm);
+      if (priceError) {
+        newErrors.selling_price = priceError;
+      }
+    } else if (touchedFields.selling_price) {
+      newErrors.selling_price = "Selling price is required";
+    }
+
+    if (productForm.cost_price !== "") {
+      const costError = validateProductFormField("cost_price", productForm.cost_price, productForm);
+      if (costError) {
+        newErrors.cost_price = costError;
+      }
+    }
+
+    if (productForm.current_stock !== "") {
+      const stockError = validateProductFormField("current_stock", productForm.current_stock, productForm);
+      if (stockError) {
+        newErrors.current_stock = stockError;
+      }
+    }
+
+    if (productForm.reorder_level !== "") {
+      const reorderError = validateProductFormField("reorder_level", productForm.reorder_level, productForm);
+      if (reorderError) {
+        newErrors.reorder_level = reorderError;
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
+      setTouchedFields({
+        product_name: true,
+        selling_price: true,
+        cost_price: true,
+        current_stock: true,
+        reorder_level: true
+      });
+      return;
+    }
+
     pendingWrite.current = true;
     setSavingProduct(true);
     setModalError("");
@@ -284,6 +464,8 @@ export function InventoryPage(props) {
       }
 
       setProductModalOpen(false);
+      setFieldErrors({});
+      setTouchedFields({});
       await loadAll();
     } catch (error) {
       setModalError(error.message);
@@ -645,21 +827,29 @@ export function InventoryPage(props) {
   }
 
   let productModalTitle = "Add Product";
-  let initialStockField = (
-    <Input
-      label="Initial Stock"
-      type="number"
-      step="0.0001"
-      min="0"
-      value={productForm.current_stock}
-      onChange={function onChange(event) {
-        updateProductField("current_stock", event.target.value);
-      }}
-    />
-  );
+  let initialStockField = null;
+  if (!productForm.product_id) {
+    initialStockField = (
+      <Input
+        label="Initial Stock (optional)"
+        type="number"
+        step="0.0001"
+        min="0"
+        placeholder="0"
+        helper="Starting quantity on hand"
+        value={productForm.current_stock}
+        error={fieldErrors.current_stock}
+        onChange={function onChange(event) {
+          handleProductFieldChange("current_stock", event.target.value);
+        }}
+        onBlur={function onBlur() {
+          handleProductFieldBlur("current_stock");
+        }}
+      />
+    );
+  }
   if (productForm.product_id) {
     productModalTitle = "Edit Product";
-    initialStockField = null;
   }
 
   let optionsTitle = "Selling Options";
@@ -721,9 +911,143 @@ export function InventoryPage(props) {
     );
   }
 
-  let imageUploadLabel = "Upload JPEG, PNG, or WebP (max 2MB)";
+  let profitPreviewElement = null;
+  const costNum = Number(productForm.cost_price);
+  const priceNum = Number(productForm.selling_price);
+  if (
+    productForm.selling_price !== "" &&
+    !isNaN(priceNum) &&
+    priceNum > 0 &&
+    !isNaN(costNum) &&
+    costNum >= 0
+  ) {
+    const profit = priceNum - costNum;
+    let marginPercent = 0;
+    if (priceNum > 0) {
+      marginPercent = Math.round((profit / priceNum) * 1000) / 10;
+    }
+
+    if (profit > 0) {
+      profitPreviewElement = (
+        <div className="flex items-center gap-2 rounded-xl bg-[#F4FBF0] border border-[#DCF7C5] px-3.5 py-2 text-xs text-[#245913]">
+          <span className="font-semibold">Est. Profit:</span>
+          <span className="font-mono font-medium">+{formatPeso(profit)}</span>
+          <span className="text-[#4E7E32]">({marginPercent}% margin)</span>
+        </div>
+      );
+    } else if (profit === 0) {
+      profitPreviewElement = (
+        <div className="flex items-center gap-2 rounded-xl bg-[#F6F6F5] border border-[#E9E9E9] px-3.5 py-2 text-xs text-[#777777]">
+          <span className="font-semibold">Est. Profit:</span>
+          <span className="font-mono font-medium">₱0.00</span>
+          <span>(Break-even)</span>
+        </div>
+      );
+    } else {
+      profitPreviewElement = (
+        <div className="flex items-center gap-2 rounded-xl bg-[#FEF3F2] border border-[#FECDCA] px-3.5 py-2 text-xs text-[#B42318]">
+          <span className="font-semibold">Selling Below Cost:</span>
+          <span className="font-mono font-medium">{formatPeso(profit)}</span>
+          <span>(Loss of {Math.abs(marginPercent)}%)</span>
+        </div>
+      );
+    }
+  }
+
+  let imagePreviewSection = null;
   if (imageFile) {
-    imageUploadLabel = imageFile.name;
+    let fileSizeLabel = "";
+    if (imageFile.size) {
+      const sizeKb = Math.round(imageFile.size / 1024);
+      if (sizeKb > 1024) {
+        fileSizeLabel = (Math.round((sizeKb / 1024) * 10) / 10) + " MB";
+      } else {
+        fileSizeLabel = sizeKb + " KB";
+      }
+    }
+
+    let thumbnailElement = (
+      <div className="h-12 w-12 rounded-lg bg-[#EEEEED] flex items-center justify-center shrink-0">
+        <Upload className="h-5 w-5 text-[#777777]" />
+      </div>
+    );
+    if (imagePreviewUrl) {
+      thumbnailElement = (
+        <img
+          src={imagePreviewUrl}
+          alt="Preview"
+          className="h-12 w-12 rounded-lg object-cover border border-[#E9E9E9] shrink-0"
+        />
+      );
+    }
+
+    imagePreviewSection = (
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-[#E9E9E9] bg-white p-2.5">
+        <div className="flex items-center gap-3 min-w-0">
+          {thumbnailElement}
+          <div className="min-w-0">
+            <p className="truncate text-xs font-medium text-[#171717]">{imageFile.name}</p>
+            {fileSizeLabel && <p className="text-2xs text-[#777777] font-mono">{fileSizeLabel}</p>}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <label className="text-2xs font-medium text-[#171717] hover:underline cursor-pointer">
+            <span>Change</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={function onFile(event) {
+                if (event.target.files && event.target.files[0]) {
+                  setImageFile(event.target.files[0]);
+                }
+              }}
+              className="hidden"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={function removeImage() {
+              setImageFile(null);
+            }}
+            className="text-2xs font-medium text-[#E0533C] hover:underline cursor-pointer"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    );
+  } else {
+    imagePreviewSection = (
+      <label className="flex cursor-pointer items-center justify-center gap-2.5 rounded-xl border border-dashed border-[#E9E9E9] bg-[#EEEEED]/30 px-4 py-3.5 text-xs text-[#171717] hover:border-[#171717] hover:bg-[#EEEEED]/50 transition-colors">
+        <Upload className="h-4 w-4 text-[#777777]" />
+        <span className="text-[#777777]">Upload JPEG, PNG, or WebP <span className="text-2xs text-[#999999]">(max 2MB)</span></span>
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={function onFile(event) {
+            if (event.target.files && event.target.files[0]) {
+              setImageFile(event.target.files[0]);
+            }
+          }}
+          className="hidden"
+        />
+      </label>
+    );
+  }
+
+  let confirmLabel = "Add Product";
+  if (productForm.product_id) {
+    if (savingProduct) {
+      confirmLabel = "Saving Changes...";
+    } else {
+      confirmLabel = "Save Changes";
+    }
+  } else {
+    if (savingProduct) {
+      confirmLabel = "Adding Product...";
+    } else {
+      confirmLabel = "Add Product";
+    }
   }
 
   let deleteProductName = "";
@@ -742,16 +1066,21 @@ export function InventoryPage(props) {
   let activeProductToggle = null;
   if (productForm.product_id) {
     activeProductToggle = (
-      <label className="flex items-center gap-2.5 py-1 text-xs font-medium text-[#171717] cursor-pointer">
+      <label className="flex items-start gap-2.5 py-1.5 text-xs font-medium text-[#171717] cursor-pointer">
         <input
           type="checkbox"
           checked={Boolean(productForm.is_active)}
           onChange={function onActiveCheck(event) {
             updateProductField("is_active", event.target.checked);
           }}
-          className="h-4 w-4 rounded border-[#E9E9E9] text-[#171717] focus:ring-[#B9F36B]/30 accent-[#171717]"
+          className="mt-0.5 h-4 w-4 rounded border-[#E9E9E9] text-[#171717] focus:ring-[#B9F36B]/30 accent-[#171717]"
         />
-        <span>Active product (available on POS screen)</span>
+        <div>
+          <span>Active product (available on POS screen)</span>
+          <p className="text-2xs font-normal text-[#777777] mt-0.5">
+            Uncheck to archive or hide from sales without deleting history
+          </p>
+        </div>
       </label>
     );
   }
@@ -833,141 +1162,202 @@ export function InventoryPage(props) {
         dismissDisabled={savingProduct}
         onClose={function close() {
           setProductModalOpen(false);
+          setFieldErrors({});
+          setTouchedFields({});
         }}
         title={productModalTitle}
       >
         <form onSubmit={handleSaveProduct}>
           <ErrorBanner message={modalError} className="mb-4" />
-          <fieldset disabled={savingProduct} className="space-y-5">
-            <Input
-              label="Product Name"
-              value={productForm.product_name}
-              onChange={function onChange(event) {
-                updateProductField("product_name", event.target.value);
-              }}
-              required={true}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Barcode"
-                mono={true}
-                value={productForm.barcode}
-                onChange={function onChange(event) {
-                  updateProductField("barcode", event.target.value);
-                }}
-                placeholder="Optional"
-              />
-              <Select
-                label="Category"
-                value={productForm.category_id}
-                onChange={function onChange(event) {
-                  updateProductField("category_id", event.target.value);
-                }}
-              >
-                <option value="">Uncategorized</option>
-                {categories.map(function renderCatOption(category) {
-                  return (
-                    <option key={category.category_id} value={category.category_id}>
-                      {category.category_name}
-                    </option>
-                  );
-                })}
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <Select
-                label="Base Unit"
-                value={productForm.base_unit}
-                onChange={function onChange(event) {
-                  updateProductField("base_unit", event.target.value);
-                }}
-                required={true}
-              >
-                {unitOptions.map(function renderUnitOption(unitName) {
-                  return (
-                    <option key={unitName} value={unitName}>
-                      {unitName}
-                    </option>
-                  );
-                })}
-              </Select>
-              <Input
-                label="Cost Price (₱)"
-                type="number"
-                step="0.01"
-                min="0"
-                value={productForm.cost_price}
-                onChange={function onChange(event) {
-                  updateProductField("cost_price", event.target.value);
-                }}
-                required={true}
-              />
-              <Input
-                label="Selling Price (₱)"
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={productForm.selling_price}
-                onChange={function onChange(event) {
-                  updateProductField("selling_price", event.target.value);
-                }}
-                required={true}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {initialStockField}
-              <Input
-                label="Reorder Level"
-                type="number"
-                step="0.0001"
-                min="0"
-                value={productForm.reorder_level}
-                onChange={function onChange(event) {
-                  updateProductField("reorder_level", event.target.value);
-                }}
-              />
-            </div>
-
+          <fieldset disabled={savingProduct} className="space-y-6">
+            {/* Section 1: Basic Details */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-[#171717]">Product Image</label>
-              <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-dashed border-[#E9E9E9] bg-[#EEEEED]/40 px-4 py-3 text-xs text-[#171717] hover:border-[#171717] transition-colors">
-                <Upload className="h-4 w-4 text-[#777777]" />
-                <span>{imageUploadLabel}</span>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={function onFile(event) {
-                    if (event.target.files && event.target.files[0]) {
-                      setImageFile(event.target.files[0]);
-                    }
+              <div className="border-b border-[#E9E9E9] pb-1.5 mb-3">
+                <span className="text-2xs font-semibold tracking-wider text-[#777777] uppercase">
+                  Basic Details
+                </span>
+              </div>
+              <div className="space-y-4">
+                <Input
+                  label="Product Name *"
+                  placeholder="e.g., San Miguel Pale Pilsen 330ml"
+                  value={productForm.product_name}
+                  error={fieldErrors.product_name}
+                  onChange={function onChange(event) {
+                    handleProductFieldChange("product_name", event.target.value);
                   }}
-                  className="hidden"
+                  onBlur={function onBlur() {
+                    handleProductFieldBlur("product_name");
+                  }}
+                  required={true}
                 />
-              </label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Select
+                    label="Category (optional)"
+                    value={productForm.category_id}
+                    onChange={function onChange(event) {
+                      handleProductFieldChange("category_id", event.target.value);
+                    }}
+                  >
+                    <option value="">Uncategorized</option>
+                    {categories.map(function renderCatOption(category) {
+                      return (
+                        <option key={category.category_id} value={category.category_id}>
+                          {category.category_name}
+                        </option>
+                      );
+                    })}
+                  </Select>
+                  <Input
+                    label="Barcode (optional)"
+                    mono={true}
+                    placeholder="Scan or enter barcode"
+                    value={productForm.barcode}
+                    onChange={function onChange(event) {
+                      handleProductFieldChange("barcode", event.target.value);
+                    }}
+                  />
+                </div>
+              </div>
             </div>
 
-            <label className="flex items-center gap-2.5 py-1 text-xs font-medium text-[#171717] cursor-pointer">
-              <input
-                type="checkbox"
-                checked={productForm.allow_custom_amount}
-                onChange={function onCheck(event) {
-                  updateProductField("allow_custom_amount", event.target.checked);
-                }}
-                className="h-4 w-4 rounded border-[#E9E9E9] text-[#171717] focus:ring-[#B9F36B]/30 accent-[#171717]"
-              />
-              <span>Allow custom peso amount ("Tingi")</span>
-            </label>
+            {/* Section 2: Pricing & Unit */}
+            <div>
+              <div className="border-b border-[#E9E9E9] pb-1.5 mb-3">
+                <span className="text-2xs font-semibold tracking-wider text-[#777777] uppercase">
+                  Pricing & Unit
+                </span>
+              </div>
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <Select
+                    label="Base Unit *"
+                    value={productForm.base_unit}
+                    error={fieldErrors.base_unit}
+                    onChange={function onChange(event) {
+                      handleProductFieldChange("base_unit", event.target.value);
+                    }}
+                    required={true}
+                  >
+                    {unitOptions.map(function renderUnitOption(unitName) {
+                      return (
+                        <option key={unitName} value={unitName}>
+                          {unitName}
+                        </option>
+                      );
+                    })}
+                  </Select>
+                  <Input
+                    label="Cost Price (₱) *"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    value={productForm.cost_price}
+                    error={fieldErrors.cost_price}
+                    onChange={function onChange(event) {
+                      handleProductFieldChange("cost_price", event.target.value);
+                    }}
+                    onBlur={function onBlur() {
+                      handleProductFieldBlur("cost_price");
+                    }}
+                    required={true}
+                  />
+                  <Input
+                    label="Selling Price (₱) *"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    placeholder="0.00"
+                    value={productForm.selling_price}
+                    error={fieldErrors.selling_price}
+                    onChange={function onChange(event) {
+                      handleProductFieldChange("selling_price", event.target.value);
+                    }}
+                    onBlur={function onBlur() {
+                      handleProductFieldBlur("selling_price");
+                    }}
+                    required={true}
+                  />
+                </div>
+                {profitPreviewElement}
+              </div>
+            </div>
 
-            {activeProductToggle}
+            {/* Section 3: Inventory & Stock Tracking */}
+            <div>
+              <div className="border-b border-[#E9E9E9] pb-1.5 mb-3">
+                <span className="text-2xs font-semibold tracking-wider text-[#777777] uppercase">
+                  Inventory Tracking
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {initialStockField}
+                <Input
+                  label="Reorder Level (optional)"
+                  type="number"
+                  step="0.0001"
+                  min="0"
+                  placeholder="5"
+                  helper="Alerts when stock reaches this level"
+                  value={productForm.reorder_level}
+                  error={fieldErrors.reorder_level}
+                  onChange={function onChange(event) {
+                    handleProductFieldChange("reorder_level", event.target.value);
+                  }}
+                  onBlur={function onBlur() {
+                    handleProductFieldBlur("reorder_level");
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Section 4: Media & Preferences */}
+            <div>
+              <div className="border-b border-[#E9E9E9] pb-1.5 mb-3">
+                <span className="text-2xs font-semibold tracking-wider text-[#777777] uppercase">
+                  Media & Preferences
+                </span>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-[#171717]">
+                    Product Image <span className="text-[#777777] font-normal text-2xs">(optional)</span>
+                  </label>
+                  {imagePreviewSection}
+                </div>
+
+                <div className="pt-1">
+                  <label className="flex items-start gap-2.5 py-1 text-xs font-medium text-[#171717] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={productForm.allow_custom_amount}
+                      onChange={function onCheck(event) {
+                        updateProductField("allow_custom_amount", event.target.checked);
+                      }}
+                      className="mt-0.5 h-4 w-4 rounded border-[#E9E9E9] text-[#171717] focus:ring-[#B9F36B]/30 accent-[#171717]"
+                    />
+                    <div>
+                      <span>Allow custom peso amount ("Tingi")</span>
+                      <p className="text-2xs font-normal text-[#777777] mt-0.5">
+                        Permits selling partial or arbitrary peso amounts at checkout
+                      </p>
+                    </div>
+                  </label>
+
+                  {activeProductToggle}
+                </div>
+              </div>
+            </div>
 
             <FormActions
               onCancel={function cancel() {
                 setProductModalOpen(false);
+                setFieldErrors({});
+                setTouchedFields({});
               }}
-              confirmLabel="Save Product"
+              confirmLabel={confirmLabel}
               disabled={savingProduct}
             />
           </fieldset>

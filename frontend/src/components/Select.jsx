@@ -29,6 +29,18 @@ export function Select(props) {
     );
   }
 
+  let borderClass = " border-[#E9E9E9] focus:border-[#171717] focus:ring-[#B9F36B]/30";
+  if (props.error) {
+    borderClass = " border-[#E0533C] focus:border-[#E0533C] focus:ring-[#E0533C]/20";
+  }
+
+  let errorElement = null;
+  if (props.error) {
+    errorElement = (
+      <div className="mt-1.5 text-xs text-[#E0533C]">{props.error}</div>
+    );
+  }
+
   return (
     <div className={extraClass}>
       {labelElement}
@@ -37,11 +49,14 @@ export function Select(props) {
           id={selectId}
           value={props.value}
           onChange={props.onChange}
+          onBlur={props.onBlur}
           required={props.required}
           disabled={props.disabled}
           aria-label={props.ariaLabel}
           className={
-            "w-full appearance-none rounded-xl border border-[#E9E9E9] bg-white text-[#171717] focus:border-[#171717] focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors " +
+            "w-full appearance-none rounded-xl border bg-white text-[#171717] focus:outline-none focus:ring-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors " +
+            borderClass +
+            " " +
             sizeClasses
           }
         >
@@ -54,6 +69,7 @@ export function Select(props) {
           }
         />
       </div>
+      {errorElement}
     </div>
   );
 }
