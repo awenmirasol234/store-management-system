@@ -566,7 +566,7 @@ export function App(props) {
       {userModalElement}
       {shiftModalElement}
 
-      <DebugOverlay defaultVisible={false} />
+      {import.meta.env.DEV && <DebugOverlay defaultVisible={false} />}
     </div>
   );
 }

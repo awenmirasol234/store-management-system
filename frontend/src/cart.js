@@ -77,6 +77,7 @@ export function calculateProductCartStockUsage(cartItems, productId) {
   return totalScaled / 10000;
 }
 
+// shortcut: client-side stock availability checked against local product snapshot; backend transaction re-validates atomically on checkout.
 export function canAddStockToCart(input) {
   const safeInput = input || {};
   const cartItems = safeInput.cartItems || [];

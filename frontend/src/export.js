@@ -1,3 +1,4 @@
+// shortcut: client-side CSV and print report via data URI and window.print(), upgrade to server-side PDF generation if thermal receipt printer integration is needed.
 export function exportToCsv(filename, headers, rows) {
   if (!rows) {
     return false;

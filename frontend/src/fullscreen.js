@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+// shortcut: browser fullscreen API used for kiosk POS mode, upgrade to Electron or native kiosk shell for locked-down retail terminals.
 export function useFullscreen() {
   const [isFullscreen, setIsFullscreen] = useState(function () {
     if (typeof document === "undefined") {

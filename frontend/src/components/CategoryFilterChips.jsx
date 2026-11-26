@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { FilterPill } from "./FilterPill.jsx";
 
 export function CategoryFilterChips(props) {
   const scrollRef = useRef(null);
@@ -68,40 +69,22 @@ export function CategoryFilterChips(props) {
     containerClass = containerClass + " " + props.className;
   }
 
-  const isAllSelected = selectedCategoryId === "ALL";
-  let allChipClass =
-    "shrink-0 rounded-full px-4 py-2 text-xs font-medium flex items-center gap-2 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 ";
-  if (isAllSelected) {
-    allChipClass = allChipClass + "bg-[#171717] font-semibold text-white shadow-xs";
-  } else {
-    allChipClass =
-      allChipClass + "bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#171717]";
-  }
-
-  let allCountBadge = null;
-  if (counts && counts.ALL !== undefined) {
-    let badgeClass = "px-2 py-0.5 rounded-full text-2xs font-mono ";
-    if (isAllSelected) {
-      badgeClass = badgeClass + "bg-[#B9F36B] text-[#171717] font-semibold";
-    } else {
-      badgeClass = badgeClass + "bg-[#EEEEED] text-[#777777]";
-    }
-    allCountBadge = <span className={badgeClass}>{counts.ALL}</span>;
-  }
-
   let allChipElement = null;
   if (showAll) {
+    let allCount = undefined;
+    if (counts && counts.ALL !== undefined) {
+      allCount = counts.ALL;
+    }
     allChipElement = (
-      <button
-        type="button"
+      <FilterPill
+        label="All"
+        active={selectedCategoryId === "ALL"}
+        count={allCount}
         onClick={function selectAll() {
           handleChipClick("ALL");
         }}
-        className={allChipClass}
-      >
-        <span>All</span>
-        {allCountBadge}
-      </button>
+        className="px-4 py-2"
+      />
     );
   }
 
@@ -129,44 +112,26 @@ export function CategoryFilterChips(props) {
           return null;
         }
 
-        // If the category item is "All", skip it since "All" chip is rendered above
         if (categoryId.toUpperCase() === "ALL" || categoryName.toLowerCase() === "all") {
           return null;
         }
 
-        const isSelected = selectedCategoryId === categoryId;
-        let chipClass =
-          "shrink-0 rounded-full px-4 py-2 text-xs font-medium flex items-center gap-2 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 ";
-        if (isSelected) {
-          chipClass = chipClass + "bg-[#171717] font-semibold text-white shadow-xs";
-        } else {
-          chipClass =
-            chipClass + "bg-white text-[#777777] border border-[#E9E9E9] hover:bg-[#EEEEED] hover:text-[#171717]";
-        }
-
-        let countBadge = null;
+        let chipCount = undefined;
         if (counts && counts[categoryId] !== undefined) {
-          let badgeClass = "px-2 py-0.5 rounded-full text-2xs font-mono ";
-          if (isSelected) {
-            badgeClass = badgeClass + "bg-[#B9F36B] text-[#171717] font-semibold";
-          } else {
-            badgeClass = badgeClass + "bg-[#EEEEED] text-[#777777]";
-          }
-          countBadge = <span className={badgeClass}>{counts[categoryId]}</span>;
+          chipCount = counts[categoryId];
         }
 
         return (
-          <button
+          <FilterPill
             key={categoryId}
-            type="button"
+            label={categoryName}
+            active={selectedCategoryId === categoryId}
+            count={chipCount}
             onClick={function selectChip() {
               handleChipClick(categoryId);
             }}
-            className={chipClass}
-          >
-            <span>{categoryName}</span>
-            {countBadge}
-          </button>
+            className="px-4 py-2"
+          />
         );
       })}
     </div>

@@ -10,6 +10,7 @@ export function subscribeToSessionExpiry(listener) {
   };
 }
 
+// shortcut: in-memory token fallback when localStorage is restricted, upgrade to httpOnly cookies for hardened web deployments.
 export function getAuthToken() {
   try {
     if (
@@ -144,7 +145,7 @@ export const api = {
       formData
     );
   },
-  async downloadFile(path, filename) {
+  async downloadFile(path, filename, fallbackErrorMessage) {
     const options = { method: "GET", headers: {} };
     const token = getAuthToken();
     if (token) {
@@ -152,7 +153,8 @@ export const api = {
     }
     const response = await fetch(API_BASE + path, options);
     if (!response.ok) {
-      let message = "Failed to download file";
+      expireSession(response, token);
+      let message = fallbackErrorMessage || "Failed to download file";
       try {
         const payload = await response.json();
         if (payload && payload.error && payload.error.message) {
@@ -164,16 +166,25 @@ export const api = {
       throw new Error(message);
     }
     const blob = await response.blob();
+    let targetName = filename;
+    const disposition = response.headers.get("content-disposition");
+    if (disposition) {
+      const match = disposition.match(/filename="?([^";]+)"?/);
+      if (match && match[1]) {
+        targetName = match[1];
+      }
+    }
     if (typeof window !== "undefined" && window.URL && document.createElement) {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = filename;
+      link.download = targetName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     }
+    return true;
   },
   importProductsFile(file, updateExisting) {
     const formData = new FormData();
@@ -374,47 +385,8 @@ export const api = {
   updateSettings(data) {
     return request("PATCH", "/api/settings", data);
   },
-  async downloadBackup() {
-    const token = getAuthToken();
-    const headers = {};
-    if (token) {
-      headers["Authorization"] = "Bearer " + token;
-    }
-    const response = await fetch(API_BASE + "/api/settings/backup", {
-      method: "GET",
-      headers: headers
-    });
-    if (!response.ok) {
-      expireSession(response, token);
-      let message = "Failed to download database backup";
-      try {
-        const errorJson = await response.json();
-        if (errorJson && errorJson.error && errorJson.error.message) {
-          message = errorJson.error.message;
-        }
-      } catch (e) {
-        // ignore parse error
-      }
-      throw new Error(message);
-    }
-    const blob = await response.blob();
-    const disposition = response.headers.get("content-disposition");
-    let filename = "storeflow-backup.db";
-    if (disposition) {
-      const match = disposition.match(/filename="?([^";]+)"?/);
-      if (match && match[1]) {
-        filename = match[1];
-      }
-    }
-    const blobUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(blobUrl);
-    return true;
+  downloadBackup() {
+    return this.downloadFile("/api/settings/backup", "storeflow-backup.db", "Failed to download database backup");
   }
 };
 
