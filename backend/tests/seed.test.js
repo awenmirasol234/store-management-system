@@ -21,11 +21,56 @@ afterEach(function cleanup() {
 });
 
 describe("seedDatabase", function () {
-  it("leaves receipt numbering after the seeded sales", async function () {
+  it("seeds reference data only by default", async function () {
     activeTempDir = fs.mkdtempSync(path.join(os.tmpdir(), "store-seed-test-"));
     const databasePath = path.join(activeTempDir, "store.db");
 
     const stats = await seedDatabase(databasePath, false);
+
+    expect(stats.units).toBe(28);
+    expect(stats.categories).toBe(20);
+    expect(stats.suppliers).toBe(0);
+    expect(stats.products).toBe(0);
+    expect(stats.selling_options).toBe(0);
+    expect(stats.inventory_transactions).toBe(0);
+    expect(stats.sales_transactions).toBe(0);
+  });
+
+  it("does not remove existing demo data when reference data is re-seeded", async function () {
+    activeTempDir = fs.mkdtempSync(path.join(os.tmpdir(), "store-seed-test-"));
+    const databasePath = path.join(activeTempDir, "store.db");
+
+    await seedDatabase(databasePath, false, true);
+    const stats = await seedDatabase(databasePath, false);
+
+    expect(stats.suppliers).toBe(6);
+    expect(stats.products).toBe(50);
+    expect(stats.selling_options).toBe(16);
+    expect(stats.inventory_transactions).toBe(48);
+    expect(stats.sales_transactions).toBe(12);
+  });
+
+  it("cleans and recreates reference data without demo data", async function () {
+    activeTempDir = fs.mkdtempSync(path.join(os.tmpdir(), "store-seed-test-"));
+    const databasePath = path.join(activeTempDir, "store.db");
+
+    await seedDatabase(databasePath, false, true);
+    const stats = await seedDatabase(databasePath, true);
+
+    expect(stats.units).toBe(28);
+    expect(stats.categories).toBe(20);
+    expect(stats.suppliers).toBe(0);
+    expect(stats.products).toBe(0);
+    expect(stats.selling_options).toBe(0);
+    expect(stats.inventory_transactions).toBe(0);
+    expect(stats.sales_transactions).toBe(0);
+  });
+
+  it("leaves receipt numbering after the seeded sales", async function () {
+    activeTempDir = fs.mkdtempSync(path.join(os.tmpdir(), "store-seed-test-"));
+    const databasePath = path.join(activeTempDir, "store.db");
+
+    const stats = await seedDatabase(databasePath, false, true);
     expect(stats.units).toBe(28);
     expect(stats.categories).toBe(20);
     expect(stats.products).toBe(50);
@@ -65,7 +110,7 @@ describe("seedDatabase", function () {
     activeTempDir = fs.mkdtempSync(path.join(os.tmpdir(), "store-seed-test-"));
     const databasePath = path.join(activeTempDir, "store.db");
 
-    const firstStats = await seedDatabase(databasePath, false);
+    const firstStats = await seedDatabase(databasePath, false, true);
     expect(firstStats.products).toBe(50);
     expect(firstStats.selling_options).toBe(16);
     expect(firstStats.inventory_transactions).toBe(48);
@@ -100,7 +145,7 @@ describe("seedDatabase", function () {
     activeDatabase = null;
 
     // Re-seed should not crash with foreign key constraint failure or duplicate transactions
-    const secondStats = await seedDatabase(databasePath, false);
+    const secondStats = await seedDatabase(databasePath, false, true);
     expect(secondStats.products).toBe(50);
     expect(secondStats.selling_options).toBe(16);
     expect(secondStats.inventory_transactions).toBe(48);
@@ -116,7 +161,7 @@ describe("seedDatabase", function () {
     activeTempDir = fs.mkdtempSync(path.join(os.tmpdir(), "store-seed-test-"));
     const databasePath = path.join(activeTempDir, "store.db");
 
-    await seedDatabase(databasePath, false);
+    await seedDatabase(databasePath, false, true);
 
     activeDatabase = openSqliteDatabase(databasePath);
     const sampleSale = activeDatabase
@@ -155,7 +200,7 @@ describe("seedDatabase", function () {
     activeDatabase.close();
     activeDatabase = null;
 
-    const stats = await seedDatabase(databasePath, true);
+    const stats = await seedDatabase(databasePath, true, true);
     expect(stats.products).toBe(50);
     expect(stats.sales_transactions).toBe(12);
 

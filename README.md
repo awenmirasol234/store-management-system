@@ -84,18 +84,29 @@ beginner guide and examples.
 
 Run all seed commands from `backend/`:
 
-- **Seed Sample Catalog & Sales**:
+- **Seed Reference Data**:
   ```bash
   npm run seed
   ```
-  Applies base units, categories, suppliers, 50 sample products, selling options, initial inventory movements, and sample sales transactions.
+  Applies base units and product categories only.
 
-- **Clean and Reseed Database**:
+- **Seed Demo Data**:
   ```bash
-  npm run seed -- --clean
+  npm run seed:demo
+  ```
+  Applies reference data plus suppliers, 50 sample products, selling options, initial inventory movements, and sample sales transactions.
+
+- **Reset Reference Data**:
+  ```bash
+  npm run seed:reset
+  ```
+
+- **Reset and Seed Demo Data**:
+  ```bash
+  npm run seed:reset:demo
   ```
   > [!WARNING]
-  > `--clean` removes all products, selling options, inventory transactions, sales, returns, customer accounts, credit records, cashier shifts, and user accounts. `store_settings` are retained.
+  > Reset commands remove all products, selling options, inventory transactions, sales, returns, customer accounts, credit records, cashier shifts, and user accounts. `store_settings` are retained.
 
 ---
 
@@ -109,6 +120,8 @@ Deploy the entire stack (Nginx frontend proxy on port `8080` + private Express b
 docker compose up -d --build
 docker compose exec backend node src/db/seed.js
 ```
+
+Use `docker compose exec backend node src/db/seed.js --demo` when a demo catalog and sample sales are needed.
 
 Open `http://localhost:8080`.
 

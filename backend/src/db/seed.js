@@ -13,7 +13,27 @@ import { toMoneyInt, toQuantityInt } from "../shared/decimal.js";
 import { createDefaultIdGenerator, createSystemClock } from "../shared/ports.js";
 import { formatReceiptNumber } from "../sales/domain.js";
 
-export async function seedDatabase(targetDbPath, shouldClean) {
+function readSeedStats(database) {
+  const unitCountRow = database.prepare("SELECT count(*) as count FROM product_units").get();
+  const prodCountRow = database.prepare("SELECT count(*) as count FROM products").get();
+  const catCountRow = database.prepare("SELECT count(*) as count FROM product_categories").get();
+  const supCountRow = database.prepare("SELECT count(*) as count FROM suppliers").get();
+  const optCountRow = database.prepare("SELECT count(*) as count FROM product_selling_options").get();
+  const txCountRow = database.prepare("SELECT count(*) as count FROM inventory_transactions").get();
+  const salesCountRow = database.prepare("SELECT count(*) as count FROM sales_transactions").get();
+
+  return {
+    units: unitCountRow.count,
+    categories: catCountRow.count,
+    suppliers: supCountRow.count,
+    products: prodCountRow.count,
+    selling_options: optCountRow.count,
+    inventory_transactions: txCountRow.count,
+    sales_transactions: salesCountRow.count
+  };
+}
+
+export async function seedDatabase(targetDbPath, shouldClean, shouldSeedDemoData) {
   let resolvedPath = targetDbPath;
   if (!resolvedPath) {
     resolvedPath = path.resolve(import.meta.dirname, "../../data/store.db");
@@ -70,6 +90,10 @@ export async function seedDatabase(targetDbPath, shouldClean) {
     for (let categoryIndex = 0; categoryIndex < CATEGORIES.length; categoryIndex = categoryIndex + 1) {
       const categoryItem = CATEGORIES[categoryIndex];
       insertCatStmt.run(categoryItem.category_id, categoryItem.category_name, categoryItem.description);
+    }
+
+    if (!shouldSeedDemoData) {
+      return readSeedStats(database);
     }
 
     database.exec(`
@@ -302,24 +326,7 @@ export async function seedDatabase(targetDbPath, shouldClean) {
   `);
   receiptSequenceStmt.run(compactDate, SAMPLE_SALES.length);
 
-  const unitCountRow = database.prepare("SELECT count(*) as count FROM product_units").get();
-  const prodCountRow = database.prepare("SELECT count(*) as count FROM products").get();
-  const catCountRow = database.prepare("SELECT count(*) as count FROM product_categories").get();
-  const supCountRow = database.prepare("SELECT count(*) as count FROM suppliers").get();
-  const optCountRow = database.prepare("SELECT count(*) as count FROM product_selling_options").get();
-  const txCountRow = database.prepare("SELECT count(*) as count FROM inventory_transactions").get();
-  const salesCountRow = database.prepare("SELECT count(*) as count FROM sales_transactions").get();
-
-  const stats = {
-      units: unitCountRow.count,
-      categories: catCountRow.count,
-      suppliers: supCountRow.count,
-      products: prodCountRow.count,
-      selling_options: optCountRow.count,
-      inventory_transactions: txCountRow.count,
-      sales_transactions: salesCountRow.count
-    };
-    return stats;
+    return readSeedStats(database);
   } finally {
     database.close();
   }
@@ -330,8 +337,15 @@ const isMain = process.argv[1] && process.argv[1].endsWith("seed.js");
 if (isMain) {
   const databasePath = process.env.DATABASE_PATH;
   const shouldClean = process.argv.includes("--clean");
-  console.log("Seeding store database (clean: " + shouldClean + ")...");
-  const stats = await seedDatabase(databasePath, shouldClean);
+  const shouldSeedDemoData = process.argv.includes("--demo");
+  console.log(
+    "Seeding store database (clean: " +
+      shouldClean +
+      ", demo: " +
+      shouldSeedDemoData +
+      ")..."
+  );
+  const stats = await seedDatabase(databasePath, shouldClean, shouldSeedDemoData);
   console.log("Database seeded successfully!");
   console.log("  Units:                  " + stats.units);
   console.log("  Categories:             " + stats.categories);

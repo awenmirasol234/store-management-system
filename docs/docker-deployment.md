@@ -44,6 +44,13 @@ Execute the seed script inside the running backend container:
 docker compose exec backend node src/db/seed.js
 ```
 
+This seeds base units and product categories only. Add `--demo` when a demo
+catalog and sample sales are needed:
+
+```bash
+docker compose exec backend node src/db/seed.js --demo
+```
+
 ### Step 3: Verify Running Services
 
 ```bash

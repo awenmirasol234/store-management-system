@@ -6,6 +6,9 @@
   "scripts": {
     "start": "node src/server.js",
     "seed": "node src/db/seed.js",
+    "seed:demo": "node src/db/seed.js --demo",
+    "seed:reset": "node src/db/seed.js --clean",
+    "seed:reset:demo": "node src/db/seed.js --clean --demo",
     "test": "vitest run",
     "test:watch": "vitest"
   },
