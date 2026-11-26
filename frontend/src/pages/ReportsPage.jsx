@@ -345,7 +345,7 @@ export function ReportsPage() {
           <tr key={item.product_id} className="hover:bg-[#EEEEED]/40 transition-colors">
             <td className="px-5 py-3.5 text-sm font-medium text-[#171717]">
               <div className="flex items-center gap-3">
-                <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
+                <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" bg="white" />
                 <span className="truncate">{item.product_name}</span>
               </div>
             </td>

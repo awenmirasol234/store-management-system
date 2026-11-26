@@ -26,7 +26,7 @@ export function DashboardPage(props) {
   const [previousSummary, setPreviousSummary] = useState(null);
   const [rangeSummary, setRangeSummary] = useState(null);
   const [lowStock, setLowStock] = useState([]);
-  const [topProducts, setTopProducts] = useState([]);
+  const [topProducts, setTopProducts] = useState(props.initialTopProducts || []);
   const [dailyTrends, setDailyTrends] = useState([]);
   const [categorySales, setCategorySales] = useState([]);
   const [trendRange, setTrendRange] = useState("7D");
@@ -219,7 +219,7 @@ export function DashboardPage(props) {
           return (
             <div key={item.product_id || idx} className="flex items-center justify-between py-3">
               <div className="flex items-center gap-3 min-w-0 pr-3">
-                <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
+                <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" bg="white" />
                 <div className="min-w-0">
                   <div className="truncate text-sm font-medium text-[#171717]">
                     {item.product_name}

@@ -36,6 +36,24 @@ describe("Refactored page rendering", function () {
     expect(html).not.toContain("Reports");
   });
 
+  it("renders top selling products with white placeholder background", function () {
+    const html = renderToString(React.createElement(DashboardPage, {
+      currentUser: { role: "OWNER" },
+      initialTopProducts: [
+        {
+          product_id: "prod-1",
+          product_name: "Century Tuna 180g",
+          quantity_sold: 10,
+          base_unit: "can",
+          revenue: 450
+        }
+      ]
+    }));
+    expect(html).toContain("Top Selling Products");
+    expect(html).toContain("Century Tuna 180g");
+    expect(html).toContain("bg-white border border-[#E9E9E9]");
+  });
+
   it("renders loading feedback while awaiting the first report", function () {
     const html = renderToString(React.createElement(ReportsPage));
     expect(html).toContain("Reports");
