@@ -27,7 +27,7 @@ export function ProductThumb(props) {
       );
     }
     return (
-      <div className="flex h-full w-full items-center justify-center bg-[#EEEEED] text-base font-semibold text-[#777777] select-none">
+      <div className="flex h-full w-full items-center justify-center bg-white text-base font-semibold text-[#777777] select-none">
         {getInitials(props.name)}
       </div>
     );

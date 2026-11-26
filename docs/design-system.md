@@ -97,7 +97,7 @@ Centralized danger and alert color tokens are declared in `frontend/src/index.cs
 
 ### 4.2 Product Cards (`frontend/src/pages/PosPage.jsx`)
 - Container: `rounded-2xl border border-[#E9E9E9] bg-white p-3.5 hover:border-[#171717]/30 hover:shadow-xs`.
-- Media container: `aspect-square rounded-xl bg-[#EEEEED] relative flex items-center justify-center`.
+- Media container: `relative aspect-[4/3] w-full overflow-hidden bg-white border-b border-[#E9E9E9]`.
 - Stock Badge: `absolute left-2 top-2 rounded-md bg-[#171717] px-2 py-0.5 font-mono text-2xs text-white`.
 - Action: Full-width button `py-2 rounded-xl border border-[#E9E9E9] text-xs font-semibold`.
 

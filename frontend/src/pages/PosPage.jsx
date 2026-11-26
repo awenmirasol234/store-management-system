@@ -1025,7 +1025,7 @@ export function PosPage(props) {
                   }}
                   className={cardClickClass}
                 >
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#EEEEED]">
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-white border-b border-[#E9E9E9]">
                     {stockBadge}
                     <ProductThumb
                       imageUrl={product.image_url}

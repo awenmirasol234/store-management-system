@@ -80,7 +80,7 @@ describe("PosPage SSR test", function () {
       })
     );
     expect(thumbHtml).toContain("CO");
-    expect(thumbHtml).toContain("bg-[#EEEEED]");
+    expect(thumbHtml).toContain("bg-white");
   });
 
   it("renders Subtotal row without redundant border-t divider wrapper", function () {
@@ -493,5 +493,25 @@ describe("PosPage SSR test", function () {
 
     expect(html).toContain("Nescafe Classic 50g");
     expect(html).toContain("h-14 w-14 shrink-0");
+  });
+
+  it("renders product card with white background and bordered media container by default", function () {
+    const html = renderToString(
+      React.createElement(PosPage, {
+        initialProducts: [
+          {
+            product_id: "prod-white-bg",
+            product_name: "Century Tuna 180g",
+            base_unit: "Can",
+            current_stock: 12,
+            selling_price: 38,
+            is_active: true
+          }
+        ]
+      })
+    );
+
+    expect(html).toContain("Century Tuna 180g");
+    expect(html).toContain("bg-white border-b border-[#E9E9E9]");
   });
 });
