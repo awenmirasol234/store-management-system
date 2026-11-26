@@ -66,7 +66,7 @@ Open `http://localhost:5173`. Vite proxies `/api` and `/uploads` requests to `ht
 1. Open `http://localhost:5173` in a browser.
 2. Complete the setup wizard to create the initial `OWNER` account and PIN.
 3. Use the created PIN to sign in.
-4. Set `ENFORCE_AUTH=true` in the backend environment when route-level authentication and role checks must be enforced. Default is `false` for development ease.
+4. Route-level authentication and role checks are enabled by default. Set `ENFORCE_AUTH=false` only for local development when unauthenticated route access is intentional.
 
 ---
 

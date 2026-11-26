@@ -64,6 +64,9 @@ Maintains the audit ledger of all physical stock movements.
 - `remarks`: Human-readable reason.
 - `created_by`: User or system ID.
 - `created_at`: ISO timestamp.
+- Creating a product with positive initial stock records a `STOCK_IN` ledger
+  entry in the same transaction as the product row. Its default reference is
+  `INITIAL-STOCK`.
 
 ### 2.4 SalesTransaction & SalesItem
 Stores completed checkout transactions and line-item snapshots.

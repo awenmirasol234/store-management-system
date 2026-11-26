@@ -11,7 +11,7 @@ Use this document when changing frontend styling, shared UI components, or POS l
 The user interface uses a high-contrast, monochromatic palette with an intentional lime-green accent for transactional triggers:
 
 - **Surface Base**: Clean white (`#FFFFFF`) cards against soft neutral background (`#F5F5F4`).
-- **Dark Neutral (Unified Black - `#171717`)**: Single near-black (`#171717`, Tailwind `neutral-900`) used uniformly across all UI components, desktop sidebar, mobile navigation, primary typography, buttons, active filter pills, modal backdrops (`bg-[#171717]/40`), and indicator badges. No other black or near-black shades (such as `#151515`) are permitted in the application UI.
+- **Dark Neutral (Unified Black - `#171717`)**: Primary near-black (`#171717`, Tailwind `neutral-900`) used across the desktop sidebar, mobile navigation, primary typography, buttons, active filter pills, modal backdrops (`bg-[#171717]/40`), and indicator badges. Supporting dark shades are allowed for the development debug overlay and subtle borders or hover states.
 - **Physical Thermal Print Pure Black (`#000000`)**: Pure black is exclusively preserved for hardware thermal receipt printing (`@media print` on `#thermal-receipt`) to guarantee maximum heat transfer, contrast, and barcode legibility on 58mm/80mm thermal paper.
 - **Transactional Accent**: Vibrant lime green (`#B9F36B`, hover `#A8E65A`) reserved for primary buttons, active navigation, and conversion checkpoints.
 - **Hairline Dividers**: Crisp borders (`#E9E9E9`).
@@ -86,7 +86,7 @@ Centralized danger and alert color tokens are declared in `frontend/src/index.cs
 ## 4. Component Implementation Specifications
 
 ### 4.1 Buttons (`frontend/src/components/Button.jsx`)
-- Border radius: `rounded-xl` (14px).
+- Border radius: `rounded-xl` using the Tailwind default radius.
 - Subtle 3D Glossy Effect: All buttons feature gentle gradient lighting, subtle inner specular highlights (`inset 0 1px 0`), a slight bottom bevel (`inset 0 -1px 0`), soft ambient drop shadows (`0 1px 2px`, `0 2px 4px`), and a tactile micro-press on active click (`active:translate-y-[0.5px]`, slight scale, depressed inner shadow).
 - Variants:
   - `primary`: `.btn-glossy-primary` with `bg-[#B9F36B] hover:bg-[#A8E65A] text-[#171717] font-semibold`.

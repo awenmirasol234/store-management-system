@@ -39,7 +39,7 @@ StoreFlow is a local-first retail point-of-sale (POS) and inventory management s
 - Selling options (packs, bundles, promos, weight/volume presets).
 - Global barcode uniqueness across `products` and `product_selling_options`.
 - Image attachments stored in `uploads/products/` with static serving.
-- Bulk stock-in with pack multiplier, stock adjustments (`ADJUSTMENT`, `DAMAGED`, `EXPIRED`), low-stock alerts.
+- Initial stock is recorded in the inventory audit ledger, alongside bulk stock-in with pack multiplier, stock adjustments (`ADJUSTMENT`, `DAMAGED`, `EXPIRED`), and low-stock alerts.
 
 ### 3.2 Sales & POS Checkout (`backend/src/sales/`)
 - Fast POS checkout supporting default base units, preset selling options, and ad-hoc custom peso ("tingi") sales.
@@ -55,8 +55,8 @@ StoreFlow is a local-first retail point-of-sale (POS) and inventory management s
 
 ### 3.4 User Roles & Cashier Shifts (`backend/src/auth/` & `backend/src/shifts/`)
 - Role-Based Access Control: `OWNER` (full administrative rights) and `CASHIER` (POS and shift duties).
-- First-time wizard creating the initial `OWNER` account; scrypt PIN hashing.
-- Cashier shift tracking: opening cash, cash movements (`CASH_IN`, `CASH_OUT`), expected cash calculation, variance reconciliation, shift closing.
+- First-time wizard creating the initial `OWNER` account; scrypt PIN hashing; hashed session-token storage; and protection against removing the last active owner.
+- Cashier shift tracking: opening cash, cash movements (`CASH_IN`, `CASH_OUT`), expected cash calculation, variance reconciliation, shift closing, and shift validation for drawer-related activity.
 
 ### 3.5 Reports & Analytics (`backend/src/reports/`)
 - Daily sales, gross revenue, net profit (`SUM(subtotal - base_quantity * unit_cost)`).

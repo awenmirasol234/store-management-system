@@ -132,11 +132,26 @@ docker compose restart nginx
 
 ## 7. Container Environment Variables
 
-Compose passes the following defaults to the backend service:
+The root `compose.yaml` passes these required values to the backend:
 
 | Variable | Container Value | Description |
 | :--- | :--- | :--- |
 | `PORT` | `3001` | Internal HTTP listening port |
-| `DATABASE_PATH` | `/data/store.db` | Absolute SQLite database file path on `store_data` volume |
+| `DATABASE_PATH` | `/data/store.db` | Absolute SQLite database file path on the `store_data` volume |
 | `UPLOADS_DIR` | `/data/uploads` | Directory for product image attachments |
-| `NODE_ENV` | `production` | Node.js production runtime optimization |
+
+The backend also supports these optional environment variables. Compose does
+not set them by default, so the application defaults apply unless they are
+added to the service environment:
+
+| Variable | Application Default | Description |
+| :--- | :--- | :--- |
+| `ENFORCE_AUTH` | `true` | Set to `false` only for intentional local development access |
+| `STORE_OPERATION_MODE` | `single_user` | Use `multi_user` to enable staff management and roles |
+| `ENABLE_CASH_DRAWER` | `false` | Enables shifts, cash movements, and drawer reconciliation |
+| `ENABLE_CUSTOMER_CREDIT` | `true` | Enables customer credit and payment features |
+| `ENABLE_SELLING_OPTIONS` | `true` | Enables packs, bundles, and other selling options |
+| `ENABLE_CUSTOM_AMOUNT_SALES` | `true` | Enables custom peso or “tingi” sales |
+| `ENABLE_PRODUCT_CATALOG_EXTRAS` | `true` | Enables categories, suppliers, and related catalog extras |
+| `ENABLE_PRODUCT_IMAGES` | `true` | Enables product image uploads and remote image imports |
+| `ENABLE_DATABASE_BACKUP` | `true` | Enables the database backup endpoint |
