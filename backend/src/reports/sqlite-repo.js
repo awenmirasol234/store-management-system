@@ -1,4 +1,5 @@
 export function createSqliteReportsRepository(database) {
+  // shortcut: date() SQL expression scans table without index seek, upgrade to UTC timestamp range bounds when sales table exceeds ~100k rows.
   const MANILA_SQL_OFFSET = "'+8 hours'";
   const COMPLETED_SALE_STATUS = "COMPLETED";
 

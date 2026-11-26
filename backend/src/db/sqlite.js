@@ -25,6 +25,7 @@ export function openSqliteDatabase(databasePath) {
   return database;
 }
 
+// shortcut: in-memory promise queue serializes concurrent writes in single Node process, upgrade to external locking if multiple API server instances share the SQLite file.
 export function createSqliteUnitOfWork(database) {
   const transactionStorage = new AsyncLocalStorage();
   let transactionQueue = Promise.resolve();

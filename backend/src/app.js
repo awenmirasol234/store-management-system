@@ -1,6 +1,5 @@
 import path from "node:path";
 import express from "express";
-import cors from "cors";
 import multer from "multer";
 import { DomainError } from "./shared/errors.js";
 import { createSecurityHeadersMiddleware } from "./shared/security-headers.js";
@@ -290,7 +289,16 @@ export function createApp(options) {
 
   const app = express();
   app.use(createSecurityHeadersMiddleware());
-  app.use(cors());
+  app.use(function corsMiddleware(request, response, next) {
+    response.setHeader("Access-Control-Allow-Origin", "*");
+    response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+    response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (request.method === "OPTIONS") {
+      response.sendStatus(204);
+      return;
+    }
+    next();
+  });
   app.use(express.json({ limit: "1mb" }));
   app.use("/uploads", express.static(uploadsDir));
   app.use(authMiddleware.authenticate);

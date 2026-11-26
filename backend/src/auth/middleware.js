@@ -1,5 +1,6 @@
 import { ForbiddenError, TooManyRequestsError, UnauthorizedError } from "../shared/errors.js";
 
+// shortcut: in-memory Map rate limiter resets on process restart, upgrade to persistent store or Redis if multi-process or persistent rate limiting is needed.
 export function createInMemoryRateLimiter(options) {
   let config = options;
   if (!config) {
