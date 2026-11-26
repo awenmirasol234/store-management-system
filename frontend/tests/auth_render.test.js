@@ -17,7 +17,7 @@ describe("Frontend Auth & Security Component Rendering", function () {
     expect(html).toContain("Duane Store");
     expect(html).toContain("Staff Username");
     expect(html).toContain("Security PIN");
-    expect(html).toContain("Sign In to Terminal");
+    expect(html).toContain("Sign In");
     // Keypad numbers
     expect(html).toContain("1");
     expect(html).toContain("9");

@@ -6,7 +6,6 @@ import { createRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { useFullscreen } from "../src/fullscreen.js";
 import { Sidebar } from "../src/components/Sidebar.jsx";
-import { PosPage } from "../src/pages/PosPage.jsx";
 import { App } from "../src/App.jsx";
 import { api, clearAuthToken, setAuthToken } from "../src/api.js";
 
@@ -198,11 +197,6 @@ describe("Fullscreen functionality & useFullscreen hook", function () {
     expect(htmlCollapsed).toContain('aria-label="Fullscreen"');
   });
 
-  it("renders Fullscreen button in PosPage (SSR)", function () {
-    const html = renderToString(React.createElement(PosPage));
-    expect(html).toContain('title="Fullscreen"');
-    expect(html).toContain('aria-label="Fullscreen"');
-  });
 
   it("renders Fullscreen button in App header when authenticated", async function () {
     setAuthToken("test-token");

@@ -114,7 +114,7 @@ export function LoginPage(props) {
     errorElement = <ErrorBanner message={errorBanner} className="mb-4" />;
   }
 
-  let submitButtonText = "Sign In to Terminal";
+  let submitButtonText = "Sign In";
   if (submitting) {
     submitButtonText = "Signing in...";
   }
