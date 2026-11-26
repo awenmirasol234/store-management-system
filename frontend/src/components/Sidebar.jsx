@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, LogOut, Store, Users, Wallet } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Maximize, Minimize, Store, Users, Wallet } from "lucide-react";
 import { getFilteredNavItems } from "../navigation.js";
 import { APP_VERSION } from "../version.js";
+import { useFullscreen } from "../fullscreen.js";
 
 export function Sidebar(props) {
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
   const [collapsed, setCollapsed] = useState(function initCollapsed() {
     try {
       return localStorage.getItem("storeflow_sidebar_collapsed") === "true";
@@ -121,6 +123,18 @@ export function Sidebar(props) {
     );
   }
 
+  const fullscreenButton = (
+    <button
+      type="button"
+      onClick={toggleFullscreen}
+      className="p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white rounded-lg cursor-pointer transition-colors"
+      title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+      aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+    >
+      {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+    </button>
+  );
+
   let manageStaffButton = null;
   let collapsedStaffButton = null;
   if (
@@ -205,6 +219,7 @@ export function Sidebar(props) {
         </div>
         {collapsedDrawerButton}
         {collapsedStaffButton}
+        {fullscreenButton}
         {logoutButton}
         <div className="text-3xs text-[#777777]" title={"Version " + APP_VERSION}>
           v{APP_VERSION}
@@ -224,7 +239,10 @@ export function Sidebar(props) {
               <div className="text-tiny text-[#A3A3A3]">{displayRole}</div>
             </div>
           </div>
-          {logoutButton}
+          <div className="flex items-center gap-1 shrink-0">
+            {fullscreenButton}
+            {logoutButton}
+          </div>
         </div>
         {cashDrawerButton}
         {manageStaffButton}

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { LogOut, Store, Wallet } from "lucide-react";
+import { LogOut, Maximize, Minimize, Store, Wallet } from "lucide-react";
 import { api, clearAuthToken, getAuthToken, subscribeToSessionExpiry } from "./api.js";
+import { useFullscreen } from "./fullscreen.js";
 import { Sidebar } from "./components/Sidebar.jsx";
 import { BottomNav } from "./components/BottomNav.jsx";
 import { UserManagementModal } from "./components/UserManagementModal.jsx";
@@ -44,6 +45,7 @@ function reportStorageError(error) {
 }
 
 export function App(props) {
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
   let initialActivePage = "dashboard";
   if (props && props.initialPage) {
     initialActivePage = props.initialPage;
@@ -510,6 +512,15 @@ export function App(props) {
           >
             {mobileInitials}
           </div>
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            className="p-1.5 text-[#A3A3A3] hover:text-white cursor-pointer transition-colors"
+          >
+            {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+          </button>
           <button
             type="button"
             onClick={handleLogout}

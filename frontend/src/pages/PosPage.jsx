@@ -6,6 +6,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  Maximize,
+  Minimize,
   Plus,
   ShoppingBag,
   Tag,
@@ -13,6 +15,7 @@ import {
   Wallet
 } from "lucide-react";
 import { api } from "../api.js";
+import { useFullscreen } from "../fullscreen.js";
 import { DEFAULT_CAPABILITIES } from "../navigation.js";
 import {
   calculateProductCartStockUsage,
@@ -50,6 +53,7 @@ function buildCartKey(productId, optionId, customAmount) {
 }
 
 export function PosPage(props) {
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
   const searchInputRef = useRef(null);
   const capabilities = props.capabilities || DEFAULT_CAPABILITIES;
 
@@ -1689,6 +1693,16 @@ export function PosPage(props) {
             >
               <Bell className="h-4 w-4" />
               {lowStockBadge}
+            </button>
+
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="btn-glossy btn-glossy-secondary flex h-11 w-11 items-center justify-center rounded-xl border border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] cursor-pointer shrink-0 transition-colors"
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+              aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            >
+              {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
             </button>
           </div>
         </PageHeader>
