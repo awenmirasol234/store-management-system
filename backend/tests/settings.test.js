@@ -160,7 +160,7 @@ describe("Store Settings Module", function () {
       expect(response.status).toBe(200);
       const body = await response.json();
       expect(body.data).toBeDefined();
-      expect(body.data.store_name).toBe("StoreFlow POS");
+      expect(body.data.store_name).toBe("Duane Store");
     });
 
     it("PATCH /api/settings updates settings", async function () {
@@ -256,7 +256,7 @@ describe("Store Settings Module", function () {
       });
       expect(response.status).toBe(200);
       const body = await response.json();
-      expect(body.data.store_name).toBe("StoreFlow POS");
+      expect(body.data.store_name).toBe("Duane Store");
     });
 
     it("forbids cashier from updating settings", async function () {

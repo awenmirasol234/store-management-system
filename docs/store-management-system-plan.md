@@ -8,7 +8,7 @@ Use this document to understand project scope, reported implementation status, a
 
 ## 1. System Scope & Architecture
 
-StoreFlow is a local-first retail point-of-sale (POS) and inventory management system designed for Philippine retail stores (Sari-Sari stores, mini-groceries).
+Duane Store is a local-first retail point-of-sale (POS) and inventory management system designed for Philippine retail stores (Sari-Sari stores, mini-groceries).
 
 ### Core Standards
 - **Currency**: Philippine Peso (`₱`), stored in database as integer centavos (`× 100`).

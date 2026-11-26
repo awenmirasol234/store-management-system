@@ -2,7 +2,7 @@ import { ValidationError } from "../shared/errors.js";
 
 export const DEFAULT_STORE_SETTINGS = {
   id: "default",
-  store_name: "StoreFlow POS",
+  store_name: "Duane Store",
   tagline: "Quality goods & daily essentials",
   address: "",
   phone: "",

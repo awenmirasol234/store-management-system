@@ -62,7 +62,7 @@ export function SettingsPage(props) {
   const [successMessage, setSuccessMessage] = useState("");
 
   const [formData, setFormData] = useState({
-    store_name: "StoreFlow POS",
+    store_name: "Duane Store",
     tagline: "",
     address: "",
     phone: "",
@@ -517,7 +517,7 @@ export function SettingsPage(props) {
                     <div className="mx-auto max-w-[240px] rounded-lg border border-[#E9E9E9] bg-white p-3 font-mono text-3xs text-[#171717] shadow-xs">
                       <div className="border-b border-dashed border-[#E9E9E9] pb-2 text-center space-y-0.5">
                         <div className="text-xs font-bold uppercase">
-                          {formData.store_name || "STOREFLOW POS"}
+                          {formData.store_name || "DUANE STORE"}
                         </div>
                         {previewTagline}
                         {previewAddress}

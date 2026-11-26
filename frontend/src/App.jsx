@@ -39,7 +39,7 @@ const SettingsPage = lazy(function loadSettingsPage() {
 
 function reportStorageError(error) {
   if (import.meta.env.DEV && typeof console !== "undefined" && console.warn) {
-    console.warn("StoreFlow local storage is unavailable.", error);
+    console.warn("Duane Store local storage is unavailable.", error);
   }
 }
 
@@ -302,7 +302,7 @@ export function App(props) {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#171717] text-[#B9F36B]">
             <Store className="h-5 w-5" />
           </div>
-          <div className="text-base font-bold">StoreFlow</div>
+          <div className="text-base font-bold">Duane Store</div>
         </div>
       </div>
     );
@@ -498,7 +498,7 @@ export function App(props) {
             <Store className="h-4 w-4" />
           </div>
           <div>
-            <div className="text-xs font-bold leading-tight">StoreFlow</div>
+            <div className="text-xs font-bold leading-tight">Duane Store</div>
             <div className="text-2xs text-[#A3A3A3]">{getPageTitle(activePage)}</div>
           </div>
         </div>

@@ -14,7 +14,7 @@ import { getFilteredNavItems } from "../src/navigation.js";
 describe("Frontend Auth & Security Component Rendering", function () {
   it("renders LoginPage with staff username input and on-screen PIN keypad", function () {
     const html = renderToString(React.createElement(LoginPage));
-    expect(html).toContain("StoreFlow");
+    expect(html).toContain("Duane Store");
     expect(html).toContain("Staff Username");
     expect(html).toContain("Security PIN");
     expect(html).toContain("Sign In to Terminal");
@@ -33,7 +33,7 @@ describe("Frontend Auth & Security Component Rendering", function () {
 
   it("renders SetupPage for first-time Store Owner setup", function () {
     const html = renderToString(React.createElement(SetupPage));
-    expect(html).toContain("Welcome to StoreFlow");
+    expect(html).toContain("Welcome to Duane Store");
     expect(html).toContain("Owner Username");
     expect(html).toContain("Owner Role Privileges");
     expect(html).toContain("Create Store Owner Account");
@@ -115,7 +115,7 @@ describe("Frontend Auth & Security Component Rendering", function () {
   it("renders App shell without crashing during initial mount", function () {
     const html = renderToString(React.createElement(App));
     expect(typeof html).toBe("string");
-    expect(html).toContain("StoreFlow");
+    expect(html).toContain("Duane Store");
   });
 
   it("renders PosPage and DashboardPage with currentUser prop", function () {

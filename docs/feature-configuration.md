@@ -1,6 +1,6 @@
 # Feature Configuration
 
-StoreFlow starts in **single-user mode**. The owner can use POS, inventory,
+Duane Store starts in **single-user mode**. The owner can use POS, inventory,
 sales, transactions, reports, and the dashboard. Owner login remains required.
 
 ## Optional features

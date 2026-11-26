@@ -6,7 +6,7 @@
 
 ### Added
 
-- StoreFlow POS with inventory, products, selling options, stock movements, and barcode support.
+- Duane Store POS with inventory, products, selling options, stock movements, and barcode support.
 - POS checkout with cart management, discounts, custom amounts, returns, and receipt numbering.
 - Customer credit, cashier shifts, cash drawer reconciliation, reports, CSV export, and receipt customization.
 - Owner setup, staff management, PIN authentication, sessions, and role-based access.

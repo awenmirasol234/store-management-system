@@ -1,6 +1,6 @@
 # Retail POS Dashboard — Tactical Design System
 
-Tactical specifications for the StoreFlow POS interface, design tokens, responsive layout, and UI components.
+Tactical specifications for the Duane Store POS interface, design tokens, responsive layout, and UI components.
 
 Use this document when changing frontend styling, shared UI components, or POS layout. Preserve the documented accessibility and responsive behavior alongside the visual specifications.
 
@@ -51,7 +51,7 @@ Centralized danger and alert color tokens are declared in `frontend/src/index.cs
 
 ```
 +--------------------------------------------------------------------------------------------------+
-| STOREFLOW POS COCKPIT LAYOUT                                                                     |
+| DUANE STORE POS COCKPIT LAYOUT                                                                     |
 +--------------+-------------------------------------------------------------+---------------------+
 | SIDEBAR      | MAIN PRODUCT WORKSPACE (~65%)                               | TRANSACTION PANEL   |
 | (#171717)    | +---------------------------------------------------------+ | (~32%)              |

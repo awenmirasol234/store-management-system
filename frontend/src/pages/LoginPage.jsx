@@ -127,7 +127,7 @@ export function LoginPage(props) {
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#171717] text-[#B9F36B] shadow-xs">
             <Store className="h-6 w-6" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-[#171717]">StoreFlow</h1>
+          <h1 className="text-xl font-bold tracking-tight text-[#171717]">Duane Store</h1>
           <p className="mt-1 text-xs text-[#777777]">Sign in with your staff account and PIN</p>
         </div>
 

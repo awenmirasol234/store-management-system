@@ -66,7 +66,7 @@ export function Sidebar(props) {
       <div className="flex flex-col items-center gap-3 py-6">
         <div
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] text-[#171717] shrink-0"
-          title="StoreFlow POS"
+          title="Duane Store POS"
         >
           <Store className="h-5 w-5" />
         </div>
@@ -89,7 +89,7 @@ export function Sidebar(props) {
             <Store className="h-5 w-5" />
           </div>
           <div>
-            <div className="text-sm font-bold text-white leading-tight">StoreFlow</div>
+            <div className="text-sm font-bold text-white leading-tight">Duane Store</div>
             <div className="text-xs text-[#A3A3A3]">POS</div>
           </div>
         </div>

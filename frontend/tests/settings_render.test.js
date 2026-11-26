@@ -124,7 +124,7 @@ describe("Settings Page & Navigation Integration", function () {
         sale: mockSale,
         items: [],
         storeSettings: {
-          store_name: "StoreFlow POS",
+          store_name: "Duane Store",
           show_cashier_on_receipt: 0
         }
       })
@@ -154,7 +154,7 @@ describe("Settings Page & Navigation Integration", function () {
         items: []
       })
     );
-    expect(html).toContain("STOREFLOW POS");
+    expect(html).toContain("DUANE STORE");
     getSettingsSpy.mockRestore();
   });
 });

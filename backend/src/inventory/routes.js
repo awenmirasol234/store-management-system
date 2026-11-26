@@ -338,7 +338,7 @@ export function createInventoryRouter(dependencies) {
             signal: controller.signal,
             headers: {
               Accept: "image/jpeg,image/png,image/webp,image/*",
-              "User-Agent": "StoreFlow-POS/1.0"
+              "User-Agent": "DuaneStore-POS/1.0"
             }
           });
         } catch (err) {

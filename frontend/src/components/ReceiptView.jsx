@@ -40,7 +40,7 @@ export function ReceiptView(props) {
   }
 
   const settings = internalSettings;
-  let storeName = "STOREFLOW POS";
+  let storeName = "DUANE STORE";
   if (settings && settings.store_name) {
     storeName = settings.store_name;
   }
