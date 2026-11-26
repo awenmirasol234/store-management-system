@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, LogOut, Store, Users, Wallet } from "lucide-react";
 import { getFilteredNavItems } from "../navigation.js";
+import { APP_VERSION } from "../version.js";
 
 export function Sidebar(props) {
   const [collapsed, setCollapsed] = useState(function initCollapsed() {
@@ -205,6 +206,9 @@ export function Sidebar(props) {
         {collapsedDrawerButton}
         {collapsedStaffButton}
         {logoutButton}
+        <div className="text-3xs text-[#777777]" title={"Version " + APP_VERSION}>
+          v{APP_VERSION}
+        </div>
       </div>
     );
   } else {
@@ -224,6 +228,7 @@ export function Sidebar(props) {
         </div>
         {cashDrawerButton}
         {manageStaffButton}
+        <div className="pt-1 text-3xs text-[#777777]">Version {APP_VERSION}</div>
       </div>
     );
   }

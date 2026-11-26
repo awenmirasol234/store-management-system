@@ -82,6 +82,8 @@ describe("Frontend Auth & Security Component Rendering", function () {
     expect(ownerHtml).toContain("Owner");
     expect(ownerHtml).toContain("Manage Staff");
     expect(ownerHtml).toContain("Reports");
+    expect(ownerHtml).toContain("Version");
+    expect(ownerHtml).toContain("1.0.0");
 
     const cashierHtml = renderToString(
       React.createElement(Sidebar, {
