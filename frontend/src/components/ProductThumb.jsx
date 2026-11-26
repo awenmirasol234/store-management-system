@@ -42,7 +42,11 @@ export function ProductThumb(props) {
 
   let bgClass = "bg-[#EEEEED]";
   if (props.bg === "white" || props.bgWhite) {
-    bgClass = "bg-white border border-[#E9E9E9]";
+    if (props.border === false || props.noBorder) {
+      bgClass = "bg-white";
+    } else {
+      bgClass = "bg-white border border-[#E9E9E9]";
+    }
   }
 
   let extraClass = "";

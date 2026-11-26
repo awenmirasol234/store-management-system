@@ -1248,6 +1248,7 @@ export function PosPage(props) {
             name={item.product_name}
             size="md"
             bg="white"
+            border={false}
           />
           <div className="min-w-0 flex-1">
             <div className="truncate text-xs font-semibold text-[#171717]">

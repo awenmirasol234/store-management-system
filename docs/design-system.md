@@ -101,7 +101,7 @@ Centralized danger and alert color tokens are declared in `frontend/src/index.cs
 - Media container: `relative aspect-[4/3] w-full overflow-hidden bg-white border-b border-[#E9E9E9]`.
 - Stock Badge: `absolute left-2 top-2 rounded-md bg-[#171717] px-2 py-0.5 font-mono text-2xs text-white`.
 - Action: Full-width button `py-2 rounded-xl border border-[#E9E9E9] text-xs font-semibold`.
-- Cart Thumbnails: `h-14 w-14 shrink-0 rounded-xl bg-white border border-[#E9E9E9]` with `object-cover` image or centered initials fallback.
+- Cart Thumbnails: `h-14 w-14 shrink-0 rounded-xl bg-white` with `object-cover` image or centered initials fallback (container outline removed).
 - **Dynamic Grid Columns & Minimum Card Width**:
   - Desktop ($\ge$ 1024px): minimum card width of **200px** with 12px gap.
   - Tablets (768px – 1023px): minimum card width of **180px** with 12px gap.

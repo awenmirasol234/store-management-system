@@ -83,6 +83,27 @@ describe("PosPage SSR test", function () {
     expect(thumbHtml).toContain("bg-white");
   });
 
+  it("renders cart product thumbnails without container border outline", function () {
+    const html = renderToString(
+      React.createElement(PosPage, {
+        initialCartItems: [
+          {
+            key: "prod-1:base",
+            product_id: "prod-1",
+            product_name: "Century Tuna 180g",
+            unit_price: 45,
+            selling_price: 45,
+            quantity: 1,
+            base_quantity_per_unit: 1
+          }
+        ]
+      })
+    );
+    expect(html).toContain("Century Tuna 180g");
+    expect(html).toContain("h-14 w-14");
+    expect(html).not.toContain("h-14 w-14 shrink-0 rounded-xl bg-white border border-[#E9E9E9]");
+  });
+
   it("renders Subtotal row without redundant border-t divider wrapper", function () {
     const html = renderToString(React.createElement(PosPage));
     expect(html).toContain("Subtotal");
@@ -493,7 +514,8 @@ describe("PosPage SSR test", function () {
 
     expect(html).toContain("Nescafe Classic 50g");
     expect(html).toContain("h-14 w-14 shrink-0");
-    expect(html).toContain("bg-white border border-[#E9E9E9]");
+    expect(html).toContain("bg-white");
+    expect(html).not.toContain("h-14 w-14 shrink-0 rounded-xl bg-white border border-[#E9E9E9]");
   });
 
   it("renders cart item thumbnail with white background and border for fallback placeholder", function () {
@@ -516,7 +538,8 @@ describe("PosPage SSR test", function () {
 
     expect(html).toContain("Instant Noodles");
     expect(html).toContain("IN");
-    expect(html).toContain("bg-white border border-[#E9E9E9]");
+    expect(html).toContain("bg-white");
+    expect(html).not.toContain("h-14 w-14 shrink-0 rounded-xl bg-white border border-[#E9E9E9]");
   });
 
   it("renders product card with white background and bordered media container by default", function () {
