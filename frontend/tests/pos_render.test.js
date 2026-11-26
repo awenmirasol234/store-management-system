@@ -234,7 +234,7 @@ describe("PosPage SSR test", function () {
     expect(html).not.toContain("md:grid-cols-4");
     expect(html).toContain("xl:grid-cols-5");
     expect(html).not.toContain("xl:grid-cols-4");
-    expect(html).toContain("h-24 w-full");
+    expect(html).toContain("h-30 w-full");
     expect(html).not.toContain("aspect-[4/3]");
     expect(html).toContain("p-2 sm:p-2.5");
     expect(html).not.toContain("data-product-id");
