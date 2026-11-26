@@ -102,8 +102,9 @@ export function createGetCustomerUseCase(dependencies) {
 export function createListCustomersUseCase(dependencies) {
   return async function execute(input) {
     const safeInput = input || {};
-    if (safeInput.query && safeInput.query.trim().length > 0) {
-      return dependencies.customerRepository.search(safeInput.query.trim());
+    const query = normalizeOptionalText(safeInput.query, "query");
+    if (query !== null) {
+      return dependencies.customerRepository.search(query);
     }
     return dependencies.customerRepository.listAll();
   };

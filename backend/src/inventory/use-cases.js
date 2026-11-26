@@ -1,6 +1,10 @@
 import { fromMoneyInt, fromQuantityInt, toMoneyInt, toQuantityInt } from "../shared/decimal.js";
 import { ConflictError, NotFoundError, ValidationError } from "../shared/errors.js";
-import { normalizeOptionalText } from "../shared/validation.js";
+import {
+  normalizeBoolean,
+  normalizeOptionalText,
+  requireNonEmptyText
+} from "../shared/validation.js";
 import { generateCsv, parseCsv } from "../shared/csv.js";
 import { generateProductXlsxTemplate, generateProductsXlsx, parseXlsx } from "../shared/xlsx.js";
 import {
@@ -33,16 +37,46 @@ async function assertBarcodeAvailable(dependencies, barcode, ignoreProductId, ig
   }
 }
 
+async function assertCategoryAvailable(dependencies, categoryId) {
+  if (
+    categoryId === null ||
+    !dependencies.categoryRepository ||
+    typeof dependencies.categoryRepository.findById !== "function"
+  ) {
+    return;
+  }
+  const category = await dependencies.categoryRepository.findById(categoryId);
+  if (!category || !category.is_active) {
+    throw new NotFoundError("Category not found: " + categoryId);
+  }
+}
+
+async function assertSupplierAvailable(dependencies, supplierId) {
+  if (
+    supplierId === null ||
+    !dependencies.supplierRepository ||
+    typeof dependencies.supplierRepository.findById !== "function"
+  ) {
+    return;
+  }
+  const supplier = await dependencies.supplierRepository.findById(supplierId);
+  if (!supplier || !supplier.is_active) {
+    throw new NotFoundError("Supplier not found: " + supplierId);
+  }
+}
+
 export function createCreateProductUseCase(dependencies) {
   return async function execute(input) {
     const safeInput = input || {};
     const now = dependencies.clock.nowIso();
     const barcode = normalizeOptionalText(safeInput.barcode, "barcode");
+    const categoryId = normalizeOptionalText(safeInput.category_id, "category_id");
     await assertBarcodeAvailable(dependencies, barcode, null, null);
+    await assertCategoryAvailable(dependencies, categoryId);
 
     const product = createProductEntity({
       product_id: dependencies.idGenerator.nextId(),
-      category_id: safeInput.category_id,
+      category_id: categoryId,
       product_name: safeInput.product_name,
       barcode: barcode,
       description: safeInput.description,
@@ -99,20 +133,26 @@ function pickField(incomingValue, fallbackValue) {
 export function createUpdateProductUseCase(dependencies) {
   return async function execute(input) {
     const safeInput = input || {};
-    const existing = await dependencies.productRepository.findById(safeInput.product_id);
+    const productId = requireNonEmptyText(safeInput.product_id, "product_id");
+    const existing = await dependencies.productRepository.findById(productId);
     if (!existing || existing.deleted_at !== null) {
-      throw new NotFoundError("Product not found: " + safeInput.product_id);
+      throw new NotFoundError("Product not found: " + productId);
     }
 
     let nextBarcode = existing.barcode;
     if (safeInput.barcode !== undefined) {
       nextBarcode = normalizeOptionalText(safeInput.barcode, "barcode");
     }
+    const categoryId = normalizeOptionalText(
+      pickField(safeInput.category_id, existing.category_id),
+      "category_id"
+    );
+    await assertCategoryAvailable(dependencies, categoryId);
     await assertBarcodeAvailable(dependencies, nextBarcode, existing.product_id, null);
 
     const updated = createProductEntity({
       product_id: existing.product_id,
-      category_id: pickField(safeInput.category_id, existing.category_id),
+      category_id: categoryId,
       product_name: pickField(safeInput.product_name, existing.product_name),
       barcode: nextBarcode,
       description: pickField(safeInput.description, existing.description),
@@ -137,9 +177,10 @@ export function createUpdateProductUseCase(dependencies) {
 export function createDeleteProductUseCase(dependencies) {
   return async function execute(input) {
     const safeInput = input || {};
-    const existing = await dependencies.productRepository.findById(safeInput.product_id);
+    const productId = requireNonEmptyText(safeInput.product_id, "product_id");
+    const existing = await dependencies.productRepository.findById(productId);
     if (!existing || existing.deleted_at !== null) {
-      throw new NotFoundError("Product not found: " + safeInput.product_id);
+      throw new NotFoundError("Product not found: " + productId);
     }
 
     const now = dependencies.clock.nowIso();
@@ -214,6 +255,9 @@ export function createStockInUseCase(dependencies) {
         if (!option || option.product_id !== product.product_id) {
           throw new NotFoundError("Selling option not found for product: " + safeInput.option_id);
         }
+        if (!option.is_active) {
+          throw new ValidationError("Selling option is inactive: " + option.option_name);
+        }
         optionQuantity = option.quantity;
         optionId = option.option_id;
       }
@@ -222,6 +266,8 @@ export function createStockInUseCase(dependencies) {
       const addedQuantityInt = toQuantityInt(addedQuantity, "added_quantity");
       const currentStockInt = toQuantityInt(product.current_stock, "current_stock");
       const updatedStock = fromQuantityInt(currentStockInt + addedQuantityInt);
+      const supplierId = normalizeOptionalText(safeInput.supplier_id, "supplier_id");
+      await assertSupplierAvailable(dependencies, supplierId);
 
       let nextCostPrice = product.cost_price;
       let transactionUnitCost = product.cost_price;
@@ -243,7 +289,7 @@ export function createStockInUseCase(dependencies) {
       const transaction = createInventoryTransactionEntity({
         transaction_id: dependencies.idGenerator.nextId(),
         product_id: product.product_id,
-        supplier_id: safeInput.supplier_id,
+        supplier_id: supplierId,
         option_id: optionId,
         transaction_type: INVENTORY_TRANSACTION_TYPES.STOCK_IN,
         quantity: addedQuantity,
@@ -348,7 +394,7 @@ export function createListProductsUseCase(dependencies) {
 export function createLookupBarcodeUseCase(dependencies) {
   return async function execute(input) {
     const safeInput = input || {};
-    const barcode = safeInput.barcode;
+    const barcode = requireNonEmptyText(safeInput.barcode, "barcode");
     const product = await dependencies.productRepository.findByBarcode(barcode);
     if (product && product.deleted_at === null && product.is_active) {
       const options = await dependencies.sellingOptionRepository.listByProductId(product.product_id);
@@ -395,14 +441,16 @@ export function createGetProductUseCase(dependencies) {
 export function createListSellingOptionsUseCase(dependencies) {
   return async function execute(input) {
     const safeInput = input || {};
-    return dependencies.sellingOptionRepository.listByProductId(safeInput.product_id);
+    const productId = requireNonEmptyText(safeInput.product_id, "product_id");
+    return dependencies.sellingOptionRepository.listByProductId(productId);
   };
 }
 
 export function createListInventoryTransactionsUseCase(dependencies) {
   return async function execute(input) {
     const safeInput = input || {};
-    return dependencies.inventoryTransactionRepository.listByProductId(safeInput.product_id);
+    const productId = requireNonEmptyText(safeInput.product_id, "product_id");
+    return dependencies.inventoryTransactionRepository.listByProductId(productId);
   };
 }
 
@@ -449,7 +497,11 @@ export function createListUnitsUseCase(dependencies) {
 export function createImportProductsFromCsvUseCase(dependencies) {
   return async function execute(input) {
     const safeInput = input || {};
-    const updateExisting = Boolean(safeInput.update_existing);
+    const updateExisting = normalizeBoolean(
+      safeInput.update_existing,
+      false,
+      "update_existing"
+    );
     const createdBy = safeInput.created_by || "system";
     const now = dependencies.clock.nowIso();
 
@@ -550,13 +602,30 @@ export function createImportProductsFromCsvUseCase(dependencies) {
             newStock = record.current_stock;
           }
 
+          let nextCategoryId = existing.category_id;
+          if (categoryId !== null) {
+            nextCategoryId = categoryId;
+          }
+          let nextBarcode = existing.barcode;
+          if (record.barcode !== null) {
+            nextBarcode = record.barcode;
+          }
+          let nextDescription = existing.description;
+          if (record.description !== null) {
+            nextDescription = record.description;
+          }
+          let nextImageUrl = existing.image_url;
+          if (record.image_url !== null) {
+            nextImageUrl = record.image_url;
+          }
+
           const updatedProduct = createProductEntity({
             product_id: existing.product_id,
-            category_id: categoryId !== null ? categoryId : existing.category_id,
+            category_id: nextCategoryId,
             product_name: record.product_name,
-            barcode: record.barcode !== null ? record.barcode : existing.barcode,
-            description: record.description !== null ? record.description : existing.description,
-            image_url: record.image_url !== null ? record.image_url : existing.image_url,
+            barcode: nextBarcode,
+            description: nextDescription,
+            image_url: nextImageUrl,
             base_unit: record.base_unit,
             current_stock: newStock,
             cost_price: record.cost_price,
@@ -571,13 +640,16 @@ export function createImportProductsFromCsvUseCase(dependencies) {
 
           await dependencies.productRepository.save(updatedProduct);
 
+          const previousStockInt = toQuantityInt(prevStock, "current_stock");
+          const newStockInt = toQuantityInt(newStock, "current_stock");
+
           // If stock was provided and changed, record an inventory audit transaction
-          if (record.stock_provided && newStock !== prevStock) {
-            const stockDiff = Math.round((newStock - prevStock) * 10000) / 10000;
-            const transactionType =
-              stockDiff > 0
-                ? INVENTORY_TRANSACTION_TYPES.STOCK_IN
-                : INVENTORY_TRANSACTION_TYPES.ADJUSTMENT;
+          if (record.stock_provided && newStockInt !== previousStockInt) {
+            const stockDiff = fromQuantityInt(newStockInt - previousStockInt);
+            let transactionType = INVENTORY_TRANSACTION_TYPES.ADJUSTMENT;
+            if (stockDiff > 0) {
+              transactionType = INVENTORY_TRANSACTION_TYPES.STOCK_IN;
+            }
 
             const stockTx = createInventoryTransactionEntity({
               transaction_id: dependencies.idGenerator.nextId(),
@@ -585,7 +657,7 @@ export function createImportProductsFromCsvUseCase(dependencies) {
               supplier_id: null,
               option_id: null,
               transaction_type: transactionType,
-              quantity: Math.abs(stockDiff),
+              quantity: stockDiff,
               unit_cost: record.cost_price,
               reference_number: "CSV-UPDATE",
               remarks: "Stock update from CSV import (was " + prevStock + ", now " + newStock + ")",
@@ -701,21 +773,23 @@ export function createExportProductsToCsvUseCase(dependencies) {
 
 export function createGenerateProductXlsxTemplateUseCase(dependencies) {
   return async function execute() {
-    const [categories, units] = await Promise.all([
-      dependencies.categoryRepository.listAll(),
-      dependencies.unitRepository ? dependencies.unitRepository.listAll() : []
-    ]);
+    const categories = await dependencies.categoryRepository.listAll();
+    let units = [];
+    if (dependencies.unitRepository) {
+      units = await dependencies.unitRepository.listAll();
+    }
     return generateProductXlsxTemplate({ categories: categories, units: units });
   };
 }
 
 export function createExportProductsToXlsxUseCase(dependencies) {
   return async function execute() {
-    const [products, categories, units] = await Promise.all([
-      dependencies.productRepository.listAll(),
-      dependencies.categoryRepository.listAll(),
-      dependencies.unitRepository ? dependencies.unitRepository.listAll() : []
-    ]);
+    const products = await dependencies.productRepository.listAll();
+    const categories = await dependencies.categoryRepository.listAll();
+    let units = [];
+    if (dependencies.unitRepository) {
+      units = await dependencies.unitRepository.listAll();
+    }
     return generateProductsXlsx({
       products: products,
       categories: categories,

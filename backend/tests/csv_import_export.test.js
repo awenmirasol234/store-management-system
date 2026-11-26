@@ -299,6 +299,15 @@ describe("Inventory CSV Domain Validation", function () {
     expect(function () {
       validateProductCsvRows(parsedRows, [], [], false);
     }).toThrow(/image_url/);
+
+    expect(function () {
+      validateProductCsvRows(
+        [{ product_name: "Item B", base_unit: "pc", selling_price: "20.00", image_url: "//evil.example/pic.png" }],
+        [],
+        [],
+        false
+      );
+    }).toThrow(/image_url/);
   });
 });
 
@@ -403,5 +412,41 @@ describe("Inventory CSV Use Cases (In-Memory Unit Tests)", function () {
     expect(deps.transactions[0].transaction_type).toBe("STOCK_IN");
     expect(deps.transactions[0].quantity).toBe(5);
     expect(deps.transactions[0].reference_number).toBe("CSV-UPDATE");
+  });
+
+  it("records a negative inventory transaction when an import lowers stock", async function () {
+    const deps = createInMemoryDeps();
+    const importUseCase = createImportProductsFromCsvUseCase(deps);
+
+    deps.products.set("prod-existing", {
+      product_id: "prod-existing",
+      product_name: "Original Name",
+      barcode: "4801112223334",
+      category_id: null,
+      description: null,
+      base_unit: "Piece (pc)",
+      cost_price: 10,
+      selling_price: 15,
+      current_stock: 10,
+      reorder_level: 2,
+      allow_custom_amount: false,
+      is_active: true,
+      deleted_at: null,
+      created_at: "2026-11-20T00:00:00.000Z",
+      updated_at: "2026-11-20T00:00:00.000Z"
+    });
+
+    await importUseCase({
+      csvText: [
+        "product_name,barcode,base_unit,cost_price,selling_price,current_stock",
+        "Updated Name,4801112223334,Piece (pc),12.00,18.00,4"
+      ].join("\n"),
+      update_existing: true,
+      created_by: "manager"
+    });
+
+    expect(deps.transactions.length).toBe(1);
+    expect(deps.transactions[0].transaction_type).toBe("ADJUSTMENT");
+    expect(deps.transactions[0].quantity).toBe(-6);
   });
 });

@@ -40,6 +40,10 @@ async function resolveCartLines(dependencies, cartItems) {
 
   for (let index = 0; index < cartItems.length; index++) {
     const rawItem = cartItems[index];
+    if (!rawItem || typeof rawItem !== "object" || Array.isArray(rawItem)) {
+      throw new ValidationError("Each sale item must be an object");
+    }
+    const productId = requireNonEmptyText(rawItem.product_id, "product_id");
     if (
       rawItem.custom_amount !== undefined &&
       rawItem.custom_amount !== null &&
@@ -55,11 +59,11 @@ async function resolveCartLines(dependencies, cartItems) {
     ) {
       throw new FeatureDisabledError("selling_options");
     }
-    let product = productCache.get(rawItem.product_id);
+    let product = productCache.get(productId);
     if (!product) {
-      product = await dependencies.productRepository.findById(rawItem.product_id);
+      product = await dependencies.productRepository.findById(productId);
       if (!product || product.deleted_at !== null) {
-        throw new NotFoundError("Product not found: " + rawItem.product_id);
+        throw new NotFoundError("Product not found: " + productId);
       }
       productCache.set(product.product_id, product);
     }
@@ -367,6 +371,7 @@ export function createProcessReturnUseCase(dependencies) {
     return dependencies.unitOfWork.run(async function runProcessReturn() {
       const createdBy = requireNonEmptyText(safeInput.created_by, "created_by");
       const remarks = requireNonEmptyText(safeInput.remarks, "remarks");
+      const saleId = requireNonEmptyText(safeInput.sale_id, "sale_id");
       const shiftId = normalizeOptionalText(safeInput.shift_id, "shift_id");
       await validateActivityShift(dependencies, shiftId, safeInput.actor_user_id);
 
@@ -374,12 +379,15 @@ export function createProcessReturnUseCase(dependencies) {
         throw new ValidationError("Return must include at least one item");
       }
 
-      const existingSaleRecord = await dependencies.salesRepository.findSaleById(safeInput.sale_id);
+      const existingSaleRecord = await dependencies.salesRepository.findSaleById(saleId);
       if (!existingSaleRecord) {
-        throw new NotFoundError("Sale not found: " + safeInput.sale_id);
+        throw new NotFoundError("Sale not found: " + saleId);
       }
 
       const sale = existingSaleRecord.sale;
+      if (sale.status !== SALE_STATUSES.COMPLETED) {
+        throw new ValidationError("Only completed sales can be returned");
+      }
       const itemsById = new Map();
       for (let index = 0; index < existingSaleRecord.items.length; index++) {
         const saleItem = existingSaleRecord.items[index];
@@ -396,14 +404,18 @@ export function createProcessReturnUseCase(dependencies) {
 
       for (let index = 0; index < safeInput.items.length; index++) {
         const requestItem = safeInput.items[index];
+        if (!requestItem || typeof requestItem !== "object" || Array.isArray(requestItem)) {
+          throw new ValidationError("Each return item must be an object");
+        }
+        const saleItemId = requireNonEmptyText(requestItem.sale_item_id, "sale_item_id");
         for (let previousIndex = 0; previousIndex < index; previousIndex++) {
-          if (safeInput.items[previousIndex].sale_item_id === requestItem.sale_item_id) {
+          if (safeInput.items[previousIndex].sale_item_id === saleItemId) {
             throw new ValidationError("Each sale item can appear only once in a return");
           }
         }
-        const saleItem = itemsById.get(requestItem.sale_item_id);
+        const saleItem = itemsById.get(saleItemId);
         if (!saleItem) {
-          throw new NotFoundError("Sale item not found in sale: " + requestItem.sale_item_id);
+          throw new NotFoundError("Sale item not found in sale: " + saleItemId);
         }
 
         const returnQtyInt = toQuantityInt(requestItem.quantity, "quantity");
@@ -559,9 +571,10 @@ export function createListSalesUseCase(dependencies) {
 export function createGetSaleUseCase(dependencies) {
   return async function execute(input) {
     const safeInput = input || {};
-    const record = await dependencies.salesRepository.findSaleById(safeInput.sale_id);
+    const saleId = requireNonEmptyText(safeInput.sale_id, "sale_id");
+    const record = await dependencies.salesRepository.findSaleById(saleId);
     if (!record) {
-      throw new NotFoundError("Sale not found: " + safeInput.sale_id);
+      throw new NotFoundError("Sale not found: " + saleId);
     }
     return record;
   };

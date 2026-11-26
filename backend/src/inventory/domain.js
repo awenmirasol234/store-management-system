@@ -69,8 +69,7 @@ export function createProductEntity(input) {
     const isAllowedPath =
       imageUrl.startsWith("http://") ||
       imageUrl.startsWith("https://") ||
-      imageUrl.startsWith("/uploads/") ||
-      imageUrl.startsWith("/");
+      imageUrl.startsWith("/uploads/");
     if (!isAllowedPath) {
       throw new ValidationError("image_url must be an HTTP/HTTPS URL or a local path");
     }
@@ -589,8 +588,7 @@ export function validateProductCsvRows(parsedRows, existingProducts, existingOpt
         const isAllowedPath =
           imageUrl.startsWith("http://") ||
           imageUrl.startsWith("https://") ||
-          imageUrl.startsWith("/uploads/") ||
-          imageUrl.startsWith("/");
+          imageUrl.startsWith("/uploads/");
         if (!isAllowedPath) {
           errors.push('Row ' + rowNum + ': "image_url" must start with http://, https://, or a local / path.');
         }
@@ -602,6 +600,23 @@ export function validateProductCsvRows(parsedRows, existingProducts, existingOpt
       existingProduct = existingProductsByBarcode.get(barcode);
     }
 
+    let validatedCostPrice = 0;
+    if (Number.isFinite(costPrice)) {
+      validatedCostPrice = costPrice;
+    }
+    let validatedSellingPrice = 0;
+    if (Number.isFinite(sellingPrice)) {
+      validatedSellingPrice = sellingPrice;
+    }
+    let validatedCurrentStock = 0;
+    if (Number.isFinite(currentStock)) {
+      validatedCurrentStock = currentStock;
+    }
+    let validatedReorderLevel = 0;
+    if (Number.isFinite(reorderLevel)) {
+      validatedReorderLevel = reorderLevel;
+    }
+
     validatedRecords.push({
       row_number: rowNum,
       product_name: productName,
@@ -610,11 +625,11 @@ export function validateProductCsvRows(parsedRows, existingProducts, existingOpt
       description: description,
       image_url: imageUrl,
       base_unit: baseUnit,
-      cost_price: Number.isFinite(costPrice) ? costPrice : 0,
-      selling_price: Number.isFinite(sellingPrice) ? sellingPrice : 0,
-      current_stock: Number.isFinite(currentStock) ? currentStock : 0,
+      cost_price: validatedCostPrice,
+      selling_price: validatedSellingPrice,
+      current_stock: validatedCurrentStock,
       stock_provided: stockProvided,
-      reorder_level: Number.isFinite(reorderLevel) ? reorderLevel : 0,
+      reorder_level: validatedReorderLevel,
       allow_custom_amount: Boolean(allowCustomAmount),
       is_active: Boolean(isActive),
       existing_product: existingProduct
@@ -622,7 +637,16 @@ export function validateProductCsvRows(parsedRows, existingProducts, existingOpt
   }
 
   if (errors.length > 0) {
-    const errorTitle = "CSV import validation failed (" + errors.length + " error" + (errors.length > 1 ? "s" : "") + " found):";
+    let errorWord = "error";
+    if (errors.length > 1) {
+      errorWord = "errors";
+    }
+    const errorTitle =
+      "CSV import validation failed (" +
+      errors.length +
+      " " +
+      errorWord +
+      " found):";
     throw new ValidationError(errorTitle + "\n• " + errors.join("\n• "));
   }
 

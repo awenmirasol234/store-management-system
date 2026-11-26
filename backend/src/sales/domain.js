@@ -100,6 +100,9 @@ function calculateBaseUnitLine(product, soldQuantityRaw) {
 }
 
 export function calculateSaleLine(input) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new ValidationError("Sale line input must be an object");
+  }
   validateSellableProduct(input.product);
 
   let rawLine = null;
@@ -148,6 +151,9 @@ export function calculateItemProfit(salesItem) {
 }
 
 export function validatePaymentBreakdown(input) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new ValidationError("Payment data must be an object");
+  }
   const paymentMethod = requireNonEmptyText(input.payment_method, "payment_method");
   if (!VALID_PAYMENT_METHODS.has(paymentMethod)) {
     throw new ValidationError("Invalid payment_method: " + paymentMethod);

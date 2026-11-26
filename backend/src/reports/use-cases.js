@@ -1,4 +1,5 @@
 import { fromMoneyInt, fromQuantityInt } from "../shared/decimal.js";
+import { ValidationError } from "../shared/errors.js";
 import { parsePositiveLimit } from "../shared/validation.js";
 import {
   buildCategorySales,
@@ -16,9 +17,14 @@ import {
 function resolveReportRange(dependencies, input) {
   const safeInput = input || {};
   const today = dependencies.clock.todayManilaIsoDate();
+  const fromDate = resolveReportDate(safeInput.from, today, "from");
+  const toDate = resolveReportDate(safeInput.to, today, "to");
+  if (fromDate > toDate) {
+    throw new ValidationError("from must be on or before to");
+  }
   return {
-    fromDate: resolveReportDate(safeInput.from, today, "from"),
-    toDate: resolveReportDate(safeInput.to, today, "to")
+    fromDate: fromDate,
+    toDate: toDate
   };
 }
 

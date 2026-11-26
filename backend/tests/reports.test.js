@@ -184,6 +184,21 @@ describe("reports SQLite repository", function () {
     expect(calculateNetProfitInt(10000, 6000, 1000)).toBe(3000);
   });
 
+  it("rejects report ranges where the start is after the end", async function () {
+    const getSummary = createGetReportsSummaryUseCase({
+      reportsRepository: {},
+      clock: {
+        todayManilaIsoDate() {
+          return "2026-11-20";
+        }
+      }
+    });
+
+    await expect(
+      getSummary({ from: "2026-11-21", to: "2026-11-20" })
+    ).rejects.toThrow(ValidationError);
+  });
+
   it("includes returns as negative product activity on the return date", async function () {
     const database = openSqliteDatabase(":memory:");
     activeDatabase = database;

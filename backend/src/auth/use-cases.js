@@ -14,6 +14,21 @@ import {
 } from "./domain.js";
 import { normalizeBoolean } from "../shared/validation.js";
 
+function createSessionExpiry(nowIso) {
+  const nowMilliseconds = Date.parse(nowIso);
+  if (!Number.isFinite(nowMilliseconds)) {
+    throw new ValidationError("System clock returned an invalid timestamp");
+  }
+  return new Date(nowMilliseconds + DEFAULT_SESSION_DURATION_MS).toISOString();
+}
+
+function runInUnitOfWork(dependencies, work) {
+  if (dependencies.unitOfWork) {
+    return dependencies.unitOfWork.run(work);
+  }
+  return work();
+}
+
 export function createGetAuthStatusUseCase(dependencies) {
   const userRepository = dependencies.userRepository;
 
@@ -68,7 +83,7 @@ export function createSetupInitialOwnerUseCase(dependencies) {
 
       const token = generateSessionToken();
       const sessionId = idGenerator.nextId();
-      const expiresAt = new Date(Date.now() + DEFAULT_SESSION_DURATION_MS).toISOString();
+      const expiresAt = createSessionExpiry(nowIso);
 
       const session = {
         session_id: sessionId,
@@ -87,10 +102,7 @@ export function createSetupInitialOwnerUseCase(dependencies) {
       };
     };
 
-    if (dependencies.unitOfWork) {
-      return dependencies.unitOfWork.run(createOwner);
-    }
-    return createOwner();
+    return runInUnitOfWork(dependencies, createOwner);
   };
 }
 
@@ -135,7 +147,7 @@ export function createLoginUseCase(dependencies) {
     const token = generateSessionToken();
     const sessionId = idGenerator.nextId();
     const nowIso = clock.nowIso();
-    const expiresAt = new Date(Date.now() + DEFAULT_SESSION_DURATION_MS).toISOString();
+    const expiresAt = createSessionExpiry(nowIso);
 
     const session = {
       session_id: sessionId,
@@ -244,67 +256,69 @@ export function createUpdateUserUseCase(dependencies) {
   const clock = dependencies.clock;
 
   return async function updateUser(userId, input) {
-    if (!userId || typeof userId !== "string") {
-      throw new ValidationError("User ID is required");
-    }
-    if (!input) {
-      throw new ValidationError("Input is required");
-    }
-
-    const user = await userRepository.findById(userId);
-    if (!user) {
-      throw new NotFoundError("User not found");
-    }
-
-    let fullName = user.full_name;
-    if (input.full_name !== undefined) {
-      fullName = validateFullName(input.full_name);
-    }
-
-    let role = user.role;
-    if (input.role !== undefined) {
-      role = validateRole(input.role);
-    }
-
-    let isActive = user.is_active;
-    if (input.is_active !== undefined) {
-      isActive = normalizeBoolean(input.is_active, user.is_active, "is_active");
-    }
-
-    const removingActiveOwner =
-      user.role === ROLES.OWNER &&
-      user.is_active &&
-      (role !== ROLES.OWNER || !isActive);
-    if (removingActiveOwner && userRepository.countActiveOwners) {
-      const activeOwnerCount = await userRepository.countActiveOwners();
-      if (activeOwnerCount <= 1) {
-        throw new ConflictError("At least one active owner account is required");
+    return runInUnitOfWork(dependencies, async function updateUserInTransaction() {
+      if (!userId || typeof userId !== "string") {
+        throw new ValidationError("User ID is required");
       }
-    }
+      if (!input) {
+        throw new ValidationError("Input is required");
+      }
 
-    let pinHash = user.pin_hash;
-    let pinSalt = user.pin_salt;
-    if (input.pin !== undefined && input.pin !== "") {
-      const validPin = validatePin(input.pin);
-      pinSalt = generateSalt();
-      pinHash = hashPin(validPin, pinSalt);
-    }
+      const user = await userRepository.findById(userId);
+      if (!user) {
+        throw new NotFoundError("User not found");
+      }
 
-    if (!isActive) {
-      await sessionRepository.deleteByUserId(userId);
-    }
+      let fullName = user.full_name;
+      if (input.full_name !== undefined) {
+        fullName = validateFullName(input.full_name);
+      }
 
-    const nowIso = clock.nowIso();
-    const updated = await userRepository.updateUser(userId, {
-      full_name: fullName,
-      role: role,
-      pin_hash: pinHash,
-      pin_salt: pinSalt,
-      is_active: isActive,
-      updated_at: nowIso
+      let role = user.role;
+      if (input.role !== undefined) {
+        role = validateRole(input.role);
+      }
+
+      let isActive = user.is_active;
+      if (input.is_active !== undefined) {
+        isActive = normalizeBoolean(input.is_active, user.is_active, "is_active");
+      }
+
+      const removingActiveOwner =
+        user.role === ROLES.OWNER &&
+        user.is_active &&
+        (role !== ROLES.OWNER || !isActive);
+      if (removingActiveOwner && userRepository.countActiveOwners) {
+        const activeOwnerCount = await userRepository.countActiveOwners();
+        if (activeOwnerCount <= 1) {
+          throw new ConflictError("At least one active owner account is required");
+        }
+      }
+
+      let pinHash = user.pin_hash;
+      let pinSalt = user.pin_salt;
+      if (input.pin !== undefined && input.pin !== "") {
+        const validPin = validatePin(input.pin);
+        pinSalt = generateSalt();
+        pinHash = hashPin(validPin, pinSalt);
+      }
+
+      if (!isActive) {
+        await sessionRepository.deleteByUserId(userId);
+      }
+
+      const nowIso = clock.nowIso();
+      const updated = await userRepository.updateUser(userId, {
+        full_name: fullName,
+        role: role,
+        pin_hash: pinHash,
+        pin_salt: pinSalt,
+        is_active: isActive,
+        updated_at: nowIso
+      });
+
+      return sanitizeUser(updated);
     });
-
-    return sanitizeUser(updated);
   };
 }
 

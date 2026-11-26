@@ -617,6 +617,15 @@ describe("sales domain and use cases", function () {
     expect(splitSale.change_amount).toBe(15);
   });
 
+  it("rejects non-object sale lines and payment data", function () {
+    expect(function () {
+      calculateSaleLine(null);
+    }).toThrow(ValidationError);
+    expect(function () {
+      validatePaymentBreakdown(null);
+    }).toThrow(ValidationError);
+  });
+
   it("formats receipt numbers and splits returns credit first", function () {
     expect(formatReceiptNumber("20261120", 1)).toBe("20261120-0001");
     expect(formatReceiptNumber("20261120", 12345)).toBe("20261120-12345");

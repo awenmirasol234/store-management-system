@@ -443,7 +443,11 @@ export function createInventoryRouter(dependencies) {
           if (redirectCount === 3) {
             throw new ValidationError("Too many image URL redirects");
           }
-          currentUrl = new URL(location, currentUrl).toString();
+          try {
+            currentUrl = new URL(location, currentUrl).toString();
+          } catch (error) {
+            throw new ValidationError("Image URL redirect target is invalid");
+          }
           continue;
         }
         break;

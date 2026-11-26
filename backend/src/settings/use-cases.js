@@ -18,7 +18,9 @@ export function createUpdateSettingsUseCase(dependencies) {
     const current = await settingsRepository.getSettings();
 
     let nowIso = new Date().toISOString();
-    if (clock && typeof clock.now === "function") {
+    if (clock && typeof clock.nowIso === "function") {
+      nowIso = clock.nowIso();
+    } else if (clock && typeof clock.now === "function") {
       nowIso = clock.now().toISOString();
     }
 

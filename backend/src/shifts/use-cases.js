@@ -7,6 +7,7 @@ import {
   SHIFT_STATUSES,
   validateActualCash
 } from "./domain.js";
+import { normalizeOptionalText, requireNonEmptyText } from "../shared/validation.js";
 
 function runInUnitOfWork(dependencies, work) {
   if (dependencies.unitOfWork) {
@@ -19,10 +20,7 @@ export function createOpenShiftUseCase(dependencies) {
   return async function openShift(input) {
     const safeInput = input || {};
     return runInUnitOfWork(dependencies, async function runOpenShift() {
-      const userId = safeInput.user_id;
-      if (!userId) {
-        throw new ValidationError("user_id is required");
-      }
+      const userId = requireNonEmptyText(safeInput.user_id, "user_id");
 
       if (dependencies.userRepository) {
         const user = await dependencies.userRepository.findById(userId);
@@ -70,10 +68,7 @@ export function createOpenShiftUseCase(dependencies) {
 export function createGetActiveShiftUseCase(dependencies) {
   return async function getActiveShift(input) {
     const safeInput = input || {};
-    const userId = safeInput.user_id;
-    if (!userId) {
-      throw new ValidationError("user_id is required");
-    }
+    const userId = requireNonEmptyText(safeInput.user_id, "user_id");
 
     const shift = await dependencies.shiftRepository.findActiveByUserId(userId);
     if (!shift) {
@@ -100,10 +95,7 @@ export function createRecordCashMovementUseCase(dependencies) {
   return async function recordCashMovement(input) {
     const safeInput = input || {};
     return runInUnitOfWork(dependencies, async function runRecordCashMovement() {
-      const shiftId = safeInput.shift_id;
-      if (!shiftId) {
-        throw new ValidationError("shift_id is required");
-      }
+      const shiftId = requireNonEmptyText(safeInput.shift_id, "shift_id");
 
       const shift = await dependencies.shiftRepository.findById(shiftId);
       if (!shift) {
@@ -135,10 +127,7 @@ export function createCloseShiftUseCase(dependencies) {
   return async function closeShift(input) {
     const safeInput = input || {};
     return runInUnitOfWork(dependencies, async function runCloseShift() {
-      const shiftId = safeInput.shift_id;
-      if (!shiftId) {
-        throw new ValidationError("shift_id is required");
-      }
+      const shiftId = requireNonEmptyText(safeInput.shift_id, "shift_id");
 
       const shift = await dependencies.shiftRepository.findById(shiftId);
       if (!shift) {
@@ -157,12 +146,13 @@ export function createCloseShiftUseCase(dependencies) {
       const variance = calculateVariance(actualCash, expectedCash);
       const now = dependencies.clock.nowIso();
 
+      const additionalNotes = normalizeOptionalText(safeInput.notes, "notes");
       let finalNotes = shift.notes;
-      if (safeInput.notes) {
+      if (additionalNotes !== null) {
         if (finalNotes) {
-          finalNotes = finalNotes + " | " + safeInput.notes.trim();
+          finalNotes = finalNotes + " | " + additionalNotes;
         } else {
-          finalNotes = safeInput.notes.trim();
+          finalNotes = additionalNotes;
         }
       }
 
@@ -194,10 +184,7 @@ export function createCloseShiftUseCase(dependencies) {
 export function createGetShiftUseCase(dependencies) {
   return async function getShift(input) {
     const safeInput = input || {};
-    const shiftId = safeInput.shift_id;
-    if (!shiftId) {
-      throw new ValidationError("shift_id is required");
-    }
+    const shiftId = requireNonEmptyText(safeInput.shift_id, "shift_id");
 
     const shift = await dependencies.shiftRepository.findById(shiftId);
     if (!shift) {

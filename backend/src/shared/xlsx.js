@@ -59,7 +59,10 @@ export async function parseXlsx(buffer) {
   const headerRow = worksheet.getRow(1);
   const headers = [];
   headerRow.eachCell({ includeEmpty: false }, function extractHeader(cell, colNumber) {
-    let rawVal = cell.text !== undefined ? cell.text : cell.value;
+    let rawVal = cell.value;
+    if (cell.text !== undefined) {
+      rawVal = cell.text;
+    }
     if (rawVal !== null && rawVal !== undefined) {
       let strVal = String(rawVal).trim();
       if (strVal.startsWith("'")) {
@@ -182,7 +185,10 @@ export async function generateProductXlsxTemplate(options) {
   const catNames = [];
   for (let c = 0; c < categories.length; c = c + 1) {
     const item = categories[c];
-    const name = typeof item === "string" ? item : item.category_name;
+    let name = item.category_name;
+    if (typeof item === "string") {
+      name = item;
+    }
     if (name && name.trim().length > 0) {
       catNames.push(name.trim());
     }
@@ -195,7 +201,10 @@ export async function generateProductXlsxTemplate(options) {
   const unitNames = [];
   for (let u = 0; u < units.length; u = u + 1) {
     const item = units[u];
-    const name = typeof item === "string" ? item : item.unit_name;
+    let name = item.unit_name;
+    if (typeof item === "string") {
+      name = item;
+    }
     if (name && name.trim().length > 0) {
       unitNames.push(name.trim());
     }
@@ -353,7 +362,10 @@ export async function generateProductsXlsx(options) {
   const unitNames = [];
   for (let u = 0; u < units.length; u = u + 1) {
     const item = units[u];
-    const name = typeof item === "string" ? item : item.unit_name;
+    let name = item.unit_name;
+    if (typeof item === "string") {
+      name = item;
+    }
     if (name) {
       unitNames.push(name.trim());
     }

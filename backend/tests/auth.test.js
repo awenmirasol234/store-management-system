@@ -118,13 +118,16 @@ describe("Auth Domain", function () {
 });
 
 describe("Auth Workflows & Repositories", function () {
-  function setupTestEnvironment() {
+  function setupTestEnvironment(clockOverride) {
     const database = openSqliteDatabase(":memory:");
     const unitOfWork = createSqliteUnitOfWork(database);
     const userRepository = createSqliteUserRepository(database);
     const sessionRepository = createSqliteSessionRepository(database);
     const idGenerator = createDefaultIdGenerator();
-    const clock = createSystemClock();
+    let clock = createSystemClock();
+    if (clockOverride) {
+      clock = clockOverride;
+    }
 
     const deps = {
       userRepository: userRepository,
@@ -226,6 +229,31 @@ describe("Auth Workflows & Repositories", function () {
         pin: "1234"
       })
     ).rejects.toThrow(UnauthorizedError);
+
+    env.database.close();
+  });
+
+  it("uses the injected clock when calculating session expiry", async function () {
+    const fixedClock = {
+      nowIso() {
+        return "2026-11-20T00:00:00.000Z";
+      }
+    };
+    const env = setupTestEnvironment(fixedClock);
+
+    const setupResult = await env.useCases.setupInitialOwner({
+      username: "owner",
+      full_name: "Maria Santos",
+      pin: "1234"
+    });
+
+    expect(setupResult.expires_at).toBe("2026-11-21T00:00:00.000Z");
+
+    const loginResult = await env.useCases.login({
+      username: "owner",
+      pin: "1234"
+    });
+    expect(loginResult.expires_at).toBe("2026-11-21T00:00:00.000Z");
 
     env.database.close();
   });
