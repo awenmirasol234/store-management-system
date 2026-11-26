@@ -493,6 +493,30 @@ describe("PosPage SSR test", function () {
 
     expect(html).toContain("Nescafe Classic 50g");
     expect(html).toContain("h-14 w-14 shrink-0");
+    expect(html).toContain("bg-white border border-[#E9E9E9]");
+  });
+
+  it("renders cart item thumbnail with white background and border for fallback placeholder", function () {
+    const html = renderToString(
+      React.createElement(PosPage, {
+        initialCartItems: [
+          {
+            key: "prod-cart-fallback:base",
+            product_id: "prod-cart-fallback",
+            product_name: "Instant Noodles",
+            image_url: null,
+            unit_price: 15,
+            selling_price: 15,
+            quantity: 2,
+            base_quantity_per_unit: 1
+          }
+        ]
+      })
+    );
+
+    expect(html).toContain("Instant Noodles");
+    expect(html).toContain("IN");
+    expect(html).toContain("bg-white border border-[#E9E9E9]");
   });
 
   it("renders product card with white background and bordered media container by default", function () {

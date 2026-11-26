@@ -95,11 +95,12 @@ Centralized danger and alert color tokens are declared in `frontend/src/index.cs
   - `danger`: `.btn-glossy-danger` with `bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200`.
   - `ghost`: `.btn-glossy-ghost` with `bg-transparent hover:bg-[#EEEEED] text-[#777777] hover:text-[#171717]`.
 
-### 4.2 Product Cards (`frontend/src/pages/PosPage.jsx`)
+### 4.2 Product Cards & Cart Thumbnails (`frontend/src/pages/PosPage.jsx`)
 - Container: `rounded-2xl border border-[#E9E9E9] bg-white p-3.5 hover:border-[#171717]/30 hover:shadow-xs`.
 - Media container: `relative aspect-[4/3] w-full overflow-hidden bg-white border-b border-[#E9E9E9]`.
 - Stock Badge: `absolute left-2 top-2 rounded-md bg-[#171717] px-2 py-0.5 font-mono text-2xs text-white`.
 - Action: Full-width button `py-2 rounded-xl border border-[#E9E9E9] text-xs font-semibold`.
+- Cart Thumbnails: `h-14 w-14 shrink-0 rounded-xl bg-white border border-[#E9E9E9]` with `object-cover` image or centered initials fallback.
 
 ### 4.3 Category & Status Filter Pills (`frontend/src/components/CategoryFilterChips.jsx`, `frontend/src/components/FilterPill.jsx`)
 - Pill Shape: `rounded-full` with `aria-pressed` state on toggle pills.

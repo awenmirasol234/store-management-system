@@ -40,11 +40,25 @@ export function ProductThumb(props) {
     sizeClass = "h-14 w-14 shrink-0";
   }
 
+  let bgClass = "bg-[#EEEEED]";
+  if (props.bg === "white" || props.bgWhite) {
+    bgClass = "bg-white border border-[#E9E9E9]";
+  }
+
+  let extraClass = "";
+  if (props.className) {
+    extraClass = " " + props.className;
+  }
+
   if (imageSrc && !hasError) {
     return (
       <div
         className={
-          "overflow-hidden rounded-xl bg-[#EEEEED] flex items-center justify-center " + sizeClass
+          "overflow-hidden rounded-xl " +
+          bgClass +
+          " flex items-center justify-center " +
+          sizeClass +
+          extraClass
         }
       >
         <img
@@ -63,8 +77,11 @@ export function ProductThumb(props) {
   return (
     <div
       className={
-        "rounded-xl bg-[#EEEEED] flex items-center justify-center text-[#777777] font-semibold text-sm select-none " +
-        sizeClass
+        "rounded-xl " +
+        bgClass +
+        " flex items-center justify-center text-[#777777] font-semibold text-sm select-none " +
+        sizeClass +
+        extraClass
       }
     >
       {getInitials(props.name)}
