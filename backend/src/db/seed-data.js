@@ -42,7 +42,6 @@ export const PRODUCT_CATEGORIES = [
   "Rice & Grains",
   "Condiments & Seasonings",
   "Cooking Essentials",
-  "Dairy & Breakfast",
   "Bread & Bakery",
   "Frozen Goods",
   "Meat & Processed Foods",
@@ -53,13 +52,7 @@ export const PRODUCT_CATEGORIES = [
   "Baby Products",
   "Health & Hygiene",
   "School & Office Supplies",
-  "Pet Supplies",
-  "Cigarettes & Tobacco",
-  "Mobile & Electronics Accessories",
-  "Load & E-Wallet Services",
-  "Party & Gift Supplies",
-  "Agricultural Supplies",
-  "Other"
+  "Cigarettes & Tobacco"
 ];
 
 export const CATEGORIES = [
@@ -107,11 +100,6 @@ export const CATEGORIES = [
     category_id: "cat_cooking_essentials",
     category_name: "Cooking Essentials",
     description: "Cooking oil, sugar, salt, and baking needs"
-  },
-  {
-    category_id: "cat_dairy_breakfast",
-    category_name: "Dairy & Breakfast",
-    description: "Coffee, powdered milk, chocolate drinks, and spreads"
   },
   {
     category_id: "cat_bread_bakery",
@@ -164,39 +152,9 @@ export const CATEGORIES = [
     description: "Paper, notebooks, pens, and school supplies"
   },
   {
-    category_id: "cat_pet_supplies",
-    category_name: "Pet Supplies",
-    description: "Pet food and pet care supplies"
-  },
-  {
     category_id: "cat_cigarettes_tobacco",
     category_name: "Cigarettes & Tobacco",
     description: "Cigarettes, tobacco, and lighters"
-  },
-  {
-    category_id: "cat_mobile_electronics",
-    category_name: "Mobile & Electronics Accessories",
-    description: "Charging cables, adaptors, and earphones"
-  },
-  {
-    category_id: "cat_load_ewallet",
-    category_name: "Load & E-Wallet Services",
-    description: "Prepaid mobile load and e-wallet top-ups"
-  },
-  {
-    category_id: "cat_party_gift_supplies",
-    category_name: "Party & Gift Supplies",
-    description: "Paper plates, cups, balloons, and party goods"
-  },
-  {
-    category_id: "cat_agricultural_supplies",
-    category_name: "Agricultural Supplies",
-    description: "Feeds, seeds, and farm essentials"
-  },
-  {
-    category_id: "cat_other",
-    category_name: "Other",
-    description: "General merchandise and miscellaneous items"
   }
 ];
 
@@ -544,10 +502,10 @@ export const PRODUCTS = [
     supplier_id: "sup_smb"
   },
 
-  // Dairy & Breakfast (6)
+  // Beverages (including coffee and powdered drinks)
   {
     id: "prod_22",
-    category_id: "cat_dairy_breakfast",
+    category_id: "cat_beverages",
     name: "Nescafé Classic Sachet 2g",
     barcode: "4800361234011",
     unit: "sachet",
@@ -567,7 +525,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_23",
-    category_id: "cat_dairy_breakfast",
+    category_id: "cat_beverages",
     name: "Great Taste White Twin Pack 50g",
     barcode: "4800016333018",
     unit: "pack",
@@ -579,7 +537,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_24",
-    category_id: "cat_dairy_breakfast",
+    category_id: "cat_beverages",
     name: "Kopiko Blanca Twin Pack 52g",
     barcode: "4800016444014",
     unit: "pack",
@@ -591,7 +549,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_25",
-    category_id: "cat_dairy_breakfast",
+    category_id: "cat_beverages",
     name: "Bear Brand Fortified Powdered Milk 33g",
     barcode: "4800361555018",
     unit: "sachet",
@@ -603,7 +561,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_26",
-    category_id: "cat_dairy_breakfast",
+    category_id: "cat_beverages",
     name: "Milo Chocolate Powdered Drink 24g",
     barcode: "4800361666014",
     unit: "sachet",
@@ -623,7 +581,7 @@ export const PRODUCTS = [
   },
   {
     id: "prod_27",
-    category_id: "cat_dairy_breakfast",
+    category_id: "cat_beverages",
     name: "Energen Champion Chocolate Cereal 40g",
     barcode: "4800016778899",
     unit: "sachet",

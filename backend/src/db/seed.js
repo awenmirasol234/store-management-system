@@ -74,7 +74,7 @@ export async function seedDatabase(targetDbPath, shouldClean) {
 
     database.exec(`
       UPDATE products SET category_id = 'cat_instant_food' WHERE category_id = 'cat_noodles';
-      UPDATE products SET category_id = 'cat_dairy_breakfast' WHERE category_id = 'cat_coffee_milk';
+      UPDATE products SET category_id = 'cat_beverages' WHERE category_id = 'cat_coffee_milk';
       UPDATE products SET category_id = 'cat_rice_grains' WHERE category_id = 'cat_rice_cooking';
       UPDATE products SET category_id = 'cat_laundry_cleaning' WHERE category_id = 'cat_laundry_home';
       DELETE FROM product_categories WHERE category_id IN ('cat_noodles', 'cat_coffee_milk', 'cat_rice_cooking', 'cat_laundry_home');

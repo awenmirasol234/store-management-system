@@ -27,7 +27,7 @@ describe("seedDatabase", function () {
 
     const stats = await seedDatabase(databasePath, false);
     expect(stats.units).toBe(28);
-    expect(stats.categories).toBe(27);
+    expect(stats.categories).toBe(20);
     expect(stats.products).toBe(50);
     expect(stats.sales_transactions).toBe(12);
 
@@ -35,15 +35,20 @@ describe("seedDatabase", function () {
     const catRows = activeDatabase
       .prepare("SELECT category_name FROM product_categories ORDER BY category_name ASC")
       .all();
-    expect(catRows.length).toBe(27);
+    expect(catRows.length).toBe(20);
     const catNames = catRows.map(function (row) {
       return row.category_name;
     });
     expect(catNames.includes("Beverages")).toBe(true);
     expect(catNames.includes("Biscuits & Crackers")).toBe(true);
     expect(catNames.includes("Instant Food")).toBe(true);
-    expect(catNames.includes("Agricultural Supplies")).toBe(true);
-    expect(catNames.includes("Other")).toBe(true);
+    expect(catNames.includes("Dairy & Breakfast")).toBe(false);
+    expect(catNames.includes("Party & Gift Supplies")).toBe(false);
+    expect(catNames.includes("Agricultural Supplies")).toBe(false);
+    expect(catNames.includes("Mobile & Electronics Accessories")).toBe(false);
+    expect(catNames.includes("Pet Supplies")).toBe(false);
+    expect(catNames.includes("Load & E-Wallet Services")).toBe(false);
+    expect(catNames.includes("Other")).toBe(false);
     const unitRows = activeDatabase.prepare("SELECT unit_name FROM product_units ORDER BY rowid ASC").all();
     expect(unitRows.length).toBe(28);
     expect(unitRows[0].unit_name).toBe("Piece (pc)");

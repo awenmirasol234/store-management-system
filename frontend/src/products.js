@@ -40,7 +40,6 @@ export const PRODUCT_CATEGORIES = [
   "Rice & Grains",
   "Condiments & Seasonings",
   "Cooking Essentials",
-  "Dairy & Breakfast",
   "Bread & Bakery",
   "Frozen Goods",
   "Meat & Processed Foods",
@@ -51,13 +50,7 @@ export const PRODUCT_CATEGORIES = [
   "Baby Products",
   "Health & Hygiene",
   "School & Office Supplies",
-  "Pet Supplies",
-  "Cigarettes & Tobacco",
-  "Mobile & Electronics Accessories",
-  "Load & E-Wallet Services",
-  "Party & Gift Supplies",
-  "Agricultural Supplies",
-  "Other"
+  "Cigarettes & Tobacco"
 ];
 
 export const STOCK_LEVELS = {

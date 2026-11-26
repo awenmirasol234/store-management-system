@@ -51,7 +51,8 @@ describe("CategoryFilterChips component", function () {
     expect(html).toContain("Beverages");
     expect(html).toContain("Biscuits &amp; Crackers");
     expect(html).toContain("Instant Food");
-    expect(html).toContain("Agricultural Supplies");
+    expect(html).toContain("Cigarettes &amp; Tobacco");
+    expect(html).not.toContain("Agricultural Supplies");
   });
 
   it("renders count badges when counts prop is provided", function () {
