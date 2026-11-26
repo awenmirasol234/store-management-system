@@ -1,1 +1,0 @@
-Review the frontend folder using the ponytail skill.
