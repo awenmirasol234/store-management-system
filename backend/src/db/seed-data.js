@@ -59,147 +59,147 @@ export const CATEGORIES = [
   {
     category_id: "cat_beverages",
     category_name: "Beverages",
-    description: "Soft drinks, bottled water, juices, and drinks"
+    description: "Soda, bottled water, juices, and ready-to-drink beverages"
   },
   {
     category_id: "cat_snacks",
     category_name: "Snacks",
-    description: "Chips, crisps, and savory snacks"
+    description: "Chips, crackers, and savory snack packs"
   },
   {
     category_id: "cat_biscuits_crackers",
     category_name: "Biscuits & Crackers",
-    description: "Crackers, cookies, and biscuits"
+    description: "Biscuits, cookies, and everyday crackers"
   },
   {
     category_id: "cat_candies_chocolates",
     category_name: "Candies & Chocolates",
-    description: "Sweets, candies, gums, and chocolates"
+    description: "Candies, chewing gum, and chocolate treats"
   },
   {
     category_id: "cat_canned",
     category_name: "Canned Goods",
-    description: "Canned meat, fish, and instant meals"
+    description: "Canned fish, meat, and ready-to-eat meals"
   },
   {
     category_id: "cat_instant_food",
     category_name: "Instant Food",
-    description: "Instant noodles, soup pouches, and ready meals"
+    description: "Instant noodles, cup meals, and quick-cook food"
   },
   {
     category_id: "cat_rice_grains",
     category_name: "Rice & Grains",
-    description: "Grains, rice varieties, oats, and cereals"
+    description: "Rice varieties, grains, oats, and breakfast cereals"
   },
   {
     category_id: "cat_condiments_seasonings",
     category_name: "Condiments & Seasonings",
-    description: "Soy sauce, vinegar, fish sauce, and seasonings"
+    description: "Sauces, vinegar, seasoning mixes, and flavorings"
   },
   {
     category_id: "cat_cooking_essentials",
     category_name: "Cooking Essentials",
-    description: "Cooking oil, sugar, salt, and baking needs"
+    description: "Cooking oil, sugar, salt, and pantry staples"
   },
   {
     category_id: "cat_bread_bakery",
     category_name: "Bread & Bakery",
-    description: "Loaf bread, buns, and baked pastries"
+    description: "Loaves, buns, pastries, and baked snacks"
   },
   {
     category_id: "cat_frozen_goods",
     category_name: "Frozen Goods",
-    description: "Ice cream, ice pops, and frozen goods"
+    description: "Frozen desserts, ice pops, and ready-to-cook food"
   },
   {
     category_id: "cat_meat_processed_foods",
     category_name: "Meat & Processed Foods",
-    description: "Hotdogs, sausages, and processed meats"
+    description: "Hotdogs, sausages, bacon, and processed meats"
   },
   {
     category_id: "cat_personal_care",
     category_name: "Personal Care",
-    description: "Bath soap, shampoo sachets, deodorant, and lotion"
+    description: "Bath soap, shampoo, deodorant, and personal care"
   },
   {
     category_id: "cat_laundry_cleaning",
     category_name: "Laundry & Cleaning",
-    description: "Detergent powder, fabric conditioner, and bleach"
+    description: "Laundry detergent, conditioner, bleach, and cleaners"
   },
   {
     category_id: "cat_household_supplies",
     category_name: "Household Supplies",
-    description: "Batteries, insect spray, candles, and matches"
+    description: "Batteries, insect control, candles, and matches"
   },
   {
     category_id: "cat_kitchen_supplies",
     category_name: "Kitchen Supplies",
-    description: "Dishwashing liquid, sponges, foils, and trash bags"
+    description: "Dishwashing liquid, sponges, foil, and trash bags"
   },
   {
     category_id: "cat_baby_products",
     category_name: "Baby Products",
-    description: "Diapers, baby wipes, and infant products"
+    description: "Diapers, wipes, formula, and infant care products"
   },
   {
     category_id: "cat_health_hygiene",
     category_name: "Health & Hygiene",
-    description: "Toothpaste, toothbrushes, and hygiene supplies"
+    description: "Toothpaste, toothbrushes, and daily hygiene supplies"
   },
   {
     category_id: "cat_school_office_supplies",
     category_name: "School & Office Supplies",
-    description: "Paper, notebooks, pens, and school supplies"
+    description: "Paper, notebooks, pens, and basic office supplies"
   },
   {
     category_id: "cat_cigarettes_tobacco",
     category_name: "Cigarettes & Tobacco",
-    description: "Cigarettes, tobacco, and lighters"
+    description: "Cigarettes, tobacco products, and lighters"
   }
 ];
 
 export const SUPPLIERS = [
   {
     supplier_id: "sup_monde",
-    supplier_name: "Monde Nissin Sales Corp",
-    contact_person: "Eduardo Santos",
-    phone: "0917-555-0101",
-    address: "Balintawak, Quezon City"
+    supplier_name: "North Metro Grocery Distribution",
+    contact_person: "Andrea Mercado",
+    phone: "0917-620-1842",
+    address: "Caloocan City, Metro Manila"
   },
   {
     supplier_id: "sup_urc",
-    supplier_name: "Universal Robina Corporation",
-    contact_person: "Maria Theresa Lim",
-    phone: "0918-555-0202",
-    address: "Pasig City, Metro Manila"
+    supplier_name: "South Luzon Consumer Goods",
+    contact_person: "Paolo Villanueva",
+    phone: "0918-731-2965",
+    address: "Muntinlupa City, Metro Manila"
   },
   {
     supplier_id: "sup_nestle",
-    supplier_name: "Nestlé Philippines Direct",
-    contact_person: "Roberto Cruz",
-    phone: "0920-555-0303",
-    address: "Makati City, Metro Manila"
+    supplier_name: "Metro Beverage and Dairy Supply",
+    contact_person: "Janelle Cruz",
+    phone: "0920-845-3176",
+    address: "Taguig City, Metro Manila"
   },
   {
     supplier_id: "sup_smb",
-    supplier_name: "San Miguel Beverages Inc",
-    contact_person: "Arman Bautista",
-    phone: "0919-555-0404",
+    supplier_name: "Capital Drinks Wholesale",
+    contact_person: "Marco Bautista",
+    phone: "0919-564-4287",
     address: "Mandaluyong City, Metro Manila"
   },
   {
     supplier_id: "sup_local_grains",
-    supplier_name: "Central Luzon Grain Wholesalers",
-    contact_person: "Mang Danilo Ramos",
-    phone: "0922-555-0505",
-    address: "Bocaue, Bulacan"
+    supplier_name: "Bayanihan Rice and Pantry Supply",
+    contact_person: "Danilo Ramos",
+    phone: "0922-678-5398",
+    address: "Meycauayan, Bulacan"
   },
   {
     supplier_id: "sup_pg_unilever",
-    supplier_name: "P&G and Unilever Local Distributor",
-    contact_person: "Carmina Villanueva",
-    phone: "0917-555-0606",
-    address: "Valenzuela City"
+    supplier_name: "Everyday Home Care Distribution",
+    contact_person: "Carmina Reyes",
+    phone: "0917-892-6410",
+    address: "Valenzuela City, Metro Manila"
   }
 ];
 
@@ -208,60 +208,60 @@ export const PRODUCTS = [
   {
     id: "prod_01",
     category_id: "cat_canned",
-    name: "Century Tuna Flakes in Oil 180g",
+    name: "Ligo Sardines in Tomato Sauce 155g",
     barcode: "4800016644011",
     unit: "piece",
-    cost: "34.00",
-    price: "42.00",
-    stock: "45",
-    reorder: "10",
+    cost: "22.50",
+    price: "29.00",
+    stock: "52",
+    reorder: "12",
     supplier_id: "sup_urc"
   },
   {
     id: "prod_02",
     category_id: "cat_canned",
-    name: "Century Tuna Hot & Spicy 180g",
+    name: "555 Tuna Caldereta 155g",
     barcode: "4800016644028",
     unit: "piece",
-    cost: "34.00",
-    price: "42.00",
-    stock: "38",
+    cost: "31.00",
+    price: "40.00",
+    stock: "34",
     reorder: "10",
     supplier_id: "sup_urc"
   },
   {
     id: "prod_03",
     category_id: "cat_canned",
-    name: "Argentina Corned Beef 175g",
+    name: "Highlands Corned Beef 175g",
     barcode: "4800016123456",
     unit: "piece",
-    cost: "39.00",
-    price: "48.00",
-    stock: "30",
-    reorder: "10",
+    cost: "42.00",
+    price: "52.00",
+    stock: "27",
+    reorder: "9",
     supplier_id: "sup_urc"
   },
   {
     id: "prod_04",
     category_id: "cat_canned",
-    name: "555 Sardines in Tomato Sauce 155g",
+    name: "Mega Sardines Chili 155g",
     barcode: "4800016555012",
     unit: "piece",
-    cost: "19.50",
-    price: "25.00",
-    stock: "60",
+    cost: "20.00",
+    price: "27.00",
+    stock: "68",
     reorder: "15",
     supplier_id: "sup_urc"
   },
   {
     id: "prod_05",
     category_id: "cat_canned",
-    name: "San Marino Corned Tuna 180g",
+    name: "Fresca Tuna Afritada 180g",
     barcode: "4800016777014",
     unit: "piece",
-    cost: "36.00",
-    price: "45.00",
-    stock: "25",
+    cost: "37.00",
+    price: "46.00",
+    stock: "22",
     reorder: "8",
     supplier_id: "sup_urc"
   },
@@ -271,21 +271,21 @@ export const PRODUCTS = [
     name: "Purefoods Corned Beef 210g",
     barcode: "4800016888019",
     unit: "piece",
-    cost: "78.00",
-    price: "95.00",
-    stock: "12",
+    cost: "82.00",
+    price: "99.00",
+    stock: "15",
     reorder: "5",
     supplier_id: "sup_smb"
   },
   {
     id: "prod_07",
     category_id: "cat_canned",
-    name: "CDO Meat Loaf 150g",
+    name: "Holiday Meat Loaf 150g",
     barcode: "4800016999015",
     unit: "piece",
-    cost: "21.50",
-    price: "28.00",
-    stock: "3", // Low stock alert
+    cost: "23.00",
+    price: "30.00",
+    stock: "6", // Low stock alert
     reorder: "10",
     supplier_id: "sup_urc"
   },
@@ -294,115 +294,115 @@ export const PRODUCTS = [
   {
     id: "prod_08",
     category_id: "cat_instant_food",
-    name: "Lucky Me! Pancit Canton Kalamansi 80g",
+    name: "Lucky Me! Beef Noodles 70g",
     barcode: "4807770270014",
     unit: "piece",
-    cost: "12.80",
-    price: "16.00",
-    stock: "85",
+    cost: "13.20",
+    price: "17.00",
+    stock: "92",
     reorder: "20",
     supplier_id: "sup_monde",
     options: [
       {
-        name: "3-Pack Kalamansi",
+        name: "3-Pack Beef",
         barcode: "4807770270014-3PK",
         quantity: "3",
-        price: "46.00"
+        price: "49.00"
       }
     ]
   },
   {
     id: "prod_09",
     category_id: "cat_instant_food",
-    name: "Lucky Me! Pancit Canton Original 80g",
+    name: "Payless Xtra Big Original 120g",
     barcode: "4807770270021",
     unit: "piece",
-    cost: "12.80",
-    price: "16.00",
-    stock: "70",
-    reorder: "20",
+    cost: "18.50",
+    price: "24.00",
+    stock: "66",
+    reorder: "18",
     supplier_id: "sup_monde",
     options: [
       {
         name: "3-Pack Original",
         barcode: "4807770270021-3PK",
         quantity: "3",
-        price: "46.00"
+        price: "68.00"
       }
     ]
   },
   {
     id: "prod_10",
     category_id: "cat_instant_food",
-    name: "Lucky Me! Pancit Canton Chili Mansi 80g",
+    name: "Nissin Yakisoba Original 60g",
     barcode: "4807770270038",
     unit: "piece",
-    cost: "12.80",
-    price: "16.00",
-    stock: "90",
-    reorder: "20",
+    cost: "13.50",
+    price: "18.00",
+    stock: "78",
+    reorder: "18",
     supplier_id: "sup_monde",
     options: [
       {
-        name: "3-Pack Chili Mansi",
+        name: "3-Pack Yakisoba",
         barcode: "4807770270038-3PK",
         quantity: "3",
-        price: "46.00"
+        price: "51.00"
       }
     ]
   },
   {
     id: "prod_11",
     category_id: "cat_instant_food",
-    name: "Lucky Me! Pancit Canton Sweet & Spicy 80g",
+    name: "QuickChow Pancit Canton 80g",
     barcode: "4807770270045",
     unit: "piece",
-    cost: "12.80",
+    cost: "12.50",
     price: "16.00",
-    stock: "65",
-    reorder: "20",
+    stock: "58",
+    reorder: "18",
     supplier_id: "sup_monde",
     options: [
       {
-        name: "3-Pack Sweet & Spicy",
+        name: "3-Pack QuickChow",
         barcode: "4807770270045-3PK",
         quantity: "3",
-        price: "46.00"
+        price: "45.00"
       }
     ]
   },
   {
     id: "prod_12",
     category_id: "cat_instant_food",
-    name: "Lucky Me! Supreme Instant Mami Beef 65g",
+    name: "Nissin Cup Noodles Beef 60g",
     barcode: "4807770270052",
     unit: "piece",
-    cost: "11.50",
-    price: "15.00",
-    stock: "40",
-    reorder: "15",
+    cost: "24.00",
+    price: "30.00",
+    stock: "42",
+    reorder: "12",
     supplier_id: "sup_monde"
   },
   {
     id: "prod_13",
     category_id: "cat_instant_food",
-    name: "Lucky Me! Supreme Instant Mami Chicken 65g",
+    name: "Nissin Cup Noodles Chicken 60g",
     barcode: "4807770270069",
     unit: "piece",
-    cost: "11.50",
-    price: "15.00",
-    stock: "35",
-    reorder: "15",
+    cost: "24.00",
+    price: "30.00",
+    stock: "37",
+    reorder: "12",
     supplier_id: "sup_monde"
   },
   {
     id: "prod_14",
     category_id: "cat_instant_food",
-    name: "Payless Xtra Big Pancit Canton Sweet Spicy 130g",
+    name: "Lucky Me! Batchoy Noodles 55g",
     barcode: "4807770270076",
     unit: "piece",
-    cost: "17.50",
-    price: "22.00",
+    cost: "16.00",
+    price: "21.00",
     stock: "0", // Out of stock test
     reorder: "15",
     supplier_id: "sup_urc"
@@ -412,60 +412,60 @@ export const PRODUCTS = [
   {
     id: "prod_15",
     category_id: "cat_beverages",
-    name: "Coca-Cola 1.5L PET",
+    name: "Pepsi 1.5L PET",
     barcode: "4800088110012",
     unit: "bottle",
-    cost: "62.00",
-    price: "75.00",
-    stock: "24",
+    cost: "59.00",
+    price: "72.00",
+    stock: "27",
     reorder: "8",
     supplier_id: "sup_smb"
   },
   {
     id: "prod_16",
     category_id: "cat_beverages",
-    name: "Royal Tru-Orange 1.5L PET",
+    name: "Mountain Dew 1.5L PET",
     barcode: "4800088110029",
     unit: "bottle",
-    cost: "62.00",
-    price: "75.00",
-    stock: "18",
+    cost: "59.00",
+    price: "72.00",
+    stock: "19",
     reorder: "8",
     supplier_id: "sup_smb"
   },
   {
     id: "prod_17",
     category_id: "cat_beverages",
-    name: "Sprite 1.5L PET",
+    name: "7UP 1.5L PET",
     barcode: "4800088110036",
     unit: "bottle",
-    cost: "62.00",
-    price: "75.00",
-    stock: "16",
+    cost: "59.00",
+    price: "72.00",
+    stock: "21",
     reorder: "8",
     supplier_id: "sup_smb"
   },
   {
     id: "prod_18",
     category_id: "cat_beverages",
-    name: "C2 Cool & Clean Green Tea Apple 500ml",
+    name: "Sting Energy Drink 330ml Can",
     barcode: "4800016223344",
     unit: "bottle",
-    cost: "19.50",
-    price: "25.00",
-    stock: "32",
+    cost: "22.00",
+    price: "28.00",
+    stock: "36",
     reorder: "10",
     supplier_id: "sup_urc"
   },
   {
     id: "prod_19",
     category_id: "cat_beverages",
-    name: "San Miguel Pale Pilsen 330ml Can",
+    name: "San Miguel Flavored Beer 330ml Can",
     barcode: "4800016334455",
     unit: "can",
-    cost: "44.00",
-    price: "55.00",
-    stock: "48",
+    cost: "46.00",
+    price: "58.00",
+    stock: "44",
     reorder: "12",
     supplier_id: "sup_smb",
     options: [
@@ -473,7 +473,7 @@ export const PRODUCTS = [
         name: "6-Can Pack",
         barcode: "4800016334455-6PK",
         quantity: "6",
-        price: "310.00"
+        price: "325.00"
       }
     ]
   },
@@ -483,21 +483,21 @@ export const PRODUCTS = [
     name: "Red Horse Beer 500ml Bottle",
     barcode: "4800016445566",
     unit: "bottle",
-    cost: "52.00",
-    price: "65.00",
-    stock: "30",
+    cost: "55.00",
+    price: "69.00",
+    stock: "26",
     reorder: "12",
     supplier_id: "sup_smb"
   },
   {
     id: "prod_21",
     category_id: "cat_beverages",
-    name: "Nature's Spring Purified Water 500ml",
+    name: "Wilkins Distilled Water 500ml",
     barcode: "4800016556677",
     unit: "bottle",
-    cost: "10.50",
-    price: "15.00",
-    stock: "60",
+    cost: "11.00",
+    price: "16.00",
+    stock: "72",
     reorder: "15",
     supplier_id: "sup_smb"
   },
@@ -506,12 +506,12 @@ export const PRODUCTS = [
   {
     id: "prod_22",
     category_id: "cat_beverages",
-    name: "Nescafé Classic Sachet 2g",
+    name: "Nescafé Original Sachet 2g",
     barcode: "4800361234011",
     unit: "sachet",
-    cost: "2.80",
-    price: "4.00",
-    stock: "150",
+    cost: "3.00",
+    price: "5.00",
+    stock: "165",
     reorder: "30",
     supplier_id: "sup_nestle",
     options: [
@@ -519,43 +519,43 @@ export const PRODUCTS = [
         name: "Strip of 10",
         barcode: "4800361234011-STRIP",
         quantity: "10",
-        price: "38.00"
+        price: "45.00"
       }
     ]
   },
   {
     id: "prod_23",
     category_id: "cat_beverages",
-    name: "Great Taste White Twin Pack 50g",
+    name: "Great Taste Choco Twin Pack 50g",
     barcode: "4800016333018",
     unit: "pack",
-    cost: "11.20",
-    price: "14.00",
-    stock: "80",
+    cost: "12.00",
+    price: "16.00",
+    stock: "88",
     reorder: "20",
     supplier_id: "sup_urc"
   },
   {
     id: "prod_24",
     category_id: "cat_beverages",
-    name: "Kopiko Blanca Twin Pack 52g",
+    name: "Kopiko Brown Coffee 30g",
     barcode: "4800016444014",
     unit: "pack",
-    cost: "11.20",
+    cost: "10.00",
     price: "14.00",
-    stock: "75",
+    stock: "82",
     reorder: "20",
     supplier_id: "sup_urc"
   },
   {
     id: "prod_25",
     category_id: "cat_beverages",
-    name: "Bear Brand Fortified Powdered Milk 33g",
+    name: "Alaska Fortified Milk 33g",
     barcode: "4800361555018",
     unit: "sachet",
-    cost: "12.50",
-    price: "16.00",
-    stock: "90",
+    cost: "13.00",
+    price: "17.00",
+    stock: "96",
     reorder: "20",
     supplier_id: "sup_nestle"
   },
@@ -565,9 +565,9 @@ export const PRODUCTS = [
     name: "Milo Chocolate Powdered Drink 24g",
     barcode: "4800361666014",
     unit: "sachet",
-    cost: "9.20",
-    price: "12.00",
-    stock: "110",
+    cost: "9.50",
+    price: "13.00",
+    stock: "125",
     reorder: "25",
     supplier_id: "sup_nestle",
     options: [
@@ -575,19 +575,19 @@ export const PRODUCTS = [
         name: "Bundle of 5",
         barcode: "4800361666014-5PK",
         quantity: "5",
-        price: "55.00"
+        price: "60.00"
       }
     ]
   },
   {
     id: "prod_27",
     category_id: "cat_beverages",
-    name: "Energen Champion Chocolate Cereal 40g",
+    name: "Energen Vanilla Cereal 40g",
     barcode: "4800016778899",
     unit: "sachet",
-    cost: "7.80",
-    price: "10.00",
-    stock: "4", // Low stock alert
+    cost: "8.50",
+    price: "11.00",
+    stock: "7", // Low stock alert
     reorder: "15",
     supplier_id: "sup_urc"
   },
@@ -599,9 +599,9 @@ export const PRODUCTS = [
     name: "SkyFlakes Crackers Single Pack 25g",
     barcode: "4800016111019",
     unit: "piece",
-    cost: "5.20",
-    price: "7.00",
-    stock: "120",
+    cost: "5.50",
+    price: "8.00",
+    stock: "135",
     reorder: "25",
     supplier_id: "sup_monde",
     options: [
@@ -609,7 +609,7 @@ export const PRODUCTS = [
         name: "10-Pack Bundle",
         barcode: "4800016111019-10PK",
         quantity: "10",
-        price: "65.00"
+        price: "75.00"
       }
     ]
   },
@@ -619,57 +619,57 @@ export const PRODUCTS = [
     name: "Fita Biscuits Single Pack 30g",
     barcode: "4800016111026",
     unit: "piece",
-    cost: "6.10",
-    price: "8.00",
-    stock: "60",
+    cost: "6.50",
+    price: "9.00",
+    stock: "67",
     reorder: "15",
     supplier_id: "sup_monde"
   },
   {
     id: "prod_30",
     category_id: "cat_snacks",
-    name: "Rebisco Sandwich Choco 32g",
+    name: "Rebisco Crackers 32g",
     barcode: "4800016111033",
     unit: "piece",
-    cost: "6.80",
-    price: "9.00",
-    stock: "70",
+    cost: "7.00",
+    price: "10.00",
+    stock: "76",
     reorder: "15",
     supplier_id: "sup_monde"
   },
   {
     id: "prod_31",
     category_id: "cat_snacks",
-    name: "Piattos Cheese Potato Crisps 85g",
+    name: "Piattos Sour Cream Potato Crisps 85g",
     barcode: "4800016222013",
     unit: "pack",
-    cost: "30.00",
-    price: "38.00",
-    stock: "28",
+    cost: "31.00",
+    price: "40.00",
+    stock: "31",
     reorder: "10",
     supplier_id: "sup_urc"
   },
   {
     id: "prod_32",
     category_id: "cat_snacks",
-    name: "Nova Multigrain Country Cheddar 78g",
+    name: "Nova Barbecue Multigrain 78g",
     barcode: "4800016222020",
     unit: "pack",
-    cost: "30.00",
-    price: "38.00",
-    stock: "25",
+    cost: "31.00",
+    price: "40.00",
+    stock: "22",
     reorder: "10",
     supplier_id: "sup_urc"
   },
   {
     id: "prod_33",
     category_id: "cat_snacks",
-    name: "Oishi Prawn Crackers Plain 60g",
+    name: "Oishi Fish Crackers 60g",
     barcode: "4800016333025",
     unit: "pack",
-    cost: "16.50",
-    price: "22.00",
-    stock: "35",
+    cost: "17.00",
+    price: "23.00",
+    stock: "39",
     reorder: "10",
     supplier_id: "sup_urc"
   },
@@ -678,12 +678,12 @@ export const PRODUCTS = [
   {
     id: "prod_34",
     category_id: "cat_rice_grains",
-    name: "Dinorado Special Fragrant Rice",
+    name: "Jasponica Premium Rice",
     barcode: "4800016900011",
     unit: "kg",
-    cost: "46.00",
-    price: "58.00",
-    stock: "125",
+    cost: "48.00",
+    price: "60.00",
+    stock: "118",
     reorder: "30",
     supplier_id: "sup_local_grains",
     options: [
@@ -691,25 +691,25 @@ export const PRODUCTS = [
         name: "5kg Bag",
         barcode: "4800016900011-5KG",
         quantity: "5",
-        price: "285.00"
+        price: "295.00"
       },
       {
         name: "25kg Sack",
         barcode: "4800016900011-25KG",
         quantity: "25",
-        price: "1400.00"
+        price: "1450.00"
       }
     ]
   },
   {
     id: "prod_35",
     category_id: "cat_rice_grains",
-    name: "Sinandomeng Well-Milled Rice",
+    name: "Dinorado Well-Milled Rice",
     barcode: "4800016900028",
     unit: "kg",
-    cost: "38.00",
-    price: "48.00",
-    stock: "150",
+    cost: "42.00",
+    price: "53.00",
+    stock: "142",
     reorder: "30",
     supplier_id: "sup_local_grains",
     options: [
@@ -717,13 +717,13 @@ export const PRODUCTS = [
         name: "5kg Bag",
         barcode: "4800016900028-5KG",
         quantity: "5",
-        price: "235.00"
+        price: "260.00"
       },
       {
         name: "25kg Sack",
         barcode: "4800016900028-25KG",
         quantity: "25",
-        price: "1150.00"
+        price: "1275.00"
       }
     ]
   },
@@ -733,9 +733,9 @@ export const PRODUCTS = [
     name: "Silver Swan Soy Sauce 385ml Bottle",
     barcode: "4800016911017",
     unit: "bottle",
-    cost: "18.50",
-    price: "24.00",
-    stock: "30",
+    cost: "19.00",
+    price: "26.00",
+    stock: "34",
     reorder: "10",
     supplier_id: "sup_urc"
   },
@@ -745,33 +745,33 @@ export const PRODUCTS = [
     name: "Datu Puti Cane Vinegar 385ml Bottle",
     barcode: "4800016911024",
     unit: "bottle",
-    cost: "17.00",
-    price: "22.00",
-    stock: "28",
+    cost: "18.00",
+    price: "24.00",
+    stock: "31",
     reorder: "10",
     supplier_id: "sup_urc"
   },
   {
     id: "prod_38",
     category_id: "cat_condiments_seasonings",
-    name: "UFC Tamis Anghang Banana Ketchup 320g",
+    name: "UFC Sweet Chili Banana Ketchup 320g",
     barcode: "4800016911031",
     unit: "bottle",
-    cost: "21.50",
-    price: "28.00",
-    stock: "22",
+    cost: "23.00",
+    price: "30.00",
+    stock: "25",
     reorder: "8",
     supplier_id: "sup_urc"
   },
   {
     id: "prod_39",
     category_id: "cat_cooking_essentials",
-    name: "Golden Fiesta Palm Oil 1L Bottle",
+    name: "Baguio Cooking Oil 1L Bottle",
     barcode: "4800016911048",
     unit: "bottle",
-    cost: "76.00",
-    price: "95.00",
-    stock: "18",
+    cost: "80.00",
+    price: "99.00",
+    stock: "16",
     reorder: "8",
     supplier_id: "sup_local_grains"
   },
@@ -781,9 +781,9 @@ export const PRODUCTS = [
     name: "Maggi Magic Sarap Seasoning 8g",
     barcode: "4800361999011",
     unit: "sachet",
-    cost: "4.20",
-    price: "6.00",
-    stock: "140",
+    cost: "4.50",
+    price: "7.00",
+    stock: "155",
     reorder: "30",
     supplier_id: "sup_nestle",
     options: [
@@ -791,7 +791,7 @@ export const PRODUCTS = [
         name: "Strip of 12",
         barcode: "4800361999011-STRIP",
         quantity: "12",
-        price: "65.00"
+        price: "75.00"
       }
     ]
   },
@@ -800,24 +800,24 @@ export const PRODUCTS = [
   {
     id: "prod_41",
     category_id: "cat_personal_care",
-    name: "Safeguard Pure White Bar Soap 130g",
+    name: "Bioderm Fresh Soap 90g",
     barcode: "4800016800013",
     unit: "piece",
-    cost: "38.00",
-    price: "48.00",
-    stock: "40",
+    cost: "35.00",
+    price: "45.00",
+    stock: "44",
     reorder: "10",
     supplier_id: "sup_pg_unilever"
   },
   {
     id: "prod_42",
     category_id: "cat_personal_care",
-    name: "Palmolive Naturals Shampoo Moisture 15ml",
+    name: "Cream Silk Daily Treatment 12ml",
     barcode: "4800016800020",
     unit: "sachet",
-    cost: "5.80",
-    price: "8.00",
-    stock: "95",
+    cost: "6.50",
+    price: "9.00",
+    stock: "100",
     reorder: "20",
     supplier_id: "sup_pg_unilever",
     options: [
@@ -825,42 +825,42 @@ export const PRODUCTS = [
         name: "Strip of 6",
         barcode: "4800016800020-6PK",
         quantity: "6",
-        price: "45.00"
+        price: "50.00"
       }
     ]
   },
   {
     id: "prod_43",
     category_id: "cat_personal_care",
-    name: "Head & Shoulders Cool Menthol 12ml",
+    name: "Clear Cool Sport Shampoo 12ml",
     barcode: "4800016800037",
     unit: "sachet",
-    cost: "6.60",
-    price: "9.00",
-    stock: "80",
+    cost: "7.00",
+    price: "10.00",
+    stock: "84",
     reorder: "20",
     supplier_id: "sup_pg_unilever"
   },
   {
     id: "prod_44",
     category_id: "cat_health_hygiene",
-    name: "Colgate Great Regular Flavor Toothpaste 50ml",
+    name: "Hapee Fresh Mint Toothpaste 50ml",
     barcode: "4800016800044",
     unit: "tube",
-    cost: "41.00",
-    price: "52.00",
-    stock: "20",
+    cost: "32.00",
+    price: "42.00",
+    stock: "23",
     reorder: "5",
     supplier_id: "sup_pg_unilever"
   },
   {
     id: "prod_45",
     category_id: "cat_personal_care",
-    name: "Sunsilk Smooth & Manageable 15ml",
+    name: "Cream Silk Conditioner 12ml",
     barcode: "4800016800051",
     unit: "sachet",
-    cost: "5.80",
-    price: "8.00",
+    cost: "6.50",
+    price: "9.00",
     stock: "0", // Out of stock test
     reorder: "20",
     supplier_id: "sup_pg_unilever"
@@ -868,12 +868,12 @@ export const PRODUCTS = [
   {
     id: "prod_46",
     category_id: "cat_personal_care",
-    name: "Rexona Men Ice Cool Roll-On 25ml",
+    name: "Nivea Men Deodorant Roll-On 25ml",
     barcode: "4800016800068",
     unit: "piece",
-    cost: "68.00",
-    price: "85.00",
-    stock: "2", // Low stock alert
+    cost: "70.00",
+    price: "89.00",
+    stock: "3", // Low stock alert
     reorder: "5",
     supplier_id: "sup_pg_unilever"
   },
@@ -882,12 +882,12 @@ export const PRODUCTS = [
   {
     id: "prod_47",
     category_id: "cat_laundry_cleaning",
-    name: "Surf Cherry Blossom Detergent Powder 65g",
+    name: "Surf Lavender Detergent Powder 65g",
     barcode: "4800016700016",
     unit: "sachet",
-    cost: "9.20",
-    price: "12.00",
-    stock: "110",
+    cost: "10.00",
+    price: "14.00",
+    stock: "118",
     reorder: "25",
     supplier_id: "sup_pg_unilever",
     options: [
@@ -895,31 +895,31 @@ export const PRODUCTS = [
         name: "Strip of 6",
         barcode: "4800016700016-6PK",
         quantity: "6",
-        price: "68.00"
+        price: "78.00"
       }
     ]
   },
   {
     id: "prod_48",
     category_id: "cat_laundry_cleaning",
-    name: "Ariel Sunrise Fresh Detergent Powder 66g",
+    name: "Tide Clean Breeze Detergent Powder 66g",
     barcode: "4800016700023",
     unit: "sachet",
-    cost: "10.80",
-    price: "14.00",
-    stock: "85",
+    cost: "11.50",
+    price: "15.00",
+    stock: "91",
     reorder: "20",
     supplier_id: "sup_pg_unilever"
   },
   {
     id: "prod_49",
     category_id: "cat_laundry_cleaning",
-    name: "Downy Mystique Fabric Conditioner 20ml",
+    name: "Downy Sunrise Fresh Conditioner 20ml",
     barcode: "4800016700030",
     unit: "sachet",
-    cost: "6.80",
-    price: "9.00",
-    stock: "100",
+    cost: "7.20",
+    price: "10.00",
+    stock: "105",
     reorder: "20",
     supplier_id: "sup_pg_unilever",
     options: [
@@ -927,19 +927,19 @@ export const PRODUCTS = [
         name: "Strip of 6",
         barcode: "4800016700030-6PK",
         quantity: "6",
-        price: "50.00"
+        price: "55.00"
       }
     ]
   },
   {
     id: "prod_50",
     category_id: "cat_kitchen_supplies",
-    name: "Joy Dishwashing Liquid Lemon 200ml",
+    name: "Smart Dishwashing Liquid Lemon 200ml",
     barcode: "4800016700047",
     unit: "bottle",
-    cost: "27.50",
-    price: "36.00",
-    stock: "26",
+    cost: "29.00",
+    price: "39.00",
+    stock: "29",
     reorder: "8",
     supplier_id: "sup_pg_unilever"
   }
@@ -1127,99 +1127,99 @@ export const SAMPLE_SALES = [
   // Today's sales
   {
     items: [
-      { id: "prod_08", qty: 2, price: 1600, cost: 1280 }, // Lucky Me Kalamansi
-      { id: "prod_22", qty: 3, price: 400, cost: 280 }    // Nescafe Classic
+      { id: "prod_08", qty: 2, price: 1700, cost: 1320 }, // Lucky Me Beef noodles
+      { id: "prod_22", qty: 4, price: 500, cost: 300 }    // Nescafe Original
     ],
-    cashPaid: 5000,
+    cashPaid: 7000,
     hoursAgo: 1
   },
   {
     items: [
-      { id: "prod_15", qty: 1, price: 7500, cost: 6200 }, // Coke 1.5L
-      { id: "prod_31", qty: 1, price: 3800, cost: 3000 }  // Piattos
+      { id: "prod_15", qty: 1, price: 7200, cost: 5900 }, // Pepsi 1.5L
+      { id: "prod_31", qty: 1, price: 4000, cost: 3100 }  // Piattos
     ],
     cashPaid: 15000,
     hoursAgo: 2
   },
   {
     items: [
-      { id: "prod_34", qty: 2, price: 5800, cost: 4600 }, // Dinorado 2kg
-      { id: "prod_36", qty: 1, price: 2400, cost: 1850 }, // Silver Swan
-      { id: "prod_40", qty: 2, price: 600, cost: 420 }    // Magic Sarap
+      { id: "prod_34", qty: 2, price: 6000, cost: 4800 }, // Jasponica rice
+      { id: "prod_36", qty: 1, price: 2600, cost: 1900 }, // Silver Swan
+      { id: "prod_40", qty: 3, price: 700, cost: 450 }    // Magic Sarap
     ],
     cashPaid: 20000,
     hoursAgo: 3
   },
   {
     items: [
-      { id: "prod_01", qty: 2, price: 4200, cost: 3400 }, // Century Tuna
-      { id: "prod_28", qty: 4, price: 700, cost: 520 }    // SkyFlakes
+      { id: "prod_01", qty: 3, price: 2900, cost: 2250 }, // Ligo sardines
+      { id: "prod_28", qty: 5, price: 800, cost: 550 }    // SkyFlakes
     ],
-    cashPaid: 12000,
+    cashPaid: 15000,
     hoursAgo: 4
   },
   {
     items: [
-      { id: "prod_41", qty: 1, price: 4800, cost: 3800 }, // Safeguard
-      { id: "prod_42", qty: 2, price: 800, cost: 580 },   // Palmolive sachet
-      { id: "prod_47", qty: 2, price: 1200, cost: 920 }   // Surf sachet
+      { id: "prod_41", qty: 1, price: 4500, cost: 3500 }, // Bioderm soap
+      { id: "prod_42", qty: 2, price: 900, cost: 650 },   // Cream Silk sachet
+      { id: "prod_47", qty: 2, price: 1400, cost: 1000 }   // Surf sachet
     ],
-    cashPaid: 10000,
+    cashPaid: 12000,
     hoursAgo: 5
   },
   {
     items: [
-      { id: "prod_19", qty: 2, price: 5500, cost: 4400 }, // San Miguel Pale
-      { id: "prod_33", qty: 1, price: 2200, cost: 1650 }  // Oishi Prawn
+      { id: "prod_19", qty: 2, price: 5800, cost: 4600 }, // San Miguel flavored beer
+      { id: "prod_33", qty: 2, price: 2300, cost: 1700 }  // Oishi fish crackers
     ],
-    cashPaid: 15000,
+    cashPaid: 20000,
     hoursAgo: 6
   },
   // Yesterday's sales
   {
     items: [
-      { id: "prod_03", qty: 1, price: 4800, cost: 3900 }, // Argentina Corned Beef
-      { id: "prod_35", qty: 3, price: 4800, cost: 3800 }  // Sinandomeng 3kg
+      { id: "prod_03", qty: 1, price: 5200, cost: 4200 }, // Highlands corned beef
+      { id: "prod_35", qty: 2, price: 5300, cost: 4200 }  // Dinorado rice
     ],
     cashPaid: 20000,
     hoursAgo: 26
   },
   {
     items: [
-      { id: "prod_25", qty: 2, price: 1600, cost: 1250 }, // Bear Brand
-      { id: "prod_23", qty: 2, price: 1400, cost: 1120 }  // Great Taste White
+      { id: "prod_25", qty: 2, price: 1700, cost: 1300 }, // Alaska milk
+      { id: "prod_23", qty: 2, price: 1600, cost: 1200 }  // Great Taste Choco
     ],
     cashPaid: 10000,
     hoursAgo: 28
   },
   {
     items: [
-      { id: "prod_10", qty: 3, price: 1600, cost: 1280 }, // Lucky Me Chili Mansi
-      { id: "prod_04", qty: 2, price: 2500, cost: 1950 }  // 555 Sardines
+      { id: "prod_10", qty: 3, price: 1800, cost: 1350 }, // Nissin Yakisoba
+      { id: "prod_04", qty: 2, price: 2700, cost: 2000 }  // Mega sardines
     ],
-    cashPaid: 10000,
+    cashPaid: 15000,
     hoursAgo: 30
   },
   {
     items: [
-      { id: "prod_39", qty: 1, price: 9500, cost: 7600 }, // Golden Fiesta 1L
-      { id: "prod_37", qty: 1, price: 2200, cost: 1700 }  // Datu Puti Vinegar
+      { id: "prod_39", qty: 1, price: 9900, cost: 8000 }, // Baguio cooking oil
+      { id: "prod_37", qty: 1, price: 2400, cost: 1800 }  // Datu Puti vinegar
     ],
-    cashPaid: 12000,
+    cashPaid: 15000,
     hoursAgo: 32
   },
   {
     items: [
-      { id: "prod_20", qty: 2, price: 6500, cost: 5200 }, // Red Horse
-      { id: "prod_32", qty: 1, price: 3800, cost: 3000 }  // Nova
+      { id: "prod_20", qty: 2, price: 6900, cost: 5500 }, // Red Horse
+      { id: "prod_32", qty: 1, price: 4000, cost: 3100 }  // Nova
     ],
     cashPaid: 20000,
     hoursAgo: 34
   },
   {
     items: [
-      { id: "prod_50", qty: 1, price: 3600, cost: 2750 }, // Joy Dishwashing
-      { id: "prod_49", qty: 3, price: 900, cost: 680 }    // Downy sachet
+      { id: "prod_50", qty: 1, price: 3900, cost: 2900 }, // Smart dishwashing
+      { id: "prod_49", qty: 3, price: 1000, cost: 720 }    // Downy sachet
     ],
     cashPaid: 10000,
     hoursAgo: 36
