@@ -155,6 +155,8 @@ export function PosPage(props) {
   const [cartCollapsed, setCartCollapsed] = useState(defaultCollapsed);
   const [gridColumns, setGridColumns] = useState(null);
   const catalogContainerRef = useRef(null);
+  const catalogGridRef = useRef(null);
+  const prevRectsRef = useRef(new Map());
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const [amountPaidInput, setAmountPaidInput] = useState("");
   const [cashPartInput, setCashPartInput] = useState("");
@@ -338,39 +340,41 @@ export function PosPage(props) {
         if (typeof window !== "undefined" && typeof window.innerWidth === "number") {
           viewportWidth = window.innerWidth;
         }
-        const cols = calculatePosGridColumns({
+        const nextCols = calculatePosGridColumns({
           containerWidth: width,
           viewportWidth: viewportWidth
         });
-        setGridColumns(cols);
+
+        setGridColumns(function applyCols(currentCols) {
+          if (nextCols === currentCols) {
+            return currentCols;
+          }
+          if (catalogGridRef.current && currentCols !== null) {
+            const cards = catalogGridRef.current.children;
+            const rects = new Map();
+            for (let i = 0; i < cards.length; i++) {
+              const card = cards[i];
+              const id = card.getAttribute("data-product-id");
+              if (id) {
+                rects.set(id, card.getBoundingClientRect());
+              }
+            }
+            prevRectsRef.current = rects;
+          }
+          return nextCols;
+        });
       }
 
       updateColumns();
 
       let resizeObserver = null;
       if (typeof ResizeObserver !== "undefined") {
-        resizeObserver = new ResizeObserver(function onResize(entries) {
-          if (entries && entries.length > 0) {
-            const width = entries[0].contentRect.width;
-            let viewportWidth = width;
-            if (typeof window !== "undefined" && typeof window.innerWidth === "number") {
-              viewportWidth = window.innerWidth;
-            }
-            const cols = calculatePosGridColumns({
-              containerWidth: width,
-              viewportWidth: viewportWidth
-            });
-            setGridColumns(cols);
-          }
-        });
+        resizeObserver = new ResizeObserver(updateColumns);
         resizeObserver.observe(element);
       }
 
-      function onWindowResize() {
-        updateColumns();
-      }
       if (typeof window !== "undefined") {
-        window.addEventListener("resize", onWindowResize);
+        window.addEventListener("resize", updateColumns);
       }
 
       return function cleanup() {
@@ -378,11 +382,91 @@ export function PosPage(props) {
           resizeObserver.disconnect();
         }
         if (typeof window !== "undefined") {
-          window.removeEventListener("resize", onWindowResize);
+          window.removeEventListener("resize", updateColumns);
         }
       };
     },
     [cartCollapsed]
+  );
+
+  useLayoutEffect(
+    function animateGridColumnChange() {
+      // shortcut: animates position (dx, dy) via GPU transform without scale interpolation; upgrade to matrix FLIP if cards need fluid resizing during transition
+      if (!catalogGridRef.current || prevRectsRef.current.size === 0) {
+        return;
+      }
+
+      if (typeof window !== "undefined" && window.matchMedia) {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          prevRectsRef.current.clear();
+          return;
+        }
+      }
+
+      const cards = catalogGridRef.current.children;
+      const animatingCards = [];
+
+      for (let i = 0; i < cards.length; i++) {
+        const card = cards[i];
+        const id = card.getAttribute("data-product-id");
+        const oldRect = prevRectsRef.current.get(id);
+        if (oldRect) {
+          const newRect = card.getBoundingClientRect();
+          const dx = oldRect.left - newRect.left;
+          const dy = oldRect.top - newRect.top;
+          if (dx !== 0 || dy !== 0) {
+            card.style.transform = "translate(" + String(dx) + "px, " + String(dy) + "px)";
+            card.style.transition = "none";
+            animatingCards.push(card);
+          }
+        }
+      }
+
+      prevRectsRef.current.clear();
+
+      if (animatingCards.length === 0) {
+        return;
+      }
+
+      // Force layout reflow so browser registers the inverted transform
+      void catalogGridRef.current.offsetHeight;
+
+      let rafId = null;
+      let cleanupTimeout = null;
+
+      if (typeof window !== "undefined") {
+        rafId = window.requestAnimationFrame(function playAnimation() {
+          for (let i = 0; i < animatingCards.length; i++) {
+            const card = animatingCards[i];
+            card.style.transform = "";
+            card.style.transition = "transform 250ms cubic-bezier(0.2, 0, 0, 1)";
+          }
+        });
+
+        cleanupTimeout = window.setTimeout(function cleanupTransitions() {
+          for (let i = 0; i < animatingCards.length; i++) {
+            const card = animatingCards[i];
+            card.style.transition = "";
+          }
+        }, 280);
+      }
+
+      return function cleanup() {
+        for (let i = 0; i < animatingCards.length; i++) {
+          animatingCards[i].style.transform = "";
+          animatingCards[i].style.transition = "";
+        }
+        if (typeof window !== "undefined") {
+          if (rafId !== null) {
+            window.cancelAnimationFrame(rafId);
+          }
+          if (cleanupTimeout !== null) {
+            window.clearTimeout(cleanupTimeout);
+          }
+        }
+      };
+    },
+    [gridColumns]
   );
 
   function handleFlyerComplete() {
@@ -986,6 +1070,7 @@ export function PosPage(props) {
 
     productGridContent = (
       <div
+        ref={catalogGridRef}
         className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
         style={gridStyle}
       >
@@ -1086,6 +1171,7 @@ export function PosPage(props) {
           return (
             <div
               key={product.product_id}
+              data-product-id={product.product_id}
               className="flex flex-col overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white text-left transition-all hover:border-[#171717]/30 hover:shadow-xs justify-between"
             >
               <div>
