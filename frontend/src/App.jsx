@@ -316,6 +316,19 @@ export function App(props) {
     return <LoginPage onLoginSuccess={handleAuthSuccess} />;
   }
 
+  let openShiftHandler = null;
+  let shiftChangeHandler = null;
+  if (activeCapabilities.cash_drawer) {
+    openShiftHandler = function openShift() {
+      setShiftModalOpen(true);
+    };
+    shiftChangeHandler = function refreshShift() {
+      if (currentUser) {
+        return loadActiveShift(currentUser.user_id, sessionToken);
+      }
+    };
+  }
+
   let pageElement = null;
   if (activePage === "dashboard") {
     pageElement = <DashboardPage onNavigate={handleNavigate} currentUser={currentUser} />;
@@ -325,15 +338,9 @@ export function App(props) {
         currentUser={currentUser}
         capabilities={activeCapabilities}
         activeShift={activeShift}
-        cashDrawerEnabled={activeCapabilities.cash_drawer}
-        onOpenShiftModal={function () {
-          setShiftModalOpen(true);
-        }}
-        onShiftChange={function () {
-          if (currentUser) {
-            loadActiveShift(currentUser.user_id, sessionToken);
-          }
-        }}
+        cashDrawerEnabled={Boolean(activeCapabilities.cash_drawer)}
+        onOpenShiftModal={openShiftHandler}
+        onShiftChange={shiftChangeHandler}
         cartItems={posCartItems}
         onCartChange={function changeCart(items) {
           if (sessionToken === getAuthToken()) {
@@ -425,19 +432,6 @@ export function App(props) {
   if (activeShift) {
     mobileShiftDotClass = "bg-[#B9F36B]";
     mobileShiftTitle = "Cash Drawer (Shift Open)";
-  }
-
-  let openShiftHandler = null;
-  let shiftChangeHandler = null;
-  if (activeCapabilities.cash_drawer) {
-    openShiftHandler = function openShift() {
-      setShiftModalOpen(true);
-    };
-    shiftChangeHandler = function refreshShift() {
-      if (currentUser) {
-        return loadActiveShift(currentUser.user_id, sessionToken);
-      }
-    };
   }
 
   let openUserHandler = null;

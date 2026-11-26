@@ -211,8 +211,48 @@ describe("PosPage SSR test", function () {
     );
     expect(html).toContain("md:grid-cols-3");
     expect(html).not.toContain("md:grid-cols-4");
-    expect(html).toContain("xl:grid-cols-4");
-    expect(html).not.toContain("xl:grid-cols-5");
+    expect(html).toContain("xl:grid-cols-5");
+    expect(html).not.toContain("xl:grid-cols-4");
+  });
+
+  it("renders Open Shift button when cash drawer capability is enabled and onOpenShiftModal is provided", function () {
+    const html = renderToString(
+      React.createElement(PosPage, {
+        onOpenShiftModal: function () {},
+        cashDrawerEnabled: true
+      })
+    );
+    expect(html).toContain("Open Shift");
+    expect(html).toContain("Cash Drawer &amp; Shift Reconciliation");
+  });
+
+  it("hides Open Shift button when cash drawer capability is disabled", function () {
+    const htmlDisabledProp = renderToString(
+      React.createElement(PosPage, {
+        onOpenShiftModal: function () {},
+        cashDrawerEnabled: false
+      })
+    );
+    expect(htmlDisabledProp).not.toContain("Open Shift");
+    expect(htmlDisabledProp).not.toContain("Cash Drawer &amp; Shift Reconciliation");
+
+    const htmlDisabledCap = renderToString(
+      React.createElement(PosPage, {
+        onOpenShiftModal: function () {},
+        capabilities: { cash_drawer: false }
+      })
+    );
+    expect(htmlDisabledCap).not.toContain("Open Shift");
+    expect(htmlDisabledCap).not.toContain("Cash Drawer &amp; Shift Reconciliation");
+
+    const htmlNoHandler = renderToString(
+      React.createElement(PosPage, {
+        onOpenShiftModal: null,
+        cashDrawerEnabled: true
+      })
+    );
+    expect(htmlNoHandler).not.toContain("Open Shift");
+    expect(htmlNoHandler).not.toContain("Cash Drawer &amp; Shift Reconciliation");
   });
 
   it("renders compact total in collapsed panel and full total in expanded panel", function () {
