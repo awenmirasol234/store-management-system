@@ -472,4 +472,26 @@ describe("PosPage SSR test", function () {
     expect(errorHtml).toContain("bg-rose-50");
     expect(errorHtml).toContain("text-rose-700");
   });
+
+  it("renders product image with medium size (h-14 w-14) on cart list for visibility", function () {
+    const html = renderToString(
+      React.createElement(PosPage, {
+        initialCartItems: [
+          {
+            key: "prod-cart-thumb:base",
+            product_id: "prod-cart-thumb",
+            product_name: "Nescafe Classic 50g",
+            image_url: "/uploads/nescafe.jpg",
+            unit_price: 45,
+            selling_price: 45,
+            quantity: 1,
+            base_quantity_per_unit: 1
+          }
+        ]
+      })
+    );
+
+    expect(html).toContain("Nescafe Classic 50g");
+    expect(html).toContain("h-14 w-14 shrink-0");
+  });
 });

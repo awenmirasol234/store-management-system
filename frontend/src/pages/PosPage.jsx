@@ -1085,7 +1085,7 @@ export function PosPage(props) {
 
       return (
         <div key={item.key} className="flex items-center gap-3.5 py-3.5">
-          <ProductThumb imageUrl={item.image_url} name={item.product_name} size="sm" />
+          <ProductThumb imageUrl={item.image_url} name={item.product_name} size="md" />
           <div className="min-w-0 flex-1">
             <div className="truncate text-xs font-semibold text-[#171717]">
               {item.product_name}
