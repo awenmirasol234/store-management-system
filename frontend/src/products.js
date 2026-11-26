@@ -130,3 +130,66 @@ export function validateImageUrl(url) {
   }
   return "";
 }
+
+export function calculatePosGridColumns(params) {
+  const containerWidth = params ? params.containerWidth : 0;
+  let viewportWidth = containerWidth;
+  if (params && typeof params.viewportWidth === "number") {
+    viewportWidth = params.viewportWidth;
+  } else if (typeof window !== "undefined" && typeof window.innerWidth === "number") {
+    viewportWidth = window.innerWidth;
+  }
+
+  // Fallback for SSR or unmeasured container
+  if (!containerWidth || containerWidth <= 0) {
+    if (viewportWidth >= 1536) {
+      return 6;
+    }
+    if (viewportWidth >= 1280) {
+      return 5;
+    }
+    if (viewportWidth >= 1024) {
+      return 4;
+    }
+    if (viewportWidth >= 640) {
+      return 3;
+    }
+    return 2;
+  }
+
+  // 1. Mobile viewports (< 768px): preserve 2-column layout (1 column only if extremely narrow < 260px)
+  if (viewportWidth < 768) {
+    if (containerWidth < 260) {
+      return 1;
+    }
+    return 2;
+  }
+
+  // 2. Tablet viewports (768px to 1023px): min card width 180px, gap 12px
+  if (viewportWidth < 1024) {
+    const minCardWidth = 180;
+    const gap = 12;
+    const fitColumns = Math.floor((containerWidth + gap) / (minCardWidth + gap));
+    let columns = fitColumns;
+    if (columns < 1) {
+      columns = 1;
+    }
+    if (columns > 4) {
+      columns = 4;
+    }
+    return columns;
+  }
+
+  // 3. Desktop viewports (>= 1024px): min card width 200px, gap 12px
+  const minCardWidth = 200;
+  const gap = 12;
+  const fitColumns = Math.floor((containerWidth + gap) / (minCardWidth + gap));
+  let columns = fitColumns;
+  if (columns < 1) {
+    columns = 1;
+  }
+  if (columns > 6) {
+    columns = 6;
+  }
+  return columns;
+}

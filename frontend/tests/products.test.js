@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  calculatePosGridColumns,
   filterProducts,
   getStockLevel,
   PRODUCT_CATEGORIES,
@@ -105,5 +106,50 @@ describe("validateImageUrl", function () {
   it("rejects malformed URLs without domains", function () {
     expect(validateImageUrl("https://")).toBe("Please enter a valid web URL");
     expect(validateImageUrl("not-a-valid-url")).toBe("URL must start with http:// or https://");
+  });
+});
+
+describe("calculatePosGridColumns", function () {
+  it("enforces minimum 200px card width on desktop viewports (>= 1024px)", function () {
+    // When sidebars are open and available width is 400px: 1 column fits at >= 200px
+    expect(calculatePosGridColumns({ containerWidth: 400, viewportWidth: 1024 })).toBe(1);
+    // At 412px: 2 columns of 200px each with 12px gap
+    expect(calculatePosGridColumns({ containerWidth: 412, viewportWidth: 1024 })).toBe(2);
+    // At 620px: drops to 2 columns (2 * 200 + 12 = 412) rather than forcing 3 narrow cards (3 requires 624px)
+    expect(calculatePosGridColumns({ containerWidth: 620, viewportWidth: 1024 })).toBe(2);
+    // At 624px: exactly 3 columns of 200px
+    expect(calculatePosGridColumns({ containerWidth: 624, viewportWidth: 1024 })).toBe(3);
+    // At 836px: 4 columns
+    expect(calculatePosGridColumns({ containerWidth: 836, viewportWidth: 1024 })).toBe(4);
+    // At 1080px: 5 columns
+    expect(calculatePosGridColumns({ containerWidth: 1080, viewportWidth: 1280 })).toBe(5);
+    // Caps at 6 columns on large containers
+    expect(calculatePosGridColumns({ containerWidth: 1600, viewportWidth: 1920 })).toBe(6);
+  });
+
+  it("enforces minimum 180px card width on tablet viewports (768px to 1023px)", function () {
+    // At 380px: 2 columns of 184px each with 12px gap
+    expect(calculatePosGridColumns({ containerWidth: 380, viewportWidth: 800 })).toBe(2);
+    // At 550px: drops to 2 columns rather than forcing 3 cards (3 requires 3 * 180 + 24 = 564px)
+    expect(calculatePosGridColumns({ containerWidth: 550, viewportWidth: 800 })).toBe(2);
+    // At 564px: exactly 3 columns
+    expect(calculatePosGridColumns({ containerWidth: 564, viewportWidth: 800 })).toBe(3);
+    // Caps at 4 columns on tablet
+    expect(calculatePosGridColumns({ containerWidth: 900, viewportWidth: 900 })).toBe(4);
+  });
+
+  it("preserves 2-column layout on mobile viewports (< 768px)", function () {
+    expect(calculatePosGridColumns({ containerWidth: 360, viewportWidth: 390 })).toBe(2);
+    expect(calculatePosGridColumns({ containerWidth: 400, viewportWidth: 420 })).toBe(2);
+    expect(calculatePosGridColumns({ containerWidth: 200, viewportWidth: 320 })).toBe(1);
+  });
+
+  it("provides sensible responsive fallback when containerWidth is 0 or unmeasured", function () {
+    expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 1920 })).toBe(6);
+    expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 1300 })).toBe(5);
+    expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 1024 })).toBe(4);
+    expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 800 })).toBe(3);
+    expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 400 })).toBe(2);
+    expect(calculatePosGridColumns(null)).toBe(2);
   });
 });

@@ -102,6 +102,11 @@ Centralized danger and alert color tokens are declared in `frontend/src/index.cs
 - Stock Badge: `absolute left-2 top-2 rounded-md bg-[#171717] px-2 py-0.5 font-mono text-2xs text-white`.
 - Action: Full-width button `py-2 rounded-xl border border-[#E9E9E9] text-xs font-semibold`.
 - Cart Thumbnails: `h-14 w-14 shrink-0 rounded-xl bg-white border border-[#E9E9E9]` with `object-cover` image or centered initials fallback.
+- **Dynamic Grid Columns & Minimum Card Width**:
+  - Desktop ($\ge$ 1024px): minimum card width of **200px** with 12px gap.
+  - Tablets (768px – 1023px): minimum card width of **180px** with 12px gap.
+  - Mobile (< 768px): preserves standard 2-column layout (`gap-2.5`, 10px gap).
+  - Columns are calculated from actual available container width using `calculatePosGridColumns`, dropping column count when the Sidebar Navigation or Current Sale Panel opens rather than compressing cards below minimum width.
 
 ### 4.3 Category & Status Filter Pills (`frontend/src/components/CategoryFilterChips.jsx`, `frontend/src/components/FilterPill.jsx`)
 - Pill Shape: `rounded-full` with `aria-pressed` state on toggle pills.

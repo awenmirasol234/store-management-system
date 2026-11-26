@@ -21,7 +21,7 @@ import {
   computeLocalCartTotals
 } from "../cart.js";
 import { formatPeso, formatCompactPeso, formatQuantity, formatQuantityWithUnit } from "../format.js";
-import { getStockLevel, filterProducts, STOCK_LEVELS } from "../products.js";
+import { getStockLevel, filterProducts, STOCK_LEVELS, calculatePosGridColumns } from "../products.js";
 import { Badge } from "../components/Badge.jsx";
 import { Button } from "../components/Button.jsx";
 import { CategoryFilterChips } from "../components/CategoryFilterChips.jsx";
@@ -153,6 +153,8 @@ export function PosPage(props) {
     defaultCollapsed = true;
   }
   const [cartCollapsed, setCartCollapsed] = useState(defaultCollapsed);
+  const [gridColumns, setGridColumns] = useState(null);
+  const catalogContainerRef = useRef(null);
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const [amountPaidInput, setAmountPaidInput] = useState("");
   const [cashPartInput, setCashPartInput] = useState("");
@@ -321,6 +323,66 @@ export function PosPage(props) {
       });
     },
     [activeFlyer, animationQueue, cartCollapsed]
+  );
+
+  useEffect(
+    function observeCatalogWidth() {
+      const element = catalogContainerRef.current;
+      if (!element) {
+        return;
+      }
+
+      function updateColumns() {
+        const width = element.clientWidth;
+        let viewportWidth = width;
+        if (typeof window !== "undefined" && typeof window.innerWidth === "number") {
+          viewportWidth = window.innerWidth;
+        }
+        const cols = calculatePosGridColumns({
+          containerWidth: width,
+          viewportWidth: viewportWidth
+        });
+        setGridColumns(cols);
+      }
+
+      updateColumns();
+
+      let resizeObserver = null;
+      if (typeof ResizeObserver !== "undefined") {
+        resizeObserver = new ResizeObserver(function onResize(entries) {
+          if (entries && entries.length > 0) {
+            const width = entries[0].contentRect.width;
+            let viewportWidth = width;
+            if (typeof window !== "undefined" && typeof window.innerWidth === "number") {
+              viewportWidth = window.innerWidth;
+            }
+            const cols = calculatePosGridColumns({
+              containerWidth: width,
+              viewportWidth: viewportWidth
+            });
+            setGridColumns(cols);
+          }
+        });
+        resizeObserver.observe(element);
+      }
+
+      function onWindowResize() {
+        updateColumns();
+      }
+      if (typeof window !== "undefined") {
+        window.addEventListener("resize", onWindowResize);
+      }
+
+      return function cleanup() {
+        if (resizeObserver) {
+          resizeObserver.disconnect();
+        }
+        if (typeof window !== "undefined") {
+          window.removeEventListener("resize", onWindowResize);
+        }
+      };
+    },
+    [cartCollapsed]
   );
 
   function handleFlyerComplete() {
@@ -915,8 +977,18 @@ export function PosPage(props) {
       </div>
     );
   } else {
+    let gridStyle = undefined;
+    if (gridColumns !== null) {
+      gridStyle = {
+        gridTemplateColumns: "repeat(" + String(gridColumns) + ", minmax(0, 1fr))"
+      };
+    }
+
     productGridContent = (
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+      <div
+        className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
+        style={gridStyle}
+      >
         {filteredProducts.map(function renderCard(product) {
           let categoryName = product.base_unit;
           if (product.category_name) {
@@ -1721,7 +1793,9 @@ export function PosPage(props) {
         />
 
         {/* Product Grid */}
-        <div className="flex-1 overflow-y-auto pr-1">{productGridContent}</div>
+        <div ref={catalogContainerRef} className="flex-1 overflow-y-auto pr-1">
+          {productGridContent}
+        </div>
       </div>
 
       {/* Right Current Sale Cart Panel (Desktop & Tablet Collapsible) */}
