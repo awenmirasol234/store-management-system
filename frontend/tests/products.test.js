@@ -110,32 +110,36 @@ describe("validateImageUrl", function () {
 });
 
 describe("calculatePosGridColumns", function () {
-  it("enforces minimum 200px card width on desktop viewports (>= 1024px)", function () {
-    // When sidebars are open and available width is 400px: 1 column fits at >= 200px
-    expect(calculatePosGridColumns({ containerWidth: 400, viewportWidth: 1024 })).toBe(1);
-    // At 412px: 2 columns of 200px each with 12px gap
-    expect(calculatePosGridColumns({ containerWidth: 412, viewportWidth: 1024 })).toBe(2);
-    // At 620px: drops to 2 columns (2 * 200 + 12 = 412) rather than forcing 3 narrow cards (3 requires 624px)
-    expect(calculatePosGridColumns({ containerWidth: 620, viewportWidth: 1024 })).toBe(2);
-    // At 624px: exactly 3 columns of 200px
-    expect(calculatePosGridColumns({ containerWidth: 624, viewportWidth: 1024 })).toBe(3);
-    // At 836px: 4 columns
-    expect(calculatePosGridColumns({ containerWidth: 836, viewportWidth: 1024 })).toBe(4);
-    // At 1080px: 5 columns
-    expect(calculatePosGridColumns({ containerWidth: 1080, viewportWidth: 1280 })).toBe(5);
-    // Caps at 6 columns on large containers
-    expect(calculatePosGridColumns({ containerWidth: 1600, viewportWidth: 1920 })).toBe(6);
+  it("enforces compact 150px card width on desktop and tablet viewports (>= 768px)", function () {
+    // When available width is 300px: 1 column fits at >= 150px
+    expect(calculatePosGridColumns({ containerWidth: 300, viewportWidth: 1024 })).toBe(1);
+    // At 312px: 2 columns of 150px each with 12px gap
+    expect(calculatePosGridColumns({ containerWidth: 312, viewportWidth: 1024 })).toBe(2);
+    // At 470px: drops to 2 columns rather than forcing 3 narrow cards (3 requires 474px)
+    expect(calculatePosGridColumns({ containerWidth: 470, viewportWidth: 1024 })).toBe(2);
+    // At 474px: exactly 3 columns of 150px
+    expect(calculatePosGridColumns({ containerWidth: 474, viewportWidth: 1024 })).toBe(3);
+    // At 636px: 4 columns
+    expect(calculatePosGridColumns({ containerWidth: 636, viewportWidth: 1024 })).toBe(4);
+    // At 798px: 5 columns
+    expect(calculatePosGridColumns({ containerWidth: 798, viewportWidth: 1024 })).toBe(5);
+    // At 960px: 6 columns
+    expect(calculatePosGridColumns({ containerWidth: 960, viewportWidth: 1280 })).toBe(6);
+    // At 1122px: 7 columns
+    expect(calculatePosGridColumns({ containerWidth: 1122, viewportWidth: 1440 })).toBe(7);
+    // Caps at 8 columns on large containers
+    expect(calculatePosGridColumns({ containerWidth: 1600, viewportWidth: 1920 })).toBe(8);
   });
 
-  it("enforces minimum 180px card width on tablet viewports (768px to 1023px)", function () {
-    // At 380px: 2 columns of 184px each with 12px gap
-    expect(calculatePosGridColumns({ containerWidth: 380, viewportWidth: 800 })).toBe(2);
-    // At 550px: drops to 2 columns rather than forcing 3 cards (3 requires 3 * 180 + 24 = 564px)
-    expect(calculatePosGridColumns({ containerWidth: 550, viewportWidth: 800 })).toBe(2);
-    // At 564px: exactly 3 columns
-    expect(calculatePosGridColumns({ containerWidth: 564, viewportWidth: 800 })).toBe(3);
-    // Caps at 4 columns on tablet
-    expect(calculatePosGridColumns({ containerWidth: 900, viewportWidth: 900 })).toBe(4);
+  it("calculates columns consistently for tablet viewports (768px to 1023px)", function () {
+    // At 312px: 2 columns of 150px each with 12px gap
+    expect(calculatePosGridColumns({ containerWidth: 312, viewportWidth: 800 })).toBe(2);
+    // At 470px: drops to 2 columns
+    expect(calculatePosGridColumns({ containerWidth: 470, viewportWidth: 800 })).toBe(2);
+    // At 474px: exactly 3 columns
+    expect(calculatePosGridColumns({ containerWidth: 474, viewportWidth: 800 })).toBe(3);
+    // At 636px: 4 columns
+    expect(calculatePosGridColumns({ containerWidth: 636, viewportWidth: 900 })).toBe(4);
   });
 
   it("preserves 2-column layout on mobile viewports (< 768px)", function () {
@@ -145,10 +149,10 @@ describe("calculatePosGridColumns", function () {
   });
 
   it("provides sensible responsive fallback when containerWidth is 0 or unmeasured", function () {
-    expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 1920 })).toBe(6);
-    expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 1300 })).toBe(5);
-    expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 1024 })).toBe(4);
-    expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 800 })).toBe(3);
+    expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 1920 })).toBe(8);
+    expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 1300 })).toBe(6);
+    expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 1024 })).toBe(5);
+    expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 800 })).toBe(4);
     expect(calculatePosGridColumns({ containerWidth: 0, viewportWidth: 400 })).toBe(2);
     expect(calculatePosGridColumns(null)).toBe(2);
   });

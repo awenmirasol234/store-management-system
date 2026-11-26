@@ -234,6 +234,12 @@ describe("PosPage SSR test", function () {
     expect(html).not.toContain("md:grid-cols-4");
     expect(html).toContain("xl:grid-cols-5");
     expect(html).not.toContain("xl:grid-cols-4");
+    expect(html).toContain("h-24 w-full");
+    expect(html).not.toContain("aspect-[4/3]");
+    expect(html).toContain("p-2 sm:p-2.5");
+    expect(html).not.toContain("data-product-id");
+    expect(html).toContain("transition-[border-color,box-shadow]");
+    expect(html).not.toContain("transition-all hover:border-[#171717]/30");
   });
 
   it("renders Open Shift button when cash drawer capability is enabled and onOpenShiftModal is provided", function () {
@@ -478,7 +484,7 @@ describe("PosPage SSR test", function () {
     expect(successHtml).toContain("Added");
     expect(successHtml).toContain("bg-[#B9F36B]");
     expect(successHtml).toContain("border-[#9BD843]");
-    expect(successHtml).toContain("scale-[1.02]");
+    expect(successHtml).toContain("py-1 text-xs");
 
     // 4. Error state
     const errorHtml = renderToString(

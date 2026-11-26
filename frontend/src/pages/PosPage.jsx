@@ -155,8 +155,6 @@ export function PosPage(props) {
   const [cartCollapsed, setCartCollapsed] = useState(defaultCollapsed);
   const [gridColumns, setGridColumns] = useState(null);
   const catalogContainerRef = useRef(null);
-  const catalogGridRef = useRef(null);
-  const prevRectsRef = useRef(new Map());
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const [amountPaidInput, setAmountPaidInput] = useState("");
   const [cashPartInput, setCashPartInput] = useState("");
@@ -344,25 +342,7 @@ export function PosPage(props) {
           containerWidth: width,
           viewportWidth: viewportWidth
         });
-
-        setGridColumns(function applyCols(currentCols) {
-          if (nextCols === currentCols) {
-            return currentCols;
-          }
-          if (catalogGridRef.current && currentCols !== null) {
-            const cards = catalogGridRef.current.children;
-            const rects = new Map();
-            for (let i = 0; i < cards.length; i++) {
-              const card = cards[i];
-              const id = card.getAttribute("data-product-id");
-              if (id) {
-                rects.set(id, card.getBoundingClientRect());
-              }
-            }
-            prevRectsRef.current = rects;
-          }
-          return nextCols;
-        });
+        setGridColumns(nextCols);
       }
 
       updateColumns();
@@ -387,86 +367,6 @@ export function PosPage(props) {
       };
     },
     [cartCollapsed]
-  );
-
-  useLayoutEffect(
-    function animateGridColumnChange() {
-      // shortcut: animates position (dx, dy) via GPU transform without scale interpolation; upgrade to matrix FLIP if cards need fluid resizing during transition
-      if (!catalogGridRef.current || prevRectsRef.current.size === 0) {
-        return;
-      }
-
-      if (typeof window !== "undefined" && window.matchMedia) {
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-          prevRectsRef.current.clear();
-          return;
-        }
-      }
-
-      const cards = catalogGridRef.current.children;
-      const animatingCards = [];
-
-      for (let i = 0; i < cards.length; i++) {
-        const card = cards[i];
-        const id = card.getAttribute("data-product-id");
-        const oldRect = prevRectsRef.current.get(id);
-        if (oldRect) {
-          const newRect = card.getBoundingClientRect();
-          const dx = oldRect.left - newRect.left;
-          const dy = oldRect.top - newRect.top;
-          if (dx !== 0 || dy !== 0) {
-            card.style.transform = "translate(" + String(dx) + "px, " + String(dy) + "px)";
-            card.style.transition = "none";
-            animatingCards.push(card);
-          }
-        }
-      }
-
-      prevRectsRef.current.clear();
-
-      if (animatingCards.length === 0) {
-        return;
-      }
-
-      // Force layout reflow so browser registers the inverted transform
-      void catalogGridRef.current.offsetHeight;
-
-      let rafId = null;
-      let cleanupTimeout = null;
-
-      if (typeof window !== "undefined") {
-        rafId = window.requestAnimationFrame(function playAnimation() {
-          for (let i = 0; i < animatingCards.length; i++) {
-            const card = animatingCards[i];
-            card.style.transform = "";
-            card.style.transition = "transform 250ms cubic-bezier(0.2, 0, 0, 1)";
-          }
-        });
-
-        cleanupTimeout = window.setTimeout(function cleanupTransitions() {
-          for (let i = 0; i < animatingCards.length; i++) {
-            const card = animatingCards[i];
-            card.style.transition = "";
-          }
-        }, 280);
-      }
-
-      return function cleanup() {
-        for (let i = 0; i < animatingCards.length; i++) {
-          animatingCards[i].style.transform = "";
-          animatingCards[i].style.transition = "";
-        }
-        if (typeof window !== "undefined") {
-          if (rafId !== null) {
-            window.cancelAnimationFrame(rafId);
-          }
-          if (cleanupTimeout !== null) {
-            window.clearTimeout(cleanupTimeout);
-          }
-        }
-      };
-    },
-    [gridColumns]
   );
 
   function handleFlyerComplete() {
@@ -1070,7 +970,6 @@ export function PosPage(props) {
 
     productGridContent = (
       <div
-        ref={catalogGridRef}
         className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
         style={gridStyle}
       >
@@ -1112,7 +1011,7 @@ export function PosPage(props) {
               <button
                 type="button"
                 disabled={true}
-                className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-[#EEEEED] py-1.5 text-xs font-semibold text-[#777777] cursor-not-allowed opacity-75"
+                className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-[#EEEEED] py-1 text-xs font-semibold text-[#777777] cursor-not-allowed opacity-75"
               >
                 <span>Out of Stock</span>
               </button>
@@ -1123,7 +1022,7 @@ export function PosPage(props) {
                 type="button"
                 disabled={true}
                 aria-label={"Adding " + product.product_name + " to cart"}
-                className="btn-glossy btn-glossy-secondary flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-[#F5F5F4] py-1.5 text-xs font-semibold text-[#171717] cursor-wait opacity-90 transition-all duration-200 ease-in-out"
+                className="btn-glossy btn-glossy-secondary flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-[#F5F5F4] py-1 text-xs font-semibold text-[#171717] cursor-wait opacity-90 transition-all duration-200 ease-in-out"
               >
                 <Loader2 className="h-3 w-3 animate-spin text-[#171717]" />
                 <span>Adding...</span>
@@ -1135,7 +1034,7 @@ export function PosPage(props) {
                 type="button"
                 disabled={true}
                 aria-label={product.product_name + " added to cart"}
-                className="btn-glossy btn-glossy-primary flex w-full items-center justify-center gap-1 rounded-lg border border-[#9BD843] bg-[#B9F36B] py-1.5 text-xs font-bold text-[#171717] shadow-xs scale-[1.02] cursor-default transition-all duration-200 ease-in-out"
+                className="btn-glossy btn-glossy-primary flex w-full items-center justify-center gap-1 rounded-lg border border-[#9BD843] bg-[#B9F36B] py-1 text-xs font-bold text-[#171717] shadow-xs cursor-default transition-all duration-200 ease-in-out"
               >
                 <Check className="h-3.5 w-3.5 stroke-[2.5] text-[#171717]" />
                 <span>Added</span>
@@ -1147,7 +1046,7 @@ export function PosPage(props) {
                 type="button"
                 disabled={true}
                 aria-label={"Failed to add " + product.product_name}
-                className="flex w-full items-center justify-center gap-1 rounded-lg border border-rose-300 bg-rose-50 py-1.5 text-xs font-semibold text-rose-700 cursor-default transition-all duration-200 ease-in-out"
+                className="flex w-full items-center justify-center gap-1 rounded-lg border border-rose-300 bg-rose-50 py-1 text-xs font-semibold text-rose-700 cursor-default transition-all duration-200 ease-in-out"
               >
                 <AlertCircle className="h-3 w-3 text-rose-600" />
                 <span>Failed</span>
@@ -1160,7 +1059,7 @@ export function PosPage(props) {
                 onClick={function onAddClick(event) {
                   handleProductCardClick(product, event);
                 }}
-                className="btn-glossy btn-glossy-secondary flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1.5 text-xs font-semibold text-[#171717] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-all duration-200 ease-in-out cursor-pointer"
+                className="btn-glossy btn-glossy-secondary flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1 text-xs font-semibold text-[#171717] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-all duration-200 ease-in-out cursor-pointer"
               >
                 <Plus className="h-3 w-3" />
                 <span>Add to Cart</span>
@@ -1171,8 +1070,7 @@ export function PosPage(props) {
           return (
             <div
               key={product.product_id}
-              data-product-id={product.product_id}
-              className="flex flex-col overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white text-left transition-all hover:border-[#171717]/30 hover:shadow-xs justify-between"
+              className="flex flex-col overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white text-left transition-[border-color,box-shadow] hover:border-[#171717]/30 hover:shadow-xs justify-between"
             >
               <div>
                 <div
@@ -1183,7 +1081,7 @@ export function PosPage(props) {
                   }}
                   className={cardClickClass}
                 >
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-white border-b border-[#E9E9E9]">
+                  <div className="relative h-24 w-full overflow-hidden bg-white border-b border-[#E9E9E9]">
                     {stockBadge}
                     <ProductThumb
                       imageUrl={product.image_url}
@@ -1191,20 +1089,20 @@ export function PosPage(props) {
                       fullBleed={true}
                     />
                   </div>
-                  <div className="p-2.5 sm:p-3 pb-0 sm:pb-0">
+                  <div className="p-2 sm:p-2.5 pb-0 sm:pb-0">
                     <div className="truncate text-xs font-medium text-[#171717]">
                       {product.product_name}
                     </div>
                     <div className="mt-0.5 truncate text-2xs text-[#777777]">
                       {categoryName}
                     </div>
-                    <div className="mt-1 font-mono text-sm font-semibold text-[#171717]">
+                    <div className="mt-0.5 font-mono text-xs sm:text-sm font-semibold text-[#171717]">
                       {formatPeso(product.selling_price)}
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="p-2.5 sm:p-3 pt-2.5 sm:pt-2.5">
+              <div className="p-2 sm:p-2.5 pt-2 sm:pt-2">
                 {addToCartButton}
               </div>
             </div>
