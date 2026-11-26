@@ -7,11 +7,13 @@ import {
   Plus,
   SlidersHorizontal,
   AlertCircle,
+  Download,
   Globe,
   Trash2,
   Upload
 } from "lucide-react";
 import { api, resolveImageUrl } from "../api.js";
+import { exportToCsv } from "../export.js";
 import { DEFAULT_CAPABILITIES } from "../navigation.js";
 import { formatPeso, formatQuantity, formatQuantityWithUnit } from "../format.js";
 import {
@@ -155,6 +157,12 @@ export function InventoryPage(props) {
   const [lowStockOnly, setLowStockOnly] = useState(false);
   const [errorBanner, setErrorBanner] = useState("");
   const [modalError, setModalError] = useState("");
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importUpdateExisting, setImportUpdateExisting] = useState(false);
+  const [importError, setImportError] = useState("");
+  const [importSubmitting, setImportSubmitting] = useState(false);
+  const [successBanner, setSuccessBanner] = useState("");
 
   // Add / Edit product modal
   const [productModalOpen, setProductModalOpen] = useState(false);
@@ -1405,26 +1413,190 @@ export function InventoryPage(props) {
     );
   }
 
+  function handleExportCsv() {
+    const headers = [
+      { key: "product_name", label: "product_name" },
+      { key: "barcode", label: "barcode" },
+      { key: "category", label: "category" },
+      { key: "description", label: "description" },
+      { key: "image_url", label: "image_url" },
+      { key: "base_unit", label: "base_unit" },
+      { key: "cost_price", label: "cost_price" },
+      { key: "selling_price", label: "selling_price" },
+      { key: "current_stock", label: "current_stock" },
+      { key: "reorder_level", label: "reorder_level" },
+      { key: "allow_custom_amount", label: "allow_custom_amount" },
+      { key: "is_active", label: "is_active" }
+    ];
+
+    const categoryMap = new Map();
+    for (let c = 0; c < categories.length; c = c + 1) {
+      categoryMap.set(categories[c].category_id, categories[c].category_name);
+    }
+
+    const rows = products.map(function (p) {
+      let catName = "";
+      if (p.category_id && categoryMap.has(p.category_id)) {
+        catName = categoryMap.get(p.category_id);
+      }
+      return {
+        product_name: p.product_name,
+        barcode: p.barcode || "",
+        category: catName,
+        description: p.description || "",
+        image_url: p.image_url || "",
+        base_unit: p.base_unit,
+        cost_price: p.cost_price,
+        selling_price: p.selling_price,
+        current_stock: p.current_stock,
+        reorder_level: p.reorder_level,
+        allow_custom_amount: Boolean(p.allow_custom_amount),
+        is_active: Boolean(p.is_active)
+      };
+    });
+
+    const today = new Date().toISOString().slice(0, 10);
+    exportToCsv("products_inventory_" + today, headers, rows);
+  }
+
+  function handleDownloadTemplate() {
+    const headers = [
+      { key: "product_name", label: "product_name" },
+      { key: "barcode", label: "barcode" },
+      { key: "category", label: "category" },
+      { key: "description", label: "description" },
+      { key: "image_url", label: "image_url" },
+      { key: "base_unit", label: "base_unit" },
+      { key: "cost_price", label: "cost_price" },
+      { key: "selling_price", label: "selling_price" },
+      { key: "current_stock", label: "current_stock" },
+      { key: "reorder_level", label: "reorder_level" },
+      { key: "allow_custom_amount", label: "allow_custom_amount" },
+      { key: "is_active", label: "is_active" }
+    ];
+
+    const sampleRows = [
+      {
+        product_name: "Century Tuna Flakes in Oil 180g",
+        barcode: "4800016644812",
+        category: "Canned Goods",
+        description: "Flakes in oil",
+        image_url: "",
+        base_unit: "Can",
+        cost_price: "28.50",
+        selling_price: "38.00",
+        current_stock: "24",
+        reorder_level: "5",
+        allow_custom_amount: "false",
+        is_active: "true"
+      },
+      {
+        product_name: "Coca-Cola Regular 330ml",
+        barcode: "4800000000012",
+        category: "Beverages",
+        description: "Carbonated soda",
+        image_url: "",
+        base_unit: "Can",
+        cost_price: "22.00",
+        selling_price: "30.00",
+        current_stock: "48",
+        reorder_level: "10",
+        allow_custom_amount: "false",
+        is_active: "true"
+      }
+    ];
+
+    exportToCsv("product_import_template", headers, sampleRows);
+  }
+
+  async function handleImportSubmit(event) {
+    event.preventDefault();
+    if (!importFile) {
+      setImportError("Please select a .csv file to import.");
+      return;
+    }
+    if (!importFile.name.toLowerCase().endsWith(".csv")) {
+      setImportError("Only CSV files (.csv) are supported for product import.");
+      return;
+    }
+    setImportError("");
+    setImportSubmitting(true);
+    try {
+      const result = await api.importProductsCsv(importFile, importUpdateExisting);
+      setImportModalOpen(false);
+      setImportFile(null);
+      setImportUpdateExisting(false);
+      let msg = "Successfully imported " + result.imported_count + " products.";
+      if (result.created_count !== undefined && result.updated_count !== undefined) {
+        msg = "Successfully imported " + result.imported_count + " products (" + result.created_count + " created, " + result.updated_count + " updated).";
+      }
+      setSuccessBanner(msg);
+      await loadAll();
+    } catch (err) {
+      setImportError(err.message);
+    } finally {
+      setImportSubmitting(false);
+    }
+  }
+
   return (
     <PageLayout>
       <PageHeader title="Inventory" stackOnMobile={true}>
-        {canWrite && <div className="flex items-center gap-2 sm:gap-3">
-          <Button
-            variant="secondary"
-            onClick={function openCat() {
-              setModalError("");
-              setCategoryModalOpen(true);
-            }}
-          >
-            <Plus className="h-4 w-4" />
-            <span>Category</span>
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <Button variant="secondary" onClick={handleExportCsv} title="Export existing products to CSV">
+            <Download className="h-4 w-4" />
+            <span>Export CSV</span>
           </Button>
-          <Button variant="primary" onClick={openCreateProduct}>
-            <Plus className="h-4 w-4" />
-            <span>Add Product</span>
-          </Button>
-        </div>}
+          {canWrite && (
+            <Button
+              variant="secondary"
+              onClick={function openImport() {
+                setImportError("");
+                setImportFile(null);
+                setImportUpdateExisting(false);
+                setImportModalOpen(true);
+              }}
+              title="Bulk import products from CSV"
+            >
+              <Upload className="h-4 w-4" />
+              <span>Import CSV</span>
+            </Button>
+          )}
+          {canWrite && (
+            <Button
+              variant="secondary"
+              onClick={function openCat() {
+                setModalError("");
+                setCategoryModalOpen(true);
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              <span>Category</span>
+            </Button>
+          )}
+          {canWrite && (
+            <Button variant="primary" onClick={openCreateProduct}>
+              <Plus className="h-4 w-4" />
+              <span>Add Product</span>
+            </Button>
+          )}
+        </div>
       </PageHeader>
+
+      {successBanner && (
+        <div className="mb-4 flex items-center justify-between rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-xs text-emerald-800">
+          <span>{successBanner}</span>
+          <button
+            type="button"
+            onClick={function () {
+              setSuccessBanner("");
+            }}
+            className="text-emerald-600 hover:text-emerald-900 font-bold ml-2 cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Search & Low Stock Filter Toolbar */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -1940,6 +2112,96 @@ export function InventoryPage(props) {
           </div>
         </div>
       )}
+      {/* Import Products from CSV Modal */}
+      <Modal
+        open={importModalOpen}
+        onClose={function closeImport() {
+          if (!importSubmitting) {
+            setImportModalOpen(false);
+          }
+        }}
+        title="Import Products from CSV"
+        size="md"
+      >
+        <form onSubmit={handleImportSubmit} className="space-y-4">
+          <div className="rounded-xl bg-[#F5F5F4] p-3.5 text-xs text-[#777777] space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-[#171717]">Need a starter spreadsheet?</span>
+              <Button
+                type="button"
+                variant="soft"
+                size="sm"
+                onClick={handleDownloadTemplate}
+                className="text-2xs"
+              >
+                <Download className="h-3 w-3 mr-1" />
+                <span>Download Template</span>
+              </Button>
+            </div>
+            <p className="text-2xs leading-relaxed text-[#777777]">
+              Required columns: <span className="font-mono text-[#171717]">product_name</span>, <span className="font-mono text-[#171717]">base_unit</span>, <span className="font-mono text-[#171717]">selling_price</span>.
+              Optional: <span className="font-mono text-[#171717]">barcode, category, description, image_url, cost_price, current_stock, reorder_level, allow_custom_amount, is_active</span>.
+            </p>
+          </div>
+
+          {importError && (
+            <div className="whitespace-pre-line">
+              <ErrorBanner message={importError} />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-semibold text-[#171717] mb-1.5">
+              Select CSV File
+            </label>
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              disabled={importSubmitting}
+              onChange={function (e) {
+                if (e.target.files && e.target.files[0]) {
+                  setImportFile(e.target.files[0]);
+                  setImportError("");
+                }
+              }}
+              className="block w-full text-xs text-[#777777] file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#171717] file:text-white hover:file:bg-[#333333] file:cursor-pointer cursor-pointer border border-[#E9E9E9] rounded-xl p-2 bg-white"
+            />
+            {importFile && (
+              <p className="mt-1 text-2xs text-[#777777]">
+                Selected: <span className="font-semibold text-[#171717]">{importFile.name}</span> ({(importFile.size / 1024).toFixed(1)} KB)
+              </p>
+            )}
+          </div>
+
+          <label className="flex items-start gap-2.5 pt-1 text-xs text-[#171717] cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={importUpdateExisting}
+              disabled={importSubmitting}
+              onChange={function (e) {
+                setImportUpdateExisting(e.target.checked);
+              }}
+              className="mt-0.5 h-4 w-4 rounded border-[#E9E9E9] text-[#171717] focus:ring-[#B9F36B]/30 accent-[#171717]"
+            />
+            <div>
+              <span className="font-medium">Update existing products if barcode matches</span>
+              <p className="text-2xs text-[#777777]">
+                When checked, existing products with the same barcode will be updated. When unchecked, existing barcodes are blocked to prevent accidental overwrites.
+              </p>
+            </div>
+          </label>
+
+          <FormActions
+            onCancel={function () {
+              setImportModalOpen(false);
+            }}
+            confirmLabel={importSubmitting ? "Importing Products..." : "Import Products"}
+            submitting={importSubmitting}
+            className="pt-2"
+          />
+        </form>
+      </Modal>
+
     </PageLayout>
   );
 }

@@ -40,6 +40,7 @@ Duane Store is a local-first retail point-of-sale (POS) and inventory management
 - Global barcode uniqueness across `products` and `product_selling_options`.
 - Image attachments stored in `uploads/products/` with static serving.
 - Initial stock is recorded in the inventory audit ledger, alongside bulk stock-in with pack multiplier, stock adjustments (`ADJUSTMENT`, `DAMAGED`, `EXPIRED`), and low-stock alerts.
+- Bulk product setup and export via RFC 4180 CSV import and export with barcode conflict protection, auto-categorization, unit alias normalization, and stock adjustment auditing.
 
 ### 3.2 Sales & POS Checkout (`backend/src/sales/`)
 - Fast POS checkout supporting default base units, preset selling options, and ad-hoc custom peso ("tingi") sales.

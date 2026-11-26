@@ -1,15 +1,19 @@
 import { fromMoneyInt, fromQuantityInt, toMoneyInt, toQuantityInt } from "../shared/decimal.js";
 import { ConflictError, NotFoundError, ValidationError } from "../shared/errors.js";
 import { normalizeOptionalText } from "../shared/validation.js";
+import { generateCsv, parseCsv } from "../shared/csv.js";
 import {
   INVENTORY_TRANSACTION_TYPES,
+  PRODUCT_CSV_COLUMNS,
   calculateStockInBaseQuantity,
   createCategoryEntity,
   createInventoryTransactionEntity,
   createProductEntity,
   createSellingOptionEntity,
   createSupplierEntity,
-  isProductLowStock
+  isProductLowStock,
+  validateProductCsvHeaders,
+  validateProductCsvRows
 } from "./domain.js";
 
 async function assertBarcodeAvailable(dependencies, barcode, ignoreProductId, ignoreOptionId) {
@@ -438,5 +442,250 @@ export function createCreateSupplierUseCase(dependencies) {
 export function createListUnitsUseCase(dependencies) {
   return async function execute() {
     return dependencies.unitRepository.listAll();
+  };
+}
+
+export function createImportProductsFromCsvUseCase(dependencies) {
+  return async function execute(input) {
+    const safeInput = input || {};
+    const csvText = safeInput.csvText;
+    if (typeof csvText !== "string" || csvText.trim().length === 0) {
+      throw new ValidationError("CSV file is empty. Please provide a valid CSV file with product data.");
+    }
+
+    const updateExisting = Boolean(safeInput.update_existing);
+    const createdBy = safeInput.created_by || "system";
+    const now = dependencies.clock.nowIso();
+
+    // 1. Parse CSV
+    const parsed = parseCsv(csvText);
+    if (parsed.headers.length === 0) {
+      throw new ValidationError("CSV file header is missing or empty.");
+    }
+    if (parsed.rowCount === 0) {
+      throw new ValidationError("CSV file contains no product data rows.");
+    }
+
+    // 2. Validate Headers
+    validateProductCsvHeaders(parsed.headers);
+
+    // 3. Fetch existing data for duplicate checks and category resolution
+    const [existingProducts, existingCategories] = await Promise.all([
+      dependencies.productRepository.listAll(),
+      dependencies.categoryRepository.listAll()
+    ]);
+
+    // Also fetch selling options across products to check barcode collisions
+    let allSellingOptions = [];
+    if (dependencies.sellingOptionRepository) {
+      const optionPromises = existingProducts.map(function (prod) {
+        return dependencies.sellingOptionRepository.listByProductId(prod.product_id);
+      });
+      const optionArrays = await Promise.all(optionPromises);
+      for (let i = 0; i < optionArrays.length; i = i + 1) {
+        allSellingOptions = allSellingOptions.concat(optionArrays[i]);
+      }
+    }
+
+    // 4. Validate all data rows (All-or-nothing check)
+    const validatedRecords = validateProductCsvRows(
+      parsed.rows,
+      existingProducts,
+      allSellingOptions,
+      updateExisting
+    );
+
+    // 5. Category lookup map (case-insensitive name -> category_id)
+    const categoryMap = new Map();
+    for (let c = 0; c < existingCategories.length; c = c + 1) {
+      const cat = existingCategories[c];
+      categoryMap.set(cat.category_name.trim().toLowerCase(), cat.category_id);
+    }
+
+    // 6. Execute in atomic transaction
+    const performImport = async function performImport() {
+      let createdCount = 0;
+      let updatedCount = 0;
+      const resultProducts = [];
+
+      for (let i = 0; i < validatedRecords.length; i = i + 1) {
+        const record = validatedRecords[i];
+
+        // Resolve or create category
+        let categoryId = null;
+        if (record.category_name) {
+          const lowerCatName = record.category_name.trim().toLowerCase();
+          if (categoryMap.has(lowerCatName)) {
+            categoryId = categoryMap.get(lowerCatName);
+          } else {
+            // Auto-create missing category
+            const newCatId = dependencies.idGenerator.nextId();
+            const newCategory = createCategoryEntity({
+              category_id: newCatId,
+              category_name: record.category_name.trim(),
+              description: "Created via CSV import",
+              is_active: true
+            });
+            await dependencies.categoryRepository.save(newCategory);
+            categoryMap.set(lowerCatName, newCatId);
+            categoryId = newCatId;
+          }
+        }
+
+        if (record.existing_product && updateExisting) {
+          // Update existing product
+          const existing = record.existing_product;
+          const prevStock = existing.current_stock;
+          let newStock = prevStock;
+          if (record.stock_provided) {
+            newStock = record.current_stock;
+          }
+
+          const updatedProduct = createProductEntity({
+            product_id: existing.product_id,
+            category_id: categoryId !== null ? categoryId : existing.category_id,
+            product_name: record.product_name,
+            barcode: record.barcode !== null ? record.barcode : existing.barcode,
+            description: record.description !== null ? record.description : existing.description,
+            image_url: record.image_url !== null ? record.image_url : existing.image_url,
+            base_unit: record.base_unit,
+            current_stock: newStock,
+            cost_price: record.cost_price,
+            selling_price: record.selling_price,
+            reorder_level: record.reorder_level,
+            allow_custom_amount: record.allow_custom_amount,
+            is_active: record.is_active,
+            deleted_at: null,
+            created_at: existing.created_at || now,
+            updated_at: now
+          });
+
+          await dependencies.productRepository.save(updatedProduct);
+
+          // If stock was provided and changed, record an inventory audit transaction
+          if (record.stock_provided && newStock !== prevStock) {
+            const stockDiff = Math.round((newStock - prevStock) * 10000) / 10000;
+            const transactionType =
+              stockDiff > 0
+                ? INVENTORY_TRANSACTION_TYPES.STOCK_IN
+                : INVENTORY_TRANSACTION_TYPES.ADJUSTMENT;
+
+            const stockTx = createInventoryTransactionEntity({
+              transaction_id: dependencies.idGenerator.nextId(),
+              product_id: existing.product_id,
+              supplier_id: null,
+              option_id: null,
+              transaction_type: transactionType,
+              quantity: Math.abs(stockDiff),
+              unit_cost: record.cost_price,
+              reference_number: "CSV-UPDATE",
+              remarks: "Stock update from CSV import (was " + prevStock + ", now " + newStock + ")",
+              created_by: createdBy,
+              created_at: now
+            });
+            await dependencies.inventoryTransactionRepository.save(stockTx);
+          }
+
+          updatedCount = updatedCount + 1;
+          resultProducts.push(updatedProduct);
+        } else {
+          // Create new product
+          const productId = dependencies.idGenerator.nextId();
+          const newProduct = createProductEntity({
+            product_id: productId,
+            category_id: categoryId,
+            product_name: record.product_name,
+            barcode: record.barcode,
+            description: record.description,
+            image_url: record.image_url,
+            base_unit: record.base_unit,
+            current_stock: record.current_stock,
+            cost_price: record.cost_price,
+            selling_price: record.selling_price,
+            reorder_level: record.reorder_level,
+            allow_custom_amount: record.allow_custom_amount,
+            is_active: record.is_active,
+            deleted_at: null,
+            created_at: now,
+            updated_at: now
+          });
+
+          await dependencies.productRepository.save(newProduct);
+
+          // Initial stock transaction
+          if (record.current_stock > 0) {
+            const initialTx = createInventoryTransactionEntity({
+              transaction_id: dependencies.idGenerator.nextId(),
+              product_id: productId,
+              supplier_id: null,
+              option_id: null,
+              transaction_type: INVENTORY_TRANSACTION_TYPES.STOCK_IN,
+              quantity: record.current_stock,
+              unit_cost: record.cost_price,
+              reference_number: "CSV-IMPORT",
+              remarks: "Initial inventory stock from CSV import",
+              created_by: createdBy,
+              created_at: now
+            });
+            await dependencies.inventoryTransactionRepository.save(initialTx);
+          }
+
+          createdCount = createdCount + 1;
+          resultProducts.push(newProduct);
+        }
+      }
+
+      return {
+        imported_count: createdCount + updatedCount,
+        created_count: createdCount,
+        updated_count: updatedCount,
+        products: resultProducts
+      };
+    };
+
+    if (dependencies.unitOfWork) {
+      return dependencies.unitOfWork.run(performImport);
+    }
+    return performImport();
+  };
+}
+
+export function createExportProductsToCsvUseCase(dependencies) {
+  return async function execute() {
+    const [products, categories] = await Promise.all([
+      dependencies.productRepository.listAll(),
+      dependencies.categoryRepository.listAll()
+    ]);
+
+    const categoryMap = new Map();
+    for (let c = 0; c < categories.length; c = c + 1) {
+      const cat = categories[c];
+      categoryMap.set(cat.category_id, cat.category_name);
+    }
+
+    const rows = [];
+    for (let i = 0; i < products.length; i = i + 1) {
+      const p = products[i];
+      let catName = "";
+      if (p.category_id && categoryMap.has(p.category_id)) {
+        catName = categoryMap.get(p.category_id);
+      }
+      rows.push({
+        product_name: p.product_name,
+        barcode: p.barcode || "",
+        category: catName,
+        description: p.description || "",
+        image_url: p.image_url || "",
+        base_unit: p.base_unit,
+        cost_price: p.cost_price,
+        selling_price: p.selling_price,
+        current_stock: p.current_stock,
+        reorder_level: p.reorder_level,
+        allow_custom_amount: Boolean(p.allow_custom_amount),
+        is_active: Boolean(p.is_active)
+      });
+    }
+
+    return generateCsv(PRODUCT_CSV_COLUMNS, rows);
   };
 }

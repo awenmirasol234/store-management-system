@@ -144,6 +144,14 @@ export const api = {
       formData
     );
   },
+  importProductsCsv(file, updateExisting) {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (updateExisting) {
+      formData.append("update_existing", "true");
+    }
+    return request("POST", "/api/products/import-csv", formData);
+  },
   listSellingOptions(productId) {
     return request("GET", "/api/products/" + encodeURIComponent(productId) + "/options");
   },

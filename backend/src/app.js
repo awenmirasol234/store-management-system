@@ -17,6 +17,8 @@ import {
 } from "./inventory/sqlite-repo.js";
 import {
   createAdjustStockUseCase,
+  createExportProductsToCsvUseCase,
+  createImportProductsFromCsvUseCase,
   createCreateCategoryUseCase,
   createCreateSupplierUseCase,
   createDeleteProductUseCase,
@@ -222,7 +224,9 @@ export function createApp(options) {
     createCategory: createCreateCategoryUseCase(sharedDeps),
     listSuppliers: createListSuppliersUseCase(sharedDeps),
     createSupplier: createCreateSupplierUseCase(sharedDeps),
-    listUnits: createListUnitsUseCase(sharedDeps)
+    listUnits: createListUnitsUseCase(sharedDeps),
+    exportProductsToCsv: createExportProductsToCsvUseCase(sharedDeps),
+    importProductsFromCsv: createImportProductsFromCsvUseCase(sharedDeps)
   };
 
   const salesUseCases = {

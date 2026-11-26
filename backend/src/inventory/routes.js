@@ -232,6 +232,50 @@ export function createInventoryRouter(dependencies) {
     response.json({ data: products });
   });
 
+  router.get("/products/export-csv", async function exportProductsCsv(request, response) {
+    const csvContent = await dependencies.useCases.exportProductsToCsv();
+    response.setHeader("Content-Type", "text/csv; charset=utf-8");
+    response.setHeader("Content-Disposition", 'attachment; filename="products_inventory.csv"');
+    response.send(csvContent);
+  });
+
+  const csvUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }
+  });
+
+  router.post(
+    "/products/import-csv",
+    csvUpload.single("file"),
+    async function importProductsCsv(request, response) {
+      if (!request.file) {
+        throw new ValidationError("CSV file is required under field name 'file'");
+      }
+      const filename = request.file.originalname || "";
+      if (!filename.toLowerCase().endsWith(".csv")) {
+        throw new ValidationError("Only CSV files (.csv) are supported for product import");
+      }
+      const csvText = request.file.buffer.toString("utf-8");
+      let createdBy = "system";
+      if (request.user && request.user.username) {
+        createdBy = request.user.username;
+      }
+      const updateExisting =
+        request.body &&
+        (request.body.update_existing === "true" ||
+          request.body.update_existing === true ||
+          request.body.update_existing === "1");
+
+      const result = await dependencies.useCases.importProductsFromCsv({
+        csvText: csvText,
+        update_existing: updateExisting,
+        created_by: createdBy
+      });
+
+      response.status(201).json({ data: result });
+    }
+  );
+
   router.get("/products/low-stock", async function listLowStock(request, response) {
     const products = await dependencies.useCases.getLowStockProducts();
     response.json({ data: products });
