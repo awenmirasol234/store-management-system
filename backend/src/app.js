@@ -18,6 +18,8 @@ import {
 import {
   createAdjustStockUseCase,
   createExportProductsToCsvUseCase,
+  createExportProductsToXlsxUseCase,
+  createGenerateProductXlsxTemplateUseCase,
   createImportProductsFromCsvUseCase,
   createCreateCategoryUseCase,
   createCreateSupplierUseCase,
@@ -226,6 +228,8 @@ export function createApp(options) {
     createSupplier: createCreateSupplierUseCase(sharedDeps),
     listUnits: createListUnitsUseCase(sharedDeps),
     exportProductsToCsv: createExportProductsToCsvUseCase(sharedDeps),
+    exportProductsToXlsx: createExportProductsToXlsxUseCase(sharedDeps),
+    generateProductXlsxTemplate: createGenerateProductXlsxTemplateUseCase(sharedDeps),
     importProductsFromCsv: createImportProductsFromCsvUseCase(sharedDeps)
   };
 

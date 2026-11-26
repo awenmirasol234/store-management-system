@@ -239,23 +239,52 @@ export function createInventoryRouter(dependencies) {
     response.send(csvContent);
   });
 
+  router.get("/products/export-xlsx", async function exportProductsXlsx(request, response) {
+    const xlsxBuffer = await dependencies.useCases.exportProductsToXlsx();
+    response.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    response.setHeader(
+      "Content-Disposition",
+      'attachment; filename="products_inventory.xlsx"'
+    );
+    response.send(Buffer.from(xlsxBuffer));
+  });
+
+  router.get("/products/template-xlsx", async function downloadTemplateXlsx(request, response) {
+    const xlsxBuffer = await dependencies.useCases.generateProductXlsxTemplate();
+    response.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    response.setHeader(
+      "Content-Disposition",
+      'attachment; filename="product_import_template.xlsx"'
+    );
+    response.send(Buffer.from(xlsxBuffer));
+  });
+
   const csvUpload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 10 * 1024 * 1024 }
   });
 
   router.post(
-    "/products/import-csv",
+    ["/products/import-csv", "/products/import"],
     csvUpload.single("file"),
-    async function importProductsCsv(request, response) {
+    async function importProductsFile(request, response) {
       if (!request.file) {
-        throw new ValidationError("CSV file is required under field name 'file'");
+        throw new ValidationError("File is required under field name 'file'");
       }
       const filename = request.file.originalname || "";
-      if (!filename.toLowerCase().endsWith(".csv")) {
-        throw new ValidationError("Only CSV files (.csv) are supported for product import");
+      const lowerName = filename.toLowerCase();
+      const isXlsx = lowerName.endsWith(".xlsx") || lowerName.endsWith(".xls");
+      const isCsv = lowerName.endsWith(".csv");
+      if (!isXlsx && !isCsv) {
+        throw new ValidationError("Only Excel (.xlsx) and CSV (.csv) files are supported for product import");
       }
-      const csvText = request.file.buffer.toString("utf-8");
+
       let createdBy = "system";
       if (request.user && request.user.username) {
         createdBy = request.user.username;
@@ -266,11 +295,23 @@ export function createInventoryRouter(dependencies) {
           request.body.update_existing === true ||
           request.body.update_existing === "1");
 
-      const result = await dependencies.useCases.importProductsFromCsv({
-        csvText: csvText,
-        update_existing: updateExisting,
-        created_by: createdBy
-      });
+      let result;
+      if (isXlsx) {
+        result = await dependencies.useCases.importProductsFromCsv({
+          fileBuffer: request.file.buffer,
+          fileType: "xlsx",
+          update_existing: updateExisting,
+          created_by: createdBy
+        });
+      } else {
+        const csvText = request.file.buffer.toString("utf-8");
+        result = await dependencies.useCases.importProductsFromCsv({
+          csvText: csvText,
+          fileType: "csv",
+          update_existing: updateExisting,
+          created_by: createdBy
+        });
+      }
 
       response.status(201).json({ data: result });
     }

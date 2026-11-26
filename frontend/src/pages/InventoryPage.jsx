@@ -1459,7 +1459,24 @@ export function InventoryPage(props) {
     exportToCsv("products_inventory_" + today, headers, rows);
   }
 
-  function handleDownloadTemplate() {
+  async function handleExportXlsx() {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      await api.downloadFile("/api/products/export-xlsx", "products_inventory_" + today + ".xlsx");
+    } catch (err) {
+      setErrorBanner("Could not export Excel file: " + err.message);
+    }
+  }
+
+  async function handleDownloadTemplateXlsx() {
+    try {
+      await api.downloadFile("/api/products/template-xlsx", "product_import_template.xlsx");
+    } catch (err) {
+      setImportError("Could not download Excel template: " + err.message);
+    }
+  }
+
+  function handleDownloadTemplateCsv() {
     const headers = [
       { key: "product_name", label: "product_name" },
       { key: "barcode", label: "barcode" },
@@ -1512,17 +1529,18 @@ export function InventoryPage(props) {
   async function handleImportSubmit(event) {
     event.preventDefault();
     if (!importFile) {
-      setImportError("Please select a .csv file to import.");
+      setImportError("Please select an Excel (.xlsx) or CSV (.csv) file to import.");
       return;
     }
-    if (!importFile.name.toLowerCase().endsWith(".csv")) {
-      setImportError("Only CSV files (.csv) are supported for product import.");
+    const lowerName = importFile.name.toLowerCase();
+    if (!lowerName.endsWith(".xlsx") && !lowerName.endsWith(".xls") && !lowerName.endsWith(".csv")) {
+      setImportError("Only Excel (.xlsx) and CSV (.csv) files are supported for product import.");
       return;
     }
     setImportError("");
     setImportSubmitting(true);
     try {
-      const result = await api.importProductsCsv(importFile, importUpdateExisting);
+      const result = await api.importProductsFile(importFile, importUpdateExisting);
       setImportModalOpen(false);
       setImportFile(null);
       setImportUpdateExisting(false);
@@ -1543,7 +1561,11 @@ export function InventoryPage(props) {
     <PageLayout>
       <PageHeader title="Inventory" stackOnMobile={true}>
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          <Button variant="secondary" onClick={handleExportCsv} title="Export existing products to CSV">
+          <Button variant="secondary" onClick={handleExportXlsx} title="Export existing products to Excel (.xlsx)">
+            <Download className="h-4 w-4" />
+            <span>Export Excel</span>
+          </Button>
+          <Button variant="secondary" onClick={handleExportCsv} title="Export existing products to CSV (.csv)">
             <Download className="h-4 w-4" />
             <span>Export CSV</span>
           </Button>
@@ -1556,10 +1578,10 @@ export function InventoryPage(props) {
                 setImportUpdateExisting(false);
                 setImportModalOpen(true);
               }}
-              title="Bulk import products from CSV"
+              title="Bulk import products from Excel or CSV"
             >
               <Upload className="h-4 w-4" />
-              <span>Import CSV</span>
+              <span>Import Products</span>
             </Button>
           )}
           {canWrite && (
@@ -2112,7 +2134,7 @@ export function InventoryPage(props) {
           </div>
         </div>
       )}
-      {/* Import Products from CSV Modal */}
+      {/* Import Products from Excel or CSV Modal */}
       <Modal
         open={importModalOpen}
         onClose={function closeImport() {
@@ -2120,23 +2142,39 @@ export function InventoryPage(props) {
             setImportModalOpen(false);
           }
         }}
-        title="Import Products from CSV"
+        title="Import Products (Excel or CSV)"
         size="md"
       >
         <form onSubmit={handleImportSubmit} className="space-y-4">
-          <div className="rounded-xl bg-[#F5F5F4] p-3.5 text-xs text-[#777777] space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-[#171717]">Need a starter spreadsheet?</span>
-              <Button
-                type="button"
-                variant="soft"
-                size="sm"
-                onClick={handleDownloadTemplate}
-                className="text-2xs"
-              >
-                <Download className="h-3 w-3 mr-1" />
-                <span>Download Template</span>
-              </Button>
+          <div className="rounded-xl bg-[#F5F5F4] p-3.5 text-xs text-[#777777] space-y-2.5">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div>
+                <span className="font-semibold text-[#171717] block">Need a starter spreadsheet?</span>
+                <span className="text-2xs text-[#777777]">Includes interactive dropdowns for categories and base units</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  onClick={handleDownloadTemplateXlsx}
+                  className="text-2xs"
+                  title="Download Excel template with dropdowns"
+                >
+                  <Download className="h-3 w-3 mr-1" />
+                  <span>Excel (.xlsx)</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant="soft"
+                  size="sm"
+                  onClick={handleDownloadTemplateCsv}
+                  className="text-2xs"
+                  title="Download plain CSV template"
+                >
+                  <span>CSV</span>
+                </Button>
+              </div>
             </div>
             <p className="text-2xs leading-relaxed text-[#777777]">
               Required columns: <span className="font-mono text-[#171717]">product_name</span>, <span className="font-mono text-[#171717]">base_unit</span>, <span className="font-mono text-[#171717]">selling_price</span>.
@@ -2152,11 +2190,11 @@ export function InventoryPage(props) {
 
           <div>
             <label className="block text-xs font-semibold text-[#171717] mb-1.5">
-              Select CSV File
+              Select Excel (.xlsx) or CSV File
             </label>
             <input
               type="file"
-              accept=".csv,text/csv"
+              accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
               disabled={importSubmitting}
               onChange={function (e) {
                 if (e.target.files && e.target.files[0]) {

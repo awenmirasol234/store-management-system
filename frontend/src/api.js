@@ -144,13 +144,47 @@ export const api = {
       formData
     );
   },
-  importProductsCsv(file, updateExisting) {
+  async downloadFile(path, filename) {
+    const options = { method: "GET", headers: {} };
+    const token = getAuthToken();
+    if (token) {
+      options.headers["Authorization"] = "Bearer " + token;
+    }
+    const response = await fetch(API_BASE + path, options);
+    if (!response.ok) {
+      let message = "Failed to download file";
+      try {
+        const payload = await response.json();
+        if (payload && payload.error && payload.error.message) {
+          message = payload.error.message;
+        }
+      } catch {
+        // ignore
+      }
+      throw new Error(message);
+    }
+    const blob = await response.blob();
+    if (typeof window !== "undefined" && window.URL && document.createElement) {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }
+  },
+  importProductsFile(file, updateExisting) {
     const formData = new FormData();
     formData.append("file", file);
     if (updateExisting) {
       formData.append("update_existing", "true");
     }
     return request("POST", "/api/products/import-csv", formData);
+  },
+  importProductsCsv(file, updateExisting) {
+    return this.importProductsFile(file, updateExisting);
   },
   listSellingOptions(productId) {
     return request("GET", "/api/products/" + encodeURIComponent(productId) + "/options");

@@ -2,6 +2,7 @@ import { fromMoneyInt, fromQuantityInt, toMoneyInt, toQuantityInt } from "../sha
 import { ConflictError, NotFoundError, ValidationError } from "../shared/errors.js";
 import { normalizeOptionalText } from "../shared/validation.js";
 import { generateCsv, parseCsv } from "../shared/csv.js";
+import { generateProductXlsxTemplate, generateProductsXlsx, parseXlsx } from "../shared/xlsx.js";
 import {
   INVENTORY_TRANSACTION_TYPES,
   PRODUCT_CSV_COLUMNS,
@@ -448,22 +449,30 @@ export function createListUnitsUseCase(dependencies) {
 export function createImportProductsFromCsvUseCase(dependencies) {
   return async function execute(input) {
     const safeInput = input || {};
-    const csvText = safeInput.csvText;
-    if (typeof csvText !== "string" || csvText.trim().length === 0) {
-      throw new ValidationError("CSV file is empty. Please provide a valid CSV file with product data.");
-    }
-
     const updateExisting = Boolean(safeInput.update_existing);
     const createdBy = safeInput.created_by || "system";
     const now = dependencies.clock.nowIso();
 
-    // 1. Parse CSV
-    const parsed = parseCsv(csvText);
+    // 1. Parse File (CSV or XLSX)
+    let parsed;
+    if (safeInput.fileType === "xlsx" || (safeInput.fileBuffer && !safeInput.csvText)) {
+      if (!safeInput.fileBuffer || safeInput.fileBuffer.length === 0) {
+        throw new ValidationError("Excel file is empty. Please provide a valid .xlsx file with product data.");
+      }
+      parsed = await parseXlsx(safeInput.fileBuffer);
+    } else {
+      const csvText = safeInput.csvText;
+      if (typeof csvText !== "string" || csvText.trim().length === 0) {
+        throw new ValidationError("CSV file is empty. Please provide a valid CSV file with product data.");
+      }
+      parsed = parseCsv(csvText);
+    }
+
     if (parsed.headers.length === 0) {
-      throw new ValidationError("CSV file header is missing or empty.");
+      throw new ValidationError("File header is missing or empty.");
     }
     if (parsed.rowCount === 0) {
-      throw new ValidationError("CSV file contains no product data rows.");
+      throw new ValidationError("File contains no product data rows.");
     }
 
     // 2. Validate Headers
@@ -687,5 +696,30 @@ export function createExportProductsToCsvUseCase(dependencies) {
     }
 
     return generateCsv(PRODUCT_CSV_COLUMNS, rows);
+  };
+}
+
+export function createGenerateProductXlsxTemplateUseCase(dependencies) {
+  return async function execute() {
+    const [categories, units] = await Promise.all([
+      dependencies.categoryRepository.listAll(),
+      dependencies.unitRepository ? dependencies.unitRepository.listAll() : []
+    ]);
+    return generateProductXlsxTemplate({ categories: categories, units: units });
+  };
+}
+
+export function createExportProductsToXlsxUseCase(dependencies) {
+  return async function execute() {
+    const [products, categories, units] = await Promise.all([
+      dependencies.productRepository.listAll(),
+      dependencies.categoryRepository.listAll(),
+      dependencies.unitRepository ? dependencies.unitRepository.listAll() : []
+    ]);
+    return generateProductsXlsx({
+      products: products,
+      categories: categories,
+      units: units
+    });
   };
 }
