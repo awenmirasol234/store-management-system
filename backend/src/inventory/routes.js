@@ -2,6 +2,7 @@ import dns from "node:dns/promises";
 import fs from "node:fs";
 import net from "node:net";
 import path from "node:path";
+import { randomUUID } from "node:crypto";
 import express from "express";
 import multer from "multer";
 import { ValidationError } from "../shared/errors.js";
@@ -177,6 +178,14 @@ function extensionForMime(mimeType) {
   return ".jpg";
 }
 
+function removeFileIfPresent(filePath) {
+  try {
+    fs.rmSync(filePath, { force: true });
+  } catch (error) {
+    // Keep the original request error when cleanup cannot remove a temporary upload.
+  }
+}
+
 function createProductImageUpload(uploadsDir) {
   const productsDir = path.join(uploadsDir, "products");
   fs.mkdirSync(productsDir, { recursive: true });
@@ -188,7 +197,7 @@ function createProductImageUpload(uploadsDir) {
     filename(request, file, callback) {
       const safeId = String(request.params.productId).replace(/[^a-zA-Z0-9_-]/g, "");
       const ext = extensionForMime(file.mimetype);
-      callback(null, safeId + "-" + String(Date.now()) + ext);
+      callback(null, safeId + "-" + randomUUID() + ext);
     }
   });
 
@@ -243,7 +252,14 @@ export function createInventoryRouter(dependencies) {
   });
 
   router.post("/products", async function createProduct(request, response) {
-    const created = await dependencies.useCases.createProduct(requireObjectBody(request.body));
+    const body = requireObjectBody(request.body);
+    let createdBy = body.created_by;
+    if (request.user && request.user.username) {
+      createdBy = request.user.username;
+    }
+    const created = await dependencies.useCases.createProduct(
+      Object.assign({}, body, { created_by: createdBy })
+    );
     response.status(201).json({ data: created });
   });
 
@@ -273,14 +289,20 @@ export function createInventoryRouter(dependencies) {
       const uploadedBuffer = fs.readFileSync(request.file.path);
       const detectedMime = detectImageMime("", uploadedBuffer, request.file.originalname);
       if (!detectedMime) {
-        fs.unlinkSync(request.file.path);
+        removeFileIfPresent(request.file.path);
         throw new ValidationError("Uploaded file is not a supported image format");
       }
       const imageUrl = "/uploads/products/" + request.file.filename;
-      const updated = await dependencies.useCases.updateProduct({
-        product_id: requireRouteParam(request.params, "productId"),
-        image_url: imageUrl
-      });
+      let updated;
+      try {
+        updated = await dependencies.useCases.updateProduct({
+          product_id: requireRouteParam(request.params, "productId"),
+          image_url: imageUrl
+        });
+      } catch (error) {
+        removeFileIfPresent(request.file.path);
+        throw error;
+      }
       response.json({ data: updated });
     }
   );
@@ -361,15 +383,22 @@ export function createInventoryRouter(dependencies) {
 
       const safeId = String(productId).replace(/[^a-zA-Z0-9_-]/g, "");
       const ext = extensionForMime(detectedMime);
-      const filename = safeId + "-" + String(Date.now()) + ext;
+      const filename = safeId + "-" + randomUUID() + ext;
+      const filePath = path.join(productsDir, filename);
 
-      fs.writeFileSync(path.join(productsDir, filename), buffer);
+      fs.writeFileSync(filePath, buffer);
 
       const imageUrl = "/uploads/products/" + filename;
-      const updated = await dependencies.useCases.updateProduct({
-        product_id: productId,
-        image_url: imageUrl
-      });
+      let updated;
+      try {
+        updated = await dependencies.useCases.updateProduct({
+          product_id: productId,
+          image_url: imageUrl
+        });
+      } catch (error) {
+        removeFileIfPresent(filePath);
+        throw error;
+      }
       response.json({ data: updated });
     }
   );

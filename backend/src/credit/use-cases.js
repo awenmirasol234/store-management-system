@@ -116,6 +116,9 @@ export function createRecordPaymentUseCase(dependencies) {
       const customerId = requireNonEmptyText(safeInput.customer_id, "customer_id");
       const createdBy = requireNonEmptyText(safeInput.created_by, "created_by");
       const shiftId = normalizeOptionalText(safeInput.shift_id, "shift_id");
+      if (shiftId === null && dependencies.features && dependencies.features.cashDrawer) {
+        throw new ValidationError("Payment activity requires an open shift");
+      }
       if (shiftId !== null) {
         const shift = await dependencies.shiftRepository.findById(shiftId);
         if (!shift || shift.status !== "OPEN") {

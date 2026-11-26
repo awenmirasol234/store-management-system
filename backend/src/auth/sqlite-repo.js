@@ -1,3 +1,5 @@
+import { hashSessionToken } from "./domain.js";
+
 function mapUserRow(row) {
   if (!row) {
     return null;
@@ -55,6 +57,11 @@ export function createSqliteUserRepository(database) {
 
   const countUsersStmt = database.prepare(`
     SELECT count(*) as count FROM users
+  `);
+
+  const countActiveOwnersStmt = database.prepare(`
+    SELECT count(*) as count FROM users
+    WHERE role = 'OWNER' AND is_active = 1
   `);
 
   return {
@@ -117,15 +124,45 @@ export function createSqliteUserRepository(database) {
     async countUsers() {
       const row = countUsersStmt.get();
       return row.count;
+    },
+
+    async countActiveOwners() {
+      const row = countActiveOwnersStmt.get();
+      return row.count;
     }
   };
 }
 
 export function createSqliteSessionRepository(database) {
+  const sessionColumns = database.prepare("PRAGMA table_info(user_sessions)").all();
+  let hasTokenHashedColumn = false;
+  for (let index = 0; index < sessionColumns.length; index++) {
+    if (sessionColumns[index].name === "token_hashed") {
+      hasTokenHashedColumn = true;
+      break;
+    }
+  }
+  if (!hasTokenHashedColumn) {
+    database.exec(
+      "ALTER TABLE user_sessions ADD COLUMN token_hashed INTEGER NOT NULL DEFAULT 0"
+    );
+  }
+
+  const legacySessions = database
+    .prepare("SELECT session_id, token FROM user_sessions WHERE token_hashed = 0")
+    .all();
+  const migrateSessionStmt = database.prepare(
+    "UPDATE user_sessions SET token = ?, token_hashed = 1 WHERE session_id = ?"
+  );
+  for (let index = 0; index < legacySessions.length; index++) {
+    const legacySession = legacySessions[index];
+    migrateSessionStmt.run(hashSessionToken(legacySession.token), legacySession.session_id);
+  }
+
   const insertStmt = database.prepare(`
     INSERT INTO user_sessions (
-      session_id, user_id, token, expires_at, created_at
-    ) VALUES (?, ?, ?, ?, ?)
+      session_id, user_id, token, token_hashed, expires_at, created_at
+    ) VALUES (?, ?, ?, 1, ?, ?)
   `);
 
   const findByTokenStmt = database.prepare(`
@@ -149,7 +186,7 @@ export function createSqliteSessionRepository(database) {
       insertStmt.run(
         session.session_id,
         session.user_id,
-        session.token,
+        hashSessionToken(session.token),
         session.expires_at,
         session.created_at
       );
@@ -157,12 +194,12 @@ export function createSqliteSessionRepository(database) {
     },
 
     async findByToken(token) {
-      const row = findByTokenStmt.get(token);
+      const row = findByTokenStmt.get(hashSessionToken(token));
       return mapSessionRow(row);
     },
 
     async deleteByToken(token) {
-      deleteByTokenStmt.run(token);
+      deleteByTokenStmt.run(hashSessionToken(token));
       return true;
     },
 

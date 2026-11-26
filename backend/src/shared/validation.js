@@ -1,5 +1,8 @@
 import { ValidationError } from "./errors.js";
 
+const MAX_QUERY_LIMIT = 1000;
+const MAX_QUERY_OFFSET = 100000;
+
 export function requireObjectBody(value) {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     throw new ValidationError("Request body must be a JSON object");
@@ -46,6 +49,9 @@ export function parseNonNegativeOffset(rawValue, fallbackValue, fieldName) {
   if (!Number.isInteger(parsed) || parsed < 0) {
     throw new ValidationError(fieldName + " must be a non-negative integer");
   }
+  if (parsed > MAX_QUERY_OFFSET) {
+    throw new ValidationError(fieldName + " cannot exceed " + String(MAX_QUERY_OFFSET));
+  }
   return parsed;
 }
 
@@ -90,6 +96,9 @@ export function parsePositiveLimit(rawValue, fallbackValue, fieldName) {
   const parsed = Number(rawValue);
   if (!Number.isInteger(parsed) || parsed <= 0) {
     throw new ValidationError(fieldName + " must be a positive integer");
+  }
+  if (parsed > MAX_QUERY_LIMIT) {
+    throw new ValidationError(fieldName + " cannot exceed " + String(MAX_QUERY_LIMIT));
   }
   return parsed;
 }

@@ -184,6 +184,66 @@ describe("reports SQLite repository", function () {
     expect(calculateNetProfitInt(10000, 6000, 1000)).toBe(3000);
   });
 
+  it("includes returns as negative product activity on the return date", async function () {
+    const database = openSqliteDatabase(":memory:");
+    activeDatabase = database;
+    database.prepare(`
+      INSERT INTO products (
+        product_id, product_name, base_unit, cost_price_int,
+        selling_price_int, created_at, updated_at
+      ) VALUES ('product-cross-day', 'Cross Day Product', 'piece', 1000, 1500, ?, ?)
+    `).run("2026-11-20T02:00:00.000Z", "2026-11-20T02:00:00.000Z");
+    database.prepare(`
+      INSERT INTO sales_transactions (
+        sale_id, receipt_number, payment_method, subtotal_amount_int,
+        total_amount_int, created_by, created_at
+      ) VALUES ('sale-cross-day', '20261120-0001', 'CASH', 1500, 1500, 'owner', ?)
+    `).run("2026-11-20T02:00:00.000Z");
+    database.prepare(`
+      INSERT INTO sales_items (
+        sale_item_id, sale_id, product_id, option_name_snapshot,
+        quantity_int, base_quantity_int, unit_price_int, unit_cost_int,
+        subtotal_int
+      ) VALUES ('item-cross-day', 'sale-cross-day', 'product-cross-day', 'piece', 10000, 10000, 1500, 1000, 1500)
+    `).run();
+    database.prepare(`
+      INSERT INTO sales_returns (
+        return_id, sale_id, total_refund_amount_int, remarks, created_by, created_at
+      ) VALUES ('return-cross-day', 'sale-cross-day', 1500, 'Returned', 'owner', ?)
+    `).run("2026-11-21T02:00:00.000Z");
+    database.prepare(`
+      INSERT INTO sales_return_items (
+        return_item_id, return_id, sale_item_id, product_id,
+        quantity_int, base_quantity_int, refund_amount_int
+      ) VALUES ('return-item-cross-day', 'return-cross-day', 'item-cross-day', 'product-cross-day', 10000, 10000, 1500)
+    `).run();
+
+    const reportDeps = {
+      reportsRepository: createSqliteReportsRepository(database),
+      clock: {
+        todayManilaIsoDate() {
+          return "2026-11-21";
+        }
+      }
+    };
+    const summary = await createGetReportsSummaryUseCase(reportDeps)({
+      from: "2026-11-21",
+      to: "2026-11-21"
+    });
+    const topProducts = await createGetTopProductsUseCase(reportDeps)({
+      from: "2026-11-21",
+      to: "2026-11-21",
+      limit: 10
+    });
+
+    expect(summary.total_items_sold).toBe(-1);
+    expect(summary.total_refunds).toBe(15);
+    expect(summary.cogs).toBe(-10);
+    expect(summary.net_profit).toBe(-5);
+    expect(topProducts[0].quantity_sold).toBe(-1);
+    expect(topProducts[0].revenue).toBe(-15);
+  });
+
   it("computes report helpers from scaled integer rows", function () {
     const itemRows = [
       {

@@ -41,6 +41,10 @@ export function generateSessionToken() {
   return crypto.randomBytes(32).toString("hex");
 }
 
+export function hashSessionToken(token) {
+  return crypto.createHash("sha256").update(String(token)).digest("hex");
+}
+
 export function validateUsername(username) {
   if (!username || typeof username !== "string") {
     throw new ValidationError("Username is required");

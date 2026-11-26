@@ -94,6 +94,10 @@ describe("shared decimal and clock helpers", function () {
     expect(function () {
       parsePositiveLimit("1.5", 50, "limit");
     }).toThrow(ValidationError);
+
+    expect(function () {
+      parsePositiveLimit("1001", 50, "limit");
+    }).toThrow(ValidationError);
   });
 
   it("validates and normalizes text and boolean primitives", function () {
@@ -143,6 +147,9 @@ describe("shared decimal and clock helpers", function () {
     }).toThrow(ValidationError);
     expect(function () {
       parseNonNegativeOffset("-1", 0, "offset");
+    }).toThrow(ValidationError);
+    expect(function () {
+      parseNonNegativeOffset("100001", 0, "offset");
     }).toThrow(ValidationError);
     expect(function () {
       normalizeOptionalEnum("UNKNOWN", new Set(["OPEN", "CLOSED"]), "status");

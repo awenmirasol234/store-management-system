@@ -37,7 +37,31 @@ export function createSqliteReportsRepository(database) {
       WHERE date(sr.created_at, ${MANILA_SQL_OFFSET}) >= ?
         AND date(sr.created_at, ${MANILA_SQL_OFFSET}) <= ?
       GROUP BY sri.sale_item_id
+    ),
+    sales_in_range AS (
+      SELECT
+        si.product_id,
+        p.product_name,
+        p.image_url,
+        p.base_unit,
+        p.category_id,
+        pc.category_name,
+        si.quantity_int - COALESCE(rt.returned_quantity_int, 0) AS quantity_int,
+        si.base_quantity_int - COALESCE(rt.returned_base_quantity_int, 0) AS base_quantity_int,
+        si.unit_cost_int,
+        si.subtotal_int - COALESCE(rt.returned_refund_int, 0) AS subtotal_int,
+        date(st.created_at, ${MANILA_SQL_OFFSET}) AS manila_date
+      FROM sales_items si
+      INNER JOIN sales_transactions st ON st.sale_id = si.sale_id
+      INNER JOIN products p ON p.product_id = si.product_id
+      LEFT JOIN product_categories pc ON pc.category_id = p.category_id
+      LEFT JOIN return_totals rt ON rt.sale_item_id = si.sale_item_id
+      WHERE st.status = '${COMPLETED_SALE_STATUS}'
+        AND date(st.created_at, ${MANILA_SQL_OFFSET}) >= ?
+        AND date(st.created_at, ${MANILA_SQL_OFFSET}) <= ?
     )
+    SELECT * FROM sales_in_range
+    UNION ALL
     SELECT
       si.product_id,
       p.product_name,
@@ -45,19 +69,24 @@ export function createSqliteReportsRepository(database) {
       p.base_unit,
       p.category_id,
       pc.category_name,
-      si.quantity_int - COALESCE(rt.returned_quantity_int, 0) AS quantity_int,
-      si.base_quantity_int - COALESCE(rt.returned_base_quantity_int, 0) AS base_quantity_int,
+      -sri.quantity_int AS quantity_int,
+      -sri.base_quantity_int AS base_quantity_int,
       si.unit_cost_int,
-      si.subtotal_int - COALESCE(rt.returned_refund_int, 0) AS subtotal_int,
-      date(st.created_at, ${MANILA_SQL_OFFSET}) AS manila_date
-    FROM sales_items si
+      -sri.refund_amount_int AS subtotal_int,
+      date(sr.created_at, ${MANILA_SQL_OFFSET}) AS manila_date
+    FROM sales_return_items sri
+    INNER JOIN sales_returns sr ON sr.return_id = sri.return_id
+    INNER JOIN sales_items si ON si.sale_item_id = sri.sale_item_id
     INNER JOIN sales_transactions st ON st.sale_id = si.sale_id
     INNER JOIN products p ON p.product_id = si.product_id
     LEFT JOIN product_categories pc ON pc.category_id = p.category_id
-    LEFT JOIN return_totals rt ON rt.sale_item_id = si.sale_item_id
     WHERE st.status = '${COMPLETED_SALE_STATUS}'
-      AND date(st.created_at, ${MANILA_SQL_OFFSET}) >= ?
-      AND date(st.created_at, ${MANILA_SQL_OFFSET}) <= ?
+      AND date(sr.created_at, ${MANILA_SQL_OFFSET}) >= ?
+      AND date(sr.created_at, ${MANILA_SQL_OFFSET}) <= ?
+      AND (
+        date(st.created_at, ${MANILA_SQL_OFFSET}) < ?
+        OR date(st.created_at, ${MANILA_SQL_OFFSET}) > ?
+      )
   `);
 
   const stockMovementsStmt = database.prepare(`
@@ -153,13 +182,31 @@ export function createSqliteReportsRepository(database) {
       return {
         sales: salesSummaryStmt.get(fromDate, toDate),
         returns: returnsSummaryStmt.get(fromDate, toDate),
-        items: salesItemsInRangeStmt.all(fromDate, toDate, fromDate, toDate),
+        items: salesItemsInRangeStmt.all(
+          fromDate,
+          toDate,
+          fromDate,
+          toDate,
+          fromDate,
+          toDate,
+          fromDate,
+          toDate
+        ),
         products: activeProductsStmt.all()
       };
     },
 
     async getSalesItems(fromDate, toDate) {
-      return salesItemsInRangeStmt.all(fromDate, toDate, fromDate, toDate);
+      return salesItemsInRangeStmt.all(
+        fromDate,
+        toDate,
+        fromDate,
+        toDate,
+        fromDate,
+        toDate,
+        fromDate,
+        toDate
+      );
     },
 
     async getDailySalesRows(fromDate, toDate) {

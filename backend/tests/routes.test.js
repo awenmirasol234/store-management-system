@@ -1,5 +1,6 @@
 import os from "node:os";
 import path from "node:path";
+import fs from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
 
@@ -28,7 +29,7 @@ async function startTestServer(serverOptions) {
       fetch: options.fetch,
       dnsLookup: options.dnsLookup,
       operationMode: "multi_user",
-      features: { cashDrawer: true },
+      features: { cashDrawer: options.cashDrawerEnabled !== false },
     clock: {
       nowIso() {
         return "2026-11-20T02:00:00.000Z";
@@ -70,7 +71,7 @@ async function requestJson(baseUrl, method, routePath, body) {
 
 describe("Express REST API routes", function () {
   it("handles products, selling options, barcode lookup, stock-in, sales, returns, and soft delete", async function () {
-    const baseUrl = await startTestServer();
+    const baseUrl = await startTestServer({ cashDrawerEnabled: false });
 
     const health = await requestJson(baseUrl, "GET", "/api/health");
     expect(health.status).toBe(200);
@@ -247,7 +248,7 @@ describe("Express REST API routes", function () {
   });
 
   it("processes POS CREDIT and SPLIT sales through REST API, updates customer balances, and rejects limit violations", async function () {
-    const baseUrl = await startTestServer();
+    const baseUrl = await startTestServer({ cashDrawerEnabled: false });
 
     // 1. Create a product
     const productRes = await requestJson(baseUrl, "POST", "/api/products", {
@@ -394,12 +395,14 @@ describe("Express REST API routes", function () {
       };
     };
 
+     const uploadsDir = fs.mkdtempSync(path.join(os.tmpdir(), "store-mgmt-image-test-"));
      const baseUrl = await startTestServer({
        fetch: mockFetch,
        dnsLookup: async function lookupPublicHost() {
-         return [{ address: "93.184.216.34", family: 4 }];
-       }
-     });
+          return [{ address: "93.184.216.34", family: 4 }];
+        },
+        uploadsDir: uploadsDir
+      });
 
     const createRes = await requestJson(baseUrl, "POST", "/api/products", {
       product_name: "Coffee Drink",
@@ -457,7 +460,9 @@ describe("Express REST API routes", function () {
       url: "https://example.com/valid-image.png"
     });
     expect(successRes.status).toBe(200);
-    expect(successRes.body.data.image_url).toMatch(/^\/uploads\/products\/[a-zA-Z0-9_-]+-\d+\.png$/);
+    expect(successRes.body.data.image_url).toMatch(
+      /^\/uploads\/products\/[a-zA-Z0-9_-]+-[0-9a-f-]{36}\.png$/
+    );
 
     const invalidUploadBody = new FormData();
     invalidUploadBody.append(
@@ -478,5 +483,16 @@ describe("Express REST API routes", function () {
 
     const productRes = await requestJson(baseUrl, "GET", "/api/products/" + productId);
     expect(productRes.body.data.image_url).toBe(successRes.body.data.image_url);
+
+    const productFilesBeforeFailure = fs.readdirSync(path.join(uploadsDir, "products"));
+    const missingProductImage = await requestJson(
+      baseUrl,
+      "POST",
+      "/api/products/missing-product/image-url",
+      { url: "https://example.com/valid-image.png" }
+    );
+    expect(missingProductImage.status).toBe(404);
+    const productFilesAfterFailure = fs.readdirSync(path.join(uploadsDir, "products"));
+    expect(productFilesAfterFailure).toEqual(productFilesBeforeFailure);
   });
 });

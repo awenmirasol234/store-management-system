@@ -201,6 +201,11 @@ describe("Auth Workflows & Repositories", function () {
     });
     expect(loginResult.user.username).toBe("owner");
     expect(loginResult.token).toBeDefined();
+    const storedSession = env.database
+      .prepare("SELECT token, token_hashed FROM user_sessions WHERE user_id = ?")
+      .get(loginResult.user.user_id);
+    expect(storedSession.token).not.toBe(loginResult.token);
+    expect(storedSession.token_hashed).toBe(1);
 
     // Verify current user through session token
     const currentUser = await env.useCases.getCurrentUser({ token: loginResult.token });
@@ -323,6 +328,14 @@ describe("Auth Workflows & Repositories", function () {
         pin: "8765"
       })
     ).rejects.toThrow(UnauthorizedError);
+
+    await expect(
+      env.useCases.updateUser(owner.user.user_id, { is_active: false })
+    ).rejects.toThrow("At least one active owner account is required");
+
+    await expect(
+      env.useCases.updateUser(owner.user.user_id, { role: ROLES.CASHIER })
+    ).rejects.toThrow("At least one active owner account is required");
 
     env.database.close();
   });

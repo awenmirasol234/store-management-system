@@ -131,7 +131,7 @@ describe("Security Features & Hardening", function () {
 
     // 6th attempt should be blocked by rate limiter
     const blockedRes = await requestJson(server.baseUrl, "POST", "/api/auth/login", {
-      username: "owner",
+      username: "Owner",
       pin: "1234"
     });
     expect(blockedRes.status).toBe(429);

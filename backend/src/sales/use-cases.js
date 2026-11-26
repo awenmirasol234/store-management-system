@@ -93,6 +93,9 @@ async function resolveCartLines(dependencies, cartItems) {
 
 async function validateActivityShift(dependencies, shiftId, actorUserId) {
   if (!shiftId) {
+    if (dependencies.features && dependencies.features.cashDrawer) {
+      throw new ValidationError("Sales activity requires an open shift");
+    }
     return;
   }
   const shift = await dependencies.shiftRepository.findById(shiftId);

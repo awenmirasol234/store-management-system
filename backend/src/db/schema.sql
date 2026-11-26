@@ -222,6 +222,7 @@ CREATE TABLE IF NOT EXISTS user_sessions (
   session_id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
   token TEXT NOT NULL UNIQUE,
+  token_hashed INTEGER NOT NULL DEFAULT 1,
   expires_at TEXT NOT NULL,
   created_at TEXT NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(user_id)

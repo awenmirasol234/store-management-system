@@ -54,8 +54,33 @@ export function createCreateProductUseCase(dependencies) {
       updated_at: now
     });
 
-    await dependencies.productRepository.save(product);
-    return product;
+    const saveProduct = async function saveProduct() {
+      await dependencies.productRepository.save(product);
+
+      if (product.current_stock > 0) {
+        const initialTransaction = createInventoryTransactionEntity({
+          transaction_id: dependencies.idGenerator.nextId(),
+          product_id: product.product_id,
+          supplier_id: null,
+          option_id: null,
+          transaction_type: INVENTORY_TRANSACTION_TYPES.STOCK_IN,
+          quantity: product.current_stock,
+          unit_cost: product.cost_price,
+          reference_number: "INITIAL-STOCK",
+          remarks: "Initial inventory stock",
+          created_by: safeInput.created_by || "system",
+          created_at: now
+        });
+        await dependencies.inventoryTransactionRepository.save(initialTransaction);
+      }
+
+      return product;
+    };
+
+    if (dependencies.unitOfWork) {
+      return dependencies.unitOfWork.run(saveProduct);
+    }
+    return saveProduct();
   };
 }
 

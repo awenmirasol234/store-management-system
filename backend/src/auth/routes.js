@@ -26,8 +26,8 @@ export function createAuthRouter(authUseCases) {
     }
 
     let username = "";
-    if (body.username) {
-      username = body.username;
+    if (typeof body.username === "string") {
+      username = body.username.trim().toLowerCase();
     }
 
     const clientKey = ip + ":" + String(username);

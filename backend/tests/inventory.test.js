@@ -106,6 +106,9 @@ describe("inventory domain and use cases", function () {
 
     expect(noodles.image_url).toBe("/uploads/products/noodles.png");
     expect(noodles.deleted_at).toBeNull();
+    expect(deps.transactions.length).toBe(1);
+    expect(deps.transactions[0].reference_number).toBe("INITIAL-STOCK");
+    expect(deps.transactions[0].quantity).toBe(20);
 
     // Option cannot reuse the product's barcode
     await expect(

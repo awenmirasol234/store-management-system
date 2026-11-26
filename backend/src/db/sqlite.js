@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { AsyncLocalStorage } from "node:async_hooks";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
@@ -25,38 +26,60 @@ export function openSqliteDatabase(databasePath) {
 }
 
 export function createSqliteUnitOfWork(database) {
-  let activeDepth = 0;
+  const transactionStorage = new AsyncLocalStorage();
+  let transactionQueue = Promise.resolve();
+
+  async function runNestedTransaction(work, transaction) {
+    const depth = transaction.depth + 1;
+    const savepointName = "sp_" + String(depth);
+    transaction.depth = depth;
+    database.exec("SAVEPOINT " + savepointName);
+
+    try {
+      const result = await work();
+      database.exec("RELEASE SAVEPOINT " + savepointName);
+      return result;
+    } catch (error) {
+      database.exec("ROLLBACK TO SAVEPOINT " + savepointName);
+      database.exec("RELEASE SAVEPOINT " + savepointName);
+      throw error;
+    } finally {
+      transaction.depth = transaction.depth - 1;
+    }
+  }
 
   return {
     async run(work) {
-      const isOuterTransaction = activeDepth === 0;
-      const savepointName = "sp_" + String(activeDepth + 1);
-      activeDepth = activeDepth + 1;
-
-      if (isOuterTransaction) {
-        database.exec("BEGIN IMMEDIATE");
-      } else {
-        database.exec("SAVEPOINT " + savepointName);
+      const activeTransaction = transactionStorage.getStore();
+      if (activeTransaction) {
+        return runNestedTransaction(work, activeTransaction);
       }
 
+      let releaseTransaction;
+      const transactionGate = new Promise(function waitForTransaction(resolve) {
+        releaseTransaction = resolve;
+      });
+      const previousTransaction = transactionQueue;
+      transactionQueue = transactionQueue.then(function waitForPreviousTransaction() {
+        return transactionGate;
+      });
+      await previousTransaction;
+
+      const transaction = { depth: 0 };
       try {
-        const result = await work();
-        if (isOuterTransaction) {
-          database.exec("COMMIT");
-        } else {
-          database.exec("RELEASE SAVEPOINT " + savepointName);
-        }
-        return result;
-      } catch (error) {
-        if (isOuterTransaction) {
-          database.exec("ROLLBACK");
-        } else {
-          database.exec("ROLLBACK TO SAVEPOINT " + savepointName);
-          database.exec("RELEASE SAVEPOINT " + savepointName);
-        }
-        throw error;
+        return await transactionStorage.run(transaction, async function runTransaction() {
+          database.exec("BEGIN IMMEDIATE");
+          try {
+            const result = await work();
+            database.exec("COMMIT");
+            return result;
+          } catch (error) {
+            database.exec("ROLLBACK");
+            throw error;
+          }
+        });
       } finally {
-        activeDepth = activeDepth - 1;
+        releaseTransaction();
       }
     }
   };

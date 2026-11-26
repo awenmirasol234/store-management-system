@@ -315,6 +315,29 @@ describe("sales domain and use cases", function () {
     expect(deps.sales.size).toBe(0);
   });
 
+  it("requires a shift when the cash drawer feature is enabled", async function () {
+    const deps = createInMemorySalesDeps();
+    deps.features = { cashDrawer: true };
+    const createProduct = createCreateProductUseCase(deps);
+    const processSale = createProcessSaleUseCase(deps);
+    const product = await createProduct({
+      product_name: "Drawer Product",
+      base_unit: "piece",
+      current_stock: 5,
+      cost_price: 10,
+      selling_price: 15
+    });
+
+    await expect(
+      processSale({
+        items: [{ product_id: product.product_id, quantity: 1 }],
+        payment_method: PAYMENT_METHODS.CASH,
+        amount_paid: 20,
+        created_by: "cashier-1"
+      })
+    ).rejects.toThrow("requires an open shift");
+  });
+
   it("fails closed when credit repositories are missing", async function () {
     const deps = createInMemorySalesDeps();
     const createProduct = createCreateProductUseCase(deps);

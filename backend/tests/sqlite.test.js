@@ -143,4 +143,32 @@ describe("SQLite repositories and UnitOfWork", function () {
     const unchanged = await deps.productRepository.findById(water.product_id);
     expect(unchanged.current_stock).toBe(10);
   });
+
+  it("serializes overlapping transactions without sharing savepoint state", async function () {
+    const database = openSqliteDatabase(":memory:");
+    activeDatabase = database;
+    const unitOfWork = createSqliteUnitOfWork(database);
+    let releaseFirst = null;
+    let firstStarted = false;
+    let secondStarted = false;
+    const firstGate = new Promise(function waitForFirst(resolve) {
+      releaseFirst = resolve;
+    });
+
+    const first = unitOfWork.run(async function firstTransaction() {
+      firstStarted = true;
+      await firstGate;
+    });
+    const second = unitOfWork.run(async function secondTransaction() {
+      secondStarted = true;
+    });
+
+    await Promise.resolve();
+    expect(firstStarted).toBe(true);
+    expect(secondStarted).toBe(false);
+
+    releaseFirst();
+    await Promise.all([first, second]);
+    expect(secondStarted).toBe(true);
+  });
 });

@@ -271,6 +271,17 @@ export function createUpdateUserUseCase(dependencies) {
       isActive = normalizeBoolean(input.is_active, user.is_active, "is_active");
     }
 
+    const removingActiveOwner =
+      user.role === ROLES.OWNER &&
+      user.is_active &&
+      (role !== ROLES.OWNER || !isActive);
+    if (removingActiveOwner && userRepository.countActiveOwners) {
+      const activeOwnerCount = await userRepository.countActiveOwners();
+      if (activeOwnerCount <= 1) {
+        throw new ConflictError("At least one active owner account is required");
+      }
+    }
+
     let pinHash = user.pin_hash;
     let pinSalt = user.pin_salt;
     if (input.pin !== undefined && input.pin !== "") {
