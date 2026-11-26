@@ -227,7 +227,7 @@ export function LineChart(props) {
           <svg
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
-            className="absolute inset-0 h-full w-full overflow-visible"
+            className="absolute inset-0 h-full w-full overflow-visible chart-line-animate"
             aria-hidden="true"
           >
             <defs>

@@ -213,6 +213,7 @@ describe("LineChart component", function () {
     expect(html).toContain('stroke="#171717"');
     expect(html).toContain('stroke="#B9F36B"');
     expect(html).toContain("profit-gradient");
+    expect(html).toContain("chart-line-animate");
 
     // X-axis HTML labels
     expect(html).toContain("11-19");
@@ -294,6 +295,9 @@ describe("PieChart component", function () {
     // SVG elements
     expect(html).toContain("<svg");
     expect(html).toContain("<path");
+    expect(html).toContain("chart-donut-animate");
+    expect(html).toContain("chart-center-animate");
+    expect(html).toContain("chart-legend-animate");
   });
 
   it("handles single-category data without path collision", function () {
@@ -336,6 +340,7 @@ describe("DashboardPage integration with redesigned charts", function () {
     expect(html).toContain("Payment");
 
     // Operational lists
+    expect(html).toContain("chart-card-animate");
     expect(html).toContain("Top Selling Products");
     expect(html).toContain("Inventory Alerts");
   });

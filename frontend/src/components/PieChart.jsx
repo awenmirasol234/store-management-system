@@ -194,7 +194,7 @@ export function PieChart(props) {
         <div className="relative shrink-0 flex items-center justify-center">
           <svg
             viewBox={"0 0 " + svgSize + " " + svgSize}
-            className="w-36 h-36 @md:w-40 @md:h-40 overflow-visible"
+            className="w-36 h-36 @md:w-40 @md:h-40 overflow-visible chart-donut-animate"
             role="img"
             aria-label="Distribution pie chart"
           >
@@ -239,7 +239,7 @@ export function PieChart(props) {
 
           {/* Donut Center Caption */}
           {isDonut && (
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center p-2">
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center p-2 chart-center-animate">
               <span className="truncate max-w-[85px] text-3xs font-medium text-[#777777] uppercase tracking-wider">
                 {centerLabelText}
               </span>
@@ -254,7 +254,7 @@ export function PieChart(props) {
         </div>
 
         {/* Legend Button List */}
-        <div className="w-full flex-1 space-y-1">
+        <div className="w-full flex-1 space-y-1 chart-legend-animate">
           {slices.map(function (slice, index) {
             const isHovered = hoveredIndex === index;
             let itemBg = "hover:bg-[#EEEEED]/60";

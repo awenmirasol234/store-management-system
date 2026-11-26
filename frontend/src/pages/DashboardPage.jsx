@@ -335,16 +335,16 @@ export function DashboardPage(props) {
           {/* Equal Height Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 items-stretch">
             {/* Sales & Profit Line Chart Card */}
-            <section className="h-full flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5 lg:col-span-2">
+            <section className="h-full flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5 lg:col-span-2 chart-card-animate">
               <div className="mb-2">
                 <h3 className="text-sm font-semibold text-[#171717]">Sales &amp; Profit Trend</h3>
                 <p className="text-xs text-[#777777]">Daily performance over time</p>
               </div>
-              <LineChart data={trendSeries} className="mt-2 flex-1" />
+              <LineChart key={trendRange} data={trendSeries} className="mt-2 flex-1" />
             </section>
 
             {/* Distribution Donut Chart Card */}
-            <section className="h-full flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5 lg:col-span-1">
+            <section className="h-full flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5 lg:col-span-1 chart-card-animate">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <h3 className="text-sm font-semibold text-[#171717]">Sales Distribution</h3>
@@ -368,6 +368,7 @@ export function DashboardPage(props) {
                 </div>
               </div>
               <PieChart
+                key={pieMode}
                 data={activePieData}
                 centerLabel={pieMode === "CATEGORY" ? "Categories" : "Payments"}
                 centerCaption={activePieCaption}

@@ -195,6 +195,103 @@
 }
 
 /* ==========================================================================
+   Chart Entrance Animations
+   ========================================================================== */
+
+@keyframes chart-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes chart-wipe-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0.15;
+  }
+  to {
+    clip-path: inset(0 0% 0 0);
+    opacity: 1;
+  }
+}
+
+@keyframes donut-bloom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.82) rotate(-18deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes chart-center-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes chart-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-card-animate {
+  animation: chart-card-in 450ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.chart-line-animate {
+  animation: chart-wipe-in 750ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: clip-path, opacity;
+}
+
+.chart-donut-animate {
+  animation: donut-bloom-in 650ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+.chart-center-animate {
+  animation: chart-center-scale-in 500ms 150ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.chart-legend-animate {
+  animation: chart-fade-in 450ms 120ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chart-card-animate,
+  .chart-line-animate,
+  .chart-donut-animate,
+  .chart-center-animate,
+  .chart-legend-animate {
+    animation: none !important;
+    clip-path: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ==========================================================================
    Tactile 3D Glossy Button Utilities
    ========================================================================== */
 
