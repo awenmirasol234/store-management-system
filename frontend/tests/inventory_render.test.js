@@ -14,9 +14,8 @@ describe("InventoryPage SSR test", function () {
     expect(html).toContain("Inventory");
     expect(html).toContain("Add Product");
     expect(html).toContain("Low Stock");
-    expect(html).toContain("Export Excel");
-    expect(html).toContain("Export CSV");
-    expect(html).toContain("Import Products");
+    expect(html).toContain("Import / Export");
+    expect(html).toContain("Category");
   });
 
   it("imports MoreVertical icon without reference error", function () {
@@ -35,9 +34,9 @@ describe("InventoryPage SSR test", function () {
     expect(html).toContain("Search products or barcode");
     expect(html).toContain('colSpan="5"');
     expect(html).not.toContain("Add Product");
+    expect(html).not.toContain("Add Category");
     expect(html).not.toContain("Import Products");
-    expect(html).toContain("Export Excel");
-    expect(html).toContain("Export CSV");
+    expect(html).toContain("Import / Export");
     expect(html).not.toContain("Actions</th>");
   });
 

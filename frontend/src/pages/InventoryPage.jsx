@@ -1,16 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  AlertCircle,
   ArrowDownToLine,
+  ArrowUpDown,
+  ChevronDown,
+  Download,
+  FileSpreadsheet,
+  Globe,
   Layers,
   MoreVertical,
   Pencil,
   Plus,
   SlidersHorizontal,
-  AlertCircle,
-  Download,
-  Globe,
   Trash2,
-  Upload
+  Upload,
+  X
 } from "lucide-react";
 import { api, resolveImageUrl } from "../api.js";
 import { exportToCsv } from "../export.js";
@@ -157,8 +161,34 @@ export function InventoryPage(props) {
   const [lowStockOnly, setLowStockOnly] = useState(false);
   const [errorBanner, setErrorBanner] = useState("");
   const [modalError, setModalError] = useState("");
+  const [dataMenuOpen, setDataMenuOpen] = useState(false);
+  const dataMenuRef = useRef(null);
+
+  useEffect(function bindDataMenuOutside() {
+    if (!dataMenuOpen) {
+      return;
+    }
+    function onKeyDown(event) {
+      if (event.key === "Escape") {
+        setDataMenuOpen(false);
+      }
+    }
+    function onMouseDown(event) {
+      if (dataMenuRef.current && !dataMenuRef.current.contains(event.target)) {
+        setDataMenuOpen(false);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("mousedown", onMouseDown);
+    return function cleanup() {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("mousedown", onMouseDown);
+    };
+  }, [dataMenuOpen]);
+
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [importFile, setImportFile] = useState(null);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
   const [importUpdateExisting, setImportUpdateExisting] = useState(false);
   const [importError, setImportError] = useState("");
   const [importSubmitting, setImportSubmitting] = useState(false);
@@ -1561,29 +1591,82 @@ export function InventoryPage(props) {
     <PageLayout>
       <PageHeader title="Inventory" stackOnMobile={true}>
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          <Button variant="secondary" onClick={handleExportXlsx} title="Export existing products to Excel (.xlsx)">
-            <Download className="h-4 w-4" />
-            <span>Export Excel</span>
-          </Button>
-          <Button variant="secondary" onClick={handleExportCsv} title="Export existing products to CSV (.csv)">
-            <Download className="h-4 w-4" />
-            <span>Export CSV</span>
-          </Button>
-          {canWrite && (
+          <div ref={dataMenuRef} className="relative">
             <Button
               variant="secondary"
-              onClick={function openImport() {
-                setImportError("");
-                setImportFile(null);
-                setImportUpdateExisting(false);
-                setImportModalOpen(true);
+              onClick={function toggleDataMenu() {
+                setDataMenuOpen(!dataMenuOpen);
               }}
-              title="Bulk import products from Excel or CSV"
+              aria-haspopup="menu"
+              aria-expanded={dataMenuOpen}
+              title="Import or export inventory data"
             >
-              <Upload className="h-4 w-4" />
-              <span>Import Products</span>
+              <ArrowUpDown className="h-4 w-4" />
+              <span>Import / Export</span>
+              <ChevronDown className="h-3.5 w-3.5 ml-0.5 text-[#777777]" />
             </Button>
-          )}
+
+            {dataMenuOpen && (
+              <div
+                role="menu"
+                className="absolute right-0 top-full mt-1.5 z-40 w-56 rounded-xl border border-[#E9E9E9] bg-white p-1.5 shadow-lg select-none"
+              >
+                {canWrite && (
+                  <div>
+                    <div className="px-2.5 py-1 text-3xs font-semibold uppercase tracking-wider text-[#777777]">
+                      Import Data
+                    </div>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={function handleOpenImport() {
+                        setDataMenuOpen(false);
+                        setImportError("");
+                        setImportFile(null);
+                        setIsDraggingFile(false);
+                        setImportUpdateExisting(false);
+                        setImportModalOpen(true);
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#171717] hover:bg-[#EEEEED] transition-colors cursor-pointer"
+                    >
+                      <Upload className="h-3.5 w-3.5 text-[#777777]" />
+                      <span>Import Products</span>
+                    </button>
+                    <div className="my-1 border-t border-[#E9E9E9]" />
+                  </div>
+                )}
+
+                <div className="px-2.5 py-1 text-3xs font-semibold uppercase tracking-wider text-[#777777]">
+                  Export Catalog
+                </div>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={function handleExportXlsxClick() {
+                    setDataMenuOpen(false);
+                    handleExportXlsx();
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#171717] hover:bg-[#EEEEED] transition-colors cursor-pointer"
+                >
+                  <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
+                  <span>Export to Excel (.xlsx)</span>
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={function handleExportCsvClick() {
+                    setDataMenuOpen(false);
+                    handleExportCsv();
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#171717] hover:bg-[#EEEEED] transition-colors cursor-pointer"
+                >
+                  <Download className="h-3.5 w-3.5 text-[#777777]" />
+                  <span>Export to CSV (.csv)</span>
+                </button>
+              </div>
+            )}
+          </div>
+
           {canWrite && (
             <Button
               variant="secondary"
@@ -1591,11 +1674,13 @@ export function InventoryPage(props) {
                 setModalError("");
                 setCategoryModalOpen(true);
               }}
+              title="Add or manage categories"
             >
               <Plus className="h-4 w-4" />
-              <span>Category</span>
+              <span>Add Category</span>
             </Button>
           )}
+
           {canWrite && (
             <Button variant="primary" onClick={openCreateProduct}>
               <Plus className="h-4 w-4" />
@@ -2134,7 +2219,7 @@ export function InventoryPage(props) {
           </div>
         </div>
       )}
-      {/* Import Products from Excel or CSV Modal */}
+      {/* Import Products Modal */}
       <Modal
         open={importModalOpen}
         onClose={function closeImport() {
@@ -2142,23 +2227,125 @@ export function InventoryPage(props) {
             setImportModalOpen(false);
           }
         }}
-        title="Import Products (Excel or CSV)"
+        title="Import Products"
         size="md"
       >
         <form onSubmit={handleImportSubmit} className="space-y-4">
-          <div className="rounded-xl bg-[#F5F5F4] p-3.5 text-xs text-[#777777] space-y-2.5">
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div>
-                <span className="font-semibold text-[#171717] block">Need a starter spreadsheet?</span>
-                <span className="text-2xs text-[#777777]">Includes interactive dropdowns for categories and base units</span>
+          {importError && (
+            <div className="whitespace-pre-line">
+              <ErrorBanner message={importError} />
+            </div>
+          )}
+
+          {/* 1. PRIMARY HERO: File Upload Dropzone / File Card */}
+          <div>
+            {!importFile ? (
+              <label
+                onDragOver={function (e) {
+                  e.preventDefault();
+                  setIsDraggingFile(true);
+                }}
+                onDragLeave={function () {
+                  setIsDraggingFile(false);
+                }}
+                onDrop={function (e) {
+                  e.preventDefault();
+                  setIsDraggingFile(false);
+                  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    setImportFile(e.dataTransfer.files[0]);
+                    setImportError("");
+                  }
+                }}
+                className={
+                  "flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-dashed p-6 text-center cursor-pointer transition-all " +
+                  (isDraggingFile
+                    ? "border-[#171717] bg-[#B9F36B]/10"
+                    : "border-[#E9E9E9] bg-[#F5F5F4]/50 hover:border-[#171717] hover:bg-[#F5F5F4]")
+                }
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-[#E9E9E9] shadow-2xs">
+                  <Upload className="h-5 w-5 text-[#171717]" />
+                </div>
+                <div>
+                  <span className="block text-xs font-semibold text-[#171717]">
+                    Choose spreadsheet or drag & drop
+                  </span>
+                  <span className="block text-2xs text-[#777777] mt-0.5">
+                    Supports Excel (.xlsx) and CSV (.csv)
+                  </span>
+                </div>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+                  disabled={importSubmitting}
+                  onChange={function (e) {
+                    if (e.target.files && e.target.files[0]) {
+                      setImportFile(e.target.files[0]);
+                      setImportError("");
+                    }
+                  }}
+                  className="hidden"
+                />
+              </label>
+            ) : (
+              <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#E9E9E9] bg-white p-3.5 shadow-2xs">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-200 shrink-0">
+                    <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-semibold text-[#171717]">
+                      {importFile.name}
+                    </p>
+                    <p className="text-2xs text-[#777777] font-mono mt-0.5">
+                      {(importFile.size / 1024).toFixed(1)} KB
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <label className="text-2xs font-semibold text-[#171717] hover:underline cursor-pointer px-2 py-1">
+                    <span>Change</span>
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+                      disabled={importSubmitting}
+                      onChange={function (e) {
+                        if (e.target.files && e.target.files[0]) {
+                          setImportFile(e.target.files[0]);
+                          setImportError("");
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={function removeFile() {
+                      setImportFile(null);
+                    }}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-[#777777] hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
+                    title="Remove file"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
+            )}
+          </div>
+
+          {/* 2. SECONDARY HELPER: Starter Template & Requirements */}
+          <div className="rounded-xl border border-[#E9E9E9] bg-[#F5F5F4] p-3 text-xs space-y-1.5">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <span className="text-2xs font-medium text-[#777777]">
+                Need a starter spreadsheet?
+              </span>
               <div className="flex items-center gap-1.5">
                 <Button
                   type="button"
-                  variant="primary"
+                  variant="secondary"
                   size="sm"
                   onClick={handleDownloadTemplateXlsx}
-                  className="text-2xs"
+                  className="h-6 text-2xs px-2 rounded-lg"
                   title="Download Excel template with dropdowns"
                 >
                   <Download className="h-3 w-3 mr-1" />
@@ -2166,76 +2353,45 @@ export function InventoryPage(props) {
                 </Button>
                 <Button
                   type="button"
-                  variant="soft"
+                  variant="secondary"
                   size="sm"
                   onClick={handleDownloadTemplateCsv}
-                  className="text-2xs"
+                  className="h-6 text-2xs px-2 rounded-lg"
                   title="Download plain CSV template"
                 >
                   <span>CSV</span>
                 </Button>
               </div>
             </div>
-            <p className="text-2xs leading-relaxed text-[#777777]">
-              Required columns: <span className="font-mono text-[#171717]">product_name</span>, <span className="font-mono text-[#171717]">base_unit</span>, <span className="font-mono text-[#171717]">selling_price</span>.
-              Optional: <span className="font-mono text-[#171717]">barcode, category, description, image_url, cost_price, current_stock, reorder_level, allow_custom_amount, is_active</span>.
+            <p className="text-3xs text-[#777777]">
+              Required columns: <strong className="text-[#171717] font-medium">Product Name</strong>, <strong className="text-[#171717] font-medium">Base Unit</strong>, and <strong className="text-[#171717] font-medium">Selling Price</strong>.
             </p>
           </div>
 
-          {importError && (
-            <div className="whitespace-pre-line">
-              <ErrorBanner message={importError} />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-xs font-semibold text-[#171717] mb-1.5">
-              Select Excel (.xlsx) or CSV File
+          {/* 3. SETTINGS: Overwrite Option */}
+          <div className="pt-2 border-t border-[#E9E9E9]">
+            <label className="flex items-center gap-2.5 text-xs text-[#171717] cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={importUpdateExisting}
+                disabled={importSubmitting}
+                onChange={function (e) {
+                  setImportUpdateExisting(e.target.checked);
+                }}
+                className="h-4 w-4 rounded border-[#E9E9E9] text-[#171717] focus:ring-[#B9F36B]/30 accent-[#171717]"
+              />
+              <span className="font-medium">Update existing products with matching barcodes</span>
             </label>
-            <input
-              type="file"
-              accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
-              disabled={importSubmitting}
-              onChange={function (e) {
-                if (e.target.files && e.target.files[0]) {
-                  setImportFile(e.target.files[0]);
-                  setImportError("");
-                }
-              }}
-              className="block w-full text-xs text-[#777777] file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#171717] file:text-white hover:file:bg-[#333333] file:cursor-pointer cursor-pointer border border-[#E9E9E9] rounded-xl p-2 bg-white"
-            />
-            {importFile && (
-              <p className="mt-1 text-2xs text-[#777777]">
-                Selected: <span className="font-semibold text-[#171717]">{importFile.name}</span> ({(importFile.size / 1024).toFixed(1)} KB)
-              </p>
-            )}
           </div>
 
-          <label className="flex items-start gap-2.5 pt-1 text-xs text-[#171717] cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={importUpdateExisting}
-              disabled={importSubmitting}
-              onChange={function (e) {
-                setImportUpdateExisting(e.target.checked);
-              }}
-              className="mt-0.5 h-4 w-4 rounded border-[#E9E9E9] text-[#171717] focus:ring-[#B9F36B]/30 accent-[#171717]"
-            />
-            <div>
-              <span className="font-medium">Update existing products if barcode matches</span>
-              <p className="text-2xs text-[#777777]">
-                When checked, existing products with the same barcode will be updated. When unchecked, existing barcodes are blocked to prevent accidental overwrites.
-              </p>
-            </div>
-          </label>
-
+          {/* 4. ACTIONS */}
           <FormActions
             onCancel={function () {
               setImportModalOpen(false);
             }}
             confirmLabel={importSubmitting ? "Importing Products..." : "Import Products"}
             submitting={importSubmitting}
-            className="pt-2"
+            className="pt-1"
           />
         </form>
       </Modal>
