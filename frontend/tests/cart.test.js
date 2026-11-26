@@ -3,7 +3,8 @@ import {
   calculateProductCartStockUsage,
   canAddStockToCart,
   computeItemBaseQuantity,
-  computeLocalCartTotals
+  computeLocalCartTotals,
+  sanitizeCartItems
 } from "../src/cart.js";
 
 describe("cart totals", function () {
@@ -32,6 +33,39 @@ describe("cart totals", function () {
       discount: 0,
       total: 0
     });
+  });
+
+  it("sanitizes persisted cart values while accepting legacy base-unit items", function () {
+    const legacyItem = {
+      key: "rice:base",
+      product_id: "rice",
+      unit_price: "10",
+      quantity: "2",
+      custom_amount: null
+    };
+    const result = sanitizeCartItems([
+      legacyItem,
+      { key: "bad", product_id: "rice", unit_price: "not-a-number", quantity: 1 },
+      null
+    ]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(
+      Object.assign({}, legacyItem, {
+        unit_price: 10,
+        quantity: 2
+      })
+    );
+    expect(sanitizeCartItems("not an array")).toEqual([]);
+  });
+
+  it("rejects non-positive custom amounts when calculating stock usage", function () {
+    expect(
+      computeItemBaseQuantity({
+        product: { selling_price: 20 },
+        customAmount: 0
+      })
+    ).toBe(0);
   });
 
   it("accepts numeric strings and ignores infinite discounts", function () {

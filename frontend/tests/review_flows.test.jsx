@@ -135,6 +135,12 @@ describe("frontend review regressions", function () {
     await click(flow.opener);
     const dialog = openDialog();
     const form = dialog.querySelector("form");
+    if (flow.opener === "Adjust Stock") {
+      await act(async function () {
+        changeInput(dialog.querySelector('input[type="number"]'), "1");
+        changeInput(dialog.querySelectorAll("input")[1], "Damaged during handling");
+      });
+    }
     await act(async function () {
       submit(form);
       submit(form);

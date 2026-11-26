@@ -19,7 +19,12 @@ import {
 import { api, resolveImageUrl } from "../api.js";
 import { exportToCsv } from "../export.js";
 import { DEFAULT_CAPABILITIES } from "../navigation.js";
-import { formatPeso, formatQuantity, formatQuantityWithUnit } from "../format.js";
+import {
+  formatPeso,
+  formatQuantity,
+  formatQuantityWithUnit,
+  getManilaIsoDateOffset
+} from "../format.js";
 import {
   COMMON_BASE_UNITS,
   filterProducts,
@@ -82,7 +87,7 @@ function validateProductFormField(fieldName, value, form) {
       return "Cost price is required";
     }
     const costNumber = Number(value);
-    if (isNaN(costNumber) || costNumber < 0) {
+    if (!Number.isFinite(costNumber) || costNumber < 0) {
       return "Cost price cannot be negative";
     }
     return "";
@@ -93,7 +98,7 @@ function validateProductFormField(fieldName, value, form) {
       return "Selling price is required";
     }
     const priceNumber = Number(value);
-    if (isNaN(priceNumber) || priceNumber <= 0) {
+    if (!Number.isFinite(priceNumber) || priceNumber <= 0) {
       return "Selling price must be greater than ₱0.00";
     }
     return "";
@@ -102,7 +107,7 @@ function validateProductFormField(fieldName, value, form) {
   if (fieldName === "current_stock") {
     if (value !== "" && value !== null && value !== undefined) {
       const stockNumber = Number(value);
-      if (isNaN(stockNumber) || stockNumber < 0) {
+      if (!Number.isFinite(stockNumber) || stockNumber < 0) {
         return "Initial stock cannot be negative";
       }
     }
@@ -112,7 +117,7 @@ function validateProductFormField(fieldName, value, form) {
   if (fieldName === "reorder_level") {
     if (value !== "" && value !== null && value !== undefined) {
       const reorderNumber = Number(value);
-      if (isNaN(reorderNumber) || reorderNumber < 0) {
+      if (!Number.isFinite(reorderNumber) || reorderNumber < 0) {
         return "Reorder level cannot be negative";
       }
     }
@@ -152,6 +157,8 @@ export function InventoryPage(props) {
   const capabilities = props.capabilities || DEFAULT_CAPABILITIES;
   const pendingWrite = useRef(false);
   const savedProductForm = useRef(null);
+  const isMounted = useRef(false);
+  const loadVersion = useRef(0);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -282,6 +289,8 @@ export function InventoryPage(props) {
   }
 
   async function loadAll() {
+    loadVersion.current = loadVersion.current + 1;
+    const currentLoad = loadVersion.current;
     setErrorBanner("");
     try {
       let categoriesPromise = Promise.resolve([]);
@@ -298,6 +307,9 @@ export function InventoryPage(props) {
           return null;
         })
       ]);
+      if (!isMounted.current || currentLoad !== loadVersion.current) {
+        return;
+      }
       setProducts(results[0]);
       setCategories(results[1]);
       setSuppliers(results[2]);
@@ -309,12 +321,19 @@ export function InventoryPage(props) {
         setUnits(unitNames);
       }
     } catch (error) {
-      setErrorBanner(error.message);
+      if (isMounted.current && currentLoad === loadVersion.current) {
+        setErrorBanner(error.message);
+      }
     }
   }
 
   useEffect(function init() {
+    isMounted.current = true;
     loadAll();
+    return function cleanup() {
+      isMounted.current = false;
+      loadVersion.current = loadVersion.current + 1;
+    };
   }, []);
 
   useEffect(
@@ -653,8 +672,13 @@ export function InventoryPage(props) {
   async function handleCreateCategory(event) {
     event.preventDefault();
     setModalError("");
+    const categoryName = categoryNameInput.trim();
+    if (categoryName.length === 0) {
+      setModalError("Category name is required");
+      return;
+    }
     try {
-      await api.createCategory({ category_name: categoryNameInput });
+      await api.createCategory({ category_name: categoryName });
       setCategoryNameInput("");
       setCategoryModalOpen(false);
       await loadAll();
@@ -685,16 +709,31 @@ export function InventoryPage(props) {
       return;
     }
     setModalError("");
+    const optionNameValue = optionName.trim();
+    const optionQuantity = Number(optionQty);
+    const optionPriceValue = Number(optionPrice);
+    if (optionNameValue.length === 0) {
+      setModalError("Option name is required");
+      return;
+    }
+    if (!Number.isFinite(optionQuantity) || optionQuantity <= 0) {
+      setModalError("Option quantity must be greater than zero");
+      return;
+    }
+    if (!Number.isFinite(optionPriceValue) || optionPriceValue <= 0) {
+      setModalError("Option price must be greater than ₱0.00");
+      return;
+    }
     try {
       let barcode = null;
       if (optionBarcode.trim().length > 0) {
         barcode = optionBarcode.trim();
       }
       await api.createSellingOption(optionsModalProduct.product_id, {
-        option_name: optionName,
+        option_name: optionNameValue,
         barcode: barcode,
-        quantity: Number(optionQty),
-        price: Number(optionPrice)
+        quantity: optionQuantity,
+        price: optionPriceValue
       });
       const updatedList = await api.listSellingOptions(optionsModalProduct.product_id);
       setProductOptions(updatedList);
@@ -748,6 +787,16 @@ export function InventoryPage(props) {
     if (!stockInProduct) {
       return;
     }
+    const quantity = Number(stockInQty);
+    const unitCost = Number(stockInUnitCost);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      setModalError("Stock quantity must be greater than zero");
+      return;
+    }
+    if (!Number.isFinite(unitCost) || unitCost < 0) {
+      setModalError("Unit cost cannot be negative");
+      return;
+    }
     await saveStock(async function writeStockIn() {
       let createdBy = "owner";
       if (props && props.currentUser && props.currentUser.username) {
@@ -756,8 +805,8 @@ export function InventoryPage(props) {
 
       const payload = {
         product_id: stockInProduct.product_id,
-        quantity: Number(stockInQty),
-        unit_cost: Number(stockInUnitCost),
+        quantity: quantity,
+        unit_cost: unitCost,
         created_by: createdBy
       };
       if (stockInOptionId) {
@@ -789,8 +838,22 @@ export function InventoryPage(props) {
     if (!adjustProduct) {
       return;
     }
+    const enteredQuantity = Number(adjustQty);
+    const remarks = adjustRemarks.trim();
+    if (!Number.isFinite(enteredQuantity) || enteredQuantity === 0) {
+      setModalError("Adjustment quantity must be a non-zero number");
+      return;
+    }
+    if ((adjustType === "DAMAGED" || adjustType === "EXPIRED") && enteredQuantity < 0) {
+      setModalError("Damaged and expired quantities must be positive");
+      return;
+    }
+    if (remarks.length === 0) {
+      setModalError("Adjustment remarks are required");
+      return;
+    }
     await saveStock(async function writeAdjustment() {
-      let qtyValue = Number(adjustQty);
+      let qtyValue = enteredQuantity;
       if ((adjustType === "DAMAGED" || adjustType === "EXPIRED") && qtyValue > 0) {
         qtyValue = -qtyValue;
       }
@@ -803,7 +866,7 @@ export function InventoryPage(props) {
         product_id: adjustProduct.product_id,
         transaction_type: adjustType,
         quantity: qtyValue,
-        remarks: adjustRemarks,
+        remarks: remarks,
         created_by: createdBy
       });
     }, function closeAdjustment() {
@@ -1081,9 +1144,9 @@ export function InventoryPage(props) {
   const priceNum = Number(productForm.selling_price);
   if (
     productForm.selling_price !== "" &&
-    !isNaN(priceNum) &&
+    Number.isFinite(priceNum) &&
     priceNum > 0 &&
-    !isNaN(costNum) &&
+    Number.isFinite(costNum) &&
     costNum >= 0
   ) {
     const profit = priceNum - costNum;
@@ -1119,6 +1182,22 @@ export function InventoryPage(props) {
     }
   }
 
+  let fileModeButtonClass =
+    "flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium cursor-pointer transition-colors ";
+  if (imageSourceMode === "file") {
+    fileModeButtonClass = fileModeButtonClass + "bg-[#171717] text-white shadow-xs font-semibold";
+  } else {
+    fileModeButtonClass = fileModeButtonClass + "text-[#777777] hover:text-[#171717]";
+  }
+
+  let urlModeButtonClass =
+    "flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium cursor-pointer transition-colors ";
+  if (imageSourceMode === "url") {
+    urlModeButtonClass = urlModeButtonClass + "bg-[#171717] text-white shadow-xs font-semibold";
+  } else {
+    urlModeButtonClass = urlModeButtonClass + "text-[#777777] hover:text-[#171717]";
+  }
+
   const imageModeSelector = (
     <div
       role="tablist"
@@ -1132,12 +1211,7 @@ export function InventoryPage(props) {
         onClick={function chooseFileMode() {
           setImageSourceMode("file");
         }}
-        className={
-          "flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium cursor-pointer transition-colors " +
-          (imageSourceMode === "file"
-            ? "bg-[#171717] text-white shadow-xs font-semibold"
-            : "text-[#777777] hover:text-[#171717]")
-        }
+        className={fileModeButtonClass}
       >
         <Upload className="h-3.5 w-3.5" />
         <span>Upload File</span>
@@ -1149,12 +1223,7 @@ export function InventoryPage(props) {
         onClick={function chooseUrlMode() {
           setImageSourceMode("url");
         }}
-        className={
-          "flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium cursor-pointer transition-colors " +
-          (imageSourceMode === "url"
-            ? "bg-[#171717] text-white shadow-xs font-semibold"
-            : "text-[#777777] hover:text-[#171717]")
-        }
+        className={urlModeButtonClass}
       >
         <Globe className="h-3.5 w-3.5" />
         <span>Image URL</span>
@@ -1222,20 +1291,24 @@ export function InventoryPage(props) {
     );
   } else if (existingImageUrl) {
     const existingSrc = resolveImageUrl(existingImageUrl);
+    let existingImageElement = (
+      <div className="h-12 w-12 rounded-lg bg-[#EEEEED] flex items-center justify-center shrink-0">
+        <Upload className="h-5 w-5 text-[#777777]" />
+      </div>
+    );
+    if (existingSrc) {
+      existingImageElement = (
+        <img
+          src={existingSrc}
+          alt="Current product"
+          className="h-12 w-12 rounded-lg object-cover border border-[#E9E9E9] shrink-0"
+        />
+      );
+    }
     fileModeContent = (
       <div className="flex items-center justify-between gap-3 rounded-xl border border-[#E9E9E9] bg-white p-2.5">
         <div className="flex items-center gap-3 min-w-0">
-          {existingSrc ? (
-            <img
-              src={existingSrc}
-              alt="Current product"
-              className="h-12 w-12 rounded-lg object-cover border border-[#E9E9E9] shrink-0"
-            />
-          ) : (
-            <div className="h-12 w-12 rounded-lg bg-[#EEEEED] flex items-center justify-center shrink-0">
-              <Upload className="h-5 w-5 text-[#777777]" />
-            </div>
-          )}
+          {existingImageElement}
           <div className="min-w-0">
             <p className="truncate text-xs font-medium text-[#171717]">Current Image</p>
             <p className="text-2xs text-[#777777] font-mono">Saved locally</p>
@@ -1386,10 +1459,15 @@ export function InventoryPage(props) {
     </div>
   );
 
+  let selectedImageModeContent = urlModeContent;
+  if (imageSourceMode === "file") {
+    selectedImageModeContent = fileModeContent;
+  }
+
   let imagePreviewSection = (
     <div>
       {imageModeSelector}
-      {imageSourceMode === "file" ? fileModeContent : urlModeContent}
+      {selectedImageModeContent}
     </div>
   );
 
@@ -1485,13 +1563,13 @@ export function InventoryPage(props) {
       };
     });
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getManilaIsoDateOffset(0);
     exportToCsv("products_inventory_" + today, headers, rows);
   }
 
   async function handleExportXlsx() {
     try {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = getManilaIsoDateOffset(0);
       await api.downloadFile("/api/products/export-xlsx", "products_inventory_" + today + ".xlsx");
     } catch (err) {
       setErrorBanner("Could not export Excel file: " + err.message);
@@ -1585,6 +1663,111 @@ export function InventoryPage(props) {
     } finally {
       setImportSubmitting(false);
     }
+  }
+
+  let importFileContent = null;
+  if (!importFile) {
+    let dropzoneClass =
+      "flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-dashed p-6 text-center cursor-pointer transition-all ";
+    if (isDraggingFile) {
+      dropzoneClass = dropzoneClass + "border-[#171717] bg-[#B9F36B]/10";
+    } else {
+      dropzoneClass =
+        dropzoneClass +
+        "border-[#E9E9E9] bg-[#F5F5F4]/50 hover:border-[#171717] hover:bg-[#F5F5F4]";
+    }
+    importFileContent = (
+      <label
+        onDragOver={function (event) {
+          event.preventDefault();
+          setIsDraggingFile(true);
+        }}
+        onDragLeave={function () {
+          setIsDraggingFile(false);
+        }}
+        onDrop={function (event) {
+          event.preventDefault();
+          setIsDraggingFile(false);
+          if (event.dataTransfer.files && event.dataTransfer.files[0]) {
+            setImportFile(event.dataTransfer.files[0]);
+            setImportError("");
+          }
+        }}
+        className={dropzoneClass}
+      >
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-[#E9E9E9] shadow-2xs">
+          <Upload className="h-5 w-5 text-[#171717]" />
+        </div>
+        <div>
+          <span className="block text-xs font-semibold text-[#171717]">
+            Choose spreadsheet or drag &amp; drop
+          </span>
+          <span className="block text-2xs text-[#777777] mt-0.5">
+            Supports Excel (.xlsx) and CSV (.csv)
+          </span>
+        </div>
+        <input
+          type="file"
+          accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+          disabled={importSubmitting}
+          onChange={function (event) {
+            if (event.target.files && event.target.files[0]) {
+              setImportFile(event.target.files[0]);
+              setImportError("");
+            }
+          }}
+          className="hidden"
+        />
+      </label>
+    );
+  } else {
+    importFileContent = (
+      <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#E9E9E9] bg-white p-3.5 shadow-2xs">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-200 shrink-0">
+            <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold text-[#171717]">{importFile.name}</p>
+            <p className="text-2xs text-[#777777] font-mono mt-0.5">
+              {(importFile.size / 1024).toFixed(1)} KB
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <label className="text-2xs font-semibold text-[#171717] hover:underline cursor-pointer px-2 py-1">
+            <span>Change</span>
+            <input
+              type="file"
+              accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+              disabled={importSubmitting}
+              onChange={function (event) {
+                if (event.target.files && event.target.files[0]) {
+                  setImportFile(event.target.files[0]);
+                  setImportError("");
+                }
+              }}
+              className="hidden"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={function removeFile() {
+              setImportFile(null);
+            }}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-[#777777] hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
+            title="Remove file"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  let importConfirmLabel = "Import Products";
+  if (importSubmitting) {
+    importConfirmLabel = "Importing Products...";
   }
 
   return (
@@ -2238,100 +2421,7 @@ export function InventoryPage(props) {
           )}
 
           {/* 1. PRIMARY HERO: File Upload Dropzone / File Card */}
-          <div>
-            {!importFile ? (
-              <label
-                onDragOver={function (e) {
-                  e.preventDefault();
-                  setIsDraggingFile(true);
-                }}
-                onDragLeave={function () {
-                  setIsDraggingFile(false);
-                }}
-                onDrop={function (e) {
-                  e.preventDefault();
-                  setIsDraggingFile(false);
-                  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                    setImportFile(e.dataTransfer.files[0]);
-                    setImportError("");
-                  }
-                }}
-                className={
-                  "flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-dashed p-6 text-center cursor-pointer transition-all " +
-                  (isDraggingFile
-                    ? "border-[#171717] bg-[#B9F36B]/10"
-                    : "border-[#E9E9E9] bg-[#F5F5F4]/50 hover:border-[#171717] hover:bg-[#F5F5F4]")
-                }
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-[#E9E9E9] shadow-2xs">
-                  <Upload className="h-5 w-5 text-[#171717]" />
-                </div>
-                <div>
-                  <span className="block text-xs font-semibold text-[#171717]">
-                    Choose spreadsheet or drag & drop
-                  </span>
-                  <span className="block text-2xs text-[#777777] mt-0.5">
-                    Supports Excel (.xlsx) and CSV (.csv)
-                  </span>
-                </div>
-                <input
-                  type="file"
-                  accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
-                  disabled={importSubmitting}
-                  onChange={function (e) {
-                    if (e.target.files && e.target.files[0]) {
-                      setImportFile(e.target.files[0]);
-                      setImportError("");
-                    }
-                  }}
-                  className="hidden"
-                />
-              </label>
-            ) : (
-              <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#E9E9E9] bg-white p-3.5 shadow-2xs">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-200 shrink-0">
-                    <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-xs font-semibold text-[#171717]">
-                      {importFile.name}
-                    </p>
-                    <p className="text-2xs text-[#777777] font-mono mt-0.5">
-                      {(importFile.size / 1024).toFixed(1)} KB
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <label className="text-2xs font-semibold text-[#171717] hover:underline cursor-pointer px-2 py-1">
-                    <span>Change</span>
-                    <input
-                      type="file"
-                      accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
-                      disabled={importSubmitting}
-                      onChange={function (e) {
-                        if (e.target.files && e.target.files[0]) {
-                          setImportFile(e.target.files[0]);
-                          setImportError("");
-                        }
-                      }}
-                      className="hidden"
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    onClick={function removeFile() {
-                      setImportFile(null);
-                    }}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg text-[#777777] hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
-                    title="Remove file"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <div>{importFileContent}</div>
 
           {/* 2. SECONDARY HELPER: Starter Template & Requirements */}
           <div className="rounded-xl border border-[#E9E9E9] bg-[#F5F5F4] p-3 text-xs space-y-1.5">
@@ -2389,7 +2479,7 @@ export function InventoryPage(props) {
             onCancel={function () {
               setImportModalOpen(false);
             }}
-            confirmLabel={importSubmitting ? "Importing Products..." : "Import Products"}
+            confirmLabel={importConfirmLabel}
             submitting={importSubmitting}
             className="pt-1"
           />

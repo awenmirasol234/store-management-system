@@ -48,13 +48,35 @@ export function Button(props) {
     getSizeClasses(props.size) +
     extraClass;
 
+  let ariaHaspopup = props.ariaHaspopup;
+  if (ariaHaspopup === undefined) {
+    ariaHaspopup = props["aria-haspopup"];
+  }
+  let ariaExpanded = props.ariaExpanded;
+  if (ariaExpanded === undefined) {
+    ariaExpanded = props["aria-expanded"];
+  }
+  let ariaControls = props.ariaControls;
+  if (ariaControls === undefined) {
+    ariaControls = props["aria-controls"];
+  }
+
   return (
     <button
       type={buttonType}
       onClick={props.onClick}
       disabled={props.disabled}
       aria-label={props.ariaLabel}
-      className={classes}
+      aria-haspopup={ariaHaspopup}
+      aria-expanded={ariaExpanded}
+      aria-controls={ariaControls}
+      title={props.title}
+      form={props.form}
+      name={props.name}
+      value={props.value}
+      id={props.id}
+      tabIndex={props.tabIndex}
+      className={"focus:outline-none focus:ring-2 focus:ring-[#B9F36B]/30 " + classes}
     >
       {props.children}
     </button>

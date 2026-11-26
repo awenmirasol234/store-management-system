@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { LogOut, Maximize, Minimize, Store, Wallet } from "lucide-react";
 import { api, clearAuthToken, getAuthToken, subscribeToSessionExpiry } from "./api.js";
+import { sanitizeCartItems } from "./cart.js";
 import { useFullscreen } from "./fullscreen.js";
 import { Sidebar } from "./components/Sidebar.jsx";
 import { BottomNav } from "./components/BottomNav.jsx";
@@ -72,7 +73,7 @@ export function App(props) {
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed)) {
-            return parsed;
+            return sanitizeCartItems(parsed);
           }
         }
       } catch (error) {
@@ -463,6 +464,13 @@ export function App(props) {
     );
   }
 
+  let fullscreenTitle = "Fullscreen";
+  let fullscreenIcon = <Maximize className="h-4 w-4" />;
+  if (isFullscreen) {
+    fullscreenTitle = "Exit Fullscreen";
+    fullscreenIcon = <Minimize className="h-4 w-4" />;
+  }
+
   let userModalElement = null;
   if (activeCapabilities.staff_management) {
     userModalElement = (
@@ -515,11 +523,11 @@ export function App(props) {
           <button
             type="button"
             onClick={toggleFullscreen}
-            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-            aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            title={fullscreenTitle}
+            aria-label={fullscreenTitle}
             className="p-1.5 text-[#A3A3A3] hover:text-white cursor-pointer transition-colors"
           >
-            {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+            {fullscreenIcon}
           </button>
           <button
             type="button"

@@ -132,7 +132,10 @@ export function validateImageUrl(url) {
 }
 
 export function calculatePosGridColumns(params) {
-  const containerWidth = params ? params.containerWidth : 0;
+  let containerWidth = 0;
+  if (params) {
+    containerWidth = params.containerWidth;
+  }
   let viewportWidth = containerWidth;
   if (params && typeof params.viewportWidth === "number") {
     viewportWidth = params.viewportWidth;

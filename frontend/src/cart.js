@@ -2,9 +2,17 @@ import { formatQuantity, formatUnit } from "./format.js";
 
 export function computeLocalCartTotals(cartItems, orderDiscount) {
   let subtotal = 0;
-  for (let index = 0; index < cartItems.length; index++) {
-    const item = cartItems[index];
-    subtotal = subtotal + item.unit_price * item.quantity;
+  let items = [];
+  if (Array.isArray(cartItems)) {
+    items = cartItems;
+  }
+  for (let index = 0; index < items.length; index++) {
+    const item = items[index];
+    const unitPrice = Number(item && item.unit_price);
+    const quantity = Number(item && item.quantity);
+    if (Number.isFinite(unitPrice) && unitPrice >= 0 && Number.isFinite(quantity) && quantity > 0) {
+      subtotal = subtotal + unitPrice * quantity;
+    }
   }
   subtotal = Math.round(subtotal * 100) / 100;
 
@@ -38,7 +46,12 @@ export function computeItemBaseQuantity(input) {
   if (customAmount !== null && customAmount !== undefined && product) {
     const parsedAmount = Number(customAmount);
     const sellingPrice = Number(product.selling_price);
-    if (!Number.isFinite(parsedAmount) || !Number.isFinite(sellingPrice) || sellingPrice <= 0) {
+    if (
+      !Number.isFinite(parsedAmount) ||
+      parsedAmount <= 0 ||
+      !Number.isFinite(sellingPrice) ||
+      sellingPrice <= 0
+    ) {
       return 0;
     }
     // Calculate base quantity from peso amount (4-decimal precision)
@@ -75,6 +88,62 @@ export function calculateProductCartStockUsage(cartItems, productId) {
     }
   }
   return totalScaled / 10000;
+}
+
+export function sanitizeCartItems(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const cleanItems = [];
+  for (let index = 0; index < value.length; index++) {
+    const item = value[index];
+    if (!item || typeof item !== "object") {
+      continue;
+    }
+
+    const productId = String(item.product_id || "").trim();
+    const unitPrice = Number(item.unit_price);
+    const quantity = Number(item.quantity);
+    let baseQuantityPerUnit = 1;
+    if (item.base_quantity_per_unit !== null && item.base_quantity_per_unit !== undefined) {
+      baseQuantityPerUnit = Number(item.base_quantity_per_unit);
+    }
+    const key = String(item.key || "").trim();
+
+    if (
+      !productId ||
+      !key ||
+      !Number.isFinite(unitPrice) ||
+      unitPrice < 0 ||
+      !Number.isFinite(quantity) ||
+      quantity <= 0 ||
+      !Number.isFinite(baseQuantityPerUnit) ||
+      baseQuantityPerUnit <= 0
+    ) {
+      continue;
+    }
+
+    let customAmount = null;
+    if (item.custom_amount !== null && item.custom_amount !== undefined) {
+      customAmount = Number(item.custom_amount);
+      if (!Number.isFinite(customAmount) || customAmount <= 0) {
+        continue;
+      }
+    }
+
+    const cleanItem = Object.assign({}, item);
+    cleanItem.product_id = productId;
+    cleanItem.unit_price = unitPrice;
+    cleanItem.quantity = quantity;
+    if (item.base_quantity_per_unit !== null && item.base_quantity_per_unit !== undefined) {
+      cleanItem.base_quantity_per_unit = baseQuantityPerUnit;
+    }
+    cleanItem.custom_amount = customAmount;
+    cleanItems.push(cleanItem);
+  }
+
+  return cleanItems;
 }
 
 // shortcut: client-side stock availability checked against local product snapshot; backend transaction re-validates atomically on checkout.

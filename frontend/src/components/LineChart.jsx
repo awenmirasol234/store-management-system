@@ -68,7 +68,10 @@ export function LineChart(props) {
   let profitPathD = "";
   for (let i = 0; i < points.length; i++) {
     const pt = points[i];
-    const prefix = i === 0 ? "M " : " L ";
+    let prefix = " L ";
+    if (i === 0) {
+      prefix = "M ";
+    }
     salesPathD = salesPathD + prefix + pt.xPercent + " " + pt.salesYPercent;
     profitPathD = profitPathD + prefix + pt.xPercent + " " + pt.profitYPercent;
   }

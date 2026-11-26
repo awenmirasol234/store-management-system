@@ -123,15 +123,22 @@ export function Sidebar(props) {
     );
   }
 
+  let fullscreenTitle = "Fullscreen";
+  let fullscreenIcon = <Maximize className="h-4 w-4" />;
+  if (isFullscreen) {
+    fullscreenTitle = "Exit Fullscreen";
+    fullscreenIcon = <Minimize className="h-4 w-4" />;
+  }
+
   const fullscreenButton = (
     <button
       type="button"
       onClick={toggleFullscreen}
       className="p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white rounded-lg cursor-pointer transition-colors"
-      title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-      aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+      title={fullscreenTitle}
+      aria-label={fullscreenTitle}
     >
-      {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+      {fullscreenIcon}
     </button>
   );
 

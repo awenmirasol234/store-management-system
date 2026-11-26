@@ -11,11 +11,15 @@ export function PaymentMethodToggle(props) {
   if (props.allowCredit === false) {
     visibleMethods = [PAYMENT_METHODS[0]];
   }
+  let columnsClass = "grid-cols-3";
+  if (visibleMethods.length === 1) {
+    columnsClass = "grid-cols-1";
+  }
   return (
     <div
       role="group"
       aria-label="Payment method"
-      className={"grid gap-2 " + (visibleMethods.length === 1 ? "grid-cols-1" : "grid-cols-3")}
+      className={"grid gap-2 " + columnsClass}
     >
       {visibleMethods.map(function renderMethod(method) {
         const IconComponent = method.icon;

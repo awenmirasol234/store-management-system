@@ -265,6 +265,11 @@ export function DashboardPage(props) {
     }
   }
 
+  let pieCenterLabel = "Categories";
+  if (pieMode === "PAYMENT") {
+    pieCenterLabel = "Payments";
+  }
+
   return (
     <PageLayout scroll={true}>
       <PageHeader title="Dashboard" />
@@ -370,7 +375,7 @@ export function DashboardPage(props) {
               <PieChart
                 key={pieMode}
                 data={activePieData}
-                centerLabel={pieMode === "CATEGORY" ? "Categories" : "Payments"}
+                centerLabel={pieCenterLabel}
                 centerCaption={activePieCaption}
                 className="mt-2 flex-1"
               />

@@ -167,6 +167,8 @@ export function PosPage(props) {
   const [activeFlyer, setActiveFlyer] = useState(null);
   const [cartBadgeBumping, setCartBadgeBumping] = useState(false);
   const [pendingSourceRect, setPendingSourceRect] = useState(null);
+  const cartBadgeTimerRef = useRef(null);
+  const catalogRequestVersion = useRef(0);
 
   let initialAdding = {};
   if (props && props.initialAddingStates) {
@@ -182,6 +184,10 @@ export function PosPage(props) {
         if (timers[id]) {
           clearTimeout(timers[id]);
         }
+      }
+      if (cartBadgeTimerRef.current) {
+        clearTimeout(cartBadgeTimerRef.current);
+        cartBadgeTimerRef.current = null;
       }
     };
   }, []);
@@ -371,15 +377,25 @@ export function PosPage(props) {
 
   function handleFlyerComplete() {
     setActiveFlyer(null);
+    triggerCartBadgeBump();
+  }
+
+  function triggerCartBadgeBump() {
+    if (cartBadgeTimerRef.current) {
+      clearTimeout(cartBadgeTimerRef.current);
+    }
     setCartBadgeBumping(true);
     if (typeof window !== "undefined") {
-      window.setTimeout(function resetBump() {
+      cartBadgeTimerRef.current = window.setTimeout(function resetBump() {
         setCartBadgeBumping(false);
+        cartBadgeTimerRef.current = null;
       }, 200);
     }
   }
 
   async function loadCatalog() {
+    catalogRequestVersion.current = catalogRequestVersion.current + 1;
+    const currentRequest = catalogRequestVersion.current;
     setErrorBanner("");
     try {
       let customerList = [];
@@ -400,6 +416,9 @@ export function PosPage(props) {
         categoriesPromise,
         api.listLowStockProducts()
       ]);
+      if (!isMounted.current || currentRequest !== catalogRequestVersion.current) {
+        return;
+      }
       const activeProducts = [];
       for (let index = 0; index < results[0].length; index++) {
         if (results[0][index].is_active) {
@@ -411,12 +430,17 @@ export function PosPage(props) {
       setLowStockProducts(results[2]);
       setCustomers(customerList);
     } catch (error) {
-      setErrorBanner(error.message);
+      if (isMounted.current && currentRequest === catalogRequestVersion.current) {
+        setErrorBanner(error.message);
+      }
     }
   }
 
   useEffect(function initLoad() {
     loadCatalog();
+    return function cancelCatalogRequest() {
+      catalogRequestVersion.current = catalogRequestVersion.current + 1;
+    };
   }, []);
 
   useEffect(function bindCtrlKShortcut() {
@@ -450,6 +474,13 @@ export function PosPage(props) {
     setErrorBanner("");
     if (!product) {
       return false;
+    }
+    if (customAmount !== null && customAmount !== undefined) {
+      const parsedCustomAmount = Number(customAmount);
+      if (!Number.isFinite(parsedCustomAmount) || parsedCustomAmount <= 0) {
+        setErrorBanner("Custom amount must be greater than zero");
+        return false;
+      }
     }
     if (getStockLevel(product) === STOCK_LEVELS.OUT) {
       setErrorBanner(product.product_name + " is out of stock");
@@ -589,18 +620,15 @@ export function PosPage(props) {
       const added = addItemToCart(product, null, null, sourceRect);
       if (added) {
         setProductAddingState(product.product_id, "success");
-        setCartBadgeBumping(true);
-        if (typeof window !== "undefined") {
-          window.setTimeout(function resetBump() {
-            setCartBadgeBumping(false);
-          }, 200);
-        }
+        triggerCartBadgeBump();
       } else {
         setProductAddingState(product.product_id, "error");
       }
     } catch (error) {
-      setProductAddingState(product.product_id, "error");
-      setErrorBanner(error.message);
+      if (isMounted.current) {
+        setProductAddingState(product.product_id, "error");
+        setErrorBanner(error.message);
+      }
     }
   }
 
@@ -632,7 +660,9 @@ export function PosPage(props) {
         });
       }
     } catch (error) {
-      setErrorBanner(error.message);
+      if (isMounted.current) {
+        setErrorBanner(error.message);
+      }
     }
   }
 
@@ -995,12 +1025,14 @@ export function PosPage(props) {
             );
           }
 
-          let cardClickClass = "cursor-pointer";
-          const buttonState = addingStates[product.product_id] || "idle";
+           let cardClickClass = "cursor-pointer";
+           let cardTabIndex = 0;
+           const buttonState = addingStates[product.product_id] || "idle";
           const isBusy = buttonState === "loading" || buttonState === "success";
 
-          if (isOut) {
-            cardClickClass = "cursor-not-allowed opacity-75";
+           if (isOut) {
+             cardClickClass = "cursor-not-allowed opacity-75";
+             cardTabIndex = -1;
           } else if (isBusy) {
             cardClickClass = "cursor-wait";
           }
@@ -1079,7 +1111,19 @@ export function PosPage(props) {
                       handleProductCardClick(product, event);
                     }
                   }}
-                  className={cardClickClass}
+                   onKeyDown={function onCardKeyDown(event) {
+                     if (event.key !== "Enter" && event.key !== " ") {
+                       return;
+                     }
+                     event.preventDefault();
+                     if (!isOut && !isBusy) {
+                       handleProductCardClick(product, event);
+                     }
+                   }}
+                   role="button"
+                   tabIndex={cardTabIndex}
+                   aria-label={"Add " + product.product_name + " to cart"}
+                   className={cardClickClass}
                 >
                   <div className="relative h-30 w-full overflow-hidden bg-white border-b border-[#E9E9E9]">
                     {stockBadge}
@@ -1206,6 +1250,10 @@ export function PosPage(props) {
 
     let tingiForm = null;
     if (capabilities.custom_amount_sales && pickerState.product.allow_custom_amount) {
+      let customAmountButtonLabel = "Add Custom Amount";
+      if (isPickerProductOut) {
+        customAmountButtonLabel = "Out of Stock";
+      }
       tingiForm = (
         <form
           onSubmit={function submitTingi(event) {
@@ -1241,7 +1289,7 @@ export function PosPage(props) {
             placeholder="e.g. 10.00"
           />
           <Button type="submit" variant="primary" className="w-full" disabled={isPickerProductOut}>
-            {isPickerProductOut ? "Out of Stock" : "Add Custom Amount"}
+            {customAmountButtonLabel}
           </Button>
         </form>
       );
@@ -1267,6 +1315,10 @@ export function PosPage(props) {
     }
 
     const isBaseSelected = selectedOptionId === "base";
+    let optionConfirmLabel = "Add to Cart";
+    if (isPickerProductOut) {
+      optionConfirmLabel = "Out of Stock";
+    }
     let baseCardClass =
       "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ";
     if (isPickerProductOut) {
@@ -1388,9 +1440,9 @@ export function PosPage(props) {
             variant="primary"
             className="w-full"
             disabled={isPickerProductOut}
-            onClick={handleConfirmOption}
-          >
-            {isPickerProductOut ? "Out of Stock" : "Add to Cart"}
+          onClick={handleConfirmOption}
+        >
+            {optionConfirmLabel}
           </Button>
         </div>
         {tingiForm}

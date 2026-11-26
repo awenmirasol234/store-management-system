@@ -259,6 +259,11 @@ export function Select(props) {
     activeOptionId = selectId + "-option-" + highlightedIndex;
   }
 
+  let chevronClass = " rotate-0";
+  if (isOpen) {
+    chevronClass = " rotate-180";
+  }
+
   let labelElement = null;
   if (props.label) {
     let labelContent = props.label;
@@ -294,9 +299,13 @@ export function Select(props) {
   }
 
   let errorElement = null;
+  let describedBy = undefined;
   if (props.error) {
+    describedBy = selectId + "-error";
     errorElement = (
-      <div className="mt-1.5 text-xs text-[#E0533C]">{props.error}</div>
+      <div id={describedBy} className="mt-1.5 text-xs text-[#E0533C]">
+        {props.error}
+      </div>
     );
   }
 
@@ -316,6 +325,8 @@ export function Select(props) {
           aria-controls={listboxId}
           aria-activedescendant={activeOptionId}
           aria-label={props.ariaLabel}
+          aria-describedby={describedBy}
+          aria-invalid={Boolean(props.error)}
           disabled={props.disabled}
           onClick={function handleToggle() {
             if (props.disabled) {
@@ -352,7 +363,7 @@ export function Select(props) {
             className={
               "pointer-events-none absolute top-1/2 -translate-y-1/2 text-[#777777] transition-transform duration-200 " +
               iconClasses +
-              (isOpen ? " rotate-180" : " rotate-0")
+              chevronClass
             }
           />
         </button>
@@ -389,6 +400,11 @@ export function Select(props) {
                 itemClass = itemClass + "opacity-40 cursor-not-allowed ";
               }
 
+              let checkIconSizeClass = "h-4 w-4";
+              if (props.size === "sm") {
+                checkIconSizeClass = "h-3.5 w-3.5";
+              }
+
               return (
                 <button
                   key={opt.value + "-" + index}
@@ -408,10 +424,7 @@ export function Select(props) {
                   <span className="truncate">{opt.label || "\u00A0"}</span>
                   {isSelected && (
                     <Check
-                      className={
-                        "flex-shrink-0 text-[#171717] " +
-                        (props.size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4")
-                      }
+                      className={"flex-shrink-0 text-[#171717] " + checkIconSizeClass}
                     />
                   )}
                 </button>

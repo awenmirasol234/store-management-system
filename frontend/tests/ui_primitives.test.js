@@ -6,6 +6,7 @@ import { Button } from "../src/components/Button.jsx";
 import { ErrorBanner } from "../src/components/ErrorBanner.jsx";
 import { FilterPill } from "../src/components/FilterPill.jsx";
 import { Input } from "../src/components/Input.jsx";
+import { FormActions } from "../src/components/FormActions.jsx";
 import { Modal } from "../src/components/Modal.jsx";
 import { PaymentMethodToggle } from "../src/components/PaymentMethodToggle.jsx";
 import { SearchInput } from "../src/components/SearchInput.jsx";
@@ -152,6 +153,8 @@ describe("Standardized UI primitives & accessibility", function () {
     );
     expect(html).toContain("border-[#E0533C]");
     expect(html).toContain("Selling price must be greater than ₱0.00");
+    expect(html).toContain('aria-invalid="true"');
+    expect(html).toContain('aria-describedby=');
   });
 
   it("renders Select with error styling and inline error message", function () {
@@ -285,5 +288,36 @@ describe("Standardized UI primitives & accessibility", function () {
     expect(html).toContain("bg-rose-600");
     expect(html).toContain("text-white");
     expect(html).toContain("Clear Cart");
+  });
+
+  it("forwards Button form and accessibility attributes", function () {
+    const html = renderToString(
+      React.createElement(
+        Button,
+        {
+          form: "checkout-form",
+          title: "Submit checkout",
+          ariaExpanded: false,
+          ariaControls: "checkout-menu"
+        },
+        "Submit"
+      )
+    );
+    expect(html).toContain('form="checkout-form"');
+    expect(html).toContain('title="Submit checkout"');
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).toContain('aria-controls="checkout-menu"');
+  });
+
+  it("disables both FormActions buttons while submitting", function () {
+    const html = renderToString(
+      React.createElement(FormActions, {
+        confirmLabel: "Save",
+        submitting: true,
+        onCancel: function () {},
+        onConfirm: function () {}
+      })
+    );
+    expect(html.match(/disabled=""/g)).toHaveLength(2);
   });
 });

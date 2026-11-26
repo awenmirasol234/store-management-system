@@ -69,9 +69,13 @@ export function Input(props) {
   }
 
   let errorElement = null;
+  let describedBy = undefined;
   if (props.error) {
+    describedBy = inputId + "-error";
     errorElement = (
-      <div className="mt-1.5 text-xs text-[#E0533C]">{props.error}</div>
+      <div id={describedBy} className="mt-1.5 text-xs text-[#E0533C]">
+        {props.error}
+      </div>
     );
   }
 
@@ -89,6 +93,9 @@ export function Input(props) {
         inputMode={props.inputMode}
         autoComplete={props.autoComplete}
         aria-label={props.ariaLabel}
+        aria-describedby={describedBy}
+        aria-invalid={Boolean(props.error)}
+        name={props.name}
         value={props.value}
         onChange={props.onChange}
         onBlur={props.onBlur}

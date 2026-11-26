@@ -16,16 +16,22 @@ export function FormActions(props) {
     containerClass = "flex justify-end gap-3 " + props.className;
   }
 
+  const isSubmitting = Boolean(props.submitting);
+
   return (
     <div className={containerClass}>
-      <Button variant="secondary" onClick={props.onCancel} disabled={props.cancelDisabled}>
+      <Button
+        variant="secondary"
+        onClick={props.onCancel}
+        disabled={props.cancelDisabled || isSubmitting}
+      >
         Cancel
       </Button>
       <Button
         type={confirmType}
         variant={confirmVariant}
         onClick={props.onConfirm}
-        disabled={props.disabled}
+        disabled={props.disabled || isSubmitting}
       >
         {props.confirmLabel}
       </Button>
