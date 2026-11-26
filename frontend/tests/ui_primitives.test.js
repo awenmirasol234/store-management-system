@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import { DataTable } from "../src/components/DataTable.jsx";
+import { Button } from "../src/components/Button.jsx";
 import { ErrorBanner } from "../src/components/ErrorBanner.jsx";
 import { FilterPill } from "../src/components/FilterPill.jsx";
 import { Input } from "../src/components/Input.jsx";
@@ -269,5 +270,20 @@ describe("Standardized UI primitives & accessibility", function () {
     );
     expect(html).not.toContain("sticky top-0");
     expect(html).not.toContain("z-10");
+  });
+
+  it("renders Button with danger-solid variant using red background and white text", function () {
+    const html = renderToString(
+      React.createElement(
+        Button,
+        {
+          variant: "danger-solid"
+        },
+        "Clear Cart"
+      )
+    );
+    expect(html).toContain("bg-rose-600");
+    expect(html).toContain("text-white");
+    expect(html).toContain("Clear Cart");
   });
 });

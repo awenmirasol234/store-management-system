@@ -1853,7 +1853,7 @@ export function PosPage(props) {
               setClearConfirmOpen(false);
             }}
             confirmType="button"
-            confirmVariant="danger"
+            confirmVariant="danger-solid"
             confirmLabel="Clear Cart"
             onConfirm={clearCart}
           />

@@ -93,6 +93,7 @@ Centralized danger and alert color tokens are declared in `frontend/src/index.cs
   - `secondary`: `.btn-glossy-secondary` with `bg-white hover:bg-[#EEEEED] text-[#171717] border border-[#E9E9E9]`.
   - `soft`: `.btn-glossy-soft` with `bg-[#EEEEED] hover:bg-[#E2E2E1] text-[#171717]`.
   - `danger`: `.btn-glossy-danger` with `bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200`.
+  - `danger-solid`: `bg-rose-600 hover:bg-rose-700 text-white border-transparent shadow-xs` for solid red destructive actions (e.g. Clear Cart confirmation).
   - `ghost`: `.btn-glossy-ghost` with `bg-transparent hover:bg-[#EEEEED] text-[#777777] hover:text-[#171717]`.
 
 ### 4.2 Product Cards & Cart Thumbnails (`frontend/src/pages/PosPage.jsx`)
