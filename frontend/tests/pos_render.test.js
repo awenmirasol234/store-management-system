@@ -410,4 +410,66 @@ describe("PosPage SSR test", function () {
     expect(html).toContain("Out of Stock");
     expect(html).not.toContain("Add Custom Amount");
   });
+
+  it("renders Add to Cart button micro-interaction states (idle, loading, success, error)", function () {
+    const testProduct = {
+      product_id: "prod-micro-1",
+      product_name: "Instant Coffee 25g",
+      base_unit: "Sachet",
+      current_stock: 10,
+      selling_price: 15,
+      is_active: true
+    };
+
+    // 1. Idle / Default state
+    const idleHtml = renderToString(
+      React.createElement(PosPage, {
+        initialProducts: [testProduct]
+      })
+    );
+    expect(idleHtml).toContain("Add to Cart");
+    expect(idleHtml).not.toContain("Adding...");
+    expect(idleHtml).not.toContain("Added");
+    expect(idleHtml).not.toContain("Failed");
+
+    // 2. Loading state
+    const loadingHtml = renderToString(
+      React.createElement(PosPage, {
+        initialProducts: [testProduct],
+        initialAddingStates: {
+          "prod-micro-1": "loading"
+        }
+      })
+    );
+    expect(loadingHtml).toContain("Adding...");
+    expect(loadingHtml).toContain("animate-spin");
+    expect(loadingHtml).toContain("cursor-wait");
+
+    // 3. Success state
+    const successHtml = renderToString(
+      React.createElement(PosPage, {
+        initialProducts: [testProduct],
+        initialAddingStates: {
+          "prod-micro-1": "success"
+        }
+      })
+    );
+    expect(successHtml).toContain("Added");
+    expect(successHtml).toContain("bg-[#B9F36B]");
+    expect(successHtml).toContain("border-[#9BD843]");
+    expect(successHtml).toContain("scale-[1.02]");
+
+    // 4. Error state
+    const errorHtml = renderToString(
+      React.createElement(PosPage, {
+        initialProducts: [testProduct],
+        initialAddingStates: {
+          "prod-micro-1": "error"
+        }
+      })
+    );
+    expect(errorHtml).toContain("Failed");
+    expect(errorHtml).toContain("bg-rose-50");
+    expect(errorHtml).toContain("text-rose-700");
+  });
 });

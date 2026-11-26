@@ -1,8 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
+  AlertCircle,
   Bell,
+  Check,
   ChevronLeft,
   ChevronRight,
+  Loader2,
   Plus,
   ShoppingBag,
   Tag,
@@ -162,6 +165,52 @@ export function PosPage(props) {
   const [activeFlyer, setActiveFlyer] = useState(null);
   const [cartBadgeBumping, setCartBadgeBumping] = useState(false);
   const [pendingSourceRect, setPendingSourceRect] = useState(null);
+
+  let initialAdding = {};
+  if (props && props.initialAddingStates) {
+    initialAdding = props.initialAddingStates;
+  }
+  const [addingStates, setAddingStates] = useState(initialAdding);
+  const addingTimersRef = useRef({});
+
+  useEffect(function cleanupAddingTimers() {
+    return function cleanup() {
+      const timers = addingTimersRef.current;
+      for (const id in timers) {
+        if (timers[id]) {
+          clearTimeout(timers[id]);
+        }
+      }
+    };
+  }, []);
+
+  function setProductAddingState(productId, state) {
+    if (addingTimersRef.current[productId]) {
+      clearTimeout(addingTimersRef.current[productId]);
+      delete addingTimersRef.current[productId];
+    }
+
+    setAddingStates(function updateAddingStates(previous) {
+      const next = Object.assign({}, previous);
+      if (state === "idle") {
+        delete next[productId];
+      } else {
+        next[productId] = state;
+      }
+      return next;
+    });
+
+    if (state === "success" || state === "error") {
+      addingTimersRef.current[productId] = setTimeout(function resetState() {
+        setAddingStates(function (previous) {
+          const next = Object.assign({}, previous);
+          delete next[productId];
+          return next;
+        });
+        delete addingTimersRef.current[productId];
+      }, 900);
+    }
+  }
 
   function triggerFlyAnimation(product, sourceElementOrRect) {
     if (!product || typeof window === "undefined") {
@@ -439,11 +488,21 @@ export function PosPage(props) {
   }
 
   async function handleProductCardClick(product, event) {
+    if (!product) {
+      return;
+    }
+    const currentState = addingStates[product.product_id];
+    if (currentState === "loading" || currentState === "success") {
+      return;
+    }
+
     setErrorBanner("");
     if (getStockLevel(product) === STOCK_LEVELS.OUT) {
       setErrorBanner(product.product_name + " is out of stock");
       return;
     }
+
+    setProductAddingState(product.product_id, "loading");
 
     let sourceRect = null;
     if (event && event.currentTarget && typeof event.currentTarget.getBoundingClientRect === "function") {
@@ -469,6 +528,7 @@ export function PosPage(props) {
         activeOptions.length > 0 ||
         (capabilities.custom_amount_sales && product.allow_custom_amount)
       ) {
+        setProductAddingState(product.product_id, "idle");
         setErrorBanner("");
         setCustomPesoInput("");
         setSelectedOptionId("base");
@@ -480,8 +540,20 @@ export function PosPage(props) {
         return;
       }
 
-      addItemToCart(product, null, null, sourceRect);
+      const added = addItemToCart(product, null, null, sourceRect);
+      if (added) {
+        setProductAddingState(product.product_id, "success");
+        setCartBadgeBumping(true);
+        if (typeof window !== "undefined") {
+          window.setTimeout(function resetBump() {
+            setCartBadgeBumping(false);
+          }, 200);
+        }
+      } else {
+        setProductAddingState(product.product_id, "error");
+      }
     } catch (error) {
+      setProductAddingState(product.product_id, "error");
       setErrorBanner(error.message);
     }
   }
@@ -868,8 +940,13 @@ export function PosPage(props) {
           }
 
           let cardClickClass = "cursor-pointer";
+          const buttonState = addingStates[product.product_id] || "idle";
+          const isBusy = buttonState === "loading" || buttonState === "success";
+
           if (isOut) {
             cardClickClass = "cursor-not-allowed opacity-75";
+          } else if (isBusy) {
+            cardClickClass = "cursor-wait";
           }
 
           let addToCartButton = null;
@@ -883,6 +960,42 @@ export function PosPage(props) {
                 <span>Out of Stock</span>
               </button>
             );
+          } else if (buttonState === "loading") {
+            addToCartButton = (
+              <button
+                type="button"
+                disabled={true}
+                aria-label={"Adding " + product.product_name + " to cart"}
+                className="btn-glossy btn-glossy-secondary flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-[#F5F5F4] py-1.5 text-xs font-semibold text-[#171717] cursor-wait opacity-90 transition-all duration-200 ease-in-out"
+              >
+                <Loader2 className="h-3 w-3 animate-spin text-[#171717]" />
+                <span>Adding...</span>
+              </button>
+            );
+          } else if (buttonState === "success") {
+            addToCartButton = (
+              <button
+                type="button"
+                disabled={true}
+                aria-label={product.product_name + " added to cart"}
+                className="btn-glossy btn-glossy-primary flex w-full items-center justify-center gap-1 rounded-lg border border-[#9BD843] bg-[#B9F36B] py-1.5 text-xs font-bold text-[#171717] shadow-xs scale-[1.02] cursor-default transition-all duration-200 ease-in-out"
+              >
+                <Check className="h-3.5 w-3.5 stroke-[2.5] text-[#171717]" />
+                <span>Added</span>
+              </button>
+            );
+          } else if (buttonState === "error") {
+            addToCartButton = (
+              <button
+                type="button"
+                disabled={true}
+                aria-label={"Failed to add " + product.product_name}
+                className="flex w-full items-center justify-center gap-1 rounded-lg border border-rose-300 bg-rose-50 py-1.5 text-xs font-semibold text-rose-700 cursor-default transition-all duration-200 ease-in-out"
+              >
+                <AlertCircle className="h-3 w-3 text-rose-600" />
+                <span>Failed</span>
+              </button>
+            );
           } else {
             addToCartButton = (
               <button
@@ -890,7 +1003,7 @@ export function PosPage(props) {
                 onClick={function onAddClick(event) {
                   handleProductCardClick(product, event);
                 }}
-                className="btn-glossy btn-glossy-secondary flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1.5 text-xs font-semibold text-[#171717] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-colors cursor-pointer"
+                className="btn-glossy btn-glossy-secondary flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1.5 text-xs font-semibold text-[#171717] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-all duration-200 ease-in-out cursor-pointer"
               >
                 <Plus className="h-3 w-3" />
                 <span>Add to Cart</span>
@@ -906,7 +1019,7 @@ export function PosPage(props) {
               <div>
                 <div
                   onClick={function onCardClick(event) {
-                    if (!isOut) {
+                    if (!isOut && !isBusy) {
                       handleProductCardClick(product, event);
                     }
                   }}
@@ -1308,6 +1421,11 @@ export function PosPage(props) {
       mobileButtonClass = mobileButtonClass + " scale-[1.03]";
     }
 
+    let mobileBadgeClass = "font-mono transition-transform duration-200 inline-block";
+    if (cartBadgeBumping) {
+      mobileBadgeClass = mobileBadgeClass + " scale-125 font-bold";
+    }
+
     mobileCartBar = (
       <div className="fixed bottom-16 left-0 right-0 z-30 border-t border-[#E9E9E9] bg-white/95 p-3 backdrop-blur md:hidden">
         <button
@@ -1320,7 +1438,9 @@ export function PosPage(props) {
         >
           <div className="flex items-center gap-2">
             <ShoppingBag className="h-5 w-5" />
-            <span>Cart ({cartItems.length})</span>
+            <span>
+              Cart (<span className={mobileBadgeClass}>{cartItems.length}</span>)
+            </span>
           </div>
           <span className="font-mono text-sm font-bold">{formatPeso(totals.total)} →</span>
         </button>
@@ -1409,8 +1529,15 @@ export function PosPage(props) {
 
     let badgeCounter = null;
     if (cartItems.length > 0) {
+      let badgeCounterClass =
+        "absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 font-mono text-3xs font-bold shadow-xs transition-all duration-200 ease-in-out";
+      if (cartBadgeBumping) {
+        badgeCounterClass = badgeCounterClass + " scale-125 bg-[#B9F36B] text-[#171717]";
+      } else {
+        badgeCounterClass = badgeCounterClass + " bg-[#171717] text-white";
+      }
       badgeCounter = (
-        <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#171717] px-1 font-mono text-3xs font-bold text-white shadow-xs">
+        <span className={badgeCounterClass}>
           {cartItems.length}
         </span>
       );
@@ -1493,6 +1620,11 @@ export function PosPage(props) {
       expandedTitleClass = expandedTitleClass + " scale-105";
     }
 
+    let expandedBadgeClass = "font-mono transition-transform duration-200 inline-block";
+    if (cartBadgeBumping) {
+      expandedBadgeClass = expandedBadgeClass + " scale-125 text-[#171717] font-bold";
+    }
+
     rightSideCartPanel = (
       <aside className="hidden md:flex w-80 xl:w-96 shrink-0 flex-col border-l border-[#E9E9E9] bg-white transition-all duration-200 ease-in-out">
         <div className="flex items-center justify-between border-b border-[#E9E9E9] px-4 py-3.5 sm:px-5 sm:py-4">
@@ -1512,7 +1644,7 @@ export function PosPage(props) {
               data-cart-target="desktop-expanded"
               className={expandedTitleClass}
             >
-              Current Sale (<span className="font-mono">{cartItems.length}</span>)
+              Current Sale (<span className={expandedBadgeClass}>{cartItems.length}</span>)
             </h2>
           </div>
           <button
