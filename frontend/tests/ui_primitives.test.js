@@ -275,12 +275,12 @@ describe("Standardized UI primitives & accessibility", function () {
     expect(html).not.toContain("z-10");
   });
 
-  it("renders Button with danger-solid variant using red background and white text", function () {
+  it("renders Button with glossy danger variant using red background and white text", function () {
     const html = renderToString(
       React.createElement(
         Button,
         {
-          variant: "danger-solid"
+          variant: "danger"
         },
         "Clear Cart"
       )

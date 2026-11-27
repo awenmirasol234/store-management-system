@@ -8,11 +8,8 @@ function getVariantClasses(variant) {
   if (variant === "soft") {
     return "btn-glossy btn-glossy-soft bg-[#EEEEED] text-[#171717] hover:bg-[#E2E2E1] border-transparent";
   }
-  if (variant === "danger") {
-    return "btn-glossy btn-glossy-danger bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-200";
-  }
-  if (variant === "danger-solid") {
-    return "bg-rose-600 text-white hover:bg-rose-700 border-transparent shadow-xs";
+  if (variant === "danger" || variant === "danger-solid") {
+    return "btn-glossy btn-glossy-danger bg-rose-600 text-white hover:bg-rose-700 border-transparent shadow-xs";
   }
   if (variant === "ghost") {
     return "btn-glossy btn-glossy-ghost bg-transparent text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717] border-transparent";
