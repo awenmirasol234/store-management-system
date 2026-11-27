@@ -1,5 +1,3 @@
-import { hashSessionToken } from "./domain.js";
-
 function mapUserRow(row) {
   if (!row) {
     return null;
@@ -133,7 +131,7 @@ export function createSqliteUserRepository(database) {
   };
 }
 
-export function createSqliteSessionRepository(database) {
+export function createSqliteSessionRepository(database, authCrypto) {
   const sessionColumns = database.prepare("PRAGMA table_info(user_sessions)").all();
   let hasTokenHashedColumn = false;
   for (let index = 0; index < sessionColumns.length; index++) {
@@ -156,7 +154,10 @@ export function createSqliteSessionRepository(database) {
   );
   for (let index = 0; index < legacySessions.length; index++) {
     const legacySession = legacySessions[index];
-    migrateSessionStmt.run(hashSessionToken(legacySession.token), legacySession.session_id);
+    migrateSessionStmt.run(
+      authCrypto.hashSessionToken(legacySession.token),
+      legacySession.session_id
+    );
   }
 
   const insertStmt = database.prepare(`
@@ -186,7 +187,7 @@ export function createSqliteSessionRepository(database) {
       insertStmt.run(
         session.session_id,
         session.user_id,
-        hashSessionToken(session.token),
+        authCrypto.hashSessionToken(session.token),
         session.expires_at,
         session.created_at
       );
@@ -194,12 +195,12 @@ export function createSqliteSessionRepository(database) {
     },
 
     async findByToken(token) {
-      const row = findByTokenStmt.get(hashSessionToken(token));
+      const row = findByTokenStmt.get(authCrypto.hashSessionToken(token));
       return mapSessionRow(row);
     },
 
     async deleteByToken(token) {
-      deleteByTokenStmt.run(hashSessionToken(token));
+      deleteByTokenStmt.run(authCrypto.hashSessionToken(token));
       return true;
     },
 

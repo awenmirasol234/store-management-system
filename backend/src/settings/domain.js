@@ -12,7 +12,7 @@ export const DEFAULT_STORE_SETTINGS = {
   default_low_stock_threshold: 5,
   sound_enabled: 1,
   show_cashier_on_receipt: 1,
-  updated_at: new Date(0).toISOString()
+  updated_at: "1970-01-01T00:00:00.000Z"
 };
 
 export function validateStoreSettings(input) {

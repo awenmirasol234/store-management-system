@@ -27,9 +27,9 @@ Dependencies must strictly point inward:
 2. **Application Layer**:
    - Resides in `<module>/use-cases.js`.
    - Coordinates business workflows, validates use-case input, orchestrates transactions via `UnitOfWork`.
-   - Injects repository ports and system clocks; never directly references databases or HTTP code.
+   - Injects repository ports, system clocks, ID generators, and security adapters; never directly references databases or HTTP code.
 3. **Infrastructure Layer**:
-   - Resides in `<module>/sqlite-repo.js` and `db/sqlite.js`.
+   - Resides in `<module>/sqlite-repo.js`, `db/sqlite.js`, and infrastructure adapters such as `auth/crypto.js`.
    - Implements domain repository ports using plain SQL with `node:sqlite`.
    - Manages DDL, pragmas (`PRAGMA foreign_keys = ON`, `PRAGMA journal_mode = WAL`), and parameter binding.
    - Exposes all repository and unit-of-work methods as asynchronous (`async`).
@@ -37,6 +37,8 @@ Dependencies must strictly point inward:
    - Backend routes (`<module>/routes.js`) translate HTTP requests, parse query/body inputs, and delegate to application use cases.
    - Frontend UI (`frontend/src/pages/` and `frontend/src/components/`) renders views and delegates API operations to `frontend/src/api.js`.
    - Routes and UI components must never execute database queries or implement core business rules.
+
+Authentication use cases and the session repository receive the same auth-crypto adapter from `app.js`. Keep PIN hashing, token creation, and token hashing out of the auth domain module.
 
 ---
 

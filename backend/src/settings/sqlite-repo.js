@@ -1,6 +1,6 @@
 import { DEFAULT_STORE_SETTINGS } from "./domain.js";
 
-export function createSqliteSettingsRepository(database) {
+export function createSqliteSettingsRepository(database, clock) {
   function mapRowToEntity(row) {
     if (!row) {
       return null;
@@ -31,7 +31,7 @@ export function createSqliteSettingsRepository(database) {
         return mapRowToEntity(row);
       }
 
-      const now = new Date().toISOString();
+      const now = clock.nowIso();
       const insert = database.prepare(`
         INSERT INTO store_settings (
           id, store_name, tagline, address, phone, tax_number,

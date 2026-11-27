@@ -16,13 +16,7 @@ export function createUpdateSettingsUseCase(dependencies) {
   async function updateSettings(input) {
     validateStoreSettings(input);
     const current = await settingsRepository.getSettings();
-
-    let nowIso = new Date().toISOString();
-    if (clock && typeof clock.nowIso === "function") {
-      nowIso = clock.nowIso();
-    } else if (clock && typeof clock.now === "function") {
-      nowIso = clock.now().toISOString();
-    }
+    const nowIso = clock.nowIso();
 
     const updated = Object.assign({}, current, { updated_at: nowIso });
 

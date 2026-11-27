@@ -108,6 +108,7 @@ import {
 } from "./shifts/use-cases.js";
 import { createShiftsRouter } from "./shifts/routes.js";
 import { createSqliteSettingsRepository } from "./settings/sqlite-repo.js";
+import { createAuthCrypto } from "./auth/crypto.js";
 import {
   createGetSettingsUseCase,
   createUpdateSettingsUseCase
@@ -167,6 +168,7 @@ export function createApp(options) {
   const uploadsDir = config.uploadsDir || path.join(backendRoot, "uploads");
   const idGenerator = config.idGenerator || createDefaultIdGenerator();
   const clock = config.clock || createSystemClock();
+  const authCrypto = config.authCrypto || createAuthCrypto();
   const unitOfWork = createSqliteUnitOfWork(database);
   const productRepository = createSqliteProductRepository(database);
   const sellingOptionRepository = createSqliteSellingOptionRepository(database);
@@ -179,15 +181,18 @@ export function createApp(options) {
   const salesRepository = createSqliteSalesRepository(database);
   const reportsRepository = createSqliteReportsRepository(database);
   const userRepository = createSqliteUserRepository(database);
-  const sessionRepository = createSqliteSessionRepository(database);
+  const sessionRepository = createSqliteSessionRepository(database, authCrypto);
   const shiftRepository = createSqliteShiftRepository(database);
   const cashMovementRepository = createSqliteCashMovementRepository(database);
-  const settingsRepository = createSqliteSettingsRepository(database);
-  const rateLimiter = createInMemoryRateLimiter();
+  const settingsRepository = createSqliteSettingsRepository(database, clock);
+  const rateLimiter = createInMemoryRateLimiter({
+    nowMilliseconds: clock.nowMilliseconds
+  });
 
   const sharedDeps = {
     idGenerator: idGenerator,
     clock: clock,
+    authCrypto: authCrypto,
     unitOfWork: unitOfWork,
     productRepository: productRepository,
     sellingOptionRepository: sellingOptionRepository,
@@ -390,6 +395,8 @@ export function createApp(options) {
     createSettingsRouter({
       databasePath: config.databasePath,
       database: database,
+      clock: clock,
+      idGenerator: idGenerator,
       useCases: settingsUseCases
     })
   );

@@ -9,15 +9,13 @@ import {
 } from "../src/shared/errors.js";
 import {
   ROLES,
-  generateSalt,
-  hashPin,
   sanitizeUser,
   validateFullName,
   validatePin,
   validateRole,
-  validateUsername,
-  verifyPin
+  validateUsername
 } from "../src/auth/domain.js";
+import { createAuthCrypto } from "../src/auth/crypto.js";
 import {
   createSqliteSessionRepository,
   createSqliteUserRepository
@@ -54,17 +52,84 @@ describe("Auth Domain", function () {
     }).toThrow();
   });
 
+  it("expires rate-limit records using its injected clock", function () {
+    let nowMilliseconds = 1000;
+    const rateLimiter = createInMemoryRateLimiter({
+      maxAttempts: 1,
+      windowMs: 10,
+      nowMilliseconds() {
+        return nowMilliseconds;
+      }
+    });
+
+    rateLimiter.recordFailure("owner");
+    expect(function () {
+      rateLimiter.check("owner");
+    }).toThrow();
+
+    nowMilliseconds = 1010;
+    expect(function () {
+      rateLimiter.check("owner");
+    }).not.toThrow();
+  });
+
   it("hashes and verifies PIN using scrypt with timing-safe comparison", function () {
-    const salt = generateSalt();
+    const authCrypto = createAuthCrypto();
+    const salt = authCrypto.generateSalt();
     const pin = "1234";
-    const hash = hashPin(pin, salt);
+    const hash = authCrypto.hashPin(pin, salt);
 
     expect(typeof hash).toBe("string");
     expect(hash.length).toBe(128); // 64 bytes hex
-    expect(verifyPin("1234", salt, hash)).toBe(true);
-    expect(verifyPin("0000", salt, hash)).toBe(false);
-    expect(verifyPin("12345", salt, hash)).toBe(false);
-    expect(verifyPin("", salt, hash)).toBe(false);
+    expect(authCrypto.verifyPin("1234", salt, hash)).toBe(true);
+    expect(authCrypto.verifyPin("0000", salt, hash)).toBe(false);
+    expect(authCrypto.verifyPin("12345", salt, hash)).toBe(false);
+    expect(authCrypto.verifyPin("", salt, hash)).toBe(false);
+  });
+
+  it("uses the injected crypto service when creating a user", async function () {
+    let createdUser = null;
+    const authCrypto = {
+      generateSalt() {
+        return "test-salt";
+      },
+      hashPin(pin, salt) {
+        expect(pin).toBe("1234");
+        expect(salt).toBe("test-salt");
+        return "test-hash";
+      }
+    };
+    const createUser = createCreateUserUseCase({
+      userRepository: {
+        async findByUsername() {
+          return null;
+        },
+        async createUser(user) {
+          createdUser = user;
+        }
+      },
+      authCrypto: authCrypto,
+      idGenerator: {
+        nextId() {
+          return "user-1";
+        }
+      },
+      clock: {
+        nowIso() {
+          return "2026-11-20T00:00:00.000Z";
+        }
+      }
+    });
+
+    await createUser({
+      username: "owner",
+      full_name: "Store Owner",
+      role: ROLES.OWNER,
+      pin: "1234"
+    });
+
+    expect(createdUser.pin_salt).toBe("test-salt");
+    expect(createdUser.pin_hash).toBe("test-hash");
   });
 
   it("validates username rules", function () {
@@ -122,7 +187,8 @@ describe("Auth Workflows & Repositories", function () {
     const database = openSqliteDatabase(":memory:");
     const unitOfWork = createSqliteUnitOfWork(database);
     const userRepository = createSqliteUserRepository(database);
-    const sessionRepository = createSqliteSessionRepository(database);
+    const authCrypto = createAuthCrypto();
+    const sessionRepository = createSqliteSessionRepository(database, authCrypto);
     const idGenerator = createDefaultIdGenerator();
     let clock = createSystemClock();
     if (clockOverride) {
@@ -133,6 +199,7 @@ describe("Auth Workflows & Repositories", function () {
       userRepository: userRepository,
       sessionRepository: sessionRepository,
       unitOfWork: unitOfWork,
+      authCrypto: authCrypto,
       idGenerator: idGenerator,
       clock: clock
     };

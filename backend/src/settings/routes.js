@@ -8,6 +8,8 @@ export function createSettingsRouter(dependencies) {
   const useCases = dependencies.useCases;
   const databasePath = dependencies.databasePath;
   const database = dependencies.database;
+  const clock = dependencies.clock;
+  const idGenerator = dependencies.idGenerator;
 
   router.get("/settings", async function getSettings(request, response) {
     const settings = await useCases.getSettings();
@@ -33,14 +35,14 @@ export function createSettingsRouter(dependencies) {
     // shortcut: disk-based SQLite backup using VACUUM INTO, upgrade to streaming WAL replication or cloud snapshot for multi-node deployments.
     const tempBackupFile = path.join(
       path.dirname(databasePath),
-      "backup-" + String(Date.now()) + "-" + String(Math.floor(Math.random() * 10000)) + ".db"
+      "backup-" + idGenerator.nextId() + ".db"
     );
     const safeSqlPath = tempBackupFile
       .replace(/\\/g, "/")
       .replace(/'/g, "''");
     database.exec("VACUUM INTO '" + safeSqlPath + "'");
 
-    const dateStr = new Date().toISOString().slice(0, 10);
+    const dateStr = clock.nowIso().slice(0, 10);
     const filename = "storeflow-backup-" + dateStr + ".db";
     response.download(tempBackupFile, filename, function cleanup() {
       fs.unlink(tempBackupFile, function onUnlink() {});

@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { openSqliteDatabase } from "../src/db/sqlite.js";
+import { createSystemClock } from "../src/shared/ports.js";
 import { createApp } from "../src/app.js";
 import { DEFAULT_STORE_SETTINGS, validateStoreSettings } from "../src/settings/domain.js";
 import { createSqliteSettingsRepository } from "../src/settings/sqlite-repo.js";
@@ -72,7 +73,7 @@ describe("Store Settings Module", function () {
   describe("SQLite Repository & Use Cases", function () {
     it("auto-seeds and returns default settings when empty", async function () {
       const db = openSqliteDatabase(":memory:");
-      const repo = createSqliteSettingsRepository(db);
+      const repo = createSqliteSettingsRepository(db, createSystemClock());
 
       const settings = await repo.getSettings();
       expect(settings).toBeDefined();
@@ -85,12 +86,12 @@ describe("Store Settings Module", function () {
 
     it("updates settings and preserves unmodified fields", async function () {
       const db = openSqliteDatabase(":memory:");
-      const repo = createSqliteSettingsRepository(db);
       const clock = {
-        now() {
-          return new Date("2026-11-23T12:00:00.000Z");
+        nowIso() {
+          return "2026-11-23T12:00:00.000Z";
         }
       };
+      const repo = createSqliteSettingsRepository(db, clock);
 
       const getUseCase = createGetSettingsUseCase({ settingsRepository: repo });
       const updateUseCase = createUpdateSettingsUseCase({ settingsRepository: repo, clock: clock });

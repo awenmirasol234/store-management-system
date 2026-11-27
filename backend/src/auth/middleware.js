@@ -9,6 +9,7 @@ export function createInMemoryRateLimiter(options) {
   const maxAttempts = config.maxAttempts || 5;
   const windowMs = config.windowMs || 15 * 60 * 1000;
   const maxEntries = config.maxEntries || 10000;
+  const nowMilliseconds = config.nowMilliseconds || Date.now;
   const attempts = new Map();
 
   function removeExpired(now) {
@@ -31,7 +32,7 @@ export function createInMemoryRateLimiter(options) {
 
   return {
     check(key) {
-      const now = Date.now();
+      const now = nowMilliseconds();
       removeExpired(now);
       const record = attempts.get(key);
       if (!record) {
@@ -46,7 +47,7 @@ export function createInMemoryRateLimiter(options) {
     },
 
     recordFailure(key) {
-      const now = Date.now();
+      const now = nowMilliseconds();
       removeExpired(now);
       const record = attempts.get(key);
       if (!record || now >= record.resetAt) {

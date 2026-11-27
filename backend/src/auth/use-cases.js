@@ -2,15 +2,11 @@ import { ConflictError, NotFoundError, UnauthorizedError, ValidationError } from
 import {
   DEFAULT_SESSION_DURATION_MS,
   ROLES,
-  generateSalt,
-  generateSessionToken,
-  hashPin,
   sanitizeUser,
   validateFullName,
   validatePin,
   validateRole,
-  validateUsername,
-  verifyPin
+  validateUsername
 } from "./domain.js";
 import { normalizeBoolean } from "../shared/validation.js";
 
@@ -44,6 +40,7 @@ export function createGetAuthStatusUseCase(dependencies) {
 export function createSetupInitialOwnerUseCase(dependencies) {
   const userRepository = dependencies.userRepository;
   const sessionRepository = dependencies.sessionRepository;
+  const authCrypto = dependencies.authCrypto;
   const idGenerator = dependencies.idGenerator;
   const clock = dependencies.clock;
 
@@ -62,8 +59,8 @@ export function createSetupInitialOwnerUseCase(dependencies) {
       const validFullName = validateFullName(input.full_name);
       const validPin = validatePin(input.pin);
 
-      const salt = generateSalt();
-      const pinHash = hashPin(validPin, salt);
+      const salt = authCrypto.generateSalt();
+      const pinHash = authCrypto.hashPin(validPin, salt);
       const userId = idGenerator.nextId();
       const nowIso = clock.nowIso();
 
@@ -81,7 +78,7 @@ export function createSetupInitialOwnerUseCase(dependencies) {
 
       await userRepository.createUser(user);
 
-      const token = generateSessionToken();
+      const token = authCrypto.generateSessionToken();
       const sessionId = idGenerator.nextId();
       const expiresAt = createSessionExpiry(nowIso);
 
@@ -109,6 +106,7 @@ export function createSetupInitialOwnerUseCase(dependencies) {
 export function createLoginUseCase(dependencies) {
   const userRepository = dependencies.userRepository;
   const sessionRepository = dependencies.sessionRepository;
+  const authCrypto = dependencies.authCrypto;
   const idGenerator = dependencies.idGenerator;
   const clock = dependencies.clock;
   const rateLimiter = dependencies.rateLimiter;
@@ -130,7 +128,7 @@ export function createLoginUseCase(dependencies) {
     let isMatch = false;
 
     if (user && user.is_active) {
-      isMatch = verifyPin(validPin, user.pin_salt, user.pin_hash);
+      isMatch = authCrypto.verifyPin(validPin, user.pin_salt, user.pin_hash);
     }
 
     if (!isMatch) {
@@ -144,7 +142,7 @@ export function createLoginUseCase(dependencies) {
       rateLimiter.reset(clientKey);
     }
 
-    const token = generateSessionToken();
+    const token = authCrypto.generateSessionToken();
     const sessionId = idGenerator.nextId();
     const nowIso = clock.nowIso();
     const expiresAt = createSessionExpiry(nowIso);
@@ -210,6 +208,7 @@ export function createGetCurrentUserUseCase(dependencies) {
 
 export function createCreateUserUseCase(dependencies) {
   const userRepository = dependencies.userRepository;
+  const authCrypto = dependencies.authCrypto;
   const idGenerator = dependencies.idGenerator;
   const clock = dependencies.clock;
 
@@ -228,8 +227,8 @@ export function createCreateUserUseCase(dependencies) {
       throw new ConflictError("Username already exists");
     }
 
-    const salt = generateSalt();
-    const pinHash = hashPin(validPin, salt);
+    const salt = authCrypto.generateSalt();
+    const pinHash = authCrypto.hashPin(validPin, salt);
     const userId = idGenerator.nextId();
     const nowIso = clock.nowIso();
 
@@ -253,6 +252,7 @@ export function createCreateUserUseCase(dependencies) {
 export function createUpdateUserUseCase(dependencies) {
   const userRepository = dependencies.userRepository;
   const sessionRepository = dependencies.sessionRepository;
+  const authCrypto = dependencies.authCrypto;
   const clock = dependencies.clock;
 
   return async function updateUser(userId, input) {
@@ -299,8 +299,8 @@ export function createUpdateUserUseCase(dependencies) {
       let pinSalt = user.pin_salt;
       if (input.pin !== undefined && input.pin !== "") {
         const validPin = validatePin(input.pin);
-        pinSalt = generateSalt();
-        pinHash = hashPin(validPin, pinSalt);
+        pinSalt = authCrypto.generateSalt();
+        pinHash = authCrypto.hashPin(validPin, pinSalt);
       }
 
       if (!isActive) {
@@ -337,6 +337,7 @@ export function createListUsersUseCase(dependencies) {
 
 export function createChangePinUseCase(dependencies) {
   const userRepository = dependencies.userRepository;
+  const authCrypto = dependencies.authCrypto;
   const clock = dependencies.clock;
 
   return async function changePin(input) {
@@ -357,12 +358,12 @@ export function createChangePinUseCase(dependencies) {
       throw new NotFoundError("User not found");
     }
 
-    if (!verifyPin(currentPin, user.pin_salt, user.pin_hash)) {
+    if (!authCrypto.verifyPin(currentPin, user.pin_salt, user.pin_hash)) {
       throw new UnauthorizedError("Current PIN is incorrect");
     }
 
-    const newSalt = generateSalt();
-    const newHash = hashPin(newPin, newSalt);
+    const newSalt = authCrypto.generateSalt();
+    const newHash = authCrypto.hashPin(newPin, newSalt);
     const nowIso = clock.nowIso();
 
     await userRepository.updateUser(userId, {

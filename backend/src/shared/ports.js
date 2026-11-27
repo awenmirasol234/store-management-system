@@ -27,6 +27,9 @@ export function formatManilaDateParts(date) {
 
 export function createSystemClock() {
   return {
+    nowMilliseconds() {
+      return Date.now();
+    },
     nowIso() {
       return new Date().toISOString();
     },

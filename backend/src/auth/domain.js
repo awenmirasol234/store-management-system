@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import { ValidationError } from "../shared/errors.js";
 
 export const ROLES = {
@@ -9,41 +8,6 @@ export const ROLES = {
 export const ALLOWED_ROLES = new Set(["OWNER", "CASHIER"]);
 
 export const DEFAULT_SESSION_DURATION_MS = 24 * 60 * 60 * 1000;
-
-export function generateSalt() {
-  return crypto.randomBytes(16).toString("hex");
-}
-
-export function hashPin(pin, salt) {
-  if (!pin || typeof pin !== "string") {
-    throw new ValidationError("PIN must be a non-empty string");
-  }
-  if (!salt || typeof salt !== "string") {
-    throw new ValidationError("Salt must be a non-empty string");
-  }
-  const derivedKey = crypto.scryptSync(pin, salt, 64);
-  return derivedKey.toString("hex");
-}
-
-export function verifyPin(pin, salt, storedHash) {
-  if (!pin || !salt || !storedHash) {
-    return false;
-  }
-  const inputHash = crypto.scryptSync(pin, salt, 64);
-  const storedBuffer = Buffer.from(storedHash, "hex");
-  if (inputHash.length !== storedBuffer.length) {
-    return false;
-  }
-  return crypto.timingSafeEqual(inputHash, storedBuffer);
-}
-
-export function generateSessionToken() {
-  return crypto.randomBytes(32).toString("hex");
-}
-
-export function hashSessionToken(token) {
-  return crypto.createHash("sha256").update(String(token)).digest("hex");
-}
 
 export function validateUsername(username) {
   if (!username || typeof username !== "string") {
