@@ -62,50 +62,48 @@ export function Sidebar(props) {
     asideClass = asideClass + "w-60";
   }
 
-  let headerElement = null;
+  let headerClass = "relative flex items-center px-5 py-5";
+  let brandNameClass =
+    "text-sm font-bold text-white leading-tight overflow-hidden whitespace-nowrap transition-all duration-200 ease-in-out motion-reduce:transition-none";
+  let brandGroupClass = "flex items-center gap-3";
+  let toggleClass =
+    "absolute right-5 rounded-lg p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white cursor-pointer transition-colors";
+  let toggleTitle = "Collapse sidebar";
+  let toggleIcon = <ChevronLeft className="h-4 w-4" />;
   if (collapsed) {
-    headerElement = (
-      <div className="flex flex-col items-center gap-3 py-6">
+    headerClass = "flex flex-col items-center gap-3 py-6";
+    brandNameClass = brandNameClass + " max-w-0 max-h-0 opacity-0";
+    brandGroupClass = "flex items-center gap-0";
+    toggleClass =
+      "rounded-lg p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white cursor-pointer transition-colors";
+    toggleTitle = "Expand sidebar";
+    toggleIcon = <ChevronRight className="h-4 w-4" />;
+  } else {
+    brandNameClass = brandNameClass + " max-w-32 max-h-6 opacity-100";
+  }
+
+  const headerElement = (
+    <div className={headerClass}>
+      <div className={brandGroupClass}>
         <div
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] text-[#171717] shrink-0"
           title="Duane Store"
         >
           <Store className="h-5 w-5" />
         </div>
-        <button
-          type="button"
-          onClick={handleToggle}
-          className="rounded-lg p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white cursor-pointer transition-colors"
-          title="Expand sidebar"
-          aria-label="Expand sidebar"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
+        <div className={brandNameClass}>Duane Store</div>
       </div>
-    );
-  } else {
-    headerElement = (
-      <div className="relative flex items-center px-5 py-5">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] text-[#171717] shrink-0">
-            <Store className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="text-sm font-bold text-white leading-tight">Duane Store</div>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={handleToggle}
-          className="absolute right-5 rounded-lg p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white cursor-pointer transition-colors"
-          title="Collapse sidebar"
-          aria-label="Collapse sidebar"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-      </div>
-    );
-  }
+      <button
+        type="button"
+        onClick={handleToggle}
+        className={toggleClass}
+        title={toggleTitle}
+        aria-label={toggleTitle}
+      >
+        {toggleIcon}
+      </button>
+    </div>
+  );
 
   let logoutButton = null;
   if (props.onLogout) {
