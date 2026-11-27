@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   AlertCircle,
   Bell,
@@ -164,7 +164,7 @@ export function PosPage(props) {
   const [completedReceipt, setCompletedReceipt] = useState(null);
 
   const [animationQueue, setAnimationQueue] = useState([]);
-  const [activeFlyer, setActiveFlyer] = useState(null);
+  const [activeFlyers, setActiveFlyers] = useState([]);
   const [cartBadgeBumping, setCartBadgeBumping] = useState(false);
   const [pendingSourceRect, setPendingSourceRect] = useState(null);
   const cartBadgeTimerRef = useRef(null);
@@ -264,16 +264,9 @@ export function PosPage(props) {
 
   useEffect(
     function processQueue() {
-      if (activeFlyer !== null || animationQueue.length === 0) {
+      if (animationQueue.length === 0) {
         return;
       }
-
-      const nextItem = animationQueue[0];
-      const remaining = [];
-      for (let i = 1; i < animationQueue.length; i++) {
-        remaining.push(animationQueue[i]);
-      }
-      setAnimationQueue(remaining);
 
       let toRect = null;
       if (typeof document !== "undefined") {
@@ -320,15 +313,24 @@ export function PosPage(props) {
         duration = 480;
       }
 
-      setActiveFlyer({
-        id: nextItem.id,
-        product: nextItem.product,
-        fromRect: nextItem.fromRect,
-        toRect: toRect,
-        duration: duration
+      const nextFlyers = [];
+      for (let index = 0; index < animationQueue.length; index++) {
+        const nextItem = animationQueue[index];
+        nextFlyers.push({
+          id: nextItem.id,
+          product: nextItem.product,
+          fromRect: nextItem.fromRect,
+          toRect: toRect,
+          duration: duration
+        });
+      }
+
+      setAnimationQueue([]);
+      setActiveFlyers(function addActiveFlyers(previous) {
+        return previous.concat(nextFlyers);
       });
     },
-    [activeFlyer, animationQueue, cartCollapsed]
+    [animationQueue, cartCollapsed]
   );
 
   useEffect(
@@ -375,10 +377,18 @@ export function PosPage(props) {
     [cartCollapsed]
   );
 
-  function handleFlyerComplete() {
-    setActiveFlyer(null);
+  const handleFlyerComplete = useCallback(function handleFlyerComplete(flyerId) {
+    setActiveFlyers(function removeActiveFlyer(previous) {
+      const remaining = [];
+      for (let index = 0; index < previous.length; index++) {
+        if (previous[index].id !== flyerId) {
+          remaining.push(previous[index]);
+        }
+      }
+      return remaining;
+    });
     triggerCartBadgeBump();
-  }
+  }, []);
 
   function triggerCartBadgeBump() {
     if (cartBadgeTimerRef.current) {
@@ -1983,8 +1993,16 @@ export function PosPage(props) {
         {receiptBody}
       </Modal>
 
-      {/* Fly-to-Cart Animation Overlay */}
-      <FlyToCartOverlay activeFlyer={activeFlyer} onComplete={handleFlyerComplete} />
+      {/* Fly-to-Cart Animation Overlays */}
+      {activeFlyers.map(function renderFlyer(flyer) {
+        return (
+          <FlyToCartOverlay
+            key={flyer.id}
+            activeFlyer={flyer}
+            onComplete={handleFlyerComplete}
+          />
+        );
+      })}
     </div>
   );
 }

@@ -171,6 +171,63 @@ describe("POS Add to Cart button micro-interactions", function () {
     expect(latestCart[0].quantity).toBe(2);
   });
 
+  it("starts multiple fly-to-cart animations without waiting for earlier flyers", async function () {
+    const products = [
+      {
+        product_id: "prod-fast-1",
+        product_name: "Fast Product One",
+        base_unit: "Piece",
+        current_stock: 10,
+        selling_price: 10,
+        is_active: true
+      },
+      {
+        product_id: "prod-fast-2",
+        product_name: "Fast Product Two",
+        base_unit: "Piece",
+        current_stock: 10,
+        selling_price: 20,
+        is_active: true
+      }
+    ];
+
+    await act(async function () {
+      root.render(
+        React.createElement(PosPage, {
+          initialProducts: products,
+          capabilities: {
+            selling_options: false,
+            custom_amount_sales: false
+          }
+        })
+      );
+    });
+
+    const addButtons = [];
+    const buttons = container.querySelectorAll("button");
+    for (let index = 0; index < buttons.length; index++) {
+      if (buttons[index].textContent.includes("Add to Cart")) {
+        addButtons.push(buttons[index]);
+      }
+    }
+    expect(addButtons.length).toBe(2);
+
+    await act(async function () {
+      addButtons[0].dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    await act(async function () {
+      addButtons[1].dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    const flyers = container.querySelectorAll("div.pointer-events-none.fixed.inset-0.z-50");
+    expect(flyers.length).toBe(2);
+
+    await act(async function () {
+      vi.advanceTimersByTime(700);
+    });
+    expect(container.querySelectorAll("div.pointer-events-none.fixed.inset-0.z-50").length).toBe(0);
+  });
+
   it("transitions button to error state when adding exceeds available stock", async function () {
     const product = {
       product_id: "prod-stock-limited",
