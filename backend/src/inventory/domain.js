@@ -171,41 +171,56 @@ export function createSellingOptionEntity(input) {
   };
 }
 
+function validatePositiveInventoryQuantity(transactionType, quantityInt) {
+  if (quantityInt <= 0) {
+    throw new ValidationError(transactionType + " quantity must be positive");
+  }
+}
+
+function validateNegativeInventoryQuantity(transactionType, quantityInt) {
+  if (quantityInt >= 0) {
+    throw new ValidationError(transactionType + " quantity must be negative");
+  }
+}
+
+function validateNonzeroInventoryQuantity(transactionType, quantityInt) {
+  if (quantityInt === 0) {
+    throw new ValidationError("ADJUSTMENT quantity cannot be zero");
+  }
+}
+
+const INVENTORY_TRANSACTION_STRATEGIES = {
+  [INVENTORY_TRANSACTION_TYPES.STOCK_IN]: {
+    validateQuantity: validatePositiveInventoryQuantity,
+    requiresRemarks: false
+  },
+  [INVENTORY_TRANSACTION_TYPES.SALE]: {
+    validateQuantity: validateNegativeInventoryQuantity,
+    requiresRemarks: false
+  },
+  [INVENTORY_TRANSACTION_TYPES.RETURN]: {
+    validateQuantity: validatePositiveInventoryQuantity,
+    requiresRemarks: false
+  },
+  [INVENTORY_TRANSACTION_TYPES.ADJUSTMENT]: {
+    validateQuantity: validateNonzeroInventoryQuantity,
+    requiresRemarks: true
+  },
+  [INVENTORY_TRANSACTION_TYPES.DAMAGED]: {
+    validateQuantity: validateNegativeInventoryQuantity,
+    requiresRemarks: true
+  },
+  [INVENTORY_TRANSACTION_TYPES.EXPIRED]: {
+    validateQuantity: validateNegativeInventoryQuantity,
+    requiresRemarks: true
+  }
+};
+
 function validateInventoryQuantitySign(transactionType, quantityInt, remarks) {
-  if (
-    transactionType === INVENTORY_TRANSACTION_TYPES.STOCK_IN ||
-    transactionType === INVENTORY_TRANSACTION_TYPES.RETURN
-  ) {
-    if (quantityInt <= 0) {
-      throw new ValidationError(transactionType + " quantity must be positive");
-    }
-    return;
-  }
-
-  if (
-    transactionType === INVENTORY_TRANSACTION_TYPES.SALE ||
-    transactionType === INVENTORY_TRANSACTION_TYPES.DAMAGED ||
-    transactionType === INVENTORY_TRANSACTION_TYPES.EXPIRED
-  ) {
-    if (quantityInt >= 0) {
-      throw new ValidationError(transactionType + " quantity must be negative");
-    }
-  }
-
-  if (transactionType === INVENTORY_TRANSACTION_TYPES.ADJUSTMENT) {
-    if (quantityInt === 0) {
-      throw new ValidationError("ADJUSTMENT quantity cannot be zero");
-    }
-  }
-
-  if (
-    transactionType === INVENTORY_TRANSACTION_TYPES.ADJUSTMENT ||
-    transactionType === INVENTORY_TRANSACTION_TYPES.DAMAGED ||
-    transactionType === INVENTORY_TRANSACTION_TYPES.EXPIRED
-  ) {
-    if (remarks === null) {
-      throw new ValidationError("remarks is required for " + transactionType);
-    }
+  const strategy = INVENTORY_TRANSACTION_STRATEGIES[transactionType];
+  strategy.validateQuantity(transactionType, quantityInt);
+  if (strategy.requiresRemarks && remarks === null) {
+    throw new ValidationError("remarks is required for " + transactionType);
   }
 }
 

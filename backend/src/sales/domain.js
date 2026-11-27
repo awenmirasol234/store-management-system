@@ -21,8 +21,6 @@ export const SALE_STATUSES = {
   VOIDED: "VOIDED"
 };
 
-const VALID_PAYMENT_METHODS = new Set(Object.values(PAYMENT_METHODS));
-
 function validateSellableProduct(product) {
   if (!product || product.deleted_at !== null) {
     throw new ValidationError("Product is not available");
@@ -99,20 +97,37 @@ function calculateBaseUnitLine(product, soldQuantityRaw) {
   };
 }
 
+const SALE_LINE_STRATEGIES = {
+  customAmount: {
+    calculate(input) {
+      return calculateCustomAmountLine(input.product, input.custom_amount);
+    }
+  },
+  sellingOption: {
+    calculate(input) {
+      return calculateOptionLine(input.product, input.option, input.quantity);
+    }
+  },
+  baseUnit: {
+    calculate(input) {
+      return calculateBaseUnitLine(input.product, input.quantity);
+    }
+  }
+};
+
 export function calculateSaleLine(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) {
     throw new ValidationError("Sale line input must be an object");
   }
   validateSellableProduct(input.product);
 
-  let rawLine = null;
+  let strategyName = "baseUnit";
   if (input.custom_amount !== undefined && input.custom_amount !== null) {
-    rawLine = calculateCustomAmountLine(input.product, input.custom_amount);
+    strategyName = "customAmount";
   } else if (input.option !== undefined && input.option !== null) {
-    rawLine = calculateOptionLine(input.product, input.option, input.quantity);
-  } else {
-    rawLine = calculateBaseUnitLine(input.product, input.quantity);
+    strategyName = "sellingOption";
   }
+  const rawLine = SALE_LINE_STRATEGIES[strategyName].calculate(input);
 
   let rawDiscount = input.discount_amount;
   if (rawDiscount === undefined || rawDiscount === null) {
@@ -150,14 +165,67 @@ export function calculateItemProfit(salesItem) {
   return fromMoneyInt(subtotalInt - totalCostInt);
 }
 
+const PAYMENT_STRATEGIES = {
+  [PAYMENT_METHODS.CASH]: {
+    calculate(input, totalInt) {
+      const amountPaidInt = toMoneyInt(input.amount_paid, "amount_paid");
+      if (amountPaidInt < totalInt) {
+        throw new ValidationError("amount_paid must be at least total_amount for CASH sale");
+      }
+      return {
+        cashInt: totalInt,
+        creditInt: 0,
+        amountPaidInt: amountPaidInt
+      };
+    }
+  },
+  [PAYMENT_METHODS.CREDIT]: {
+    calculate(input, totalInt, customerId) {
+      if (customerId === null) {
+        throw new ValidationError("customer_id is required for CREDIT sale");
+      }
+      return {
+        cashInt: 0,
+        creditInt: totalInt,
+        amountPaidInt: 0
+      };
+    }
+  },
+  [PAYMENT_METHODS.SPLIT]: {
+    calculate(input, totalInt, customerId) {
+      if (customerId === null) {
+        throw new ValidationError("customer_id is required for SPLIT sale");
+      }
+      const cashInt = toMoneyInt(input.cash_amount, "cash_amount");
+      const creditInt = toMoneyInt(input.credit_amount, "credit_amount");
+      if (cashInt <= 0 || creditInt <= 0) {
+        throw new ValidationError("SPLIT sale requires both cash_amount and credit_amount > 0");
+      }
+      if (cashInt + creditInt !== totalInt) {
+        throw new ValidationError("cash_amount + credit_amount must equal total_amount");
+      }
+      const amountPaidInt = toMoneyInt(input.amount_paid, "amount_paid");
+      if (amountPaidInt < cashInt) {
+        throw new ValidationError("amount_paid must be at least cash_amount for SPLIT sale");
+      }
+      return {
+        cashInt: cashInt,
+        creditInt: creditInt,
+        amountPaidInt: amountPaidInt
+      };
+    }
+  }
+};
+
 export function validatePaymentBreakdown(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) {
     throw new ValidationError("Payment data must be an object");
   }
   const paymentMethod = requireNonEmptyText(input.payment_method, "payment_method");
-  if (!VALID_PAYMENT_METHODS.has(paymentMethod)) {
+  if (!Object.hasOwn(PAYMENT_STRATEGIES, paymentMethod)) {
     throw new ValidationError("Invalid payment_method: " + paymentMethod);
   }
+  const strategy = PAYMENT_STRATEGIES[paymentMethod];
 
   const totalInt = toMoneyInt(input.total_amount, "total_amount");
   if (totalInt < 0) {
@@ -165,43 +233,9 @@ export function validatePaymentBreakdown(input) {
   }
 
   const customerId = normalizeOptionalText(input.customer_id, "customer_id");
-  let cashInt = 0;
-  let creditInt = 0;
-  let amountPaidInt = 0;
+  const amounts = strategy.calculate(input, totalInt, customerId);
 
-  if (paymentMethod === PAYMENT_METHODS.CASH) {
-    cashInt = totalInt;
-    creditInt = 0;
-    amountPaidInt = toMoneyInt(input.amount_paid, "amount_paid");
-    if (amountPaidInt < totalInt) {
-      throw new ValidationError("amount_paid must be at least total_amount for CASH sale");
-    }
-  } else if (paymentMethod === PAYMENT_METHODS.CREDIT) {
-    if (customerId === null) {
-      throw new ValidationError("customer_id is required for CREDIT sale");
-    }
-    cashInt = 0;
-    creditInt = totalInt;
-    amountPaidInt = 0;
-  } else {
-    if (customerId === null) {
-      throw new ValidationError("customer_id is required for SPLIT sale");
-    }
-    cashInt = toMoneyInt(input.cash_amount, "cash_amount");
-    creditInt = toMoneyInt(input.credit_amount, "credit_amount");
-    if (cashInt <= 0 || creditInt <= 0) {
-      throw new ValidationError("SPLIT sale requires both cash_amount and credit_amount > 0");
-    }
-    if (cashInt + creditInt !== totalInt) {
-      throw new ValidationError("cash_amount + credit_amount must equal total_amount");
-    }
-    amountPaidInt = toMoneyInt(input.amount_paid, "amount_paid");
-    if (amountPaidInt < cashInt) {
-      throw new ValidationError("amount_paid must be at least cash_amount for SPLIT sale");
-    }
-  }
-
-  let changeInt = amountPaidInt - cashInt;
+  let changeInt = amounts.amountPaidInt - amounts.cashInt;
   if (changeInt < 0) {
     changeInt = 0;
   }
@@ -209,9 +243,9 @@ export function validatePaymentBreakdown(input) {
   return {
     payment_method: paymentMethod,
     customer_id: customerId,
-    cash_amount: fromMoneyInt(cashInt),
-    credit_amount: fromMoneyInt(creditInt),
-    amount_paid: fromMoneyInt(amountPaidInt),
+    cash_amount: fromMoneyInt(amounts.cashInt),
+    credit_amount: fromMoneyInt(amounts.creditInt),
+    amount_paid: fromMoneyInt(amounts.amountPaidInt),
     change_amount: fromMoneyInt(changeInt)
   };
 }

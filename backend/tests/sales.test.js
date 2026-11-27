@@ -521,9 +521,20 @@ describe("sales domain and use cases", function () {
       is_active: true
     };
 
+    const baseLine = calculateSaleLine({ product: product, quantity: 2 });
+    expect(baseLine.base_quantity).toBe(2);
+    expect(baseLine.subtotal).toBe(40);
+
     const line = calculateSaleLine({ product: product, option: option, quantity: 2 });
     expect(line.base_quantity).toBe(6);
     expect(line.subtotal).toBe(100);
+
+    const customAmountLine = calculateSaleLine({
+      product: Object.assign({}, product, { allow_custom_amount: true }),
+      custom_amount: 50
+    });
+    expect(customAmountLine.base_quantity).toBe(2.5);
+    expect(customAmountLine.subtotal).toBe(50);
 
     expect(function () {
       calculateSaleLine({
@@ -579,6 +590,13 @@ describe("sales domain and use cases", function () {
     expect(function () {
       validatePaymentBreakdown({ payment_method: PAYMENT_METHODS.CREDIT, total_amount: 100 });
     }).toThrow(ValidationError);
+    const creditSale = validatePaymentBreakdown({
+      payment_method: PAYMENT_METHODS.CREDIT,
+      total_amount: 100,
+      customer_id: "cust-1"
+    });
+    expect(creditSale.cash_amount).toBe(0);
+    expect(creditSale.credit_amount).toBe(100);
     expect(function () {
       validatePaymentBreakdown({
         payment_method: PAYMENT_METHODS.SPLIT,
@@ -605,6 +623,12 @@ describe("sales domain and use cases", function () {
         credit_amount: 40
       });
     }).toThrow(ValidationError);
+    expect(function () {
+      validatePaymentBreakdown({
+        payment_method: "__proto__",
+        total_amount: 100
+      });
+    }).toThrow("Invalid payment_method");
 
     const splitSale = validatePaymentBreakdown({
       payment_method: PAYMENT_METHODS.SPLIT,

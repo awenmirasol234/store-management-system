@@ -388,6 +388,41 @@ describe("inventory domain and use cases", function () {
         Object.assign({}, transactionInput, { transaction_type: "UNKNOWN" })
       );
     }).toThrow(ValidationError);
+
+    const returnTransaction = createInventoryTransactionEntity(
+      Object.assign({}, transactionInput, {
+        transaction_type: INVENTORY_TRANSACTION_TYPES.RETURN,
+        quantity: 1
+      })
+    );
+    expect(returnTransaction.transaction_type).toBe(INVENTORY_TRANSACTION_TYPES.RETURN);
+
+    const damagedTransaction = createInventoryTransactionEntity(
+      Object.assign({}, transactionInput, {
+        transaction_type: INVENTORY_TRANSACTION_TYPES.DAMAGED,
+        quantity: -1,
+        remarks: "Damaged item"
+      })
+    );
+    expect(damagedTransaction.quantity).toBe(-1);
+
+    const expiredTransaction = createInventoryTransactionEntity(
+      Object.assign({}, transactionInput, {
+        transaction_type: INVENTORY_TRANSACTION_TYPES.EXPIRED,
+        quantity: -1,
+        remarks: "Expired item"
+      })
+    );
+    expect(expiredTransaction.quantity).toBe(-1);
+
+    const adjustmentTransaction = createInventoryTransactionEntity(
+      Object.assign({}, transactionInput, {
+        transaction_type: INVENTORY_TRANSACTION_TYPES.ADJUSTMENT,
+        quantity: 1,
+        remarks: "Stock count correction"
+      })
+    );
+    expect(adjustmentTransaction.quantity).toBe(1);
   });
 
   it("converts stock-in pack quantities and evaluates low-stock flags", function () {

@@ -494,6 +494,34 @@ export function createListUnitsUseCase(dependencies) {
   };
 }
 
+const PRODUCT_IMPORT_STRATEGIES = {
+  csv: {
+    parse(input) {
+      const csvText = input.csvText;
+      if (typeof csvText !== "string" || csvText.trim().length === 0) {
+        throw new ValidationError("CSV file is empty. Please provide a valid CSV file with product data.");
+      }
+      return parseCsv(csvText);
+    }
+  },
+  xlsx: {
+    async parse(input) {
+      if (!input.fileBuffer || input.fileBuffer.length === 0) {
+        throw new ValidationError("Excel file is empty. Please provide a valid .xlsx file with product data.");
+      }
+      return parseXlsx(input.fileBuffer);
+    }
+  }
+};
+
+function parseProductImport(input) {
+  let strategyName = "csv";
+  if (input.fileType === "xlsx" || (input.fileBuffer && !input.csvText)) {
+    strategyName = "xlsx";
+  }
+  return PRODUCT_IMPORT_STRATEGIES[strategyName].parse(input);
+}
+
 export function createImportProductsFromCsvUseCase(dependencies) {
   return async function execute(input) {
     const safeInput = input || {};
@@ -505,20 +533,7 @@ export function createImportProductsFromCsvUseCase(dependencies) {
     const createdBy = safeInput.created_by || "system";
     const now = dependencies.clock.nowIso();
 
-    // 1. Parse File (CSV or XLSX)
-    let parsed;
-    if (safeInput.fileType === "xlsx" || (safeInput.fileBuffer && !safeInput.csvText)) {
-      if (!safeInput.fileBuffer || safeInput.fileBuffer.length === 0) {
-        throw new ValidationError("Excel file is empty. Please provide a valid .xlsx file with product data.");
-      }
-      parsed = await parseXlsx(safeInput.fileBuffer);
-    } else {
-      const csvText = safeInput.csvText;
-      if (typeof csvText !== "string" || csvText.trim().length === 0) {
-        throw new ValidationError("CSV file is empty. Please provide a valid CSV file with product data.");
-      }
-      parsed = parseCsv(csvText);
-    }
+    const parsed = await parseProductImport(safeInput);
 
     if (parsed.headers.length === 0) {
       throw new ValidationError("File header is missing or empty.");
