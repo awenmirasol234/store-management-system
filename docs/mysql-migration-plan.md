@@ -1,6 +1,6 @@
 # MySQL Migration Plan
 
-Tactical instructions for replacing SQLite with a fresh MySQL database in Docker Compose.
+Instructions for replacing SQLite with a fresh MySQL database in Docker Compose.
 
 ## Objective
 
