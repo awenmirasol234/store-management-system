@@ -484,7 +484,8 @@ describe("PosPage SSR test", function () {
     expect(successHtml).toContain("Added");
     expect(successHtml).toContain("bg-[#B9F36B]");
     expect(successHtml).toContain("border-[#9BD843]");
-    expect(successHtml).toContain("py-1 text-xs");
+    expect(successHtml).toContain("min-h-[40px]");
+    expect(successHtml).toContain("py-2.5 text-xs");
 
     // 4. Error state
     const errorHtml = renderToString(

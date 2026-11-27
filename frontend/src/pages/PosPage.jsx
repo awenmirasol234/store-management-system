@@ -1013,7 +1013,7 @@ export function PosPage(props) {
             </div>
           </div>
           <div className="p-2 sm:p-2.5 pt-2 sm:pt-2">
-            <Skeleton className="h-7 rounded-lg" />
+            <Skeleton className="h-10 rounded-lg" />
           </div>
         </div>
       );
@@ -1089,7 +1089,7 @@ export function PosPage(props) {
               <button
                 type="button"
                 disabled={true}
-                className="flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-[#EEEEED] py-1 text-xs font-semibold text-[#777777] cursor-not-allowed opacity-75"
+                className="flex w-full min-h-[40px] items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-[#EEEEED] py-2.5 text-xs font-semibold text-[#777777] cursor-not-allowed opacity-75"
               >
                 <span>Out of Stock</span>
               </button>
@@ -1100,7 +1100,7 @@ export function PosPage(props) {
                 type="button"
                 disabled={true}
                 aria-label={"Adding " + product.product_name + " to cart"}
-                className="btn-glossy btn-glossy-secondary flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-[#F5F5F4] py-1 text-xs font-semibold text-[#171717] cursor-wait opacity-90 transition-all duration-200 ease-in-out"
+                className="btn-glossy btn-glossy-secondary flex w-full min-h-[40px] items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-[#F5F5F4] py-2.5 text-xs font-semibold text-[#171717] cursor-wait opacity-90 transition-all duration-200 ease-in-out"
               >
                 <Loader2 className="h-3 w-3 animate-spin text-[#171717]" />
                 <span>Adding...</span>
@@ -1112,7 +1112,7 @@ export function PosPage(props) {
                 type="button"
                 disabled={true}
                 aria-label={product.product_name + " added to cart"}
-                className="btn-glossy btn-glossy-primary flex w-full items-center justify-center gap-1 rounded-lg border border-[#9BD843] bg-[#B9F36B] py-1 text-xs font-bold text-[#171717] shadow-xs cursor-default transition-all duration-200 ease-in-out"
+                className="btn-glossy btn-glossy-primary flex w-full min-h-[40px] items-center justify-center gap-1 rounded-lg border border-[#9BD843] bg-[#B9F36B] py-2.5 text-xs font-bold text-[#171717] shadow-xs cursor-default transition-all duration-200 ease-in-out"
               >
                 <Check className="h-3.5 w-3.5 stroke-[2.5] text-[#171717]" />
                 <span>Added</span>
@@ -1124,7 +1124,7 @@ export function PosPage(props) {
                 type="button"
                 disabled={true}
                 aria-label={"Failed to add " + product.product_name}
-                className="flex w-full items-center justify-center gap-1 rounded-lg border border-rose-300 bg-rose-50 py-1 text-xs font-semibold text-rose-700 cursor-default transition-all duration-200 ease-in-out"
+                className="flex w-full min-h-[40px] items-center justify-center gap-1 rounded-lg border border-rose-300 bg-rose-50 py-2.5 text-xs font-semibold text-rose-700 cursor-default transition-all duration-200 ease-in-out"
               >
                 <AlertCircle className="h-3 w-3 text-rose-600" />
                 <span>Failed</span>
@@ -1137,7 +1137,7 @@ export function PosPage(props) {
                 onClick={function onAddClick(event) {
                   handleProductCardClick(product, event);
                 }}
-                className="btn-glossy btn-glossy-secondary flex w-full items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-1 text-xs font-semibold text-[#171717] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-all duration-200 ease-in-out cursor-pointer"
+                className="btn-glossy btn-glossy-secondary flex w-full min-h-[40px] items-center justify-center gap-1 rounded-lg border border-[#E9E9E9] bg-white py-2.5 text-xs font-semibold text-[#171717] hover:bg-[#EEEEED] active:bg-[#E2E2E1] transition-all duration-200 ease-in-out cursor-pointer"
               >
                 <Plus className="h-3 w-3" />
                 <span>Add to Cart</span>
