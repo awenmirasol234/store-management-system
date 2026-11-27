@@ -140,8 +140,8 @@ describe("Standardized UI primitives & accessibility", function () {
     expect(html).toContain("Utang");
     expect(html).not.toContain("Split");
     expect(html).toContain("grid-cols-2");
-    expect(html).toContain("min-h-[44px]");
-    expect(html).toContain("py-3");
+    expect(html).toContain("flex-col");
+    expect(html).toContain("py-2");
     expect(html).toContain('aria-pressed="true"');
   });
 

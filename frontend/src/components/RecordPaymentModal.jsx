@@ -149,7 +149,7 @@ export function RecordPaymentModal(props) {
                 setAmount(String(currentBalance));
               }}
               disabled={currentBalance <= 0}
-              className="rounded-full border border-[#171717] bg-[#171717] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#262626] disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition-colors"
+              className="rounded-full border border-[#171717] bg-[#171717] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#171717]/90 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition-colors"
             >
               {"Full Balance (" + formatPeso(currentBalance) + ")"}
             </button>

@@ -18,17 +18,17 @@ export function PaymentMethodToggle(props) {
     <div
       role="group"
       aria-label="Payment method"
-      className={"grid gap-1 rounded-xl border border-[#E9E9E9] bg-[#F2F2F2] p-1 " + columnsClass}
+      className={"grid gap-2 " + columnsClass}
     >
       {visibleMethods.map(function renderMethod(method) {
         const IconComponent = method.icon;
         const isSelected = props.paymentMethod === method.key;
         let buttonClass =
-          "flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-3.5 py-3 text-sm cursor-pointer transition-colors ";
+          "flex flex-col items-center justify-center gap-1 rounded-xl border px-3 py-2 text-xs font-medium cursor-pointer transition-colors ";
         if (isSelected) {
-          buttonClass = buttonClass + "bg-[#171717] text-white font-semibold shadow-xs";
+          buttonClass = buttonClass + "border-[#171717] bg-[#171717] text-white font-semibold shadow-xs";
         } else {
-          buttonClass = buttonClass + "bg-transparent text-[#777777] font-medium hover:text-[#171717]";
+          buttonClass = buttonClass + "border-[#E9E9E9] bg-white text-[#777777] hover:bg-[#EEEEED] hover:text-[#171717]";
         }
         return (
           <button

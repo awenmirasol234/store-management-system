@@ -22,7 +22,7 @@ export function BottomNav(props) {
   return (
     <nav
       aria-label="Mobile navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 flex h-16 border-t border-[#262626] bg-[#171717] select-none md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-40 flex h-16 border-t border-[#171717] bg-[#171717] select-none md:hidden"
     >
       <div className={gridClass}>
         {items.map(function renderBottomItem(item) {

@@ -93,7 +93,7 @@ export function DebugOverlay(props) {
   if (!isExpanded) {
     return (
       <div
-        className="fixed bottom-20 right-4 z-50 flex items-center gap-2 rounded-xl border border-[#262626] bg-[#171717] px-3 py-1.5 font-mono text-xs text-white shadow-xl md:bottom-4"
+        className="fixed bottom-20 right-4 z-50 flex items-center gap-2 rounded-xl border border-[#171717] bg-[#171717] px-3 py-1.5 font-mono text-xs text-white shadow-xl md:bottom-4"
         title="Live Responsive Overlay (Alt+D to toggle, click to expand)"
       >
         <span className="flex h-2 w-2 rounded-full bg-[#B9F36B] animate-pulse" />
@@ -127,9 +127,9 @@ export function DebugOverlay(props) {
 
   // Expanded panel displaying width, breakpoints, and spacing scale
   return (
-    <div className="fixed bottom-20 right-4 z-50 w-80 rounded-2xl border border-[#262626] bg-[#171717] p-4 font-mono text-xs text-white shadow-2xl md:bottom-4">
+    <div className="fixed bottom-20 right-4 z-50 w-80 rounded-2xl border border-[#171717] bg-[#171717] p-4 font-mono text-xs text-white shadow-2xl md:bottom-4">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#262626] pb-2.5">
+      <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
         <div className="flex items-center gap-2">
           <Ruler className="h-4 w-4 text-[#B9F36B]" />
           <span className="font-bold text-sm text-white">Debug Metrics</span>
@@ -160,14 +160,14 @@ export function DebugOverlay(props) {
 
       {/* Live Viewport & Breakpoint */}
       <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-        <div className="rounded-xl border border-[#262626] bg-[#222222] p-2.5">
+        <div className="rounded-xl border border-white/10 bg-[#171717] p-2.5">
           <div className="text-[#A3A3A3]">Viewport</div>
           <div className="mt-1 font-bold text-sm text-[#B9F36B]">
             {dimensions.width} × {dimensions.height}
           </div>
           <div className="mt-0.5 text-2xs text-[#777777]">pixels (px)</div>
         </div>
-        <div className="rounded-xl border border-[#262626] bg-[#222222] p-2.5">
+        <div className="rounded-xl border border-white/10 bg-[#171717] p-2.5">
           <div className="text-[#A3A3A3]">Breakpoint</div>
           <div className="mt-1 font-bold text-sm text-white uppercase">{bp.name}</div>
           <div className="mt-0.5 text-2xs text-[#777777]">{bp.label}</div>
@@ -182,7 +182,7 @@ export function DebugOverlay(props) {
         <div className="grid grid-cols-6 gap-1 text-center text-2xs">
           {["xs", "sm", "md", "lg", "xl", "2xl"].map(function (step) {
             const isCurrent = step === bp.name;
-            let stepClass = "rounded py-1 font-semibold uppercase transition-colors bg-[#262626] text-[#777777]";
+            let stepClass = "rounded py-1 font-semibold uppercase transition-colors border border-white/10 bg-[#171717] text-[#777777]";
             if (isCurrent) {
               stepClass = "rounded py-1 font-semibold uppercase transition-colors bg-[#B9F36B] text-[#171717] shadow";
             }
@@ -203,19 +203,19 @@ export function DebugOverlay(props) {
         <div className="text-2xs font-semibold uppercase text-[#A3A3A3] mb-1.5">
           Tailwind Spacing Scale
         </div>
-        <div className="max-h-36 overflow-y-auto no-scrollbar rounded-xl border border-[#262626] bg-[#222222]">
+        <div className="max-h-36 overflow-y-auto no-scrollbar rounded-xl border border-white/10 bg-[#171717]">
           <table className="w-full text-left text-2xs">
-            <thead className="border-b border-[#262626] bg-[#1a1a1a] text-[#A3A3A3]">
+            <thead className="border-b border-white/10 bg-[#171717] text-[#A3A3A3]">
               <tr>
                 <th className="px-2.5 py-1.5">Token</th>
                 <th className="px-2.5 py-1.5 text-right">Pixels</th>
                 <th className="px-2.5 py-1.5 text-right">REM</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#262626]">
+            <tbody className="divide-y divide-white/10">
               {SPACING_SCALE.map(function (s) {
                 return (
-                  <tr key={s.token} className="hover:bg-[#2a2a2a]/50">
+                  <tr key={s.token} className="hover:bg-white/5">
                     <td className="px-2.5 py-1 font-bold text-[#B9F36B]">{s.token}</td>
                     <td className="px-2.5 py-1 text-right text-white font-medium">{s.px}px</td>
                     <td className="px-2.5 py-1 text-right text-[#A3A3A3]">{s.rem}</td>
@@ -229,7 +229,7 @@ export function DebugOverlay(props) {
 
       {/* Shortcut note */}
       <div className="mt-2.5 text-center text-2xs text-[#777777]">
-        Toggle overlay with <kbd className="rounded bg-[#262626] px-1 py-0.5 text-white">Alt+D</kbd>
+        Toggle overlay with <kbd className="rounded border border-white/15 bg-[#171717] px-1 py-0.5 text-white">Alt+D</kbd>
       </div>
     </div>
   );
