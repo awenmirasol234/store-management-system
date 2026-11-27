@@ -79,6 +79,15 @@ For each request:
 - Update related documentation when a code change makes documented behavior inaccurate.
 - Do not copy detailed specifications, roadmaps, or setup procedures into `AGENTS.md`.
 
+## Documentation Format
+
+- Write operational documentation in tactical instruction format.
+- State the objective first.
+- Use ordered, imperative steps for actions.
+- Separate preservation rules, verification checks, and risks.
+- Mark optional procedures and explain when they apply.
+- Keep instructions concise and avoid unnecessary background.
+
 ## Architecture
 
 - Keep dependencies pointing inward:
