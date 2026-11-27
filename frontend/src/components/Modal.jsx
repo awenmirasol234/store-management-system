@@ -239,7 +239,7 @@ function OpenModal(props) {
           panelAnimClass
         }
       >
-        <div className="flex items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 sm:px-6 sm:py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-[#E9E9E9] px-5 py-3.5 sm:px-6 sm:py-4">
           <h2 id={titleId} className="text-base font-semibold text-[#171717]">
             {props.title}
           </h2>
@@ -254,7 +254,7 @@ function OpenModal(props) {
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="overflow-y-auto p-4 sm:p-6">{props.children}</div>
+        <div className="flex flex-1 min-h-0 flex-col overflow-y-auto p-4 sm:p-6">{props.children}</div>
       </div>
     </dialog>
   );

@@ -14,7 +14,6 @@ export function PosCheckoutModal(props) {
   const comboboxId = useId();
   const listboxId = comboboxId + "-listbox";
 
-  const [showAllItems, setShowAllItems] = useState(false);
   const [customerQuery, setCustomerQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -45,7 +44,6 @@ export function PosCheckoutModal(props) {
   useEffect(
     function resetOnOpenChange() {
       if (!props.open) {
-        setShowAllItems(false);
         setDropdownOpen(false);
         setCustomerQuery("");
         setHighlightedIndex(0);
@@ -146,12 +144,6 @@ export function PosCheckoutModal(props) {
   let itemCountLabel = formatQuantity(totalUnitsCount) + " items";
   if (totalUnitsCount === 1) {
     itemCountLabel = "1 item";
-  }
-
-  const hasMoreItems = itemList.length > 3;
-  let visibleItems = itemList;
-  if (hasMoreItems && !showAllItems) {
-    visibleItems = itemList.slice(0, 3);
   }
 
   const discountNumber = Number(props.discount);
@@ -363,31 +355,8 @@ export function PosCheckoutModal(props) {
     }
   }
 
-  let productListClass = "divide-y divide-[#E9E9E9]";
-  if (showAllItems) {
-    productListClass = productListClass + " max-h-44 sm:max-h-none sm:flex-1 sm:min-h-0 overflow-y-auto pr-1";
-  } else {
-    productListClass = productListClass + " max-h-44 sm:max-h-none overflow-y-auto sm:overflow-visible";
-  }
-
-  let viewMoreButton = null;
-  if (hasMoreItems) {
-    let toggleLabel = "View more items (" + String(itemList.length - 3) + " more)";
-    if (showAllItems) {
-      toggleLabel = "Show fewer items";
-    }
-    viewMoreButton = (
-      <button
-        type="button"
-        onClick={function toggleItems() {
-          setShowAllItems(!showAllItems);
-        }}
-        className="mt-1.5 text-xs font-medium text-[#171717] underline underline-offset-2 hover:text-[#777777] cursor-pointer"
-      >
-        {toggleLabel}
-      </button>
-    );
-  }
+  const productListClass =
+    "divide-y divide-[#E9E9E9] max-h-48 sm:max-h-none sm:flex-1 sm:min-h-0 overflow-y-auto pr-1";
 
   let discountRows = null;
   if (hasDiscount) {
@@ -424,7 +393,7 @@ export function PosCheckoutModal(props) {
           <p className="py-4 text-xs text-[#777777]">No items in current sale.</p>
         ) : (
           <div className={productListClass}>
-            {visibleItems.map(function renderItem(item, index) {
+            {itemList.map(function renderItem(item, index) {
               let itemKey = String(index);
               if (item.key) {
                 itemKey = item.key;
@@ -456,7 +425,6 @@ export function PosCheckoutModal(props) {
             })}
           </div>
         )}
-        {viewMoreButton}
       </div>
 
       <div className="mt-auto space-y-2.5">
@@ -901,10 +869,10 @@ export function PosCheckoutModal(props) {
       onClose={props.onClose}
       title="Complete Checkout"
       maxWidth="max-w-[820px]"
-      panelClassName="rounded-[18px] sm:h-[476px]"
+      panelClassName="rounded-[18px] sm:h-[580px]"
       dismissDisabled={Boolean(props.submitting || savingCustomer)}
     >
-      <form id={formId} onSubmit={handleFormSubmit} className="flex h-full flex-col gap-4">
+      <form id={formId} onSubmit={handleFormSubmit} className="flex flex-1 min-h-0 flex-col gap-4">
         <ErrorBanner message={props.errorMessage} />
 
         <div className="grid flex-1 min-h-0 grid-cols-1 sm:grid-cols-[minmax(0,9fr)_minmax(0,11fr)] gap-5 items-stretch">

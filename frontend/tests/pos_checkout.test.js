@@ -88,7 +88,7 @@ describe("PosCheckoutModal two-column redesign", function () {
     expect(html).toContain("Payment Details");
     expect(html).toContain("max-w-[820px]");
     expect(html).toContain("rounded-[18px]");
-    expect(html).toContain("sm:h-[476px]");
+    expect(html).toContain("sm:h-[580px]");
     expect(html).toContain("2 × Rice 1kg");
     expect(html).toContain("Subtotal");
     expect(html).toContain("Discount");
@@ -102,7 +102,7 @@ describe("PosCheckoutModal two-column redesign", function () {
     expect(html).not.toContain("Total Charged to Utang");
   });
 
-  it("shows View more items when order has more than 3 lines and expands on click", async function () {
+  it("displays all order items by default with scrollable list and no View more items toggle", async function () {
     await act(async function () {
       root.render(
         React.createElement(PosCheckoutModal, {
@@ -126,16 +126,12 @@ describe("PosCheckoutModal two-column redesign", function () {
     });
 
     expect(container.textContent).toContain("Rice 1kg");
-    expect(container.textContent).not.toContain("Sugar");
+    expect(container.textContent).toContain("Sugar");
     const viewMoreBtn = Array.from(container.querySelectorAll("button")).find(function (btn) {
       return btn.textContent.includes("View more items");
     });
-    expect(viewMoreBtn).toBeDefined();
-
-    await act(async function () {
-      viewMoreBtn.click();
-    });
-    expect(container.textContent).toContain("Sugar");
+    expect(viewMoreBtn).toBeUndefined();
+    expect(container.querySelector('[aria-label="Order Summary"]').innerHTML).toContain("overflow-y-auto");
   });
 
   it("updates Cash Received via Exact preset, shows Amount Short / Change, and moves focus on Enter without premature submit", async function () {
