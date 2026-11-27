@@ -129,16 +129,17 @@ describe("Standardized UI primitives & accessibility", function () {
     expect(html).toContain("rounded-xl");
   });
 
-  it("renders PaymentMethodToggle with Cash, Utang, and Split options", function () {
+  it("renders PaymentMethodToggle with Cash and Utang options", function () {
     const html = renderToString(
       React.createElement(PaymentMethodToggle, {
-        paymentMethod: "SPLIT",
+        paymentMethod: "CREDIT",
         onChange: function () {}
       })
     );
     expect(html).toContain("Cash");
     expect(html).toContain("Utang");
-    expect(html).toContain("Split");
+    expect(html).not.toContain("Split");
+    expect(html).toContain("grid-cols-2");
     expect(html).toContain('aria-pressed="true"');
   });
 

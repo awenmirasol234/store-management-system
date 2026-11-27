@@ -1,9 +1,8 @@
-import { ArrowLeftRight, Banknote, CreditCard } from "lucide-react";
+import { Banknote, CreditCard } from "lucide-react";
 
 const PAYMENT_METHODS = [
   { key: "CASH", label: "Cash", icon: Banknote },
-  { key: "CREDIT", label: "Utang", icon: CreditCard },
-  { key: "SPLIT", label: "Split", icon: ArrowLeftRight }
+  { key: "CREDIT", label: "Utang", icon: CreditCard }
 ];
 
 export function PaymentMethodToggle(props) {
@@ -11,7 +10,7 @@ export function PaymentMethodToggle(props) {
   if (props.allowCredit === false) {
     visibleMethods = [PAYMENT_METHODS[0]];
   }
-  let columnsClass = "grid-cols-3";
+  let columnsClass = "grid-cols-2";
   if (visibleMethods.length === 1) {
     columnsClass = "grid-cols-1";
   }

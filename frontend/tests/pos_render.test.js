@@ -22,11 +22,11 @@ describe("PosPage SSR test", function () {
     expect(typeof ShoppingBag).toBe("object");
   });
 
-  it("renders Cash, Utang, and Split payment options", function () {
+  it("renders Cash and Utang payment options without Split", function () {
     const html = renderToString(React.createElement(PosPage));
     expect(html).toContain("Cash");
     expect(html).toContain("Utang");
-    expect(html).toContain("Split");
+    expect(html).not.toContain("Split");
   });
 
   it("renders Clear Cart action in cart header and inline Discount control in cart footer", function () {
