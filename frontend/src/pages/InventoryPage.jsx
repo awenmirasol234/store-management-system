@@ -919,7 +919,7 @@ export function InventoryPage(props) {
   let productTableBody = <TableEmptyRow colSpan={productColumnCount} message={emptyProductsMessage} />;
   if (filteredProducts.length > 0) {
     productTableBody = filteredProducts.map(function renderRow(product) {
-      let barcodeText = "—";
+      let barcodeText = "No barcode";
       if (product.barcode) {
         barcodeText = product.barcode;
       }
@@ -987,7 +987,7 @@ export function InventoryPage(props) {
   let mobileCardsContent = <EmptyState message={emptyProductsMessage} />;
   if (filteredProducts.length > 0) {
     mobileCardsContent = filteredProducts.map(function renderProductCard(product) {
-      let barcodeText = "—";
+      let barcodeText = "No barcode";
       if (product.barcode) {
         barcodeText = product.barcode;
       }
