@@ -1,6 +1,6 @@
 services:
-  nginx:
-    container_name: store-management-system-nginx
+  frontend:
+    container_name: store-management-system-frontend
     image: ghcr.io/awenmirasol234/store-management-system-frontend:${IMAGE_TAG:-latest}
     build: ./frontend
     restart: unless-stopped
