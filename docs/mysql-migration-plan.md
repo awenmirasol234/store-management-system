@@ -2,6 +2,8 @@
 
 Instructions for replacing SQLite with a fresh MySQL database in Docker Compose.
 
+> **Optional:** Use this plan only when migrating the backend from SQLite to MySQL. It is not required for the current SQLite setup.
+
 ## Objective
 
 Run the backend against MySQL without changing the frontend API or business rules.
