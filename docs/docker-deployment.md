@@ -79,6 +79,25 @@ CI publishes container images to GitHub Container Registry (GHCR):
 - `ghcr.io/awenmirasol234/store-management-system-backend`
 - `ghcr.io/awenmirasol234/store-management-system-frontend`
 
+### Automatic Deployment
+
+When push-triggered CI is enabled and succeeds for `main`, the CD workflow
+deploys the images on a self-hosted GitHub Actions runner. CI is currently
+manual-only, so this deployment is paused as well.
+
+1. Install Docker Engine and the Docker Compose plugin on the runner.
+2. Keep the deployment checkout containing `compose.yaml` at
+   `/opt/projects/store-management-system` on the runner.
+3. Ensure the runner can access the Docker daemon.
+
+The deployment path is defined directly in the workflow. Do not add it to `.env`
+files. The workflow runs:
+
+```bash
+docker compose pull
+docker compose up -d --remove-orphans
+```
+
 ### Deploying a Specific Release / Tag
 
 1. Authenticate to GHCR:
