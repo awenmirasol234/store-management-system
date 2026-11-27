@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 
 function renderTrendPill(trend, trendLabel) {
@@ -37,11 +38,50 @@ function renderTrendPill(trend, trendLabel) {
 }
 
 export function StatCard(props) {
+  const [animatedValue, setAnimatedValue] = useState(0);
   const trendElement = renderTrendPill(props.trend, props.trendLabel);
+
+  useEffect(
+    function animateCountUp() {
+      if (!Number.isFinite(props.countUpValue)) {
+        return undefined;
+      }
+
+      const target = props.countUpValue;
+      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        setAnimatedValue(target);
+        return undefined;
+      }
+
+      const start = performance.now();
+      let animationFrame = 0;
+
+      function updateCount(timestamp) {
+        const progress = Math.min((timestamp - start) / 900, 1);
+        const easedProgress = 1 - Math.pow(1 - progress, 3);
+        setAnimatedValue(target * easedProgress);
+
+        if (progress < 1) {
+          animationFrame = requestAnimationFrame(updateCount);
+        }
+      }
+
+      animationFrame = requestAnimationFrame(updateCount);
+      return function cancelCountUp() {
+        cancelAnimationFrame(animationFrame);
+      };
+    },
+    [props.countUpValue]
+  );
 
   let footerElement = null;
   if (props.meta) {
     footerElement = <div className="mt-1.5 font-mono text-xs text-[#777777]">{props.meta}</div>;
+  }
+
+  let displayedValue = props.value;
+  if (Number.isFinite(props.countUpValue) && props.formatCountUp) {
+    displayedValue = props.formatCountUp(animatedValue);
   }
 
   return (
@@ -53,7 +93,7 @@ export function StatCard(props) {
         {trendElement}
       </div>
       <div className="mt-2 font-mono text-2xl font-bold text-[#171717]">
-        {props.value}
+        {displayedValue}
       </div>
       {footerElement}
     </div>

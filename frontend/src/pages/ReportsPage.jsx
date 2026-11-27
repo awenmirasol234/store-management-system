@@ -217,10 +217,30 @@ export function ReportsPage() {
   let lowStockCount = "0";
   let outOfStockCount = "0";
   let activeProductCount = "0";
+  let grossSalesValue = 0;
+  let netSalesValue = 0;
+  let netProfitValue = 0;
+  let cogsValue = 0;
+  let totalDiscountsValue = 0;
+  let totalRefundsValue = 0;
+  let inventoryValueAmount = 0;
+  let lowStockCountValue = 0;
+  let outOfStockCountValue = 0;
+  let activeProductCountValue = 0;
 
   if (summary) {
+    grossSalesValue = summary.gross_sales;
+    netSalesValue = summary.net_sales || summary.gross_sales - summary.total_refunds;
+    netProfitValue = summary.net_profit;
+    cogsValue = summary.cogs;
+    totalDiscountsValue = summary.total_discount;
+    totalRefundsValue = summary.total_refunds;
+    inventoryValueAmount = summary.inventory_valuation;
+    lowStockCountValue = summary.low_stock_count;
+    outOfStockCountValue = summary.out_of_stock_count || 0;
+    activeProductCountValue = summary.active_product_count || 0;
     grossSales = formatPeso(summary.gross_sales);
-    netSales = formatPeso(summary.net_sales || summary.gross_sales - summary.total_refunds);
+    netSales = formatPeso(netSalesValue);
     netProfit = formatPeso(summary.net_profit);
     cogs = formatPeso(summary.cogs);
     totalDiscounts = formatPeso(summary.total_discount);
@@ -294,10 +314,10 @@ export function ReportsPage() {
     activeTabContent = (
       <div className="flex flex-col gap-4 sm:gap-5">
         <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Gross Sales" value={grossSales} meta={totalOrders + " orders"} icon={Banknote} />
-          <StatCard label="Discounts" value={totalDiscounts} meta="Total markdown" icon={ArrowDownRight} />
-          <StatCard label="Refunds / Returns" value={totalRefunds} meta="Processed refunds" icon={ArrowUpRight} />
-          <StatCard label="Net Sales" value={netSales} meta="Gross - Discounts & Refunds" icon={TrendingUp} />
+          <StatCard label="Gross Sales" value={grossSales} countUpValue={grossSalesValue} formatCountUp={formatPeso} meta={totalOrders + " orders"} icon={Banknote} />
+          <StatCard label="Discounts" value={totalDiscounts} countUpValue={totalDiscountsValue} formatCountUp={formatPeso} meta="Total markdown" icon={ArrowDownRight} />
+          <StatCard label="Refunds / Returns" value={totalRefunds} countUpValue={totalRefundsValue} formatCountUp={formatPeso} meta="Processed refunds" icon={ArrowUpRight} />
+          <StatCard label="Net Sales" value={netSales} countUpValue={netSalesValue} formatCountUp={formatPeso} meta="Gross - Discounts & Refunds" icon={TrendingUp} />
         </div>
 
         <section className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
@@ -433,9 +453,9 @@ export function ReportsPage() {
     activeTabContent = (
       <div className="flex flex-col gap-4 sm:gap-5">
         <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-3">
-          <StatCard label="Gross Sales" value={grossSales} meta="Total sales revenue" icon={Banknote} />
-          <StatCard label="Cost of Goods Sold (COGS)" value={cogs} meta="Cost of sold inventory" icon={Package} />
-          <StatCard label="Net Profit" value={netProfit} meta="Sales - COGS - Refunds" icon={TrendingUp} />
+          <StatCard label="Gross Sales" value={grossSales} countUpValue={grossSalesValue} formatCountUp={formatPeso} meta="Total sales revenue" icon={Banknote} />
+          <StatCard label="Cost of Goods Sold (COGS)" value={cogs} countUpValue={cogsValue} formatCountUp={formatPeso} meta="Cost of sold inventory" icon={Package} />
+          <StatCard label="Net Profit" value={netProfit} countUpValue={netProfitValue} formatCountUp={formatPeso} meta="Sales - COGS - Refunds" icon={TrendingUp} />
         </div>
 
         <section className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
@@ -451,10 +471,10 @@ export function ReportsPage() {
     activeTabContent = (
       <div className="flex flex-col gap-4 sm:gap-5">
         <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Inventory Valuation" value={inventoryValue} meta="Current stock × cost price" icon={Package} />
-          <StatCard label="Active Products" value={activeProductCount} meta="Catalog products" icon={BarChart2} />
-          <StatCard label="Low Stock Items" value={lowStockCount} meta="Below reorder level" icon={ArrowDownRight} />
-          <StatCard label="Out of Stock" value={outOfStockCount} meta="0 stock remaining" icon={ArrowUpRight} />
+          <StatCard label="Inventory Valuation" value={inventoryValue} countUpValue={inventoryValueAmount} formatCountUp={formatPeso} meta="Current stock × cost price" icon={Package} />
+          <StatCard label="Active Products" value={activeProductCount} countUpValue={activeProductCountValue} formatCountUp={formatQuantity} meta="Catalog products" icon={BarChart2} />
+          <StatCard label="Low Stock Items" value={lowStockCount} countUpValue={lowStockCountValue} formatCountUp={formatQuantity} meta="Below reorder level" icon={ArrowDownRight} />
+          <StatCard label="Out of Stock" value={outOfStockCount} countUpValue={outOfStockCountValue} formatCountUp={formatQuantity} meta="0 stock remaining" icon={ArrowUpRight} />
         </div>
       </div>
     );

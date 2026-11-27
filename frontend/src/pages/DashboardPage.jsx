@@ -101,8 +101,16 @@ export function DashboardPage(props) {
   let transactionCount = "0";
   let itemsSoldCount = "0";
   let grossProfit = "₱0.00";
+  let todaySalesValue = 0;
+  let transactionCountValue = 0;
+  let itemsSoldCountValue = 0;
+  let grossProfitValue = 0;
 
   if (summary) {
+    todaySalesValue = summary.gross_sales;
+    transactionCountValue = summary.sale_count;
+    itemsSoldCountValue = summary.total_items_sold || 0;
+    grossProfitValue = summary.net_profit;
     todaySales = formatPeso(summary.gross_sales);
     transactionCount = String(summary.sale_count);
     itemsSoldCount = formatQuantity(summary.total_items_sold || 0);
@@ -282,6 +290,8 @@ export function DashboardPage(props) {
           <StatCard
             label="Today's Sales"
             value={todaySales}
+            countUpValue={todaySalesValue}
+            formatCountUp={formatPeso}
             meta={transactionCount + " transactions today"}
             trend={salesTrend}
             trendLabel="Compared to yesterday"
@@ -289,6 +299,8 @@ export function DashboardPage(props) {
           <StatCard
             label="Transactions"
             value={transactionCount}
+            countUpValue={transactionCountValue}
+            formatCountUp={formatQuantity}
             meta="Completed checkouts"
             trend={transactionsTrend}
             trendLabel="Compared to yesterday"
@@ -296,6 +308,8 @@ export function DashboardPage(props) {
           <StatCard
             label="Items Sold"
             value={itemsSoldCount}
+            countUpValue={itemsSoldCountValue}
+            formatCountUp={formatQuantity}
             meta="Units moved today"
             trend={itemsTrend}
             trendLabel="Compared to yesterday"
@@ -303,6 +317,8 @@ export function DashboardPage(props) {
           <StatCard
             label="Today's Profit"
             value={grossProfit}
+            countUpValue={grossProfitValue}
+            formatCountUp={formatPeso}
             meta="Gross profit today"
             trend={profitTrend}
             trendLabel="Compared to yesterday"
