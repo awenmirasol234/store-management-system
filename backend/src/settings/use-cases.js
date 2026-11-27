@@ -67,3 +67,18 @@ export function createUpdateSettingsUseCase(dependencies) {
   updateSettings.execute = updateSettings;
   return updateSettings;
 }
+
+export function createCreateDatabaseBackupUseCase(dependencies) {
+  const backupService = dependencies.databaseBackupService;
+  const clock = dependencies.clock;
+
+  return async function createDatabaseBackup() {
+    const backup = await backupService.createBackup();
+    const date = clock.nowIso().slice(0, 10);
+    return {
+      path: backup.path,
+      filename: "storeflow-backup-" + date + ".db",
+      cleanup: backup.cleanup
+    };
+  };
+}

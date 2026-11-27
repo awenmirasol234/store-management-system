@@ -279,6 +279,18 @@ describe("Store Settings Module", function () {
       expect(response.status).toBe(403);
     });
 
+    it("reports backup unavailable for an in-memory database", async function () {
+      const response = await fetch(baseUrl + "/api/settings/backup", {
+        headers: { Authorization: "Bearer " + ownerToken }
+      });
+      expect(response.status).toBe(400);
+      const body = await response.json();
+      expect(body.error.code).toBe("BACKUP_UNAVAILABLE");
+      expect(body.error.message).toBe(
+        "Database backup is only available for disk-based databases"
+      );
+    });
+
     it("allows owner to update settings", async function () {
       const response = await fetch(baseUrl + "/api/settings", {
         method: "PATCH",

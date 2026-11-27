@@ -20,7 +20,7 @@ import {
   createSqliteSessionRepository,
   createSqliteUserRepository
 } from "../src/auth/sqlite-repo.js";
-import { createInMemoryRateLimiter } from "../src/auth/middleware.js";
+import { createInMemoryRateLimiter } from "../src/auth/rate-limiter.js";
 import {
   createChangePinUseCase,
   createCreateUserUseCase,

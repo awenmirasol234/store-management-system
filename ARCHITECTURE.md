@@ -29,7 +29,7 @@ Dependencies must strictly point inward:
    - Coordinates business workflows, validates use-case input, orchestrates transactions via `UnitOfWork`.
    - Injects repository ports, system clocks, ID generators, and security adapters; never directly references databases or HTTP code.
 3. **Infrastructure Layer**:
-   - Resides in `<module>/sqlite-repo.js`, `db/sqlite.js`, and infrastructure adapters such as `auth/crypto.js`.
+   - Resides in `<module>/sqlite-repo.js`, `db/sqlite.js`, and adapters such as `auth/crypto.js` and `settings/sqlite-backup.js`.
    - Implements domain repository ports using plain SQL with `node:sqlite`.
    - Manages DDL, pragmas (`PRAGMA foreign_keys = ON`, `PRAGMA journal_mode = WAL`), and parameter binding.
    - Exposes all repository and unit-of-work methods as asynchronous (`async`).

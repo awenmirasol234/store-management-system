@@ -1,4 +1,15 @@
-import { ValidationError } from "../shared/errors.js";
+import { DomainError, ValidationError } from "../shared/errors.js";
+
+export class DatabaseBackupUnavailableError extends DomainError {
+  constructor() {
+    super(
+      "Database backup is only available for disk-based databases",
+      "BACKUP_UNAVAILABLE",
+      400
+    );
+    this.name = "DatabaseBackupUnavailableError";
+  }
+}
 
 export const DEFAULT_STORE_SETTINGS = {
   id: "default",

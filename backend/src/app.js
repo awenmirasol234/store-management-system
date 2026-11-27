@@ -86,9 +86,9 @@ import {
   createUpdateUserUseCase
 } from "./auth/use-cases.js";
 import {
-  createAuthMiddleware,
-  createInMemoryRateLimiter
+  createAuthMiddleware
 } from "./auth/middleware.js";
+import { createInMemoryRateLimiter } from "./auth/rate-limiter.js";
 import {
   createAuthRouter,
   createUsersRouter
@@ -108,8 +108,10 @@ import {
 } from "./shifts/use-cases.js";
 import { createShiftsRouter } from "./shifts/routes.js";
 import { createSqliteSettingsRepository } from "./settings/sqlite-repo.js";
+import { createSqliteBackupService } from "./settings/sqlite-backup.js";
 import { createAuthCrypto } from "./auth/crypto.js";
 import {
+  createCreateDatabaseBackupUseCase,
   createGetSettingsUseCase,
   createUpdateSettingsUseCase
 } from "./settings/use-cases.js";
@@ -185,6 +187,11 @@ export function createApp(options) {
   const shiftRepository = createSqliteShiftRepository(database);
   const cashMovementRepository = createSqliteCashMovementRepository(database);
   const settingsRepository = createSqliteSettingsRepository(database, clock);
+  const databaseBackupService = createSqliteBackupService({
+    database: database,
+    databasePath: config.databasePath,
+    idGenerator: idGenerator
+  });
   const rateLimiter = createInMemoryRateLimiter({
     nowMilliseconds: clock.nowMilliseconds
   });
@@ -209,6 +216,7 @@ export function createApp(options) {
     shiftRepository: shiftRepository,
     cashMovementRepository: cashMovementRepository,
     settingsRepository: settingsRepository,
+    databaseBackupService: databaseBackupService,
     rateLimiter: rateLimiter,
     features: features
   };
@@ -286,7 +294,8 @@ export function createApp(options) {
 
   const settingsUseCases = {
     getSettings: createGetSettingsUseCase(sharedDeps),
-    updateSettings: createUpdateSettingsUseCase(sharedDeps)
+    updateSettings: createUpdateSettingsUseCase(sharedDeps),
+    createDatabaseBackup: createCreateDatabaseBackupUseCase(sharedDeps)
   };
 
   const authMiddleware = createAuthMiddleware(authUseCases);
@@ -393,10 +402,6 @@ export function createApp(options) {
   app.use(
     "/api",
     createSettingsRouter({
-      databasePath: config.databasePath,
-      database: database,
-      clock: clock,
-      idGenerator: idGenerator,
       useCases: settingsUseCases
     })
   );
