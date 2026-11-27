@@ -68,7 +68,7 @@ export function Sidebar(props) {
       <div className="flex flex-col items-center gap-3 py-6">
         <div
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] text-[#171717] shrink-0"
-          title="Duane Store POS"
+          title="Duane Store"
         >
           <Store className="h-5 w-5" />
         </div>
@@ -85,20 +85,19 @@ export function Sidebar(props) {
     );
   } else {
     headerElement = (
-      <div className="flex items-center justify-between px-5 py-5">
+      <div className="relative flex items-center px-5 py-5">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#B9F36B] text-[#171717] shrink-0">
             <Store className="h-5 w-5" />
           </div>
           <div>
             <div className="text-sm font-bold text-white leading-tight">Duane Store</div>
-            <div className="text-xs text-[#A3A3A3]">POS</div>
           </div>
         </div>
         <button
           type="button"
           onClick={handleToggle}
-          className="rounded-lg p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white cursor-pointer transition-colors"
+          className="absolute right-5 rounded-lg p-1.5 text-[#A3A3A3] hover:bg-white/10 hover:text-white cursor-pointer transition-colors"
           title="Collapse sidebar"
           aria-label="Collapse sidebar"
         >
