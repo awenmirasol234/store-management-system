@@ -16,6 +16,8 @@ import { Input } from "../components/Input.jsx";
 import { PageHeader } from "../components/PageHeader.jsx";
 import { PageLayout } from "../components/PageLayout.jsx";
 import { ErrorBanner } from "../components/ErrorBanner.jsx";
+import { Skeleton } from "../components/Skeleton.jsx";
+import { useDelayedSkeleton } from "../use-delayed-skeleton.js";
 
 function normalizeSettings(data) {
   let settings = data;
@@ -56,6 +58,8 @@ export function SettingsPage(props) {
   const currentUser = props.currentUser;
 
   const [loading, setLoading] = useState(true);
+  const [settingsLoadFailed, setSettingsLoadFailed] = useState(false);
+  const showSettingsSkeleton = useDelayedSkeleton(loading) && loading;
   const [saving, setSaving] = useState(false);
   const [downloadingBackup, setDownloadingBackup] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -90,12 +94,14 @@ export function SettingsPage(props) {
         if (data) {
           setFormData(normalizeSettings(data));
         }
+        setSettingsLoadFailed(false);
         setLoading(false);
       })
       .catch(function (error) {
         if (!isMounted) {
           return;
         }
+        setSettingsLoadFailed(true);
         setErrorMessage(error.message || "Failed to load store settings");
         setLoading(false);
       });
@@ -271,7 +277,7 @@ export function SettingsPage(props) {
           type="submit"
           form="settings-form"
           variant="primary"
-          disabled={loading || saving}
+          disabled={loading || saving || settingsLoadFailed}
         >
           <Save className="h-4 w-4" />
           <span>{saveButtonText}</span>
@@ -281,7 +287,38 @@ export function SettingsPage(props) {
       {errorBanner}
       {successBanner}
 
-      <form id="settings-form" onSubmit={handleSave} className="space-y-4 sm:space-y-5">
+      {showSettingsSkeleton && (
+        <div role="status" aria-label="Loading settings" className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-12">
+          <div className="space-y-4 sm:space-y-5 lg:col-span-7">
+            <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+              <Skeleton className="mb-5 h-5 w-32" />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Skeleton className="h-10 sm:col-span-2" />
+                <Skeleton className="h-10" />
+                <Skeleton className="h-10" />
+                <Skeleton className="h-10" />
+                <Skeleton className="h-10" />
+              </div>
+            </div>
+            <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+              <Skeleton className="mb-5 h-5 w-48" />
+              <Skeleton className="h-10 w-full sm:w-1/2" />
+            </div>
+            <Skeleton className="h-24 rounded-2xl border border-[#E9E9E9] bg-white" />
+            <Skeleton className="h-24 rounded-2xl border border-[#E9E9E9] bg-white" />
+          </div>
+          <div className="lg:col-span-5">
+            <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+              <Skeleton className="mb-5 h-5 w-52" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="mt-4 h-10 w-full" />
+              <Skeleton className="mx-auto mt-5 h-64 w-64 max-w-full rounded-xl" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!loading && !settingsLoadFailed && <form id="settings-form" onSubmit={handleSave} className="space-y-4 sm:space-y-5">
         <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-12">
           {/* Left Column: Profile, Preferences, Disaster Recovery */}
           <div className="space-y-4 sm:space-y-5 lg:col-span-7">
@@ -562,7 +599,7 @@ export function SettingsPage(props) {
             </div>
           </div>
         </div>
-      </form>
+      </form>}
     </PageLayout>
   );
 }

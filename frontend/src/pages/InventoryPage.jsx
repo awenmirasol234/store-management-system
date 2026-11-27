@@ -50,6 +50,8 @@ import { Select } from "../components/Select.jsx";
 import { TableEmptyRow } from "../components/TableEmptyRow.jsx";
 import { InventoryStockInModal } from "../components/InventoryStockInModal.jsx";
 import { InventoryAdjustModal } from "../components/InventoryAdjustModal.jsx";
+import { Skeleton } from "../components/Skeleton.jsx";
+import { useDelayedSkeleton } from "../use-delayed-skeleton.js";
 
 function createEmptyProductForm() {
   return {
@@ -160,6 +162,11 @@ export function InventoryPage(props) {
   const isMounted = useRef(false);
   const loadVersion = useRef(0);
   const [products, setProducts] = useState([]);
+  const [hasLoadedInventory, setHasLoadedInventory] = useState(false);
+  const [inventoryLoadFailed, setInventoryLoadFailed] = useState(false);
+  const inventoryIsLoading = !hasLoadedInventory && !inventoryLoadFailed;
+  const showInventorySkeleton =
+    useDelayedSkeleton(inventoryIsLoading) && inventoryIsLoading;
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [units, setUnits] = useState(COMMON_BASE_UNITS);
@@ -292,6 +299,7 @@ export function InventoryPage(props) {
     loadVersion.current = loadVersion.current + 1;
     const currentLoad = loadVersion.current;
     setErrorBanner("");
+    setInventoryLoadFailed(false);
     try {
       let categoriesPromise = Promise.resolve([]);
       let suppliersPromise = Promise.resolve([]);
@@ -311,6 +319,7 @@ export function InventoryPage(props) {
         return;
       }
       setProducts(results[0]);
+      setHasLoadedInventory(true);
       setCategories(results[1]);
       setSuppliers(results[2]);
       if (results[3] && Array.isArray(results[3]) && results[3].length > 0) {
@@ -322,6 +331,9 @@ export function InventoryPage(props) {
       }
     } catch (error) {
       if (isMounted.current && currentLoad === loadVersion.current) {
+        if (!hasLoadedInventory) {
+          setInventoryLoadFailed(true);
+        }
         setErrorBanner(error.message);
       }
     }
@@ -917,7 +929,47 @@ export function InventoryPage(props) {
     productColumnCount = 6;
   }
   let productTableBody = <TableEmptyRow colSpan={productColumnCount} message={emptyProductsMessage} />;
-  if (filteredProducts.length > 0) {
+  let mobileCardsContent = <EmptyState message={emptyProductsMessage} />;
+  if (!hasLoadedInventory) {
+    if (inventoryLoadFailed) {
+      productTableBody = <TableEmptyRow colSpan={productColumnCount} message="Could not load products." />;
+      mobileCardsContent = <EmptyState message="Could not load products." />;
+    } else if (showInventorySkeleton) {
+      const tableRows = [];
+      const mobileCards = [];
+      for (let rowIndex = 0; rowIndex < 5; rowIndex++) {
+        tableRows.push(
+          <tr key={rowIndex}>
+            <td className="px-5 py-3.5"><Skeleton className="h-9 w-48 max-w-full" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="h-4 w-16" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="ml-auto h-4 w-16" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="ml-auto h-4 w-16" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="ml-auto h-6 w-20 rounded-full" /></td>
+            {canWrite && <td className="px-5 py-3.5"><Skeleton className="ml-auto h-8 w-24" /></td>}
+          </tr>
+        );
+        mobileCards.push(
+          <div key={rowIndex} className="rounded-2xl border border-[#E9E9E9] bg-white p-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-14 w-14 shrink-0 rounded-xl" />
+              <div className="min-w-0 flex-1">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="mt-2 h-3 w-1/2" />
+                <Skeleton className="mt-2 h-5 w-20 rounded-full" />
+              </div>
+              <Skeleton className="h-5 w-16" />
+            </div>
+            {canWrite && <Skeleton className="h-9 w-full rounded-lg" />}
+          </div>
+        );
+      }
+      productTableBody = tableRows;
+      mobileCardsContent = mobileCards;
+    } else {
+      productTableBody = null;
+      mobileCardsContent = null;
+    }
+  } else if (filteredProducts.length > 0) {
     productTableBody = filteredProducts.map(function renderRow(product) {
       let barcodeText = "No barcode";
       if (product.barcode) {
@@ -982,10 +1034,6 @@ export function InventoryPage(props) {
         </tr>
       );
     });
-  }
-
-  let mobileCardsContent = <EmptyState message={emptyProductsMessage} />;
-  if (filteredProducts.length > 0) {
     mobileCardsContent = filteredProducts.map(function renderProductCard(product) {
       let barcodeText = "No barcode";
       if (product.barcode) {
@@ -1914,13 +1962,15 @@ export function InventoryPage(props) {
 
       {errorElement}
 
+      {showInventorySkeleton && <span role="status" aria-label="Loading inventory" className="sr-only">Loading inventory</span>}
+
       {/* Mobile Product Card List (< md) */}
-      <div className="flex-1 overflow-y-auto space-y-3 md:hidden">
+      <div className="flex-1 overflow-y-auto space-y-3 md:hidden" aria-busy={!hasLoadedInventory && !inventoryLoadFailed}>
         {mobileCardsContent}
       </div>
 
       {/* Desktop Product Table (>= md) */}
-      <div className="hidden md:block flex-1 overflow-auto rounded-2xl border border-[#E9E9E9] bg-white">
+      <div className="hidden md:block flex-1 overflow-auto rounded-2xl border border-[#E9E9E9] bg-white" aria-busy={!hasLoadedInventory && !inventoryLoadFailed}>
         <DataTable
           stickyHead={true}
           headRow={

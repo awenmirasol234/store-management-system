@@ -64,7 +64,7 @@ describe("POS product catalog loading", function () {
       vi.advanceTimersByTime(150);
     });
     expect(container.querySelector('[aria-label="Loading products"]')).not.toBeNull();
-    expect(container.querySelectorAll('[aria-hidden="true"].animate-pulse').length).toBe(6);
+    expect(container.querySelector('[aria-label="Loading products"]').children.length).toBe(6);
 
     await act(async function () {
       resolveProducts([

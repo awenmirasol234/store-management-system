@@ -142,6 +142,14 @@ All application pages share a uniform spacing scale:
 - **Card Padding**: `p-4 sm:p-5`.
 - **Data Table Cells**: Headers `px-5 py-3`, body cells `px-5 py-3.5`, table section headers `px-5 py-3.5`.
 
+### 4.7 Loading Skeletons
+- Use `frontend/src/components/Skeleton.jsx` for neutral animated placeholder shapes.
+- Match placeholder sizes and grouping to the content being loaded.
+- Delay skeleton visibility by 150ms with `frontend/src/use-delayed-skeleton.js` to avoid flashing on fast requests.
+- Put `role="status"` and an accessible loading label on the loading region; keep decorative skeleton shapes hidden from assistive technology.
+- Do not replace already-loaded content with skeletons during background refreshes or action-level requests.
+- Respect reduced-motion preferences with `motion-reduce:animate-none`.
+
 ---
 
 ## 5. Coding Agent Guardrails

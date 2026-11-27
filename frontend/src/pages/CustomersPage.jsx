@@ -16,12 +16,19 @@ import { RecordPaymentModal } from "../components/RecordPaymentModal.jsx";
 import { SearchInput } from "../components/SearchInput.jsx";
 import { StatCard } from "../components/StatCard.jsx";
 import { TableEmptyRow } from "../components/TableEmptyRow.jsx";
+import { Skeleton } from "../components/Skeleton.jsx";
+import { useDelayedSkeleton } from "../use-delayed-skeleton.js";
 
 export function CustomersPage(props) {
   const [customers, setCustomers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("ALL");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [hasLoadedCustomers, setHasLoadedCustomers] = useState(false);
+  const [customerLoadFailed, setCustomerLoadFailed] = useState(false);
+  const customersAreLoading = loading && !hasLoadedCustomers && !customerLoadFailed;
+  const showCustomerSkeleton =
+    useDelayedSkeleton(customersAreLoading) && customersAreLoading;
   const [errorBanner, setErrorBanner] = useState("");
   const requestVersion = useRef(0);
 
@@ -38,6 +45,7 @@ export function CustomersPage(props) {
     requestVersion.current = requestVersion.current + 1;
     const currentRequest = requestVersion.current;
     setErrorBanner("");
+    setCustomerLoadFailed(false);
     setLoading(true);
     try {
       const list = await api.listCustomers(queryText);
@@ -45,9 +53,13 @@ export function CustomersPage(props) {
         return;
       }
       setCustomers(list || []);
+      setHasLoadedCustomers(true);
     } catch (error) {
       if (currentRequest !== requestVersion.current) {
         return;
+      }
+      if (!hasLoadedCustomers) {
+        setCustomerLoadFailed(true);
       }
       setErrorBanner(error.message);
     } finally {
@@ -180,11 +192,47 @@ export function CustomersPage(props) {
 
   let tableBodyContent = null;
   let mobileCardsContent = null;
-  if (loading && customers.length === 0) {
-    tableBodyContent = (
-      <TableEmptyRow colSpan={6} message="Loading customers..." />
-    );
-    mobileCardsContent = <EmptyState message="Loading customers..." />;
+  if (!hasLoadedCustomers) {
+    if (customerLoadFailed) {
+      tableBodyContent = <TableEmptyRow colSpan={6} message="Could not load customers." />;
+      mobileCardsContent = <EmptyState message="Could not load customers." />;
+    } else if (showCustomerSkeleton) {
+      const tableRows = [];
+      const mobileCards = [];
+      for (let rowIndex = 0; rowIndex < 5; rowIndex++) {
+        tableRows.push(
+          <tr key={rowIndex}>
+            <td className="px-5 py-3.5"><Skeleton className="h-4 w-32" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="h-4 w-40 max-w-full" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="ml-auto h-4 w-20" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="ml-auto h-4 w-20" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="h-6 w-20 rounded-full" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="ml-auto h-8 w-28" /></td>
+          </tr>
+        );
+        mobileCards.push(
+          <div key={rowIndex} className="rounded-2xl border border-[#E9E9E9] bg-white p-4 space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="mt-2 h-3 w-5/6" />
+              </div>
+              <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
+            <div className="flex justify-between border-t border-[#E9E9E9] pt-2.5">
+              <Skeleton className="h-8 w-24" />
+              <Skeleton className="h-8 w-24" />
+            </div>
+            <Skeleton className="h-8 w-full rounded-lg" />
+          </div>
+        );
+      }
+      tableBodyContent = tableRows;
+      mobileCardsContent = mobileCards;
+    } else {
+      tableBodyContent = null;
+      mobileCardsContent = null;
+    }
   } else if (filteredCustomers.length === 0) {
     tableBodyContent = (
       <TableEmptyRow
@@ -379,7 +427,28 @@ export function CustomersPage(props) {
       {errorElement}
 
       {/* Summary Stat Cards */}
-      <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {showCustomerSkeleton && (
+        <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+            <Skeleton className="h-3 w-32" />
+            <Skeleton className="mt-4 h-7 w-28" />
+            <Skeleton className="mt-3 h-3 w-40 max-w-full" />
+          </div>
+          <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="mt-4 h-7 w-20" />
+          </div>
+          <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="mt-4 h-7 w-20" />
+          </div>
+          <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+            <Skeleton className="h-3 w-32" />
+            <Skeleton className="mt-4 h-7 w-20" />
+          </div>
+        </div>
+      )}
+      {hasLoadedCustomers && <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total Outstanding Utang"
           value={formatPeso(totalUtang)}
@@ -401,7 +470,7 @@ export function CustomersPage(props) {
           value={String(overLimitCount)}
           icon={AlertCircle}
         />
-      </div>
+      </div>}
 
       {/* Search Bar & Filter Pills */}
       <div className="mb-4 sm:mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -449,12 +518,13 @@ export function CustomersPage(props) {
       </div>
 
       {/* Mobile Customer Card List (< md) */}
-      <div className="space-y-3 md:hidden">
+      {showCustomerSkeleton && <span role="status" aria-label="Loading customers" className="sr-only">Loading customers</span>}
+      <div className="space-y-3 md:hidden" aria-busy={!hasLoadedCustomers && !customerLoadFailed}>
         {mobileCardsContent}
       </div>
 
       {/* Desktop Customers Table (>= md) */}
-      <div className="hidden md:block overflow-x-auto rounded-2xl border border-[#E9E9E9] bg-white">
+      <div className="hidden md:block overflow-x-auto rounded-2xl border border-[#E9E9E9] bg-white" aria-busy={!hasLoadedCustomers && !customerLoadFailed}>
         <DataTable headRow={tableHeadRow} stickyHead={true}>
           {tableBodyContent}
         </DataTable>

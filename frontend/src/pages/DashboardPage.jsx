@@ -19,7 +19,86 @@ import { PageHeader } from "../components/PageHeader.jsx";
 import { PageLayout } from "../components/PageLayout.jsx";
 import { PieChart } from "../components/PieChart.jsx";
 import { ProductThumb } from "../components/ProductThumb.jsx";
+import { Skeleton } from "../components/Skeleton.jsx";
 import { StatCard } from "../components/StatCard.jsx";
+import { useDelayedSkeleton } from "../use-delayed-skeleton.js";
+
+function DashboardSkeleton(props) {
+  let summarySkeleton = null;
+  let chartSkeleton = null;
+  let sectionClass = "grid grid-cols-1 gap-4 sm:gap-5";
+  if (props.isOwner) {
+    const statCards = [];
+    for (let index = 0; index < 4; index++) {
+      statCards.push(
+        <div key={index} className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="mt-4 h-7 w-32" />
+          <Skeleton className="mt-3 h-3 w-40 max-w-full" />
+        </div>
+      );
+    }
+    summarySkeleton = (
+      <>
+        <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {statCards}
+        </div>
+        <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-3">
+          <div className="h-72 rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5 lg:col-span-2">
+            <Skeleton className="h-4 w-36" />
+            <Skeleton className="mt-2 h-3 w-48 max-w-full" />
+            <Skeleton className="mt-5 h-48 w-full rounded-xl" />
+          </div>
+          <div className="h-72 rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="mt-2 h-3 w-44 max-w-full" />
+            <Skeleton className="mx-auto mt-5 h-44 w-44 rounded-full" />
+          </div>
+        </div>
+      </>
+    );
+    sectionClass = sectionClass + " lg:grid-cols-2";
+  }
+
+  function createRows() {
+    const rows = [];
+    for (let index = 0; index < 5; index++) {
+      rows.push(
+        <div key={index} className="flex items-center gap-3 py-3">
+          <Skeleton className="h-10 w-10 shrink-0 rounded-xl" />
+          <div className="min-w-0 flex-1">
+            <Skeleton className="h-3 w-2/3" />
+            <Skeleton className="mt-2 h-3 w-1/3" />
+          </div>
+          <Skeleton className="h-5 w-16 shrink-0" />
+        </div>
+      );
+    }
+    return rows;
+  }
+
+  chartSkeleton = (
+    <div className={sectionClass}>
+      {props.isOwner && (
+        <section className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+          <Skeleton className="mb-2 h-4 w-40" />
+          <div className="divide-y divide-[#E9E9E9]">{createRows()}</div>
+        </section>
+      )}
+      <section className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+        <Skeleton className="mb-2 h-4 w-36" />
+        <div className="divide-y divide-[#E9E9E9]">{createRows()}</div>
+      </section>
+    </div>
+  );
+
+  return (
+    <div role="status" aria-label="Loading dashboard">
+      {summarySkeleton}
+      {chartSkeleton}
+    </div>
+  );
+}
 
 export function DashboardPage(props) {
   const [summary, setSummary] = useState(null);
@@ -29,10 +108,15 @@ export function DashboardPage(props) {
   const [topProducts, setTopProducts] = useState(props.initialTopProducts || []);
   const [dailyTrends, setDailyTrends] = useState([]);
   const [categorySales, setCategorySales] = useState([]);
+  const [hasLoadedDashboard, setHasLoadedDashboard] = useState(false);
+  const [dashboardLoadFailed, setDashboardLoadFailed] = useState(false);
   const [trendRange, setTrendRange] = useState("7D");
   const [pieMode, setPieMode] = useState("CATEGORY");
   const [errorBanner, setErrorBanner] = useState("");
   const requestVersion = useRef(0);
+  const dashboardIsLoading = !hasLoadedDashboard && !dashboardLoadFailed;
+  const showDashboardSkeleton =
+    useDelayedSkeleton(dashboardIsLoading) && dashboardIsLoading;
 
   const isOwner = Boolean(!props.currentUser || props.currentUser.role === "OWNER");
 
@@ -40,6 +124,7 @@ export function DashboardPage(props) {
     requestVersion.current = requestVersion.current + 1;
     const currentRequest = requestVersion.current;
     setErrorBanner("");
+    setDashboardLoadFailed(false);
     try {
       if (!isOwner) {
         const products = await api.listLowStockProducts();
@@ -47,6 +132,7 @@ export function DashboardPage(props) {
           return;
         }
         setLowStock(products || []);
+        setHasLoadedDashboard(true);
         return;
       }
 
@@ -77,10 +163,12 @@ export function DashboardPage(props) {
       setTopProducts(results[4]);
       setDailyTrends(results[5] || []);
       setCategorySales(results[6] || []);
+      setHasLoadedDashboard(true);
     } catch (error) {
       if (currentRequest !== requestVersion.current) {
         return;
       }
+      setDashboardLoadFailed(true);
       setErrorBanner(error.message);
     }
   }
@@ -284,8 +372,10 @@ export function DashboardPage(props) {
 
       {errorElement}
 
+      {showDashboardSkeleton && <DashboardSkeleton isOwner={isOwner} />}
+
       {/* 1. Summary KPI Cards (Unchanged) */}
-      {isOwner && (
+      {!showDashboardSkeleton && isOwner && (
         <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
             label="Today's Sales"
@@ -327,7 +417,7 @@ export function DashboardPage(props) {
       )}
 
       {/* 2. Visual Analytics Section */}
-      {isOwner && (
+      {!showDashboardSkeleton && isOwner && (
         <div className="mb-4 sm:mb-5">
           {/* Shared Section Header with Range Toggle */}
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -401,7 +491,7 @@ export function DashboardPage(props) {
       )}
 
       {/* 3. Operational Sections: Top Selling, Inventory Alerts */}
-      <div className={sectionsClass}>
+      {!showDashboardSkeleton && <div className={sectionsClass}>
         {/* Top-Selling Products */}
         {isOwner && (
           <section className="flex flex-col rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
@@ -429,7 +519,7 @@ export function DashboardPage(props) {
           </div>
           {lowStockList}
         </section>
-      </div>
+      </div>}
     </PageLayout>
   );
 }

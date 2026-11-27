@@ -28,6 +28,8 @@ import { Select } from "../components/Select.jsx";
 import { StatCard } from "../components/StatCard.jsx";
 import { TableEmptyRow } from "../components/TableEmptyRow.jsx";
 import { MultiTrendBarChart } from "../components/TrendBarChart.jsx";
+import { Skeleton } from "../components/Skeleton.jsx";
+import { useDelayedSkeleton } from "../use-delayed-skeleton.js";
 
 const TABS = [
   { id: "SALES", label: "Sales Report" },
@@ -38,6 +40,64 @@ const TABS = [
   { id: "MOVEMENTS", label: "Stock Movement" },
   { id: "TRANSACTIONS", label: "Transactions" }
 ];
+
+function ReportsSkeleton(props) {
+  let statCount = 0;
+  let showChart = false;
+  let showTable = true;
+  if (props.activeTab === "SALES") {
+    statCount = 4;
+    showChart = true;
+  } else if (props.activeTab === "PROFIT") {
+    statCount = 3;
+    showChart = true;
+    showTable = false;
+  } else if (props.activeTab === "INVENTORY") {
+    statCount = 4;
+    showTable = false;
+  }
+
+  const statCards = [];
+  for (let index = 0; index < statCount; index++) {
+    statCards.push(
+      <div key={index} className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="mt-4 h-7 w-32" />
+        <Skeleton className="mt-3 h-3 w-40 max-w-full" />
+      </div>
+    );
+  }
+
+  const rows = [];
+  for (let index = 0; index < 6; index++) {
+    rows.push(
+      <div key={index} className="flex items-center gap-4 border-b border-[#E9E9E9] px-5 py-3.5">
+        <Skeleton className="h-4 w-1/4" />
+        <Skeleton className="h-4 w-1/5" />
+        <Skeleton className="ml-auto h-4 w-20" />
+        <Skeleton className="h-4 w-16" />
+      </div>
+    );
+  }
+
+  return (
+    <div role="status" aria-label="Loading reports" className="space-y-4">
+      {statCards.length > 0 && (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {statCards}
+        </div>
+      )}
+      {showChart && (
+        <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 sm:p-5">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="mt-2 h-3 w-56 max-w-full" />
+          <Skeleton className="mt-5 h-64 w-full rounded-xl" />
+        </div>
+      )}
+      {showTable && <div className="rounded-2xl border border-[#E9E9E9] bg-white py-2">{rows}</div>}
+    </div>
+  );
+}
 
 export function ReportsPage() {
   const [activeTab, setActiveTab] = useState("SALES");
@@ -58,6 +118,10 @@ export function ReportsPage() {
   const [filterType, setFilterType] = useState("ALL");
 
   const [report, setReport] = useState(null);
+  const hasCurrentReport = Boolean(report && report.range === range);
+  const reportsAreLoading = !hasCurrentReport;
+  const showReportsSkeleton =
+    useDelayedSkeleton(reportsAreLoading) && reportsAreLoading;
 
   useEffect(
     function fetchOnDateChange() {
@@ -94,7 +158,6 @@ export function ReportsPage() {
 
   let results = [];
   let errorBanner = "";
-  const hasCurrentReport = Boolean(report && report.range === range);
   if (hasCurrentReport) {
     results = report.results || [];
     errorBanner = report.error || "";
@@ -757,7 +820,10 @@ export function ReportsPage() {
       </PageHeader>
 
       <ErrorBanner message={errorBanner} className="mb-4 sm:mb-5" />
-      {!hasCurrentReport && <p role="status" className="mb-4 text-sm text-[#777777]">Loading reports…</p>}
+      {!hasCurrentReport && !showReportsSkeleton && (
+        <p role="status" className="mb-4 text-sm text-[#777777]">Loading reports…</p>
+      )}
+      {showReportsSkeleton && <ReportsSkeleton activeTab={activeTab} />}
 
       {/* Clean Tab Bar */}
       <div

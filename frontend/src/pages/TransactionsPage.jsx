@@ -15,6 +15,8 @@ import { PageLayout } from "../components/PageLayout.jsx";
 import { ReceiptView } from "../components/ReceiptView.jsx";
 import { SearchInput } from "../components/SearchInput.jsx";
 import { TableEmptyRow } from "../components/TableEmptyRow.jsx";
+import { Skeleton } from "../components/Skeleton.jsx";
+import { useDelayedSkeleton } from "../use-delayed-skeleton.js";
 
 function getPaymentTone(method) {
   if (method === "CASH") {
@@ -62,6 +64,11 @@ export function filterSales(salesList, query) {
 
 export function TransactionsPage(props) {
   const [sales, setSales] = useState([]);
+  const [loadingSales, setLoadingSales] = useState(true);
+  const [hasLoadedSales, setHasLoadedSales] = useState(false);
+  const [salesLoadFailed, setSalesLoadFailed] = useState(false);
+  const salesAreLoading = loadingSales && !hasLoadedSales && !salesLoadFailed;
+  const showSalesSkeleton = useDelayedSkeleton(salesAreLoading) && salesAreLoading;
   const [searchQuery, setSearchQuery] = useState("");
   const [paymentFilter, setPaymentFilter] = useState("ALL");
   const [errorBanner, setErrorBanner] = useState("");
@@ -73,11 +80,19 @@ export function TransactionsPage(props) {
 
   async function loadSales() {
     setErrorBanner("");
+    setSalesLoadFailed(false);
+    setLoadingSales(true);
     try {
       const list = await api.listSales(50);
       setSales(list);
+      setHasLoadedSales(true);
     } catch (error) {
+      if (!hasLoadedSales) {
+        setSalesLoadFailed(true);
+      }
       setErrorBanner(error.message);
+    } finally {
+      setLoadingSales(false);
     }
   }
 
@@ -196,7 +211,48 @@ export function TransactionsPage(props) {
   }
 
   let tableBody = <TableEmptyRow colSpan="6" message="No completed sales yet." />;
-  if (sales.length > 0 && filteredSales.length === 0) {
+  let mobileSalesList = <EmptyState message="No transactions recorded yet." />;
+  if (!hasLoadedSales) {
+    if (salesLoadFailed) {
+      tableBody = <TableEmptyRow colSpan="6" message="Could not load transactions." />;
+      mobileSalesList = <EmptyState message="Could not load transactions." />;
+    } else if (showSalesSkeleton) {
+      const tableRows = [];
+      const mobileCards = [];
+      for (let rowIndex = 0; rowIndex < 6; rowIndex++) {
+        tableRows.push(
+          <tr key={rowIndex}>
+            <td className="px-5 py-3.5"><Skeleton className="h-4 w-20" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="h-4 w-32" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="h-6 w-16 rounded-full" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="ml-auto h-4 w-20" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="ml-auto h-4 w-20" /></td>
+            <td className="px-5 py-3.5"><Skeleton className="ml-auto h-8 w-28" /></td>
+          </tr>
+        );
+        mobileCards.push(
+          <div key={rowIndex} className="rounded-2xl border border-[#E9E9E9] bg-white p-4 space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="mt-2 h-3 w-32" />
+              </div>
+              <Skeleton className="h-6 w-16 rounded-full" />
+            </div>
+            <div className="flex items-center justify-between border-t border-[#E9E9E9] pt-2.5">
+              <Skeleton className="h-8 w-24" />
+              <Skeleton className="h-8 w-28" />
+            </div>
+          </div>
+        );
+      }
+      tableBody = tableRows;
+      mobileSalesList = mobileCards;
+    } else {
+      tableBody = null;
+      mobileSalesList = null;
+    }
+  } else if (sales.length > 0 && filteredSales.length === 0) {
     tableBody = <TableEmptyRow colSpan="6" message={emptyFilterMessage} />;
   } else if (filteredSales.length > 0) {
     tableBody = filteredSales.map(function renderSaleRow(sale) {
@@ -234,10 +290,9 @@ export function TransactionsPage(props) {
     });
   }
 
-  let mobileSalesList = <EmptyState message="No transactions recorded yet." />;
-  if (sales.length > 0 && filteredSales.length === 0) {
+  if (hasLoadedSales && sales.length > 0 && filteredSales.length === 0) {
     mobileSalesList = <EmptyState message={emptyFilterMessage} />;
-  } else if (filteredSales.length > 0) {
+  } else if (hasLoadedSales && filteredSales.length > 0) {
     mobileSalesList = filteredSales.map(function renderSaleCard(sale) {
       return (
         <div
@@ -408,13 +463,15 @@ export function TransactionsPage(props) {
 
       {errorElement}
 
+      {showSalesSkeleton && <span role="status" aria-label="Loading transaction list" className="sr-only">Loading transactions</span>}
+
       {/* Mobile Card List (< md) */}
-      <div className="flex-1 overflow-y-auto space-y-3 md:hidden">
+      <div className="flex-1 overflow-y-auto space-y-3 md:hidden" aria-busy={!hasLoadedSales && !salesLoadFailed}>
         {mobileSalesList}
       </div>
 
       {/* Desktop Table (>= md) */}
-      <div className="hidden md:block flex-1 overflow-auto rounded-2xl border border-[#E9E9E9] bg-white">
+      <div className="hidden md:block flex-1 overflow-auto rounded-2xl border border-[#E9E9E9] bg-white" aria-busy={!hasLoadedSales && !salesLoadFailed}>
         <DataTable
           stickyHead={true}
           headRow={

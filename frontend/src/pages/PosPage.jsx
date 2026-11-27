@@ -38,6 +38,8 @@ import { ReceiptView } from "../components/ReceiptView.jsx";
 import { SearchInput } from "../components/SearchInput.jsx";
 import { PosCheckoutModal } from "../components/PosCheckoutModal.jsx";
 import { FlyToCartOverlay } from "../components/FlyToCartOverlay.jsx";
+import { Skeleton } from "../components/Skeleton.jsx";
+import { useDelayedSkeleton } from "../use-delayed-skeleton.js";
 
 function buildCartKey(productId, optionId, customAmount) {
   if (customAmount !== null && customAmount !== undefined) {
@@ -61,8 +63,8 @@ export function PosPage(props) {
   const [hasLoadedProducts, setHasLoadedProducts] = useState(
     Boolean(props && props.initialProducts !== undefined)
   );
-  const [showProductSkeleton, setShowProductSkeleton] = useState(false);
   const [catalogLoadFailed, setCatalogLoadFailed] = useState(false);
+  const showProductSkeleton = useDelayedSkeleton(!hasLoadedProducts && !catalogLoadFailed);
   const [categories, setCategories] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -174,7 +176,6 @@ export function PosPage(props) {
   const [pendingSourceRect, setPendingSourceRect] = useState(null);
   const cartBadgeTimerRef = useRef(null);
   const catalogRequestVersion = useRef(0);
-  const catalogLoadingTimerRef = useRef(null);
 
   let initialAdding = {};
   if (props && props.initialAddingStates) {
@@ -194,10 +195,6 @@ export function PosPage(props) {
       if (cartBadgeTimerRef.current) {
         clearTimeout(cartBadgeTimerRef.current);
         cartBadgeTimerRef.current = null;
-      }
-      if (catalogLoadingTimerRef.current) {
-        clearTimeout(catalogLoadingTimerRef.current);
-        catalogLoadingTimerRef.current = null;
       }
     };
   }, []);
@@ -418,15 +415,6 @@ export function PosPage(props) {
     const currentRequest = catalogRequestVersion.current;
     setErrorBanner("");
     setCatalogLoadFailed(false);
-    if (!hasLoadedProducts) {
-      if (catalogLoadingTimerRef.current) {
-        clearTimeout(catalogLoadingTimerRef.current);
-      }
-      catalogLoadingTimerRef.current = setTimeout(function showDelayedProductSkeleton() {
-        setShowProductSkeleton(true);
-        catalogLoadingTimerRef.current = null;
-      }, 150);
-    }
     try {
       let customerList = [];
       if (capabilities.customer_credit) {
@@ -449,10 +437,6 @@ export function PosPage(props) {
       if (!isMounted.current || currentRequest !== catalogRequestVersion.current) {
         return;
       }
-      if (catalogLoadingTimerRef.current) {
-        clearTimeout(catalogLoadingTimerRef.current);
-        catalogLoadingTimerRef.current = null;
-      }
       const activeProducts = [];
       for (let index = 0; index < results[0].length; index++) {
         if (results[0][index].is_active) {
@@ -461,17 +445,11 @@ export function PosPage(props) {
       }
       setProducts(activeProducts);
       setHasLoadedProducts(true);
-      setShowProductSkeleton(false);
       setCategories(results[1]);
       setLowStockProducts(results[2]);
       setCustomers(customerList);
     } catch (error) {
       if (isMounted.current && currentRequest === catalogRequestVersion.current) {
-        if (catalogLoadingTimerRef.current) {
-          clearTimeout(catalogLoadingTimerRef.current);
-          catalogLoadingTimerRef.current = null;
-        }
-        setShowProductSkeleton(false);
         if (!hasLoadedProducts) {
           setCatalogLoadFailed(true);
         }
@@ -1047,20 +1025,20 @@ export function PosPage(props) {
         <div
           key={index}
           aria-hidden="true"
-          className="flex animate-pulse flex-col overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white justify-between"
+          className="flex flex-col overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white justify-between"
         >
           <div>
             <div className="relative h-30 w-full overflow-hidden border-b border-[#E9E9E9] bg-[#EEEEED]">
-              <div className="absolute left-2 top-2 h-4 w-16 rounded-md bg-[#E2E2E1]" />
+              <Skeleton className="absolute left-2 top-2 h-4 w-16 rounded-md bg-[#E2E2E1]" />
             </div>
             <div className="p-2 sm:p-2.5 pb-0 sm:pb-0">
-              <div className="h-3 w-3/4 rounded bg-[#E2E2E1]" />
-              <div className="mt-1.5 h-2.5 w-1/2 rounded bg-[#EEEEED]" />
-              <div className="mt-1.5 h-3 w-1/3 rounded bg-[#E2E2E1]" />
+              <Skeleton className="h-3 w-3/4 rounded bg-[#E2E2E1]" />
+              <Skeleton className="mt-1.5 h-2.5 w-1/2" />
+              <Skeleton className="mt-1.5 h-3 w-1/3 rounded bg-[#E2E2E1]" />
             </div>
           </div>
           <div className="p-2 sm:p-2.5 pt-2 sm:pt-2">
-            <div className="h-7 rounded-lg bg-[#EEEEED]" />
+            <Skeleton className="h-7 rounded-lg" />
           </div>
         </div>
       );

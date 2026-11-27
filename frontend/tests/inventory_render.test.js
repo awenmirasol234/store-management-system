@@ -32,7 +32,8 @@ describe("InventoryPage SSR test", function () {
       })
     );
     expect(html).toContain("Search products or barcode");
-    expect(html).toContain('colSpan="5"');
+    expect(html).toContain("Stock</th>");
+    expect(html).not.toContain("Actions</th>");
     expect(html).not.toContain("Add Product");
     expect(html).not.toContain("Add Category");
     expect(html).not.toContain("Import Products");

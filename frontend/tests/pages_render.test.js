@@ -79,11 +79,10 @@ describe("Refactored page rendering", function () {
     expect(html).not.toContain("Today&#x27;s Sales");
   });
 
-  it("renders TransactionsPage with shared page, payment filter pills, and empty-state components", function () {
+  it("renders TransactionsPage with shared page, filters, and loading table", function () {
     const html = renderToString(React.createElement(TransactionsPage));
     expect(html).toContain("Transactions");
-    expect(html).toContain("No completed sales yet.");
-    expect(html).toContain("No transactions recorded yet.");
+    expect(html).toContain('aria-busy="true"');
     expect(html).toContain("Cash");
     expect(html).toContain("Utang");
     expect(html).toContain("Split");
@@ -96,7 +95,7 @@ describe("Refactored page rendering", function () {
       })
     );
     expect(html).toContain("Transactions");
-    expect(html).toContain("No completed sales yet.");
+    expect(html).toContain('aria-busy="true"');
   });
 
   it("uses consistent outer page padding across PageLayout pages and PosPage", function () {

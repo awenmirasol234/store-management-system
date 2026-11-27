@@ -8,17 +8,13 @@ import { CustomerLedgerModal } from "../src/components/CustomerLedgerModal.jsx";
 import { getFilteredNavItems, NAV_ITEMS } from "../src/navigation.js";
 
 describe("Customers & Utang UI components", function () {
-  it("renders CustomersPage with summary stat cards and table header", function () {
+  it("renders CustomersPage with page controls and table header while data loads", function () {
     const html = renderToString(
       React.createElement(CustomersPage, {
         currentUser: { username: "owner", role: "OWNER" }
       })
     );
     expect(html).toContain("Customer Credit &amp; Utang");
-    expect(html).toContain("Total Outstanding Utang");
-    expect(html).toContain("Customers with Utang");
-    expect(html).toContain("Active Customers");
-    expect(html).toContain("Over Credit Limit");
     expect(html).toContain("New Customer");
     expect(html).toContain("Search name, phone, address...");
     expect(html).toContain("md:hidden");

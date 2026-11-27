@@ -25,7 +25,7 @@ describe("Settings Page & Navigation Integration", function () {
     expect(getPageFromPath("/settings")).toBe("settings");
   });
 
-  it("renders SettingsPage layout and all setting sections", function () {
+  it("renders SettingsPage header while settings are loading", function () {
     const html = renderToString(
       React.createElement(SettingsPage, {
         currentUser: {
@@ -38,17 +38,8 @@ describe("Settings Page & Navigation Integration", function () {
     );
 
     expect(html).toContain("Store Settings");
-    expect(html).toContain("Store Profile");
-    expect(html).toContain("Receipt &amp; Thermal Printing");
-    expect(html).toContain("POS &amp; Inventory Preferences");
-    expect(html).toContain("Staff &amp; Access");
-    expect(html).toContain("Manage Staff");
-    expect(html).toContain("Database &amp; Disaster Recovery");
-    expect(html).toContain("Download Backup");
-    expect(html).toContain("Save Settings");
-    const matches = html.match(/Save Settings/g) || [];
-    expect(matches.length).toBe(1);
-    expect(html).toContain("Thermal Receipt Preview");
+    expect(html).not.toContain("Store Profile");
+    expect(html).toContain("disabled");
   });
 
   it("renders ReceiptView with dynamic store profile and footer", function () {
