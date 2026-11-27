@@ -129,6 +129,43 @@ function applyOrderDiscount(subtotalInt, orderDiscountRaw) {
   };
 }
 
+function applyOrderDiscountToLines(lines, discountInt) {
+  let remainingSubtotalInt = 0;
+  for (let index = 0; index < lines.length; index++) {
+    remainingSubtotalInt = remainingSubtotalInt + toMoneyInt(lines[index].subtotal, "subtotal");
+  }
+
+  let remainingDiscountInt = discountInt;
+  const discountedLines = [];
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index];
+    const lineSubtotalInt = toMoneyInt(line.subtotal, "subtotal");
+    let lineDiscountInt = 0;
+
+    if (lineSubtotalInt > 0 && remainingDiscountInt > 0) {
+      lineDiscountInt = Number(
+        roundHalfUpBigIntDiv(
+          BigInt(remainingDiscountInt) * BigInt(lineSubtotalInt),
+          BigInt(remainingSubtotalInt)
+        )
+      );
+      remainingDiscountInt = remainingDiscountInt - lineDiscountInt;
+      remainingSubtotalInt = remainingSubtotalInt - lineSubtotalInt;
+    }
+
+    discountedLines.push(
+      Object.assign({}, line, {
+        discount_amount: fromMoneyInt(
+          toMoneyInt(line.discount_amount, "discount_amount") + lineDiscountInt
+        ),
+        subtotal: fromMoneyInt(lineSubtotalInt - lineDiscountInt)
+      })
+    );
+  }
+
+  return discountedLines;
+}
+
 function aggregateRequiredStockByProduct(lines) {
   const requiredByProduct = new Map();
   for (let index = 0; index < lines.length; index++) {
@@ -148,6 +185,7 @@ export function createCalculateCartTotalsUseCase(dependencies) {
     const safeInput = input || {};
     const resolved = await resolveCartLines(dependencies, safeInput.items);
     const totals = applyOrderDiscount(resolved.subtotal_int, safeInput.discount_amount);
+    resolved.lines = applyOrderDiscountToLines(resolved.lines, totals.discount_int);
     const requiredByProduct = aggregateRequiredStockByProduct(resolved.lines);
 
     const stockWarnings = [];
@@ -238,6 +276,7 @@ export function createProcessSaleUseCase(dependencies) {
       await validateActivityShift(dependencies, shiftId, safeInput.actor_user_id);
       const resolved = await resolveCartLines(dependencies, safeInput.items);
       const totals = applyOrderDiscount(resolved.subtotal_int, safeInput.discount_amount);
+      resolved.lines = applyOrderDiscountToLines(resolved.lines, totals.discount_int);
       const requiredByProduct = aggregateRequiredStockByProduct(resolved.lines);
 
       for (const [productId, requiredInt] of requiredByProduct.entries()) {

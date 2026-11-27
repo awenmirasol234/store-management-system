@@ -162,6 +162,44 @@ function createInMemorySalesDeps() {
 }
 
 describe("sales domain and use cases", function () {
+  it("allocates order discounts to sale items and refunds only the discounted amount", async function () {
+    const deps = createInMemorySalesDeps();
+    const createProduct = createCreateProductUseCase(deps);
+    const calculateCart = createCalculateCartTotalsUseCase(deps);
+    const processSale = createProcessSaleUseCase(deps);
+    const processReturn = createProcessReturnUseCase(deps);
+    const product = await createProduct({
+      product_name: "Discounted Product",
+      base_unit: "piece",
+      current_stock: 5,
+      cost_price: 20,
+      selling_price: 100
+    });
+    const cart = { items: [{ product_id: product.product_id, quantity: 1 }], discount_amount: 20 };
+
+    const preview = await calculateCart(cart);
+    expect(preview.lines[0].discount_amount).toBe(20);
+    expect(preview.lines[0].subtotal).toBe(80);
+
+    const sale = await processSale(
+      Object.assign({}, cart, {
+        payment_method: PAYMENT_METHODS.CASH,
+        amount_paid: 80,
+        created_by: "cashier"
+      })
+    );
+    expect(sale.items[0].discount_amount).toBe(20);
+    expect(sale.items[0].subtotal).toBe(80);
+
+    const returned = await processReturn({
+      sale_id: sale.sale.sale_id,
+      items: [{ sale_item_id: sale.items[0].sale_item_id, quantity: 1 }],
+      remarks: "Returned",
+      created_by: "cashier"
+    });
+    expect(returned.return_record.total_refund_amount).toBe(80);
+  });
+
   it("processes base-unit, option, and ad-hoc tingi sales with exact stock deduction and profit snapshots", async function () {
     const deps = createInMemorySalesDeps();
     const createProduct = createCreateProductUseCase(deps);
@@ -218,14 +256,15 @@ describe("sales domain and use cases", function () {
     expect(result.sale.receipt_number).toBe("20261120-0001");
     expect(result.sale.change_amount).toBe(4);
 
-    // Candy: 100 - (2 * 3) = 94; profit = 10 - (6 * 1) = 4
+    // The ₱1 order discount is allocated as ₱0.59 to candy and ₱0.41 to oil.
+    // Candy: 100 - (2 * 3) = 94; profit = 9.41 - (6 * 1) = 3.41
     expect(deps.products.get(candy.product_id).current_stock).toBe(94);
-    expect(calculateItemProfit(result.items[0])).toBe(4);
+    expect(calculateItemProfit(result.items[0])).toBe(3.41);
 
-    // Oil: 1000 - (7 / 0.20 = 35 ml) = 965; profit = 7 - (35 * 0.15) = 1.75
+    // Oil: 1000 - (7 / 0.20 = 35 ml) = 965; profit = 6.59 - (35 * 0.15) = 1.34
     expect(deps.products.get(oil.product_id).current_stock).toBe(965);
     expect(result.items[1].option_name_snapshot).toBe("Custom Amount (₱7.00)");
-    expect(calculateItemProfit(result.items[1])).toBe(1.75);
+    expect(calculateItemProfit(result.items[1])).toBe(1.34);
   });
 
   it("blocks overselling when multiple lines share the same product", async function () {
