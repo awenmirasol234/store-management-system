@@ -6,6 +6,73 @@ import { FormActions } from "./FormActions.jsx";
 import { Input } from "./Input.jsx";
 import { Modal } from "./Modal.jsx";
 
+export function buildCustomerPayload(fields) {
+  const safeFields = fields || {};
+  let rawName = "";
+  if (safeFields.fullName !== undefined && safeFields.fullName !== null) {
+    rawName = String(safeFields.fullName);
+  }
+  const cleanName = rawName.trim();
+  if (cleanName.length === 0) {
+    throw new Error("Customer name is required");
+  }
+
+  const payload = {
+    full_name: cleanName
+  };
+
+  let rawPhone = "";
+  if (safeFields.phone !== undefined && safeFields.phone !== null) {
+    rawPhone = String(safeFields.phone);
+  }
+  const cleanPhone = rawPhone.trim();
+  if (cleanPhone.length > 0) {
+    payload.phone = cleanPhone;
+  } else {
+    payload.phone = null;
+  }
+
+  let rawAddress = "";
+  if (safeFields.address !== undefined && safeFields.address !== null) {
+    rawAddress = String(safeFields.address);
+  }
+  const cleanAddress = rawAddress.trim();
+  if (cleanAddress.length > 0) {
+    payload.address = cleanAddress;
+  } else {
+    payload.address = null;
+  }
+
+  let rawLimit = "";
+  if (safeFields.creditLimit !== undefined && safeFields.creditLimit !== null) {
+    rawLimit = String(safeFields.creditLimit);
+  }
+  const cleanLimit = rawLimit.trim();
+  if (cleanLimit.length > 0) {
+    const parsedLimit = Number(cleanLimit);
+    if (Number.isNaN(parsedLimit) || !Number.isFinite(parsedLimit) || parsedLimit < 0) {
+      throw new Error("Credit limit must be a valid positive amount");
+    }
+    payload.credit_limit = parsedLimit;
+  } else {
+    payload.credit_limit = null;
+  }
+
+  if (safeFields.isActive !== undefined) {
+    payload.is_active = Boolean(safeFields.isActive);
+  }
+
+  return payload;
+}
+
+export async function saveCustomerRecord(fields, existingCustomer) {
+  const payload = buildCustomerPayload(fields);
+  if (existingCustomer && existingCustomer.customer_id) {
+    return api.updateCustomer(existingCustomer.customer_id, payload);
+  }
+  return api.createCustomer(payload);
+}
+
 export function CustomerModal(props) {
   const [fullName, setFullName] = useState(function initFullName() {
     if (props.customer && props.customer.full_name) {
@@ -86,55 +153,20 @@ export function CustomerModal(props) {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    const cleanName = fullName.trim();
-    if (cleanName.length === 0) {
-      setErrorMessage("Customer name is required");
-      return;
-    }
-
     setSubmitting(true);
     setErrorMessage("");
 
     try {
-      const payload = {
-        full_name: cleanName
-      };
-
-      const cleanPhone = phone.trim();
-      if (cleanPhone.length > 0) {
-        payload.phone = cleanPhone;
-      } else {
-        payload.phone = null;
-      }
-
-      const cleanAddress = address.trim();
-      if (cleanAddress.length > 0) {
-        payload.address = cleanAddress;
-      } else {
-        payload.address = null;
-      }
-
-      const cleanLimit = creditLimit.trim();
-      if (cleanLimit.length > 0) {
-        const parsedLimit = Number(cleanLimit);
-        if (Number.isNaN(parsedLimit) || parsedLimit < 0) {
-          setErrorMessage("Credit limit must be a valid positive amount");
-          setSubmitting(false);
-          return;
-        }
-        payload.credit_limit = parsedLimit;
-      } else {
-        payload.credit_limit = null;
-      }
-
-      payload.is_active = isActive;
-
-      let saved = null;
-      if (isEdit) {
-        saved = await api.updateCustomer(props.customer.customer_id, payload);
-      } else {
-        saved = await api.createCustomer(payload);
-      }
+      const saved = await saveCustomerRecord(
+        {
+          fullName: fullName,
+          phone: phone,
+          address: address,
+          creditLimit: creditLimit,
+          isActive: isActive
+        },
+        props.customer
+      );
 
       if (props.onSaved) {
         props.onSaved(saved);

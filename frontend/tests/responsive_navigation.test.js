@@ -51,7 +51,7 @@ describe("Responsive navigation & components", function () {
         onAmountPaidChange: function () {}
       })
     );
-    expect(html).toContain("₱1,000.00");
+    expect(html).toContain("₱1,000");
     expect(html).toContain("Change");
     expect(html).toContain("₱450.00");
   });

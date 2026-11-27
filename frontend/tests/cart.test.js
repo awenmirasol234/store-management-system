@@ -4,6 +4,8 @@ import {
   canAddStockToCart,
   computeItemBaseQuantity,
   computeLocalCartTotals,
+  evaluateCashTendered,
+  getSmartCashPresets,
   sanitizeCartItems
 } from "../src/cart.js";
 
@@ -239,5 +241,62 @@ describe("canAddStockToCart", function () {
     });
     expect(result.allowed).toBe(false);
     expect(result.message).toBe("Product is not available");
+  });
+});
+
+describe("getSmartCashPresets", function () {
+  it("returns Exact plus up to 3 strictly greater PHP banknotes under 1000", function () {
+    expect(getSmartCashPresets(100)).toEqual([
+      { key: "exact", label: "Exact", amount: 100 },
+      { key: "200", label: "₱200", amount: 200 },
+      { key: "500", label: "₱500", amount: 500 },
+      { key: "1000", label: "₱1,000", amount: 1000 }
+    ]);
+    expect(getSmartCashPresets(550)).toEqual([
+      { key: "exact", label: "Exact", amount: 550 },
+      { key: "1000", label: "₱1,000", amount: 1000 }
+    ]);
+    expect(getSmartCashPresets(45)).toEqual([
+      { key: "exact", label: "Exact", amount: 45 },
+      { key: "50", label: "₱50", amount: 50 },
+      { key: "100", label: "₱100", amount: 100 },
+      { key: "200", label: "₱200", amount: 200 }
+    ]);
+  });
+
+  it("returns Exact plus stepped bill combinations when total is 1000 or more", function () {
+    expect(getSmartCashPresets(1250)).toEqual([
+      { key: "exact", label: "Exact", amount: 1250 },
+      { key: "1300", label: "₱1,300", amount: 1300 },
+      { key: "1500", label: "₱1,500", amount: 1500 },
+      { key: "2000", label: "₱2,000", amount: 2000 }
+    ]);
+  });
+
+  it("returns only Exact when total is 0", function () {
+    expect(getSmartCashPresets(0)).toEqual([
+      { key: "exact", label: "Exact", amount: 0 }
+    ]);
+  });
+});
+
+describe("evaluateCashTendered", function () {
+  it("distinguishes empty, invalid, short, exact, and overpayment states", function () {
+    expect(evaluateCashTendered("", 100).status).toBe("empty");
+    expect(evaluateCashTendered("-50", 100).status).toBe("invalid");
+    expect(evaluateCashTendered("abc", 100).status).toBe("invalid");
+    expect(evaluateCashTendered("100.123", 100).status).toBe("invalid");
+
+    const shortEval = evaluateCashTendered("75.50", 100);
+    expect(shortEval.status).toBe("short");
+    expect(shortEval.shortAmount).toBe(24.5);
+
+    const exactEval = evaluateCashTendered("100", 100);
+    expect(exactEval.status).toBe("sufficient");
+    expect(exactEval.changeAmount).toBe(0);
+
+    const changeEval = evaluateCashTendered("200", 125.25);
+    expect(changeEval.status).toBe("sufficient");
+    expect(changeEval.changeAmount).toBe(74.75);
   });
 });

@@ -200,3 +200,123 @@ export function canAddStockToCart(input) {
     message: ""
   };
 }
+
+const PHP_BANKNOTES = [20, 50, 100, 200, 500, 1000];
+
+export function getSmartCashPresets(totalDue) {
+  let safeTotal = Number(totalDue);
+  if (!Number.isFinite(safeTotal) || safeTotal < 0) {
+    safeTotal = 0;
+  }
+  safeTotal = Math.round(safeTotal * 100) / 100;
+
+  const presets = [
+    { key: "exact", label: "Exact", amount: safeTotal }
+  ];
+  if (safeTotal <= 0) {
+    return presets;
+  }
+
+  const candidates = [];
+  if (safeTotal < 1000) {
+    for (let i = 0; i < PHP_BANKNOTES.length; i++) {
+      if (PHP_BANKNOTES[i] > safeTotal) {
+        candidates.push(PHP_BANKNOTES[i]);
+      }
+    }
+  } else {
+    const steps = [100, 500, 1000];
+    for (let i = 0; i < steps.length; i++) {
+      const step = steps[i];
+      const nextMultiple = Math.floor(safeTotal / step) * step + step;
+      if (nextMultiple > safeTotal && !candidates.includes(nextMultiple)) {
+        candidates.push(nextMultiple);
+      }
+    }
+  }
+
+  const maxBills = Math.min(3, candidates.length);
+  for (let i = 0; i < maxBills; i++) {
+    const bill = candidates[i];
+    presets.push({
+      key: String(bill),
+      label: "₱" + bill.toLocaleString("en-PH"),
+      amount: bill
+    });
+  }
+  return presets;
+}
+
+export function evaluateCashTendered(rawInput, totalDue) {
+  let safeTotal = Number(totalDue);
+  if (!Number.isFinite(safeTotal) || safeTotal < 0) {
+    safeTotal = 0;
+  }
+  safeTotal = Math.round(safeTotal * 100) / 100;
+
+  let text = "";
+  if (rawInput !== undefined && rawInput !== null) {
+    text = String(rawInput).trim();
+  }
+  if (text.length === 0) {
+    return {
+      status: "empty",
+      amount: null,
+      changeAmount: 0,
+      shortAmount: safeTotal,
+      errorMessage: ""
+    };
+  }
+
+  if (text.startsWith("-")) {
+    return {
+      status: "invalid",
+      amount: null,
+      changeAmount: 0,
+      shortAmount: safeTotal,
+      errorMessage: "Amount cannot be negative."
+    };
+  }
+
+  if (!/^\d+(\.\d{1,2})?$/.test(text)) {
+    return {
+      status: "invalid",
+      amount: null,
+      changeAmount: 0,
+      shortAmount: safeTotal,
+      errorMessage: "Enter a valid amount with up to 2 decimal places."
+    };
+  }
+
+  const parsed = Number(text);
+  if (!Number.isFinite(parsed)) {
+    return {
+      status: "invalid",
+      amount: null,
+      changeAmount: 0,
+      shortAmount: safeTotal,
+      errorMessage: "Enter a valid amount."
+    };
+  }
+
+  const rounded = Math.round(parsed * 100) / 100;
+  if (rounded < safeTotal) {
+    const shortAmount = Math.round((safeTotal - rounded) * 100) / 100;
+    return {
+      status: "short",
+      amount: rounded,
+      changeAmount: 0,
+      shortAmount: shortAmount,
+      errorMessage: ""
+    };
+  }
+
+  const changeAmount = Math.round((rounded - safeTotal) * 100) / 100;
+  return {
+    status: "sufficient",
+    amount: rounded,
+    changeAmount: changeAmount,
+    shortAmount: 0,
+    errorMessage: ""
+  };
+}

@@ -82,6 +82,7 @@ export function Modal(props) {
       title={renderTitle}
       size={props.size}
       maxWidth={props.maxWidth}
+      panelClassName={props.panelClassName}
       onClose={props.onClose}
       dismissDisabled={props.dismissDisabled}
       isClosing={isClosing}
@@ -102,11 +103,19 @@ function OpenModal(props) {
       const dialog = dialogRef.current;
       openerRef.current = document.activeElement;
       dialog.showModal();
-      const focusable = dialog.querySelectorAll(
-        'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusable.length > 0) {
-        focusable[0].focus();
+      const preferred = dialog.querySelector("[data-autofocus]");
+      if (preferred && !preferred.matches(":disabled")) {
+        preferred.focus();
+        if (typeof preferred.select === "function") {
+          preferred.select();
+        }
+      } else {
+        const focusable = dialog.querySelectorAll(
+          'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length > 0) {
+          focusable[0].focus();
+        }
       }
       return function cleanup() {
         dialog.close();
@@ -192,6 +201,11 @@ function OpenModal(props) {
     dialogPointerClass = " pointer-events-none select-none";
   }
 
+  let panelRadiusClass = "rounded-2xl";
+  if (props.panelClassName) {
+    panelRadiusClass = props.panelClassName;
+  }
+
   return (
     <dialog
       ref={dialogRef}
@@ -217,7 +231,9 @@ function OpenModal(props) {
       />
       <div
         className={
-          "relative z-10 w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col " +
+          "relative z-10 w-full " +
+          panelRadiusClass +
+          " bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col " +
           widthClass +
           " " +
           panelAnimClass

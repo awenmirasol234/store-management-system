@@ -164,9 +164,9 @@ export function PosPage(props) {
   const catalogContainerRef = useRef(null);
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const [amountPaidInput, setAmountPaidInput] = useState("");
-  const [cashPartInput, setCashPartInput] = useState("");
   const [customerIdInput, setCustomerIdInput] = useState("");
   const [submittingSale, setSubmittingSale] = useState(false);
+  const submittingSaleRef = useRef(false);
 
   const [completedReceipt, setCompletedReceipt] = useState(null);
 
@@ -791,6 +791,7 @@ export function PosPage(props) {
   function clearCart() {
     setCartItems([]);
     setOrderDiscount(0);
+    setPaymentMethod("CASH");
     setErrorBanner("");
     setClearConfirmOpen(false);
     setMobileCartOpen(false);
@@ -806,15 +807,9 @@ export function PosPage(props) {
   function handlePaymentMethodChange(newMethod) {
     setPaymentMethod(newMethod);
     if (newMethod === "CASH") {
-      setAmountPaidInput(String(totals.total));
-      setCashPartInput("");
+      setAmountPaidInput("");
     } else if (newMethod === "CREDIT") {
       setAmountPaidInput("0");
-      setCashPartInput("");
-    } else if (newMethod === "SPLIT") {
-      const half = Math.round((totals.total / 2) * 100) / 100;
-      setCashPartInput(String(half));
-      setAmountPaidInput(String(half));
     }
   }
 
@@ -824,23 +819,18 @@ export function PosPage(props) {
     }
     setErrorBanner("");
     if (paymentMethod === "CASH") {
-      setAmountPaidInput(String(totals.total));
-      setCashPartInput("");
-    } else if (paymentMethod === "CREDIT") {
-      setAmountPaidInput("0");
-      setCashPartInput("");
+      setAmountPaidInput("");
     } else {
-      if (!cashPartInput || Number(cashPartInput) <= 0) {
-        const half = Math.round((totals.total / 2) * 100) / 100;
-        setCashPartInput(String(half));
-        setAmountPaidInput(String(half));
-      }
+      setAmountPaidInput("0");
     }
     setCheckoutModalOpen(true);
   }
 
   async function handleCompleteSale(event) {
     event.preventDefault();
+    if (submittingSaleRef.current) {
+      return;
+    }
     setErrorBanner("");
 
     if (paymentMethod !== "CASH" && customerIdInput.trim().length === 0) {
@@ -848,6 +838,7 @@ export function PosPage(props) {
       return;
     }
 
+    submittingSaleRef.current = true;
     setSubmittingSale(true);
 
     try {
@@ -886,16 +877,9 @@ export function PosPage(props) {
 
       if (paymentMethod === "CASH") {
         payload.amount_paid = Number(amountPaidInput);
-      } else if (paymentMethod === "CREDIT") {
+      } else {
         payload.customer_id = customerIdInput.trim();
         payload.amount_paid = 0;
-      } else {
-        const cashPart = Number(cashPartInput);
-        const creditPart = Math.round((totals.total - cashPart) * 100) / 100;
-        payload.customer_id = customerIdInput.trim();
-        payload.cash_amount = cashPart;
-        payload.credit_amount = creditPart;
-        payload.amount_paid = Number(amountPaidInput);
       }
 
       const result = await api.processSale(payload);
@@ -905,13 +889,13 @@ export function PosPage(props) {
       setCheckoutModalOpen(false);
       clearCart();
       setCustomerIdInput("");
-      setCashPartInput("");
       setAmountPaidInput("");
       setCompletedReceipt(result);
       await loadCatalog();
     } catch (error) {
       setErrorBanner(error.message);
     } finally {
+      submittingSaleRef.current = false;
       setSubmittingSale(false);
     }
   }
@@ -928,19 +912,10 @@ export function PosPage(props) {
 
   const totals = computeLocalCartTotals(cartItems, orderDiscount);
 
-  let cashDueForChange = totals.total;
-  if (paymentMethod === "SPLIT") {
-    const parsedCashPart = Number(cashPartInput);
-    if (Number.isFinite(parsedCashPart) && parsedCashPart > 0) {
-      cashDueForChange = parsedCashPart;
-    } else {
-      cashDueForChange = 0;
-    }
-  }
   const tenderedValue = Number(amountPaidInput);
   let changePreview = 0;
-  if (Number.isFinite(tenderedValue) && tenderedValue > cashDueForChange) {
-    changePreview = Math.round((tenderedValue - cashDueForChange) * 100) / 100;
+  if (Number.isFinite(tenderedValue) && tenderedValue > totals.total) {
+    changePreview = Math.round((tenderedValue - totals.total) * 100) / 100;
   }
 
   let errorElement = null;
@@ -1988,13 +1963,14 @@ export function PosPage(props) {
         }}
         paymentMethod={paymentMethod}
         onPaymentMethodChange={handlePaymentMethodChange}
+        items={cartItems}
+        subtotal={totals.subtotal}
+        discount={totals.discount}
         total={totals.total}
         amountPaid={amountPaidInput}
         onAmountPaidChange={setAmountPaidInput}
         customerId={customerIdInput}
         onCustomerIdChange={setCustomerIdInput}
-        cashPart={cashPartInput}
-        onCashPartChange={setCashPartInput}
         changePreview={changePreview}
         submitting={submittingSale}
         errorMessage={errorBanner}
@@ -2005,11 +1981,20 @@ export function PosPage(props) {
           setCustomers(function updateCustomers(previous) {
             const nextList = [newCustomer];
             for (let index = 0; index < previous.length; index++) {
-              nextList.push(previous[index]);
+              if (previous[index].customer_id !== newCustomer.customer_id) {
+                nextList.push(previous[index]);
+              }
             }
             return nextList;
           });
           setCustomerIdInput(newCustomer.customer_id);
+          if (capabilities.customer_credit) {
+            api.listCustomers().then(function syncCustomers(freshList) {
+              if (isMounted.current && Array.isArray(freshList)) {
+                setCustomers(freshList);
+              }
+            }).catch(function ignoreRefreshError() {});
+          }
         }}
       />
 

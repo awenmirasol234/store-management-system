@@ -60,6 +60,7 @@ export function Button(props) {
 
   return (
     <button
+      ref={props.buttonRef}
       type={buttonType}
       onClick={props.onClick}
       disabled={props.disabled}

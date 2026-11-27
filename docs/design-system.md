@@ -118,7 +118,7 @@ Centralized danger and alert color tokens are declared in `frontend/src/index.cs
 - Backdrop: `fixed inset-0 z-50 flex items-center justify-center bg-[#171717]/40 backdrop-blur-[2px] p-3 sm:p-6` (supports Escape key and backdrop click-to-close).
 - Card Container: `w-full rounded-2xl bg-white shadow-xl border border-[#E9E9E9] max-h-[92vh] flex flex-col` (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`).
 - **Padding Rule**: `Modal.jsx` owns all content padding (`p-4 sm:p-6`). Modal children must never introduce conflicting outer padding.
-- Sizes: `sm` (`max-w-sm`), `md` (`max-w-md`), `lg` (`max-w-lg`, default), `xl` (`max-w-2xl` for checkout cockpit).
+- Sizes: `sm` (`max-w-sm`), `md` (`max-w-md`), `lg` (`max-w-lg`, default), `xl` (`max-w-2xl`), or custom `maxWidth` (`max-w-[820px]` with `panelClassName="rounded-[18px]"` for the two-column checkout modal).
 - **Animations**:
   - **Entrance**: Smooth scale-up from 95% to 100% (`scale(0.95)` to `scale(1)`) and fade-in (`opacity 0` to `1`) with subtle backdrop fade over 200ms ease-out (`cubic-bezier(0, 0, 0.2, 1)`).
   - **Exit**: Smooth scale-down (`scale(1)` to `scale(0.95)`) and fade-out with backdrop fade over 150ms ease-out before unmounting.
