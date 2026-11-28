@@ -568,4 +568,113 @@ describe("PosPage SSR test", function () {
     expect(html).toContain("Century Tuna 180g");
     expect(html).toContain("bg-white border-b border-[#E9E9E9]");
   });
+
+  it("disables selling options in picker modal when current stock is below required base quantity", function () {
+    const dummyProduct = {
+      product_id: "prod-1",
+      product_name: "Century Tuna 180g",
+      base_unit: "Can",
+      current_stock: 4,
+      selling_price: 45
+    };
+    const dummyOptions = [
+      {
+        option_id: "opt-pack-6",
+        option_name: "1 Pack (6 pcs)",
+        quantity: 6,
+        price: 250,
+        is_active: true
+      }
+    ];
+
+    const html = renderToString(
+      React.createElement(PosPage, {
+        initialPickerState: {
+          product: dummyProduct,
+          options: dummyOptions
+        }
+      })
+    );
+
+    expect(html).toMatch(/<input[^>]*checked=""[^>]*value="base"/);
+    expect(html).not.toMatch(/<input[^>]*disabled=""[^>]*value="base"/);
+    expect(html).toMatch(/<input[^>]*disabled=""[^>]*value="opt-pack-6"/);
+    expect(html).toContain("Insufficient stock");
+  });
+
+  it("disables selling options in picker modal when remaining stock after cart items is insufficient", function () {
+    const dummyProduct = {
+      product_id: "prod-1",
+      product_name: "Century Tuna 180g",
+      base_unit: "Can",
+      current_stock: 10,
+      selling_price: 45
+    };
+    const dummyOptions = [
+      {
+        option_id: "opt-pack-6",
+        option_name: "1 Pack (6 pcs)",
+        quantity: 6,
+        price: 250,
+        is_active: true
+      }
+    ];
+
+    const html = renderToString(
+      React.createElement(PosPage, {
+        initialCartItems: [
+          {
+            key: "prod-1:base",
+            product_id: "prod-1",
+            product_name: "Century Tuna 180g",
+            base_unit: "Can",
+            unit_price: 45,
+            quantity: 5,
+            base_quantity_per_unit: 1
+          }
+        ],
+        initialPickerState: {
+          product: dummyProduct,
+          options: dummyOptions
+        }
+      })
+    );
+
+    expect(html).not.toMatch(/<input[^>]*disabled=""[^>]*value="base"/);
+    expect(html).toMatch(/<input[^>]*disabled=""[^>]*value="opt-pack-6"/);
+    expect(html).toContain("Insufficient stock");
+  });
+
+  it("disables base option when fractional stock is below 1 while keeping smaller selling option enabled", function () {
+    const oilProduct = {
+      product_id: "prod-oil",
+      product_name: "Cooking Oil",
+      base_unit: "Liter (L)",
+      current_stock: 0.5,
+      selling_price: 100
+    };
+    const dummyOptions = [
+      {
+        option_id: "opt-quarter",
+        option_name: "250ml Bottle",
+        quantity: 0.25,
+        price: 28,
+        is_active: true
+      }
+    ];
+
+    const html = renderToString(
+      React.createElement(PosPage, {
+        initialPickerState: {
+          product: oilProduct,
+          options: dummyOptions
+        },
+        initialSelectedOptionId: "opt-quarter"
+      })
+    );
+
+    expect(html).toMatch(/<input[^>]*disabled=""[^>]*value="base"/);
+    expect(html).not.toMatch(/<input[^>]*disabled=""[^>]*value="opt-quarter"/);
+    expect(html).toContain("Insufficient stock");
+  });
 });

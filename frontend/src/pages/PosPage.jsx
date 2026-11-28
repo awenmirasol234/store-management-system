@@ -492,6 +492,19 @@ export function PosPage(props) {
     };
   }, []);
 
+  function isPickerOptionAvailable(product, option, currentCart) {
+    const requiredBaseQty = computeItemBaseQuantity({
+      product: product,
+      option: option,
+      quantity: 1
+    });
+    return canAddStockToCart({
+      cartItems: currentCart,
+      product: product,
+      additionalBaseQuantity: requiredBaseQty
+    }).allowed;
+  }
+
   function addItemToCart(product, option, customAmount, sourceElementOrRect) {
     setErrorBanner("");
     if (!product) {
@@ -630,7 +643,18 @@ export function PosPage(props) {
         setProductAddingState(product.product_id, "idle");
         setErrorBanner("");
         setCustomPesoInput("");
-        setSelectedOptionId("base");
+        let defaultOptionId = "";
+        if (isPickerOptionAvailable(product, null, latestCart.current)) {
+          defaultOptionId = "base";
+        } else {
+          for (let index = 0; index < activeOptions.length; index++) {
+            if (isPickerOptionAvailable(product, activeOptions[index], latestCart.current)) {
+              defaultOptionId = activeOptions[index].option_id;
+              break;
+            }
+          }
+        }
+        setSelectedOptionId(defaultOptionId);
         setPendingSourceRect(sourceRect);
         setPickerState({
           product: product,
@@ -1341,20 +1365,29 @@ export function PosPage(props) {
       );
     }
 
-    function handleConfirmOption() {
-      if (isPickerProductOut) {
-        return;
-      }
-      let chosenOption = null;
-      if (selectedOptionId !== "base") {
-        for (let i = 0; i < pickerState.options.length; i++) {
-          if (pickerState.options[i].option_id === selectedOptionId) {
-            chosenOption = pickerState.options[i];
-            break;
-          }
+    const isBaseAvailable = !isPickerProductOut && isPickerOptionAvailable(pickerState.product, null, cartItems);
+    let selectedOptionObj = null;
+    let isSelectedOptionAvailable = false;
+    if (selectedOptionId === "base") {
+      isSelectedOptionAvailable = isBaseAvailable;
+    } else if (selectedOptionId) {
+      for (let i = 0; i < pickerState.options.length; i++) {
+        if (pickerState.options[i].option_id === selectedOptionId) {
+          selectedOptionObj = pickerState.options[i];
+          break;
         }
       }
-      const added = addItemToCart(pickerState.product, chosenOption, null, pendingSourceRect);
+      if (selectedOptionObj) {
+        isSelectedOptionAvailable =
+          !isPickerProductOut && isPickerOptionAvailable(pickerState.product, selectedOptionObj, cartItems);
+      }
+    }
+
+    function handleConfirmOption() {
+      if (isPickerProductOut || !isSelectedOptionAvailable) {
+        return;
+      }
+      const added = addItemToCart(pickerState.product, selectedOptionObj, null, pendingSourceRect);
       if (added) {
         setPickerState(null);
       }
@@ -1367,12 +1400,19 @@ export function PosPage(props) {
     }
     let baseCardClass =
       "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ";
-    if (isPickerProductOut) {
+    let baseRadioClass = "h-4 w-4 accent-[#171717] cursor-pointer";
+    if (!isBaseAvailable) {
       baseCardClass = baseCardClass + "border-[#E9E9E9] opacity-60 cursor-not-allowed";
+      baseRadioClass = "h-4 w-4 accent-[#171717] cursor-not-allowed";
     } else if (isBaseSelected) {
       baseCardClass = baseCardClass + "border-[#171717] bg-[#EEEEED]/40 shadow-2xs cursor-pointer";
     } else {
       baseCardClass = baseCardClass + "border-[#E9E9E9] hover:border-[#171717] hover:bg-[#EEEEED] cursor-pointer";
+    }
+
+    let baseStockWarning = null;
+    if (!isPickerProductOut && !isBaseAvailable) {
+      baseStockWarning = <span className="text-xs font-medium text-rose-600">Insufficient stock</span>;
     }
 
     pickerBody = (
@@ -1384,7 +1424,7 @@ export function PosPage(props) {
             <label
               className={baseCardClass}
               onDoubleClick={function directPickBase(event) {
-                if (isPickerProductOut) {
+                if (!isBaseAvailable) {
                   return;
                 }
                 let sourceRect = pendingSourceRect;
@@ -1402,7 +1442,7 @@ export function PosPage(props) {
                   type="radio"
                   name="pos-selling-option"
                   value="base"
-                  disabled={isPickerProductOut}
+                  disabled={!isBaseAvailable}
                   checked={isBaseSelected}
                   onChange={function onSelectBase() {
                     setSelectedOptionId("base");
@@ -1410,27 +1450,41 @@ export function PosPage(props) {
                       setErrorBanner("");
                     }
                   }}
-                  className="h-4 w-4 accent-[#171717] cursor-pointer"
+                  className={baseRadioClass}
                 />
                 <span className="text-sm font-medium text-[#171717]">
                   {"1 " + pickerState.product.base_unit + " (Default)"}
                 </span>
               </div>
-              <span className="font-mono text-sm font-bold text-[#171717]">
-                {formatPeso(pickerState.product.selling_price)}
-              </span>
+              <div className="flex flex-col items-end shrink-0 text-right">
+                {baseStockWarning}
+                <span className="font-mono text-sm font-bold text-[#171717]">
+                  {formatPeso(pickerState.product.selling_price)}
+                </span>
+              </div>
             </label>
 
             {pickerState.options.map(function renderOption(option) {
+              const isOptionAvailable =
+                !isPickerProductOut && isPickerOptionAvailable(pickerState.product, option, cartItems);
               const isOptionSelected = selectedOptionId === option.option_id;
               let optionCardClass =
                 "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ";
-              if (isPickerProductOut) {
+              let optionRadioClass = "h-4 w-4 accent-[#171717] cursor-pointer";
+              if (!isOptionAvailable) {
                 optionCardClass = optionCardClass + "border-[#E9E9E9] opacity-60 cursor-not-allowed";
+                optionRadioClass = "h-4 w-4 accent-[#171717] cursor-not-allowed";
               } else if (isOptionSelected) {
                 optionCardClass = optionCardClass + "border-[#171717] bg-[#EEEEED]/40 shadow-2xs cursor-pointer";
               } else {
                 optionCardClass = optionCardClass + "border-[#E9E9E9] hover:border-[#171717] hover:bg-[#EEEEED] cursor-pointer";
+              }
+
+              let optionStockWarning = null;
+              if (!isPickerProductOut && !isOptionAvailable) {
+                optionStockWarning = (
+                  <span className="text-xs font-medium text-rose-600">Insufficient stock</span>
+                );
               }
 
               return (
@@ -1438,7 +1492,7 @@ export function PosPage(props) {
                   key={option.option_id}
                   className={optionCardClass}
                   onDoubleClick={function directPickOption(event) {
-                    if (isPickerProductOut) {
+                    if (!isOptionAvailable) {
                       return;
                     }
                     let sourceRect = pendingSourceRect;
@@ -1456,7 +1510,7 @@ export function PosPage(props) {
                       type="radio"
                       name="pos-selling-option"
                       value={option.option_id}
-                      disabled={isPickerProductOut}
+                      disabled={!isOptionAvailable}
                       checked={isOptionSelected}
                       onChange={function onSelectOption() {
                         setSelectedOptionId(option.option_id);
@@ -1464,7 +1518,7 @@ export function PosPage(props) {
                           setErrorBanner("");
                         }
                       }}
-                      className="h-4 w-4 accent-[#171717] cursor-pointer"
+                      className={optionRadioClass}
                     />
                     <div>
                       <div className="text-sm font-medium text-[#171717]">{option.option_name}</div>
@@ -1473,9 +1527,12 @@ export function PosPage(props) {
                       </div>
                     </div>
                   </div>
-                  <span className="font-mono text-sm font-bold text-[#171717]">
-                    {formatPeso(option.price)}
-                  </span>
+                  <div className="flex flex-col items-end shrink-0 text-right">
+                    {optionStockWarning}
+                    <span className="font-mono text-sm font-bold text-[#171717]">
+                      {formatPeso(option.price)}
+                    </span>
+                  </div>
                 </label>
               );
             })}
@@ -1485,9 +1542,9 @@ export function PosPage(props) {
             type="button"
             variant="primary"
             className="w-full"
-            disabled={isPickerProductOut}
-          onClick={handleConfirmOption}
-        >
+            disabled={isPickerProductOut || !isSelectedOptionAvailable}
+            onClick={handleConfirmOption}
+          >
             {optionConfirmLabel}
           </Button>
         </div>
